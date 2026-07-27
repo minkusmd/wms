@@ -1,0 +1,309 @@
+object frmSearchDialog: TfrmSearchDialog
+  Left = 0
+  Top = 0
+  Margins.Left = 4
+  Margins.Top = 4
+  Margins.Right = 4
+  Margins.Bottom = 4
+  ActiveControl = edSearchText
+  AutoSize = True
+  BorderStyle = bsDialog
+  ClientHeight = 450
+  ClientWidth = 597
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -15
+  Font.Name = 'Segoe UI'
+  Font.Style = []
+  Position = poScreenCenter
+  OnClose = FormClose
+  OnShow = FormShow
+  PixelsPerInch = 120
+  TextHeight = 20
+  object dtDialogTitle: TDialogTitle
+    Left = 0
+    Top = 0
+    Width = 597
+    Height = 80
+    Margins.Left = 4
+    Margins.Top = 4
+    Margins.Right = 4
+    Margins.Bottom = 4
+    Text = 'C'#259'uta'#539'i dup'#259' criteriile selectate'
+    FontTitle.Charset = DEFAULT_CHARSET
+    FontTitle.Color = clWindowText
+    FontTitle.Height = -18
+    FontTitle.Name = 'Segoe UI'
+    FontTitle.Style = [fsBold]
+    FontText.Charset = DEFAULT_CHARSET
+    FontText.Color = clWindowText
+    FontText.Height = -15
+    FontText.Name = 'Segoe UI'
+    FontText.Style = []
+    ImageList = dmAdditions.cxImageList_DialogIcons
+    ImageIndex = 9
+  end
+  object pnButtons: TPanel
+    AlignWithMargins = True
+    Left = 0
+    Top = 385
+    Width = 597
+    Height = 65
+    Margins.Left = 0
+    Margins.Top = 10
+    Margins.Right = 0
+    Margins.Bottom = 0
+    Align = alTop
+    BevelOuter = bvNone
+    TabOrder = 3
+    object btnCancel: TcxButton
+      Left = 468
+      Top = 9
+      Width = 112
+      Height = 36
+      Margins.Left = 4
+      Margins.Top = 4
+      Margins.Right = 4
+      Margins.Bottom = 4
+      Cancel = True
+      Caption = 'Renunta'
+      ModalResult = 2
+      OptionsImage.Spacing = 5
+      TabOrder = 1
+    end
+    object btnSearch: TcxButton
+      Left = 340
+      Top = 9
+      Width = 113
+      Height = 36
+      Margins.Left = 4
+      Margins.Top = 4
+      Margins.Right = 4
+      Margins.Bottom = 4
+      Caption = 'OK'
+      Default = True
+      OptionsImage.Spacing = 5
+      TabOrder = 0
+      OnClick = btnSearchClick
+    end
+  end
+  object pnGeneral: TPanel
+    AlignWithMargins = True
+    Left = 10
+    Top = 90
+    Width = 577
+    Height = 131
+    Margins.Left = 10
+    Margins.Top = 10
+    Margins.Right = 10
+    Margins.Bottom = 1
+    Align = alTop
+    BevelKind = bkFlat
+    BevelOuter = bvNone
+    Color = clWindow
+    ParentBackground = False
+    TabOrder = 1
+    object cxLabel1: TLabel
+      Left = 15
+      Top = 15
+      Width = 27
+      Height = 20
+      Margins.Left = 4
+      Margins.Top = 4
+      Margins.Right = 4
+      Margins.Bottom = 4
+      Caption = 'Text'
+      Transparent = True
+    end
+    object cxLabel2: TLabel
+      Left = 315
+      Top = 15
+      Width = 126
+      Height = 20
+      Margins.Left = 4
+      Margins.Top = 4
+      Margins.Right = 4
+      Margins.Bottom = 4
+      Caption = 'Criteriul de cautare'
+      Transparent = True
+    end
+    object lbCriteriaInfo: TLabel
+      Left = 15
+      Top = 74
+      Width = 540
+      Height = 45
+      Margins.Left = 4
+      Margins.Top = 4
+      Margins.Right = 4
+      Margins.Bottom = 4
+      AutoSize = False
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = 77982
+      Font.Height = -15
+      Font.Name = 'Segoe UI'
+      Font.Style = []
+      ParentFont = False
+      Transparent = True
+      WordWrap = True
+    end
+    object cmbCriteria: TcxComboBox
+      Left = 315
+      Top = 38
+      Margins.Left = 4
+      Margins.Top = 4
+      Margins.Right = 4
+      Margins.Bottom = 4
+      ParentFont = False
+      Properties.DropDownListStyle = lsFixedList
+      Properties.DropDownRows = 10
+      Properties.OnChange = cmbCriteriaPropertiesChange
+      TabOrder = 1
+      Width = 240
+    end
+    object edSearchText: TcxMRUEdit
+      Left = 24
+      Top = 38
+      Margins.Left = 4
+      Margins.Top = 4
+      Margins.Right = 4
+      Margins.Bottom = 4
+      ParentFont = False
+      Properties.CharCase = ecUpperCase
+      Properties.ImmediateDropDownWhenKeyPressed = False
+      Properties.MaskKind = emkRegExpr
+      Properties.ShowEllipsis = False
+      TabOrder = 0
+      Width = 284
+    end
+  end
+  object pnGoodsSearchOptions: TPanel
+    AlignWithMargins = True
+    Left = 10
+    Top = 222
+    Width = 577
+    Height = 148
+    Margins.Left = 10
+    Margins.Top = 0
+    Margins.Right = 10
+    Margins.Bottom = 5
+    Align = alTop
+    BevelKind = bkFlat
+    BevelOuter = bvNone
+    Color = clWindow
+    ParentBackground = False
+    TabOrder = 2
+    object lbPrice: TLabel
+      Left = 329
+      Top = 101
+      Width = 84
+      Height = 19
+      Margins.Left = 4
+      Margins.Top = 4
+      Margins.Right = 4
+      Margins.Bottom = 4
+      Caption = '>='#1062#1077#1085#1072'<='
+      Enabled = False
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -16
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      ParentFont = False
+      Transparent = True
+    end
+    object cbSearchOption_CurrentGroup: TCheckBox
+      Left = 15
+      Top = 15
+      Width = 201
+      Height = 21
+      Margins.Left = 4
+      Margins.Top = 4
+      Margins.Right = 4
+      Margins.Bottom = 4
+      Caption = 'Cauta in mapa curenta'
+      TabOrder = 0
+    end
+    object cbSearchOption_Available: TCheckBox
+      Left = 15
+      Top = 44
+      Width = 96
+      Height = 21
+      Margins.Left = 4
+      Margins.Top = 4
+      Margins.Right = 4
+      Margins.Bottom = 4
+      Caption = 'In stoc'
+      TabOrder = 2
+    end
+    object cbSearchOption_Defect: TCheckBox
+      Left = 241
+      Top = 15
+      Width = 74
+      Height = 21
+      Margins.Left = 4
+      Margins.Top = 4
+      Margins.Right = 4
+      Margins.Bottom = 4
+      Caption = 'RMA'
+      TabOrder = 1
+    end
+    object cbSearchOption_Admin: TCheckBox
+      Left = 241
+      Top = 44
+      Width = 147
+      Height = 21
+      Margins.Left = 4
+      Margins.Top = 4
+      Margins.Right = 4
+      Margins.Bottom = 4
+      Caption = 'Uz Intern'
+      TabOrder = 3
+    end
+    object cbSearchOption_SumRange: TCheckBox
+      Left = 15
+      Top = 101
+      Width = 194
+      Height = 22
+      Margins.Left = 4
+      Margins.Top = 4
+      Margins.Right = 4
+      Margins.Bottom = 4
+      Caption = 'Diapazonul de preturi (MDL)'
+      TabOrder = 6
+      OnClick = cbSearchOption_SumRangeClick
+    end
+    object edSum_Start: TcxCurrencyEdit
+      Left = 241
+      Top = 98
+      Margins.Left = 4
+      Margins.Top = 4
+      Margins.Right = 4
+      Margins.Bottom = 4
+      EditValue = 0.000000000000000000
+      Enabled = False
+      ParentFont = False
+      Properties.Alignment.Horz = taLeftJustify
+      Properties.AssignedValues.MinValue = True
+      Properties.DisplayFormat = '#,##0.00'
+      TabOrder = 4
+      Width = 80
+    end
+    object edSum_End: TcxCurrencyEdit
+      Left = 414
+      Top = 98
+      Margins.Left = 4
+      Margins.Top = 4
+      Margins.Right = 4
+      Margins.Bottom = 4
+      EditValue = 0.000000000000000000
+      Enabled = False
+      ParentFont = False
+      Properties.Alignment.Horz = taLeftJustify
+      Properties.AssignedValues.MinValue = True
+      Properties.DisplayFormat = '#,##0.00'
+      TabOrder = 5
+      Width = 80
+    end
+  end
+end

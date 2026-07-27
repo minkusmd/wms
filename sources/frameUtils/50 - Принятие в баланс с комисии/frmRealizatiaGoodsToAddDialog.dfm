@@ -1,0 +1,232 @@
+object frmRealizatiaGoodsToAddDlg: TfrmRealizatiaGoodsToAddDlg
+  Left = 0
+  Top = 0
+  ActiveControl = beGoods
+  BorderStyle = bsDialog
+  Caption = #1042#1099#1073#1086#1088' '#1090#1086#1074#1072#1088#1072
+  ClientHeight = 297
+  ClientWidth = 588
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -12
+  Font.Name = 'Segoe UI'
+  Font.Style = []
+  OldCreateOrder = False
+  Position = poOwnerFormCenter
+  OnCreate = FormCreate
+  DesignSize = (
+    588
+    297)
+  PixelsPerInch = 96
+  TextHeight = 15
+  object imgWarning: TImage
+    Left = 12
+    Top = 257
+    Width = 18
+    Height = 18
+    Picture.Data = {
+      07544269746D6170C2010000424DC201000000000000C2000000280000001000
+      000010000000010008000000000000010000120B0000120B0000230000002300
+      000000000000FFFFFF00FF00FF005BF6FB004BF0FA0051F4FB0045EAF90047EA
+      F60049EEF90048E8F3001C6871003EE4F7003FE6F8002CC6DD0034DBF40024BB
+      D60026BFD9002BC6DF0030D9F50021C3E40026D1F30025C9E90028D3F4000F8C
+      A90018C5F1001BC8F10017ACCD0018AECF0021CCF20026AECE0037B4D10047BB
+      D50072CADF0082D0E20015C2F000020202020202020202020202020202021F17
+      171717171717171717171717171F1E15182222222222222222222222131E201B
+      1C192222220000181919191C1A20021E13161C191C00001C141616131E020221
+      1B0E0E1216160E12120E0E1B210202021E110C0B0B0A0A0B0B0B111E02020202
+      021A070408000006060B1A0202020202021E11040400000808111E0202020202
+      02021A0905000004091A02020202020202021E10030000050D1E020202020202
+      0202021A090505091B020202020202020202021E0F05050D1E02020202020202
+      020202021A09091A0202020202020202020202021E0F111E0202020202020202
+      02020202021D1D02020202020202}
+    Transparent = True
+  end
+  object lbGoodsExistsWarning: TLabel
+    Left = 36
+    Top = 257
+    Width = 155
+    Height = 15
+    Caption = #1044#1072#1085#1085#1099#1081' '#1090#1086#1074#1072#1088' '#1091#1078#1077' '#1074' '#1089#1087#1080#1089#1082#1077'!'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clRed
+    Font.Height = -12
+    Font.Name = 'Segoe UI'
+    Font.Style = []
+    ParentFont = False
+  end
+  object dtDialogTitle: TDialogTitle
+    Left = 0
+    Top = 0
+    Width = 588
+    Height = 64
+    Title = #1042#1099#1073#1086#1088' '#1090#1086#1074#1072#1088#1072
+    Text = ''
+    FontTitle.Charset = DEFAULT_CHARSET
+    FontTitle.Color = clWindowText
+    FontTitle.Height = -13
+    FontTitle.Name = 'Segoe UI'
+    FontTitle.Style = [fsBold]
+    FontText.Charset = DEFAULT_CHARSET
+    FontText.Color = clWindowText
+    FontText.Height = -12
+    FontText.Name = 'Segoe UI'
+    FontText.Style = []
+    ImageList = dmAdditions.cxImageList_DialogIcons
+    ImageIndex = 1
+  end
+  object pnClient: TPanel
+    AlignWithMargins = True
+    Left = 8
+    Top = 72
+    Width = 572
+    Height = 165
+    Margins.Left = 8
+    Margins.Top = 8
+    Margins.Right = 8
+    Margins.Bottom = 8
+    Align = alTop
+    Anchors = [akLeft, akTop, akRight, akBottom]
+    BevelKind = bkFlat
+    BevelOuter = bvNone
+    Color = clWindow
+    ParentBackground = False
+    TabOrder = 1
+    object cxLabel1: TLabel
+      Left = 20
+      Top = 18
+      Width = 32
+      Height = 15
+      Caption = #1058#1086#1074#1072#1088
+      Transparent = True
+    end
+    object lbQTY: TLabel
+      Left = 20
+      Top = 77
+      Width = 65
+      Height = 15
+      Caption = #1050#1086#1083#1080#1095#1077#1089#1090#1074#1086
+      Transparent = True
+    end
+    object Label1: TLabel
+      Left = 20
+      Top = 106
+      Width = 28
+      Height = 15
+      Caption = #1062#1077#1085#1072
+      Transparent = True
+    end
+    object beGoods: TcxButtonEdit
+      Left = 91
+      Top = 34
+      Properties.Buttons = <
+        item
+          Default = True
+          Glyph.SourceDPI = 96
+          Glyph.Data = {
+            424D360400000000000036000000280000001000000010000000010020000000
+            000000000000C40E0000C40E00000000000000000000FF00FF00FF00FF00FF00
+            FF00FF00FF00B8C698FFA6AE7AFF948F55FFFF00FF00FF00FF00FF00FF00FF00
+            FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF0086B558FF8DB4
+            61FF92B266FF99B56DFF9EB975FF91884AFF718043FF757C43FF8F8C4DFF9284
+            49FFA58D5EFFFF00FF00FF00FF00FF00FF00FF00FF00FF00FF0086B558FFA4BD
+            7EFFA4BD7EFFA4C17EFFA4C17EFF91884AFF96A67CFF98AA7FFFB5CD98FFB5CD
+            98FFB1C58DFFA88559FFFF00FF00FF00FF00FF00FF00FF00FF0086B558FFA4B9
+            7DFFA4BD7EFFA4BD7EFFA4BD7EFF928449FF96A67CFF98AA7FFFB5CD98FFB5CD
+            98FFB5CD98FF9C7240FFFF00FF00FF00FF00FF00FF00FF00FF0086B558FFA4B9
+            7DFFA6AE7AFFA4B97DFFA4BD7EFF928449FF96A67CFF98AA7FFFB5CD98FFB5CD
+            98FFB5CD98FF9C7240FFFF00FF00FF00FF00FF00FF00FF00FF0086B558FFA9AA
+            78FFA4B97DFFA6AE7AFFA4B97DFF928449FF96A67CFF98A57DFFB5CD98FFB5CD
+            98FFB5CD98FF9D703FFFFF00FF00FF00FF00FF00FF00FF00FF0086B558FFA9AA
+            78FFA9AA78FFA6AE7AFFA4B97DFF967D46FF96A67CFF98A57DFFB6C596FFB6C5
+            96FFB5CD98FF9D703FFFFF00FF00FF00FF00FF00FF00FF00FF0086B558FFABA5
+            76FFA9AA78FFA9AA78FFA4B97DFF967D46FF979E7AFF98A57DFFB6C596FFB6C5
+            96FFB6C997FF9D703FFFFF00FF00FF00FF00FF00FF00FF00FF0086B558FFADA1
+            74FFABA576FFA9AA78FFB6B188FF967D46FF979E7AFF98A57DFFB6C596FFB6C5
+            96FFB6C596FF9D703FFFFF00FF00FF00FF00FF00FF00FF00FF0086B057FFADA1
+            74FFADA174FFABA576FFBAB991FF967D46FF979E7AFF9A9D7BFFB6C596FFB6C5
+            96FFB6C596FF9D703FFFFF00FF00FF00FF00FF00FF00FF00FF0086B057FFB296
+            6FFFB09A70FFADA174FFBAB991FF9C7240FF979E7AFF9A9D7BFFB8BE94FFB8C0
+            95FFB6C596FF9D703FFFFF00FF00FF00FF00FF00FF00FF00FF0086B057FFB296
+            6FFFB2966FFFB09A70FFC5B395FF967D46FF9A9777FF9A9D7BFFB8BE94FFB8BE
+            94FFB8C095FF9D703FFFFF00FF00FF00FF00FF00FF00FF00FF0086B057FFB78E
+            6BFFB2966FFFB2966FFFC5B395FF9C7240FF9A9D7BFF9A9D7BFFB8BE94FFB8BE
+            94FFB8BE94FF9D703FFFFF00FF00FF00FF00FF00FF00FF00FF0086B057FFB78E
+            6BFFB78E6BFFC1AC8CFFB9A882FF9C7240FF9A9D7BFFB1AE8AFFBAB991FFB8BE
+            94FFB8BE94FF9E6E3EFFFF00FF00FF00FF00FF00FF00FF00FF0086B057FF9F98
+            5FFFA6AB76FF979357FFAA986AFFA49573FFBCB18DFFBCB18DFFBAB991FFBAB9
+            91FFBCB18DFFAB7F56FFFF00FF00FF00FF00FF00FF00FF00FF0090B063FF90B0
+            63FF88AA56FF87A755FF89A054FF8A9A52FF8C934FFF91884AFF928449FF9C72
+            40FFA88559FFFF00FF00FF00FF00FF00FF00FF00FF00}
+          Kind = bkGlyph
+        end>
+      Properties.ClickKey = 115
+      Properties.ReadOnly = True
+      Properties.ViewStyle = vsHideCursor
+      Properties.OnButtonClick = beGoodsPropertiesButtonClick
+      TabOrder = 0
+      Text = 'beGoods'
+      OnDblClick = beGoodsDblClick
+      Width = 459
+    end
+    object edGOODSID: TcxDBTextEdit
+      Left = 20
+      Top = 35
+      TabStop = False
+      DataBinding.DataField = 'GOODSID'
+      Properties.ReadOnly = True
+      TabOrder = 1
+      Width = 65
+    end
+    object edQTY: TcxDBMaskEdit
+      Left = 91
+      Top = 74
+      DataBinding.DataField = 'QTY'
+      Properties.Alignment.Horz = taLeftJustify
+      Properties.MaskKind = emkRegExpr
+      Properties.EditMask = '\d+'
+      Properties.MaxLength = 0
+      TabOrder = 2
+      Width = 97
+    end
+    object lbCURRENCY_NAME: TcxDBLabel
+      Left = 189
+      Top = 104
+      AutoSize = True
+      DataBinding.DataField = 'CURRENCY_NAME'
+      DataBinding.DataSource = dmDB.IBCDataSourceDocs
+    end
+    object edPRICE: TcxDBCalcEdit
+      Left = 91
+      Top = 103
+      DataBinding.DataField = 'PRICE'
+      Properties.Alignment.Horz = taLeftJustify
+      Properties.DisplayFormat = '0.00'
+      TabOrder = 3
+      Width = 97
+    end
+  end
+  object btnOk: TcxButton
+    Left = 364
+    Top = 252
+    Width = 90
+    Height = 29
+    Anchors = [akRight, akBottom]
+    Caption = '&Ok'
+    Default = True
+    ModalResult = 1
+    TabOrder = 2
+  end
+  object btnCancel: TcxButton
+    Left = 472
+    Top = 252
+    Width = 90
+    Height = 29
+    Anchors = [akRight, akBottom]
+    Cancel = True
+    Caption = #1054#1090#1084#1077#1085#1080#1090#1100
+    ModalResult = 2
+    TabOrder = 3
+  end
+end

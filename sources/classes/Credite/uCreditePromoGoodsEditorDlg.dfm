@@ -1,0 +1,146 @@
+object frmCreditePromoGoodsEditorDlg: TfrmCreditePromoGoodsEditorDlg
+  Left = 0
+  Top = 0
+  BorderStyle = bsDialog
+  Caption = 'Produsele in promotii pe credit'
+  ClientHeight = 276
+  ClientWidth = 482
+  Color = clBtnFace
+  Font.Charset = RUSSIAN_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -12
+  Font.Name = 'Segoe UI'
+  Font.Style = []
+  OldCreateOrder = False
+  PixelsPerInch = 96
+  TextHeight = 15
+  object Panel1: TPanel
+    Left = 8
+    Top = 8
+    Width = 465
+    Height = 209
+    BevelOuter = bvNone
+    Color = clWindow
+    ParentBackground = False
+    TabOrder = 0
+    object cxLabel1: TcxLabel
+      Left = 16
+      Top = 16
+      Caption = 'Produs'
+    end
+    object beGoodsName: TcxButtonEdit
+      Left = 16
+      Top = 39
+      Properties.Buttons = <
+        item
+          Default = True
+          Glyph.SourceDPI = 96
+          Glyph.Data = {
+            424D360400000000000036000000280000001000000010000000010020000000
+            000000000000C40E0000C40E000000000000000000004043468A111C232A62B1
+            E2F666B7EAFF65B5E8FE66B7EAFF66B7EAFF66B7EAFF66B7EAFF66B7EAFF66B7
+            EAFF66B7EAFF66B7EAFF66B7EAFF4780A3B200000000656768D80A0E111764B3
+            E5FB65B5E8FE65B5E8FE65B6E9FF65B6E9FF65B6E9FF65B6E9FF65B6E9FF65B5
+            E8FE65B5E8FE65B5E8FE65B6E9FF62B0E2F705090B0C747575F90D0F101D5597
+            C2D465B5E8FE65B5E8FE65B6E9FF65B6E9FF65B6E9FF65B6E9FF65B6E9FF65B5
+            E8FE65B5E8FE65B5E8FE65B6E9FF65B5E8FE192D3A3F777777FF1E2122413E6C
+            8A9A65B5E8FE65B5E8FE65B6E9FF65B6E9FF65B6E9FF65B6E9FF65B6E9FF65B5
+            E8FE65B5E8FE65B5E8FE65B6E9FF65B5E8FE3158707B777777FE3234356B2741
+            515F65B5E8FE65B5E8FE65B5E8FE65B6E9FF65B6E9FF65B6E9FF65B6E9FF65B5
+            E8FE65B5E8FE65B5E8FE65B6E9FF65B6E9FF4883A7B7787878FF464747950F17
+            1D2465B5E8FE65B5E8FE66B7EAFF66B7EAFF66B7EAFF66B7EAFF66B7EAFF65B6
+            E9FF65B6E9FF65B6E9FF65B6E9FF65B6E9FF5EA9D9ED787878FF595A5ABF0101
+            01025CA4D2E665B5E8FE66B7EAFF66B7EAFF66B7EAFF66B7EAFF66B7EAFF65B6
+            E9FF65B6E9FF65B6E9FF65B6E9FF65B6E9FF65B6E9FF787878FF646667D70000
+            0000457B9CAD65B5E8FE66B7EAFF66B7EAFF66B7EAFF66B7EAFF66B7EAFF65B6
+            E9FF65B6E9FF65B6E9FF65B6E9FF65B6E9FF65B6E9FF787878FF696B6DE00000
+            000029495D6765B5E8FE66B7EAFF66B7EAFF66B7EAFF66B7EAFF66B7EAFF65B6
+            E9FF65B6E9FF65B6E9FF65B6E9FF65B6E9FF65B6E9FF787878FF757575F93234
+            356B000000000000000000000000030404060304040603040406030404060202
+            03040000000000000000000000000000000000000000787878FF787878FF7878
+            78FF787878FF787878FF787878FF787878FF787878FF787878FF787878FF7878
+            78FF787878FF787878FF787878FF787878FF00000000777777FD787878FF7878
+            78FF787878FF787878FF787878FF787878FF787878FF787878FF787878FF7878
+            78FF787878FF787878FF787878FF4242428D00000000767676FB787878FF7878
+            78FF787878FF787878FF787878FF787878FF42484C9000000000000000000000
+            000000000000000000000000000000000000000000002C313360787878FF7878
+            78FF787878FF787878FF787878FF363D40770404050800000000000000000000
+            0000000000000000000000000000000000000000000000000000000000000000
+            0000000000000000000000000000000000000000000000000000000000000000
+            0000000000000000000000000000000000000000000000000000000000000000
+            0000000000000000000000000000000000000000000000000000000000000000
+            00000000000000000000000000000000000000000000}
+          Kind = bkGlyph
+        end>
+      Properties.ClickKey = 115
+      Properties.OnButtonClick = beGoodsNamePropertiesButtonClick
+      TabOrder = 1
+      Text = 'beGoodsName'
+      Width = 433
+    end
+    object cxLabel2: TcxLabel
+      Left = 16
+      Top = 80
+      Caption = 'Suma'
+    end
+    object ceSuma: TcxDBCalcEdit
+      Left = 16
+      Top = 105
+      TabOrder = 4
+      Width = 121
+    end
+    object deData1: TcxDBDateEdit
+      Left = 16
+      Top = 159
+      TabOrder = 6
+      Width = 89
+    end
+    object cxLabel3: TcxLabel
+      Left = 16
+      Top = 134
+      Caption = 'Perioada'
+    end
+    object deData2: TcxDBDateEdit
+      Left = 128
+      Top = 159
+      TabOrder = 7
+      Width = 89
+    end
+    object lbExistsError: TcxLabel
+      Left = 48
+      Top = 64
+      AutoSize = False
+      Caption = 'Eroare!!! Produsul ales exista in lista!!!'
+      ParentFont = False
+      Style.Font.Charset = RUSSIAN_CHARSET
+      Style.Font.Color = clRed
+      Style.Font.Height = -12
+      Style.Font.Name = 'Segoe UI'
+      Style.Font.Style = []
+      Style.IsFontAssigned = True
+      Visible = False
+      Height = 19
+      Width = 385
+    end
+  end
+  object btnOK: TcxButton
+    Left = 263
+    Top = 239
+    Width = 90
+    Height = 29
+    Caption = 'OK'
+    Default = True
+    ModalResult = 1
+    TabOrder = 1
+  end
+  object btnCancel: TcxButton
+    Left = 367
+    Top = 239
+    Width = 90
+    Height = 29
+    Cancel = True
+    Caption = 'Renunta'
+    ModalResult = 2
+    TabOrder = 2
+  end
+end
