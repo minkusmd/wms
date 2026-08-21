@@ -43,6 +43,7 @@ type
         IBCDataSourceGoods: TIBCDataSource;
         cxDBTreeList_TITLE_RUS: TcxDBTreeListColumn;
         bbCatalogFilters: TdxBarButton;
+        bbVirtualFolders: TdxBarButton;
         cxDBTreeList_FILTER_COUNT: TcxDBTreeListColumn;
         IBCTrUpdate: TIBCTransaction;
         bbCompatibleGoods: TdxBarButton;
@@ -158,6 +159,7 @@ type
             TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
         procedure cxDBTreeList_FILTER_COUNTGetDisplayText(Sender: TcxTreeListColumn; ANode: TcxTreeListNode; var Value: string);
         procedure bbCatalogFiltersClick(Sender: TObject);
+        procedure bbVirtualFoldersClick(Sender: TObject);
         procedure bbCompatibleGoodsClick(Sender: TObject);
         procedure bbBannersClick(Sender: TObject);
         procedure btnVirtualCategoriesClick(Sender: TObject);
@@ -204,6 +206,8 @@ type
         procedure ShowSortCatalogDialog;
         procedure ShowSortGoodsFoldersDialog;
         procedure ShowCatalogFiltersDialog(const CatalogID: Integer; const TitleRom, TitleRus: string);
+        procedure ShowVirtualFoldersDialog(const CatalogID: Integer);
+        procedure RebuildCatalogLevels;
         procedure ShowCompatibleGoodsDialog;
         procedure ShowBannersEditor(const CatalogID: Integer);
         procedure ShowEditGroupImageDialog;
@@ -237,6 +241,7 @@ uses
     frmChangeOrderNoDialog, frmWebCatalogFiltersDialog, frmWebCatalogCompatibleGroupsDialog, SWNSecurityFlags, SWNSecurity,
     frmWebCatalogBannersDialog, frmWebCatalogLevel1Dialog, frmWebCatalogImageDialog, frmChangeParentFolderDialog,
     frmWebCatalogCopyItemDialog, frmWebCatalogAlsoBuyDialog, frmWebArticleEditorDialog, cxTLExportLink, frmWebCatalogLevel4Dialog,
+    frmWebCatalogVirtualFoldersDialog,
     frmWebVirtualCategoriesDialog;
 
 {$R *.dfm}
@@ -300,6 +305,11 @@ procedure TfrmWebCatalogDlg.bbCatalogFiltersClick(Sender: TObject);
 begin
     ShowCatalogFiltersDialog(cxDBTreeList.FocusedNode.Values[cxDBTreeList_CATALOGID.Position.ColIndex], cxDBTreeList.FocusedNode.Values
         [cxDBTreeList_TITLE.Position.ColIndex], cxDBTreeList.FocusedNode.Values[cxDBTreeList_TITLE_RUS.Position.ColIndex]);
+end;
+
+procedure TfrmWebCatalogDlg.bbVirtualFoldersClick(Sender: TObject);
+begin
+    ShowVirtualFoldersDialog(cxDBTreeList.FocusedNode.Values[cxDBTreeList_CATALOGID.Position.ColIndex]);
 end;
 
 procedure TfrmWebCatalogDlg.bbCollapseClick(Sender: TObject);
@@ -385,8 +395,6 @@ begin
         2:
             ShowCreateLevel3FolderDialog(ParentID);
         3:
-            ShowCreateLevel3FolderDialog(ParentID);
-        4:
             ShowCreateLevel4FolderDialog(ParentID);
 //    else
 //        begin
@@ -808,7 +816,7 @@ begin
         fL4 := (parentLevel = 2) or (Level = 2);
         fEdit := True;
         fDelete := not cxDBTreeList.FocusedNode.HasChildren;
-        fFilters := (Level = 2);
+        fFilters := (Level >= 2);
         fCompatible := (Level >= 2);
     // goods
         fAddGoods := Level >= 2;
@@ -828,6 +836,7 @@ begin
 
     bbMoveFolder.Enabled := fL2 or fL3 or fL4;
     bbCatalogFilters.Enabled := fFilters;
+    bbVirtualFolders.Enabled := fFilters;
     bbCompatibleGoods.Enabled := fCompatible;
   // goods
     bbAddGoodsGroup.Enabled := fAddGoods;
@@ -979,6 +988,19 @@ begin
     end;
 end;
 
+procedure TfrmWebCatalogDlg.ShowVirtualFoldersDialog(const CatalogID: Integer);
+var
+    dialog: TfrmWebCatalogVirtualFoldersDlg;
+begin
+    dialog := TfrmWebCatalogVirtualFoldersDlg.Create(Self, IBCTrUpdate);
+    try
+        dialog.CatalogID := CatalogID;
+        dialog.ShowModal;
+    finally
+        dialog.Free;
+    end;
+end;
+
 procedure TfrmWebCatalogDlg.ShowCompatibleGoodsDialog;
 var
     dialog: TfrmWebCatalogCompatibleGroupsDlg;
@@ -1117,6 +1139,7 @@ var
     dialog1: TfrmWebCatalogLevel1Dlg;
     dialog2: TfrmWebCatalogLevel2Dlg;
     dialog3: TfrmWebCatalogLevel3Dlg;
+    dialog4: TfrmWebCatalogLevel4Dlg;
 //  Level: Integer;
 begin
 //  Level := cxDBTreeList.FocusedNode.Level;
@@ -1161,13 +1184,13 @@ begin
         3:
             begin
         // LEVEL 4
-                dialog3 := TfrmWebCatalogLevel3Dlg.Create(Self, IBCQueryTree, IBCDataSourceTree);
+                dialog4 := TfrmWebCatalogLevel4Dlg.Create(Self, IBCQueryTree, IBCDataSourceTree);
                 try
-                    dialog3.DataSourceImage := IBCDataSourceImage;
-                    dialog3.CreateNewFolder := False;
-                    dialog3.ShowModal;
+                    dialog4.DataSourceImage := IBCDataSourceImage;
+                    dialog4.CreateNewFolder := False;
+                    dialog4.ShowModal;
                 finally
-                    dialog3.Free;
+                    dialog4.Free;
                 end;
             end;
 
@@ -1187,10 +1210,36 @@ begin
         dialog.CurrentFirmaID := FirmaID;
         if dialog.ShowModal = mrOk then
         begin
+            RebuildCatalogLevels;
             IBCQueryTree.Refresh;
         end;
     finally
         dialog.Free;
+    end;
+end;
+
+{ CATALOG_LEVEL este denormalizat si se strica la fiecare mutare de nod. Nu il
+  citeste nimeni pe site (adancimea vine din WEB_GET_CATALOG_TREE4), deci daca
+  procedura lipseste inca in baza nu are rost sa blocam mutarea. }
+procedure TfrmWebCatalogDlg.RebuildCatalogLevels;
+var
+    q: TIBCQuery;
+begin
+    q := TIBCQuery.Create(nil);
+    try
+        try
+            q.Transaction := IBCTrUpdate;
+            q.SQL.Text := 'EXECUTE PROCEDURE SP_REBUILD_CATALOG_LEVEL';
+            if not IBCTrUpdate.Active then
+                IBCTrUpdate.StartTransaction;
+            q.ExecSQL;
+            IBCTrUpdate.Commit;
+        except
+            if IBCTrUpdate.Active then
+                IBCTrUpdate.Rollback;
+        end;
+    finally
+        q.Free;
     end;
 end;
 

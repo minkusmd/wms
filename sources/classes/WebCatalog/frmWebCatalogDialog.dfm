@@ -4,8 +4,8 @@ object frmWebCatalogDlg: TfrmWebCatalogDlg
   ActiveControl = cxDBTreeList
   BorderIcons = [biSystemMenu, biMaximize]
   Caption = 'Web Catalog'
-  ClientHeight = 811
-  ClientWidth = 1452
+  ClientHeight = 578
+  ClientWidth = 1149
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -18,7 +18,7 @@ object frmWebCatalogDlg: TfrmWebCatalogDlg
   object dtDialogTitle: TDialogTitle
     Left = 0
     Top = 0
-    Width = 1452
+    Width = 1149
     Height = 64
     Title = 'Web Catalog'
     Text = 'Administrarea web catalogului de produse'
@@ -34,21 +34,24 @@ object frmWebCatalogDlg: TfrmWebCatalogDlg
     FontText.Style = []
     ImageList = dmAdditions.cxImageList_DialogIcons
     ImageIndex = 30
+    ExplicitWidth = 1452
   end
   object Panel2: TPanel
     Left = 0
     Top = 64
-    Width = 1452
-    Height = 696
+    Width = 1149
+    Height = 463
     Align = alClient
     BevelOuter = bvNone
     ShowCaption = False
     TabOrder = 1
+    ExplicitWidth = 1452
+    ExplicitHeight = 696
     object pnGoods: TPanel
-      Left = 1045
+      Left = 742
       Top = 0
       Width = 407
-      Height = 696
+      Height = 463
       Align = alRight
       BevelOuter = bvNone
       Color = clWindow
@@ -56,6 +59,8 @@ object frmWebCatalogDlg: TfrmWebCatalogDlg
       ParentBackground = False
       ShowCaption = False
       TabOrder = 1
+      ExplicitLeft = 1045
+      ExplicitHeight = 696
       object dxBarDockControl2: TdxBarDockControl
         Left = 1
         Top = 0
@@ -86,14 +91,9 @@ object frmWebCatalogDlg: TfrmWebCatalogDlg
           Align = alClient
           TabOrder = 0
           object cxGridCatalogTable: TcxGridDBTableView
-            Navigator.Buttons.CustomButtons = <>
-            ScrollbarAnnotations.CustomAnnotations = <>
             OnFocusedRecordChanged = cxGridCatalogTableFocusedRecordChanged
             DataController.DataSource = IBCDataSourceGoods
             DataController.KeyFieldNames = 'CATALOGID;GOODSPARENTID'
-            DataController.Summary.DefaultGroupSummaryItems = <>
-            DataController.Summary.FooterSummaryItems = <>
-            DataController.Summary.SummaryGroups = <>
             OptionsBehavior.CopyCaptionsToClipboard = False
             OptionsBehavior.IncSearch = True
             OptionsCustomize.ColumnFiltering = False
@@ -111,7 +111,6 @@ object frmWebCatalogDlg: TfrmWebCatalogDlg
             OptionsView.Indicator = True
             Styles.Header = dmAdditions.cxStyle_GridHeader
             object cxGridCatalog_IMG: TcxGridDBColumn
-              DataBinding.IsNullValueType = True
               PropertiesClassName = 'TcxImageComboBoxProperties'
               Properties.DefaultImageIndex = 12
               Properties.Images = dmAdditions.cxImageList_SWN
@@ -125,7 +124,6 @@ object frmWebCatalogDlg: TfrmWebCatalogDlg
             object cxGridCatalog_GOODSPARENTID: TcxGridDBColumn
               Caption = 'Cod'
               DataBinding.FieldName = 'GOODSPARENTID'
-              DataBinding.IsNullValueType = True
               HeaderAlignmentHorz = taCenter
               MinWidth = 60
               Options.HorzSizing = False
@@ -134,12 +132,10 @@ object frmWebCatalogDlg: TfrmWebCatalogDlg
             object cxGridCatalog_TITLE: TcxGridDBColumn
               Caption = 'Grupa de produse'
               DataBinding.FieldName = 'TITLE'
-              DataBinding.IsNullValueType = True
             end
             object cxGridCatalog_GOODS_COUNT: TcxGridDBColumn
               Caption = 'Total'
               DataBinding.FieldName = 'GOODS_COUNT'
-              DataBinding.IsNullValueType = True
               HeaderAlignmentHorz = taCenter
               MinWidth = 60
               Options.HorzSizing = False
@@ -148,7 +144,6 @@ object frmWebCatalogDlg: TfrmWebCatalogDlg
             object cxGridCatalog_FLG_SEE_ALSO: TcxGridDBColumn
               Caption = 'Vezi alte'
               DataBinding.FieldName = 'FLG_SEE_ALSO'
-              DataBinding.IsNullValueType = True
               PropertiesClassName = 'TcxCheckBoxProperties'
               Properties.ValueChecked = '1'
               Properties.ValueUnchecked = '0'
@@ -241,13 +236,8 @@ object frmWebCatalogDlg: TfrmWebCatalogDlg
         Align = alTop
         TabOrder = 3
         object cxGridSeeAlsoView: TcxGridDBTableView
-          Navigator.Buttons.CustomButtons = <>
-          ScrollbarAnnotations.CustomAnnotations = <>
           DataController.DataSource = IBCDataSourceSeeAlso
           DataController.KeyFieldNames = 'CATALOGID;GOODSFOLDERID'
-          DataController.Summary.DefaultGroupSummaryItems = <>
-          DataController.Summary.FooterSummaryItems = <>
-          DataController.Summary.SummaryGroups = <>
           OptionsBehavior.IncSearch = True
           OptionsBehavior.ImmediateEditor = False
           OptionsData.CancelOnExit = False
@@ -260,13 +250,11 @@ object frmWebCatalogDlg: TfrmWebCatalogDlg
           object cxGridSeeAlsoView_GOODSID: TcxGridDBColumn
             Caption = 'Cod'
             DataBinding.FieldName = 'GOODSFOLDERID'
-            DataBinding.IsNullValueType = True
             HeaderAlignmentHorz = taCenter
           end
           object cxGridSeeAlsoView_GOODS_NAME: TcxGridDBColumn
             Caption = 'Denumire'
             DataBinding.FieldName = 'GOODSFOLDER_NAME'
-            DataBinding.IsNullValueType = True
             HeaderAlignmentHorz = taCenter
             Width = 300
           end
@@ -279,18 +267,14 @@ object frmWebCatalogDlg: TfrmWebCatalogDlg
         Left = 1
         Top = 500
         Width = 406
-        Height = 196
+        Height = 16
         Align = alClient
         TabOrder = 5
+        ExplicitHeight = 196
         object cxGrid1DBTableView1: TcxGridDBTableView
           OnKeyDown = cxGrid1DBTableView1KeyDown
-          Navigator.Buttons.CustomButtons = <>
           FindPanel.DisplayMode = fpdmAlways
-          ScrollbarAnnotations.CustomAnnotations = <>
           DataController.DataSource = IBCDataSourceGoodsList
-          DataController.Summary.DefaultGroupSummaryItems = <>
-          DataController.Summary.FooterSummaryItems = <>
-          DataController.Summary.SummaryGroups = <>
           OptionsBehavior.IncSearch = True
           OptionsBehavior.ImmediateEditor = False
           OptionsData.CancelOnExit = False
@@ -303,19 +287,16 @@ object frmWebCatalogDlg: TfrmWebCatalogDlg
           object cxGrid1DBTableView1Column1: TcxGridDBColumn
             Caption = 'Cod'
             DataBinding.FieldName = 'GoodsID'
-            DataBinding.IsNullValueType = True
             Width = 51
           end
           object cxGrid1DBTableView1Column2: TcxGridDBColumn
             Caption = 'Denumire'
             DataBinding.FieldName = 'TITLE'
-            DataBinding.IsNullValueType = True
             Width = 330
           end
           object cxGrid1DBTableView1Column3: TcxGridDBColumn
             Caption = 'P'
             DataBinding.FieldName = 'FLG_IN_PRICE'
-            DataBinding.IsNullValueType = True
             PropertiesClassName = 'TcxCheckBoxProperties'
             Properties.NullStyle = nssUnchecked
             Properties.ValueChecked = '1'
@@ -339,27 +320,30 @@ object frmWebCatalogDlg: TfrmWebCatalogDlg
     object pnTree: TPanel
       Left = 0
       Top = 0
-      Width = 1045
-      Height = 696
+      Width = 742
+      Height = 463
       Align = alClient
       BevelOuter = bvNone
       TabOrder = 0
+      ExplicitWidth = 1045
+      ExplicitHeight = 696
       DesignSize = (
-        1045
-        696)
+        742
+        463)
       object dxBarDockControl1: TdxBarDockControl
         Left = 0
         Top = 0
-        Width = 1045
+        Width = 742
         Height = 28
         Align = dalTop
         BarManager = dxBarManager
+        ExplicitWidth = 1045
       end
       object cxDBTreeList: TcxDBTreeList
         Left = 10
         Top = 34
-        Width = 1033
-        Height = 441
+        Width = 730
+        Height = 208
         Anchors = [akLeft, akTop, akRight, akBottom]
         Bands = <
           item
@@ -375,7 +359,6 @@ object frmWebCatalogDlg: TfrmWebCatalogDlg
         Images = dmAdditions.cxImageList_SWN
         LookAndFeel.Kind = lfUltraFlat
         LookAndFeel.NativeStyle = True
-        Navigator.Buttons.CustomButtons = <>
         OptionsBehavior.ChangeDelay = 1000
         OptionsBehavior.IncSearch = True
         OptionsCustomizing.ColumnCustomizing = False
@@ -393,6 +376,8 @@ object frmWebCatalogDlg: TfrmWebCatalogDlg
         Styles.ColumnHeader = dmAdditions.cxStyle_GridHeader
         TabOrder = 2
         OnFocusedNodeChanged = cxDBTreeListFocusedNodeChanged
+        ExplicitWidth = 1033
+        ExplicitHeight = 441
         object cxDBTreeList_TITLE: TcxDBTreeListColumn
           Caption.Text = 'Denumirea'
           DataBinding.FieldName = 'TITLE'
@@ -400,8 +385,6 @@ object frmWebCatalogDlg: TfrmWebCatalogDlg
           Position.ColIndex = 0
           Position.RowIndex = 0
           Position.BandIndex = 0
-          Summary.FooterSummaryItems = <>
-          Summary.GroupFooterSummaryItems = <>
         end
         object cxDBTreeList_TITLE_RUS: TcxDBTreeListColumn
           Caption.Text = #1053#1072#1079#1074#1072#1085#1080#1077
@@ -410,8 +393,6 @@ object frmWebCatalogDlg: TfrmWebCatalogDlg
           Position.ColIndex = 1
           Position.RowIndex = 0
           Position.BandIndex = 0
-          Summary.FooterSummaryItems = <>
-          Summary.GroupFooterSummaryItems = <>
         end
         object cxDBTreeListcx_URL_RO: TcxDBTreeListColumn
           Caption.Text = 'Url'
@@ -420,8 +401,6 @@ object frmWebCatalogDlg: TfrmWebCatalogDlg
           Position.ColIndex = 2
           Position.RowIndex = 0
           Position.BandIndex = 0
-          Summary.FooterSummaryItems = <>
-          Summary.GroupFooterSummaryItems = <>
         end
         object cxDBTreeList_CATALOGID: TcxDBTreeListColumn
           Caption.AlignHorz = taCenter
@@ -433,8 +412,6 @@ object frmWebCatalogDlg: TfrmWebCatalogDlg
           Position.ColIndex = 3
           Position.RowIndex = 0
           Position.BandIndex = 0
-          Summary.FooterSummaryItems = <>
-          Summary.GroupFooterSummaryItems = <>
         end
         object cxDBTreeList_FLG_ENABLED: TcxDBTreeListColumn
           Visible = False
@@ -443,8 +420,6 @@ object frmWebCatalogDlg: TfrmWebCatalogDlg
           Position.ColIndex = 4
           Position.RowIndex = 0
           Position.BandIndex = 0
-          Summary.FooterSummaryItems = <>
-          Summary.GroupFooterSummaryItems = <>
         end
         object cxDBTreeList_FILTER_COUNT: TcxDBTreeListColumn
           Caption.AlignHorz = taCenter
@@ -456,8 +431,6 @@ object frmWebCatalogDlg: TfrmWebCatalogDlg
           Position.ColIndex = 5
           Position.RowIndex = 0
           Position.BandIndex = 0
-          Summary.FooterSummaryItems = <>
-          Summary.GroupFooterSummaryItems = <>
           OnGetDisplayText = cxDBTreeList_FILTER_COUNTGetDisplayText
         end
         object cxDBTreeList_PoliticaPet: TcxDBTreeListColumn
@@ -470,8 +443,6 @@ object frmWebCatalogDlg: TfrmWebCatalogDlg
           Position.ColIndex = 10
           Position.RowIndex = 0
           Position.BandIndex = 0
-          Summary.FooterSummaryItems = <>
-          Summary.GroupFooterSummaryItems = <>
         end
         object cxDBTreeList_CUSTOM_PRICE_COLUMN_DISPLAY: TcxDBTreeListColumn
           Styles.Content = dmAdditions.cxStyle_TextBoldRed
@@ -483,8 +454,6 @@ object frmWebCatalogDlg: TfrmWebCatalogDlg
           Position.ColIndex = 6
           Position.RowIndex = 0
           Position.BandIndex = 0
-          Summary.FooterSummaryItems = <>
-          Summary.GroupFooterSummaryItems = <>
           OnGetDisplayText = cxDBTreeList_CUSTOM_PRICE_COLUMN_DISPLAYGetDisplayText
         end
         object cxDBTreeList_ORDERNO: TcxDBTreeListColumn
@@ -496,8 +465,6 @@ object frmWebCatalogDlg: TfrmWebCatalogDlg
           Position.BandIndex = 0
           SortOrder = soAscending
           SortIndex = 0
-          Summary.FooterSummaryItems = <>
-          Summary.GroupFooterSummaryItems = <>
         end
         object cxDBTreeListcxDBTreeListColumn8: TcxDBTreeListColumn
           PropertiesClassName = 'TcxCheckBoxProperties'
@@ -511,8 +478,6 @@ object frmWebCatalogDlg: TfrmWebCatalogDlg
           Position.ColIndex = 8
           Position.RowIndex = 0
           Position.BandIndex = 0
-          Summary.FooterSummaryItems = <>
-          Summary.GroupFooterSummaryItems = <>
         end
         object cxDBTreeListcxDBTreeListColumn9: TcxDBTreeListColumn
           PropertiesClassName = 'TcxCheckBoxProperties'
@@ -526,8 +491,6 @@ object frmWebCatalogDlg: TfrmWebCatalogDlg
           Position.ColIndex = 9
           Position.RowIndex = 0
           Position.BandIndex = 0
-          Summary.FooterSummaryItems = <>
-          Summary.GroupFooterSummaryItems = <>
         end
         object cxDBTreeList_PARENTID: TcxDBTreeListColumn
           VisibleForExpressionEditor = bFalse
@@ -537,8 +500,6 @@ object frmWebCatalogDlg: TfrmWebCatalogDlg
           Position.ColIndex = 11
           Position.RowIndex = 0
           Position.BandIndex = 0
-          Summary.FooterSummaryItems = <>
-          Summary.GroupFooterSummaryItems = <>
         end
         object cxDBTreeListcx_FLG_POPULAR: TcxDBTreeListColumn
           PropertiesClassName = 'TcxCheckBoxProperties'
@@ -551,8 +512,6 @@ object frmWebCatalogDlg: TfrmWebCatalogDlg
           Position.ColIndex = 12
           Position.RowIndex = 0
           Position.BandIndex = 0
-          Summary.FooterSummaryItems = <>
-          Summary.GroupFooterSummaryItems = <>
         end
         object cxDBTreeListcxDBTreeListColumn14: TcxDBTreeListColumn
           PropertiesClassName = 'TcxCheckBoxProperties'
@@ -566,32 +525,34 @@ object frmWebCatalogDlg: TfrmWebCatalogDlg
           Position.ColIndex = 13
           Position.RowIndex = 0
           Position.BandIndex = 0
-          Summary.FooterSummaryItems = <>
-          Summary.GroupFooterSummaryItems = <>
         end
       end
       object cxSplitter1: TcxSplitter
         Left = 0
         Top = 28
         Width = 8
-        Height = 453
+        Height = 220
+        ExplicitHeight = 453
       end
       object cxPageControl1: TcxPageControl
         Left = 0
-        Top = 481
-        Width = 1045
+        Top = 248
+        Width = 742
         Height = 215
         Align = alBottom
         TabOrder = 3
         Properties.ActivePage = tbsReWriteURL
         Properties.CustomButtons.Buttons = <>
+        ExplicitTop = 481
+        ExplicitWidth = 1045
         ClientRectBottom = 211
         ClientRectLeft = 4
-        ClientRectRight = 1041
+        ClientRectRight = 738
         ClientRectTop = 26
         object cxTabSheet2: TcxTabSheet
           Caption = 'Meta descriere'
           ImageIndex = 1
+          ExplicitWidth = 1037
           object cxDBMemo1: TcxDBMemo
             Left = 0
             Top = 28
@@ -607,7 +568,8 @@ object frmWebCatalogDlg: TfrmWebCatalogDlg
             Style.Font.Style = []
             Style.IsFontAssigned = True
             TabOrder = 0
-            Width = 1037
+            ExplicitWidth = 1037
+            Width = 734
           end
           object cxDBMemo2: TcxDBMemo
             Left = 0
@@ -624,7 +586,8 @@ object frmWebCatalogDlg: TfrmWebCatalogDlg
             Style.Font.Style = []
             Style.IsFontAssigned = True
             TabOrder = 1
-            Width = 1037
+            ExplicitWidth = 1037
+            Width = 734
           end
           object cxDBMemo3: TcxDBMemo
             Left = 0
@@ -641,7 +604,8 @@ object frmWebCatalogDlg: TfrmWebCatalogDlg
             Style.Font.Style = []
             Style.IsFontAssigned = True
             TabOrder = 2
-            Width = 1037
+            ExplicitWidth = 1037
+            Width = 734
           end
           object cxDBMemo4: TcxDBMemo
             Left = 0
@@ -658,57 +622,54 @@ object frmWebCatalogDlg: TfrmWebCatalogDlg
             Style.Font.Style = []
             Style.IsFontAssigned = True
             TabOrder = 4
-            Width = 1037
+            ExplicitWidth = 1037
+            Width = 734
           end
           object dxBarDockControl5: TdxBarDockControl
             Left = 0
             Top = 0
-            Width = 1037
+            Width = 734
             Height = 28
             Align = dalTop
             BarManager = dxBarManager
+            ExplicitWidth = 1037
           end
         end
         object cxTabSheet1: TcxTabSheet
           Caption = 'Articole SEO'
           ImageIndex = 0
+          ExplicitWidth = 1037
           object dxBarDockControl4: TdxBarDockControl
             Left = 0
             Top = 0
-            Width = 1037
+            Width = 734
             Height = 28
             Align = dalTop
             BarManager = dxBarManager
+            ExplicitWidth = 1037
           end
           object cxGrid2: TcxGrid
             Left = 0
             Top = 28
-            Width = 1037
+            Width = 734
             Height = 157
             Align = alClient
             TabOrder = 1
+            ExplicitWidth = 1037
             object cxGrid2DBTableView1: TcxGridDBTableView
-              Navigator.Buttons.CustomButtons = <>
-              ScrollbarAnnotations.CustomAnnotations = <>
-              DataController.Summary.DefaultGroupSummaryItems = <>
-              DataController.Summary.FooterSummaryItems = <>
-              DataController.Summary.SummaryGroups = <>
               OptionsView.GroupByBox = False
               object cxGrid2DBTableView1_ARTICLEID: TcxGridDBColumn
                 Caption = 'Cod'
                 DataBinding.FieldName = 'ARTICLEID'
-                DataBinding.IsNullValueType = True
               end
               object cxGrid2DBTableView1_TITLE_RO: TcxGridDBColumn
                 Caption = 'Title'
                 DataBinding.FieldName = 'TITLE_RO'
-                DataBinding.IsNullValueType = True
                 Width = 500
               end
               object cxGrid2DBTableView1_TITLE_RU: TcxGridDBColumn
                 Caption = #1047#1072#1075#1086#1083#1086#1074#1086#1082
                 DataBinding.FieldName = 'TITLE_RU'
-                DataBinding.IsNullValueType = True
                 Width = 500
               end
             end
@@ -720,6 +681,7 @@ object frmWebCatalogDlg: TfrmWebCatalogDlg
         object tbsReWriteURL: TcxTabSheet
           Caption = #1063#1055#1059
           ImageIndex = 2
+          ExplicitWidth = 1037
           object Label4: TLabel
             Left = 267
             Top = 3
@@ -781,8 +743,8 @@ object frmWebCatalogDlg: TfrmWebCatalogDlg
   end
   object pnButtons: TPanel
     Left = 0
-    Top = 760
-    Width = 1452
+    Top = 527
+    Width = 1149
     Height = 51
     Align = alBottom
     BevelOuter = bvNone
@@ -790,6 +752,8 @@ object frmWebCatalogDlg: TfrmWebCatalogDlg
     Padding.Right = 12
     Padding.Bottom = 12
     TabOrder = 2
+    ExplicitTop = 760
+    ExplicitWidth = 1452
     object btnVirtualCategories: TcxButton
       Left = 12
       Top = 8
@@ -800,7 +764,7 @@ object frmWebCatalogDlg: TfrmWebCatalogDlg
       OnClick = btnVirtualCategoriesClick
     end
     object btnCancel: TcxButton
-      Left = 1350
+      Left = 1047
       Top = 8
       Width = 90
       Height = 31
@@ -809,9 +773,10 @@ object frmWebCatalogDlg: TfrmWebCatalogDlg
       Caption = 'Inchide'
       ModalResult = 2
       TabOrder = 1
+      ExplicitLeft = 1350
     end
     object btnOK: TcxButton
-      Left = 1260
+      Left = 957
       Top = 8
       Width = 90
       Height = 31
@@ -821,6 +786,7 @@ object frmWebCatalogDlg: TfrmWebCatalogDlg
       ModalResult = 1
       TabOrder = 0
       Visible = False
+      ExplicitLeft = 1260
     end
   end
   object dxBarManager: TdxBarManager
@@ -1101,6 +1067,14 @@ object frmWebCatalogDlg: TfrmWebCatalogDlg
       ShortCut = 16454
       OnClick = bbCatalogFiltersClick
     end
+    object bbVirtualFolders: TdxBarButton
+      Caption = 'Mape virtuale...'
+      Category = 0
+      Hint = 'Mape virtuale (subcategorii pe atribut)'
+      Visible = ivAlways
+      ImageIndex = 26
+      OnClick = bbVirtualFoldersClick
+    end
     object bbCompatibleGoods: TdxBarButton
       Caption = 'Produse compatibile'
       Category = 0
@@ -1170,6 +1144,11 @@ object frmWebCatalogDlg: TfrmWebCatalogDlg
           UserDefine = [udPaintStyle]
           Visible = True
           ItemName = 'bbCatalogFilters'
+        end
+        item
+          UserDefine = [udPaintStyle]
+          Visible = True
+          ItemName = 'bbVirtualFolders'
         end
         item
           Visible = True
@@ -1355,28 +1334,21 @@ object frmWebCatalogDlg: TfrmWebCatalogDlg
       'INSERT INTO VW_TWEB_CATALOG'
       
         '  (CATALOGID, PARENTID, DT, TITLE, TITLE_RUS, ORDERNO, FLG_ENABL' +
-        'ED, FLG_4LEVEL, FLG_GOODS_GROUP, '
-      
-        '   FLG_DELIMITER, FLG_CUSTOM_PRICE_COLUMN, FILTER_COUNT, GOODS_G' +
-        'ROUP_NAME, CUSTOM_PRICE_COLUMN, '
-      
-        '   CUSTOM_PRICE_COLUMN_DISPLAY, REWRITE_URL_ROM, REWRITE_URL_RUS' +
-        ', '
-      
-        'PGT_ID, PGT_NAME, FLG_PROMO, FLG_NEW, FLG_GROUP_IS_LINK, URL_RO,' +
-        ' URL_RU, flg_popular, FLG_VIRTUAL_CATALOG, VIRTUAL_FILTERID, VIRTUAL_FILTERPARAMIDS)'
+        'ED, FLG_4LEVEL, FLG_GOODS_GROUP, FLG_DELIMITER, FLG_CUSTOM_PRICE' +
+        '_COLUMN, FILTER_COUNT, GOODS_GROUP_NAME, CUSTOM_PRICE_COLUMN, CU' +
+        'STOM_PRICE_COLUMN_DISPLAY, FLG_VIEWMODE_VITRINA, FLG_DISABLE_VIE' +
+        'WMODE_CHANGE, REWRITE_URL_ROM, REWRITE_URL_RUS, PGT_ID, PGT_NAME' +
+        ', FLG_PROMO, FLG_NEW, FLG_GROUP_IS_LINK, URL_RO, URL_RU, FLG_POP' +
+        'ULAR, FLG_VIRTUAL_CATALOG)'
       'VALUES'
       
         '  (:CATALOGID, :PARENTID, :DT, :TITLE, :TITLE_RUS, :ORDERNO, :FL' +
-        'G_ENABLED, :FLG_4LEVEL, '
-      
-        '   :FLG_GOODS_GROUP, :FLG_DELIMITER, :FLG_CUSTOM_PRICE_COLUMN, :' +
-        'FILTER_COUNT, :GOODS_GROUP_NAME, '
-      '   :CUSTOM_PRICE_COLUMN, :CUSTOM_PRICE_COLUMN_DISPLAY, '
-      
-        '   :REWRITE_URL_ROM, :REWRITE_URL_RUS, :PGT_ID, :PGT_NAME, :FLG_' +
-        'PROMO, :FLG_NEW, :FLG_GROUP_IS_LINK, '
-      '   :URL_RO, :URL_RU, :flg_popular, :FLG_VIRTUAL_CATALOG, :VIRTUAL_FILTERID, :VIRTUAL_FILTERPARAMIDS)')
+        'G_ENABLED, :FLG_4LEVEL, :FLG_GOODS_GROUP, :FLG_DELIMITER, :FLG_C' +
+        'USTOM_PRICE_COLUMN, :FILTER_COUNT, :GOODS_GROUP_NAME, :CUSTOM_PR' +
+        'ICE_COLUMN, :CUSTOM_PRICE_COLUMN_DISPLAY, :FLG_VIEWMODE_VITRINA,' +
+        ' :FLG_DISABLE_VIEWMODE_CHANGE, :REWRITE_URL_ROM, :REWRITE_URL_RU' +
+        'S, :PGT_ID, :PGT_NAME, :FLG_PROMO, :FLG_NEW, :FLG_GROUP_IS_LINK,' +
+        ' :URL_RO, :URL_RU, :FLG_POPULAR, :FLG_VIRTUAL_CATALOG)')
     SQLDelete.Strings = (
       'DELETE FROM VW_TWEB_CATALOG'
       'WHERE'
@@ -1386,39 +1358,34 @@ object frmWebCatalogDlg: TfrmWebCatalogDlg
       'SET'
       
         '  CATALOGID = :CATALOGID, PARENTID = :PARENTID, DT = :DT, TITLE ' +
-        '= :TITLE, TITLE_RUS = :TITLE_RUS, '
-      
-        'ORDERNO = :ORDERNO, FLG_ENABLED = :FLG_ENABLED, FLG_4LEVEL = :FL' +
-        'G_4LEVEL, FLG_GOODS_GROUP = :FLG_GOODS_GROUP, '
-      
-        'FLG_DELIMITER = :FLG_DELIMITER, FLG_CUSTOM_PRICE_COLUMN = :FLG_C' +
-        'USTOM_PRICE_COLUMN, FILTER_COUNT = :FILTER_COUNT, '
-      
-        'GOODS_GROUP_NAME = :GOODS_GROUP_NAME, CUSTOM_PRICE_COLUMN = :CUS' +
-        'TOM_PRICE_COLUMN, '
-      'CUSTOM_PRICE_COLUMN_DISPLAY = :CUSTOM_PRICE_COLUMN_DISPLAY, '
-      
-        'REWRITE_URL_ROM = :REWRITE_URL_ROM, REWRITE_URL_RUS = :REWRITE_U' +
-        'RL_RUS, '
-      'PGT_ID = :PGT_ID, PGT_NAME = :PGT_NAME, FLG_PROMO = :FLG_PROMO, '
-      
-        'FLG_NEW = :FLG_NEW, FLG_GROUP_IS_LINK = :FLG_GROUP_IS_LINK, URL_' +
-        'RO = :URL_RO, URL_RU = :URL_RU, '
-      'flg_popular = :flg_popular, '
-      'FLG_VIRTUAL_CATALOG = :FLG_VIRTUAL_CATALOG, VIRTUAL_FILTERID = :VIRTUAL_FILTERID, VIRTUAL_FILTERPARAMIDS = :VIRTUAL_FILTERPARAMIDS'
+        '= :TITLE, TITLE_RUS = :TITLE_RUS, ORDERNO = :ORDERNO, FLG_ENABLE' +
+        'D = :FLG_ENABLED, FLG_4LEVEL = :FLG_4LEVEL, FLG_GOODS_GROUP = :F' +
+        'LG_GOODS_GROUP, FLG_DELIMITER = :FLG_DELIMITER, FLG_CUSTOM_PRICE' +
+        '_COLUMN = :FLG_CUSTOM_PRICE_COLUMN, FILTER_COUNT = :FILTER_COUNT' +
+        ', GOODS_GROUP_NAME = :GOODS_GROUP_NAME, CUSTOM_PRICE_COLUMN = :C' +
+        'USTOM_PRICE_COLUMN, CUSTOM_PRICE_COLUMN_DISPLAY = :CUSTOM_PRICE_' +
+        'COLUMN_DISPLAY, FLG_VIEWMODE_VITRINA = :FLG_VIEWMODE_VITRINA, FL' +
+        'G_DISABLE_VIEWMODE_CHANGE = :FLG_DISABLE_VIEWMODE_CHANGE, REWRIT' +
+        'E_URL_ROM = :REWRITE_URL_ROM, REWRITE_URL_RUS = :REWRITE_URL_RUS' +
+        ', PGT_ID = :PGT_ID, PGT_NAME = :PGT_NAME, FLG_PROMO = :FLG_PROMO' +
+        ', FLG_NEW = :FLG_NEW, FLG_GROUP_IS_LINK = :FLG_GROUP_IS_LINK, UR' +
+        'L_RO = :URL_RO, URL_RU = :URL_RU, FLG_POPULAR = :FLG_POPULAR, FL' +
+        'G_VIRTUAL_CATALOG = :FLG_VIRTUAL_CATALOG'
       'WHERE'
       '  CATALOGID = :Old_CATALOGID')
     SQLRefresh.Strings = (
-      'SELECT VW_TWEB_CATALOG.*, '
       
-        '  IIF(EXISTS(SELECT GOODSPARENTID FROM TWEB_CATALOG_ITEMS WHERE ' +
-        'TWEB_CATALOG_ITEMS.CATALOGID=VW_TWEB_CATALOG.CATALOGID),14,13) A' +
-        'S IMAGEINDEX'
-      'FROM VW_TWEB_CATALOG'
+        'SELECT CATALOGID, PARENTID, DT, TITLE, TITLE_RUS, ORDERNO, FLG_E' +
+        'NABLED, FLG_4LEVEL, FLG_GOODS_GROUP, FLG_DELIMITER, FLG_CUSTOM_P' +
+        'RICE_COLUMN, FILTER_COUNT, GOODS_GROUP_NAME, CUSTOM_PRICE_COLUMN' +
+        ', CUSTOM_PRICE_COLUMN_DISPLAY, FLG_VIEWMODE_VITRINA, FLG_DISABLE' +
+        '_VIEWMODE_CHANGE, REWRITE_URL_ROM, REWRITE_URL_RUS, PGT_ID, PGT_' +
+        'NAME, FLG_PROMO, FLG_NEW, FLG_GROUP_IS_LINK, URL_RO, URL_RU, FLG' +
+        '_POPULAR, FLG_VIRTUAL_CATALOG FROM VW_TWEB_CATALOG'
       'WHERE'
       '  CATALOGID = :CATALOGID')
     SQLLock.Strings = (
-      'SELECT NULL FROM TWEB_CATALOG'
+      'SELECT NULL FROM VW_TWEB_CATALOG'
       'WHERE'
       'CATALOGID = :Old_CATALOGID'
       'FOR UPDATE WITH LOCK')

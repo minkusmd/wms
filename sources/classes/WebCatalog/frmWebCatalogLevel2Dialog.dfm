@@ -154,11 +154,12 @@ object frmWebCatalogLevel2Dlg: TfrmWebCatalogLevel2Dlg
       end
       object cbFLG_ENABLED: TcxDBCheckBox
         Left = 116
-        Top = 482
+        Top = 483
         Caption = 'Grupa activa'
         DataBinding.DataField = 'FLG_ENABLED'
         ParentFont = False
         Properties.Alignment = taLeftJustify
+        Properties.NullStyle = nssUnchecked
         Properties.ValueChecked = 1
         Properties.ValueUnchecked = 0
         TabOrder = 13
@@ -322,7 +323,7 @@ object frmWebCatalogLevel2Dlg: TfrmWebCatalogLevel2Dlg
         object cxDBImage1: TcxDBImage
           Left = 16
           Top = 20
-          DataBinding.DataField = 'BIG_IMAGE'
+          DataBinding.DataField = 'IMAGE'
           Properties.GraphicClassName = 'TdxPNGImage'
           Properties.ImmediatePost = True
           TabOrder = 1

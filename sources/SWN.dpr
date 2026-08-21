@@ -62,6 +62,7 @@ uses
   frmGoodsACNTBrowser in 'classes\GoodsACNT\frmGoodsACNTBrowser.pas' {frmGoodsACNTDlg},
   frmGoodsAcntFolderDialog in 'classes\GoodsACNT\frmGoodsAcntFolderDialog.pas' {frmGoodsAcntFolderDlg},
   frmGoodsAcntEditorDialog in 'classes\GoodsACNT\frmGoodsAcntEditorDialog.pas' {frmGoodsAcntEditorDlg},
+  frmMergeGoodsAcntUnit in 'classes\GoodsACNT\frmMergeGoodsAcntUnit.pas' {frmMergeGoodsAcntDlg},
   frame01CasaPKOUnit in 'frames\frame01CasaPKOUnit.pas' {frame01CasaPKO: TFrame},
   frame02CasaRKOUnit in 'frames\frame02CasaRKOUnit.pas' {frame02CasaRKO: TFrame},
   frame03CasaNSUnit in 'frames\frame03CasaNSUnit.pas' {frame03CasaNS: TFrame},
@@ -231,6 +232,8 @@ uses
   frmWebCatalogLevel2Dialog in 'classes\WebCatalog\frmWebCatalogLevel2Dialog.pas' {frmWebCatalogLevel2Dlg},
   frmWebCatalogLevel3Dialog in 'classes\WebCatalog\frmWebCatalogLevel3Dialog.pas' {frmWebCatalogLevel3Dlg},
   frmSelectCatalogFilterValueDialog in 'classes\WebCatalog\frmSelectCatalogFilterValueDialog.pas' {frmSelectCatalogFilterValueDlg},
+  frmWebCatalogVirtualFoldersDialog in 'classes\WebCatalog\frmWebCatalogVirtualFoldersDialog.pas' {frmWebCatalogVirtualFoldersDlg},
+  frmWebCatalogVirtualFolderEditorDialog in 'classes\WebCatalog\frmWebCatalogVirtualFolderEditorDialog.pas' {frmWebCatalogVirtualFolderEditorDlg},
   frmCurrencyHistoryDialog in 'classes\Currency\frmCurrencyHistoryDialog.pas' {frmCurrencyHistoryDlg},
   frmGoodsPricesDialog in 'classes\Goods\frmGoodsPricesDialog.pas' {frmGoodsPricesDlg},
   frmGoodsForeignCodeDialog in 'classes\Goods\frmGoodsForeignCodeDialog.pas' {frmGoodsForeignCodeDlg},
@@ -257,6 +260,7 @@ uses
   frmWebShopsDialog in 'classes\WebShops\frmWebShopsDialog.pas' {frmWebShopsDlg},
   frmBlockedIpDialog in 'classes\WebShops\frmBlockedIpDialog.pas' {frmBlockedIpDlg},
   frmBlockIpEditorDialog in 'classes\WebShops\frmBlockIpEditorDialog.pas' {frmBlockIpEditorDlg},
+  frmApiConfigDialog in 'classes\ApiConfig\frmApiConfigDialog.pas' {frmApiConfigDlg},
   frmCityEditorDialog in 'classes\WebShops\frmCityEditorDialog.pas' {frmCityEditorDlg},
   frmMagazinEditorDialog in 'classes\WebShops\frmMagazinEditorDialog.pas' {frmMagazinEditorDlg},
   frmMergeGoodsDialog in 'classes\Goods\frmMergeGoodsDialog.pas' {frmMergeGoodsDlg},
@@ -587,6 +591,8 @@ uses
   frmFiscalPrintersSetupDialog in 'FiscalPrinter\frmFiscalPrintersSetupDialog.pas' {frmFiscalPrintersSetupDlg},
   frmFiscalPrinterSharingDialog in 'FiscalPrinter\frmFiscalPrinterSharingDialog.pas' {frmFiscalPrinterSharingDlg},
   frmFiscalPrinterEditDialog in 'FiscalPrinter\frmFiscalPrinterEditDialog.pas' {frmFiscalPrinterEditDlg},
+  frmWorkStationsSetupDialog in 'FiscalPrinter\frmWorkStationsSetupDialog.pas' {frmWorkStationsSetupDlg},
+  frmWorkStationEditDialog in 'FiscalPrinter\frmWorkStationEditDialog.pas' {frmWorkStationEditDlg},
   frmWebUrlsUnit in 'classes\WebUrls\frmWebUrlsUnit.pas' {frmWebUrlsDialog},
   frmWebUrlsEditorUnit in 'classes\WebUrls\frmWebUrlsEditorUnit.pas' {frmWebUrlsEditorDialog},
   frame62ContracteUnit in 'frames\frame62ContracteUnit.pas' {frame62Contracte: TFrame},
@@ -797,7 +803,7 @@ uses
   frmMergeGoodsDialogEx in 'classes\Goods\frmMergeGoodsDialogEx.pas' {frmMergeGoodsDlgEx},
   frame126RefurbUnit in 'frames\frame126RefurbUnit.pas' {frame126Refurb},
   frame127DoxyUnit in 'frames\frame127DoxyUnit.pas' {frame127Doxy},
-  frmWebCatalogLevel4Dialog in 'classes\WebCatalog\frmWebCatalogLevel4Dialog.pas',
+  frmWebCatalogLevel4Dialog in 'classes\WebCatalog\frmWebCatalogLevel4Dialog.pas' {frmWebCatalogLevel4Dlg},
   uPhoneSearchThread in 'Tools\Sip\uPhoneSearchThread.pas',
   SwnThreadsUnit in 'Utils\SwnThreadsUnit.pas',
   frame129VinzarePrinPartenerUnit in 'frames\frame129VinzarePrinPartenerUnit.pas',
@@ -830,7 +836,8 @@ uses
   uPythonRunner in 'Scrapper\uPythonRunner.pas',
   uThreadInfoForm in 'Utils\uThreadInfoForm.pas',
   frmImportPricelistErrorUnit in 'frameUtils\78 - Pricelist\frmImportPricelistErrorUnit.pas' {frmImportPricelistErrorDlg},
-  uPythonRunnerGoogle in 'Utils\uPythonRunnerGoogle.pas';
+  uPythonRunnerGoogle in 'Utils\uPythonRunnerGoogle.pas',
+  frmSelectGoodsAcntUnit in 'classes\GoodsACNT\frmSelectGoodsAcntUnit.pas' {Form3};
 
 {$R 'swn_images.res' 'Resources\swn_images.rc'}
 {$R *.res}

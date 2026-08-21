@@ -121,6 +121,7 @@ end;
 procedure TfrmWebCatalogLevel2Dlg.FormShow(Sender: TObject);
 begin
    ImgCatalog.DataBinding.DataSource := DataSourceImage;
+   cxDBImage1.DataBinding.DataSource := DataSourceImage;
 end;
 
 procedure TfrmWebCatalogLevel2Dlg.IBCQueryImageBeforeInsert(DataSet: TDataSet);

@@ -414,36 +414,18 @@ object frmWebCatalogLevel3Dlg: TfrmWebCatalogLevel3Dlg
           Style.TransparentBorder = False
           TabOrder = 20
         end
-        object cbFLG_VIRTUAL_CATALOG: TcxDBCheckBox
-          Left = 245
-          Top = 430
-          Width = 260
-          Caption = 'Mapa virtuala (dupa atribut)'
-          DataBinding.DataField = 'FLG_VIRTUAL_CATALOG'
-          ParentFont = False
-          Properties.Alignment = taLeftJustify
-          Properties.NullStyle = nssUnchecked
-          Properties.ValueChecked = 1
-          Properties.ValueUnchecked = 0
-          Style.TransparentBorder = False
-          TabOrder = 21
-        end
-        object btnChooseFilter: TcxButton
-          Left = 245
-          Top = 458
-          Width = 210
-          Height = 25
-          Caption = 'Alege atributul si valorile...'
-          TabOrder = 22
-          OnClick = btnChooseFilterClick
-        end
         object lbVirtualFilter: TLabel
           Left = 245
-          Top = 490
-          Width = 260
-          Height = 15
-          Caption = 'Atribut: (nedefinit)'
-        end        object imgBIG_IMAGE: TcxDBImage
+          Top = 430
+          Width = 280
+          Height = 45
+          AutoSize = False
+          Caption =
+            'Mapele virtuale se administreaza din butonul "Mape virtuale..." ' +
+            'al catalogului.'
+          WordWrap = True
+        end
+        object imgBIG_IMAGE: TcxDBImage
           Left = 27
           Top = 338
           DataBinding.DataField = 'BIG_IMAGE'
@@ -457,7 +439,7 @@ object frmWebCatalogLevel3Dlg: TfrmWebCatalogLevel3Dlg
           Left = 161
           Top = 33
           Caption = 'Este parinte pentru nivelul 4'
-          DataBinding.DataField = 'FLG_LEVEL4'
+          DataBinding.DataField = 'FLG_4LEVEL'
           ParentFont = False
           Properties.Alignment = taLeftJustify
           Properties.ImmediatePost = True
@@ -480,6 +462,34 @@ object frmWebCatalogLevel3Dlg: TfrmWebCatalogLevel3Dlg
           Properties.ValueUnchecked = 0
           Style.TransparentBorder = False
           TabOrder = 1
+        end
+        object lbURL_RO: TLabel
+          Left = 245
+          Top = 480
+          Width = 255
+          Height = 15
+          Caption = 'Link RO (doar pentru grupa dinamica)'
+        end
+        object teURL_RO: TcxDBTextEdit
+          Left = 245
+          Top = 499
+          DataBinding.DataField = 'URL_RO'
+          TabOrder = 30
+          Width = 255
+        end
+        object lbURL_RU: TLabel
+          Left = 245
+          Top = 528
+          Width = 255
+          Height = 15
+          Caption = 'Link RU'
+        end
+        object teURL_RU: TcxDBTextEdit
+          Left = 245
+          Top = 547
+          DataBinding.DataField = 'URL_RU'
+          TabOrder = 31
+          Width = 255
         end
         object cbFLG_ENABLED: TcxDBCheckBox
           Left = 16

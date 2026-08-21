@@ -110,9 +110,9 @@ object frmWebCatalogImageDlg: TfrmWebCatalogImageDlg
     KeyFields = 'CATALOGID'
     SQLInsert.Strings = (
       'INSERT INTO TWEB_CATALOG_IMAGE'
-      '  (CATALOGID, IMAGE)'
+      '  (CATALOGID, IMAGE, BIG_IMAGE)'
       'VALUES'
-      '  (:CATALOGID, :IMAGE)')
+      '  (:CATALOGID, :IMAGE, :BIG_IMAGE)')
     SQLDelete.Strings = (
       'DELETE FROM TWEB_CATALOG_IMAGE'
       'WHERE'
@@ -120,11 +120,11 @@ object frmWebCatalogImageDlg: TfrmWebCatalogImageDlg
     SQLUpdate.Strings = (
       'UPDATE TWEB_CATALOG_IMAGE'
       'SET'
-      '  CATALOGID = :CATALOGID, IMAGE = :IMAGE'
+      '  CATALOGID = :CATALOGID, IMAGE = :IMAGE, BIG_IMAGE = :BIG_IMAGE'
       'WHERE'
       '  CATALOGID = :Old_CATALOGID')
     SQLRefresh.Strings = (
-      'SELECT CATALOGID, IMAGE FROM TWEB_CATALOG_IMAGE'
+      'SELECT CATALOGID, IMAGE, BIG_IMAGE FROM TWEB_CATALOG_IMAGE'
       'WHERE'
       '  CATALOGID = :CATALOGID')
     SQLLock.Strings = (

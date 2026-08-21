@@ -50,6 +50,10 @@ type
     Label19: TLabel;
     cbFLG_LEVEL4: TcxDBCheckBox;
     cbFLG_GROUP_IS_LINK: TcxDBCheckBox;
+    lbURL_RO: TLabel;
+    teURL_RO: TcxDBTextEdit;
+    lbURL_RU: TLabel;
+    teURL_RU: TcxDBTextEdit;
     cbFLG_ENABLED: TcxDBCheckBox;
     cxScrollBox1: TcxScrollBox;
     Label10: TLabel;
@@ -67,8 +71,6 @@ type
     btnGenereazaSeo: TcxButton;
     cxDBMemo1: TcxDBMemo;
     cxDBMemo2: TcxDBMemo;
-    cbFLG_VIRTUAL_CATALOG: TcxDBCheckBox;
-    btnChooseFilter: TcxButton;
     lbVirtualFilter: TLabel;
       procedure cbFLG_CUSTOM_PRICE_COLUMNPropertiesChange(Sender: TObject);
       procedure cxButton2Click(Sender: TObject);
@@ -77,7 +79,6 @@ type
     procedure cxButton3Click(Sender: TObject);
     procedure btnGenereazaSeoClick(Sender: TObject);
     procedure cmbViewModePropertiesCloseUp(Sender: TObject);
-    procedure btnChooseFilterClick(Sender: TObject);
    private
     { Private declarations }
       fCreateNewFolder: Boolean;
@@ -86,7 +87,6 @@ type
       FParentID: Integer;
       procedure SetCreateNewFolder(const Value: Boolean);
       function CheckParams: Boolean;
-      procedure UpdateVirtualFilterLabel;
       procedure EnableDisableCustomPriceColumn;
       procedure SetDataSourceImage(const Value: TIBCDataSource);
       procedure SetDT(const Value: Integer);
@@ -108,7 +108,7 @@ type
 implementation
 
 uses
-   SWNUtils, SWNConst, DataModuleDB, frmSelectCatalogFilterValueDialog;
+   SWNUtils, SWNConst, DataModuleDB;
 
 {$R *.dfm}
 { TfrmWebCatalogLevel1Dlg }
@@ -145,10 +145,10 @@ begin
    else if (Pos(fMasterDataSet.FieldByName('REWRITE_URL_RUS').asString, ' ') > 0) then
       AddErrorToStr(ErrorStr, 'ReWrite URL: На русском - без пробелов!');
 
-   if (fMasterDataSet.FindField('FLG_VIRTUAL_CATALOG') <> nil) and
-      (fMasterDataSet.FieldByName('FLG_VIRTUAL_CATALOG').AsInteger = 1) and
-      (fMasterDataSet.FieldByName('VIRTUAL_FILTERID').AsInteger <= 0) then
-      AddErrorToStr(ErrorStr, 'Mapa virtuala: alegeti atributul si valoarea');
+   // nodul-link nu are mape de produse: singura lui valoare este URL-ul tinta
+   if (fMasterDataSet.FieldByName('FLG_GROUP_IS_LINK').AsInteger = 1) and
+      (Trim(fMasterDataSet.FieldByName('URL_RO').AsString) = '') then
+      AddErrorToStr(ErrorStr, 'Grupa dinamica: completati Link RO');
 
    if ErrorStr = '' then
       Result := True
@@ -257,6 +257,8 @@ begin
 //   teURL_RO.DataBinding.DataSource :=  fMasterDataSource;
 //   teURL_RU.DataBinding.DataSource :=  fMasterDataSource;
    cbFLG_GROUP_IS_LINK.DataBinding.DataSource :=  fMasterDataSource;
+   teURL_RO.DataBinding.DataSource := fMasterDataSource;
+   teURL_RU.DataBinding.DataSource := fMasterDataSource;
 
    teTITLE_RO.DataBinding.DataSource := IBCDS_SeoDescription;
    teTITLE_RU.DataBinding.DataSource := IBCDS_SeoDescription;
@@ -264,7 +266,6 @@ begin
    teDescription_RU.DataBinding.DataSource := IBCDS_SeoDescription;
    cbFLG_LEVEL4.DataBinding.DataSource := fMasterDataSource;
    cbFLG_POPULAR.DataBinding.DataSource := fMasterDataSource;
-   cbFLG_VIRTUAL_CATALOG.DataBinding.DataSource := fMasterDataSource;
 
 end;
 
@@ -332,8 +333,6 @@ begin
 
       cxPageControl1.ActivePageIndex := 0;
 
-      if fMasterDataSet.FindField('VIRTUAL_FILTERID') <> nil then
-         UpdateVirtualFilterLabel;
    except
       if IBCQuerySeoDescription.State in [dsEdit, dsInsert] then
          IBCQuerySeoDescription.Cancel;
@@ -374,69 +373,6 @@ begin
 
    fMasterDataSet.Cancel;
    fMasterDataSet.UpdateTransaction.Rollback;
-end;
-
-procedure TfrmWebCatalogLevel3Dlg.btnChooseFilterClick(Sender: TObject);
-var
-   d: TfrmSelectCatalogFilterValueDlg;
-begin
-   d := TfrmSelectCatalogFilterValueDlg.Create(Self);
-   try
-      d.FilterID := fMasterDataSet.FieldByName('VIRTUAL_FILTERID').AsInteger;
-      d.ParamIDs := fMasterDataSet.FieldByName('VIRTUAL_FILTERPARAMIDS').AsString;
-      if d.ShowModal = mrOk then
-      begin
-         if not (fMasterDataSet.State in dsEditModes) then
-            fMasterDataSet.Edit;
-         fMasterDataSet.FieldByName('VIRTUAL_FILTERID').AsInteger := d.FilterID;
-         fMasterDataSet.FieldByName('VIRTUAL_FILTERPARAMIDS').AsString := d.ParamIDs;
-         fMasterDataSet.FieldByName('FLG_VIRTUAL_CATALOG').AsInteger := 1;
-         UpdateVirtualFilterLabel;
-      end;
-   finally
-      d.Free;
-   end;
-end;
-
-procedure TfrmWebCatalogLevel3Dlg.UpdateVirtualFilterLabel;
-var
-   fid: Integer;
-   csv, fname, vals: string;
-   q: TIBCQuery;
-begin
-   fid := fMasterDataSet.FieldByName('VIRTUAL_FILTERID').AsInteger;
-   csv := Trim(fMasterDataSet.FieldByName('VIRTUAL_FILTERPARAMIDS').AsString);
-   if fid <= 0 then
-   begin
-      lbVirtualFilter.Caption := 'Atribut: (nedefinit)';
-      Exit;
-   end;
-   fname := '';
-   vals := '';
-   q := TIBCQuery.Create(nil);
-   try
-      q.Connection := dmDB.IBCConnection;
-      q.Transaction := dmDB.IBCTrDefaultSelect;
-      q.SQL.Text := 'SELECT FILTERNAME FROM TS_FILTERS WHERE FILTERID = :fid';
-      q.ParamByName('fid').AsInteger := fid;
-      q.Open;
-      if not q.IsEmpty then
-         fname := q.FieldByName('FILTERNAME').AsString;
-      q.Close;
-      if csv <> '' then
-      begin
-         q.SQL.Text := 'SELECT LIST(PARAM_VALUE, '', '') AS VALS FROM TS_FILTER_PARAMS ' +
-            'WHERE FILTERID = :fid AND FILTERPARAMID IN (' + csv + ')';
-         q.ParamByName('fid').AsInteger := fid;
-         q.Open;
-         if not q.IsEmpty then
-            vals := q.FieldByName('VALS').AsString;
-         q.Close;
-      end;
-   finally
-      q.Free;
-   end;
-   lbVirtualFilter.Caption := 'Atribut: ' + fname + '  ->  ' + vals;
 end;
 
 end.
