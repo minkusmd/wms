@@ -96,14 +96,13 @@ object frmPriceListImportDlg: TfrmPriceListImportDlg
         Align = alClient
         BevelOuter = bvNone
         TabOrder = 1
+        ExplicitWidth = 0
         object dxSpreadSheet1: TdxSpreadSheet
           Left = 0
-          Top = 35
+          Top = 32
           Width = 1370
-          Height = 383
+          Height = 386
           Align = alClient
-          ExplicitTop = 32
-          ExplicitHeight = 386
           Data = {
             9802000044585353763242461000000042465320000000000000000001000101
             010100000100000001004246532000000000424653200100000001000000200B
@@ -132,13 +131,14 @@ object frmPriceListImportDlg: TfrmPriceListImportDlg
           Left = 0
           Top = 3
           Width = 1370
-          Height = 24
+          Height = 21
           Margins.Left = 0
           Margins.Right = 0
           Margins.Bottom = 8
           Align = alTop
           SpreadSheet = dxSpreadSheet1
           TabOrder = 0
+          ExplicitWidth = 0
         end
       end
     end

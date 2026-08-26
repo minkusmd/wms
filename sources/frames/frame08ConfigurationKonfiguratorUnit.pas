@@ -189,6 +189,7 @@ type
     cxGridComponentsDBTableView1SUMA: TcxGridDBColumn;
     bbLibrareSubMenu: TdxBarSubItem;
     bbLivrareRepublica: TdxBarButton;
+    cxTabSheet1: TcxTabSheet;
         procedure bbGoodsNewClick(Sender: TObject);
         procedure cxGridComponentsTableStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
         procedure bbGoodsModifyClick(Sender: TObject);
@@ -844,7 +845,6 @@ begin
   AddDelivery2Jurnal(173080);
   dmdb.ibcqueryjurnal.Refresh;
   dmdb.IBCQueryDocs.RefreshRecord;
-
 end;
 
 procedure Tframe08ConfigurationBRK.bbAddFromKitClick(Sender: TObject);

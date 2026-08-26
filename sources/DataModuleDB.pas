@@ -332,7 +332,7 @@ var
 implementation
 
 uses
-  Controls, DataModuleAdditions, SQLThread, SWNConst, SWNDBErrors, SWNTypes, SWNValueStorageUnit, {TelegramBot, }Winsock,
+  Controls, DataModuleAdditions, FiscalPrinterUtilsUnit, SQLThread, SWNConst, SWNDBErrors, SWNTypes, SWNValueStorageUnit, {TelegramBot, }Winsock,
   cxGridCustomTableView, cxImageComboBox, frmAddCallReminderUnit, frmBSToolsCopyGridClipboardDialog,
   frmCustomerCurrentDebtsDialog, frmExchangeRateEditor, shellapi,
   System.JSON,
@@ -578,6 +578,9 @@ begin
         fCurrentFirma := NewFirmaID;
         FCurrentFirmaName := NewFirmaTitle;
         GetFirmaInfo(NewFirmaID);
+
+        // calculatorul se inregistreaza singur, ca sa poata fi ales in "Acces la MCC"
+        RegisterCurrentWorkStation(NewFirmaID);
     end;
 end;
 

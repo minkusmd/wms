@@ -1,0 +1,94 @@
+tinte fara imagine: 44; cu geaman gasit: 32; fara geaman: 12
+
+242461  [PENTIUMG6405]  Procesor INTEL PENTIUM G6405, TRAY, LGA 1200, 4.1GHz, 4MB, 14nm, Intel UHD Gra
+      <- 237210 (1 img) CPU S1200 Intel Pentium G6405 Box (4.1GHz, 4MB, 14nm, Intel UHD Graphics
+283472  [I512400]  Procesor INTEL CORE I5-12400 TRAY, LGA 1700, 2.5-4.4GHz,  18MB,  10nm,  Intel 
+      <- 284839 (6 img) Procesor INTEL Core i5-12400 Box, LGA 1700, 2.5-4.4GHz,  18MB,  10nm,  I
+283473  [I512400F]  Procesor INTEL CORE I5-12400F TRAY, LGA 1700, 2.5-4.4GHz,  18MB,  10nm,  No In
+      <- 311287 (1 img) Procesor INTEL Core i5-12400F 2.5-4.4GHz, 6 Cores 12-Threads (LGA1700, 2
+      <- 354370 (2 img) Procesor INTEL Intel® Core™ i5-12400F, S1700, 2.5-4.4GHz, 6C(6P+0Е) / 12
+      <- 286987 (13 img) Procesor INTEL CORE I5-12400F BOX, LGA 1700, 2.5-4.4GHz, 18MB, 10nm, No 
+287603  [I312100]  Procesor INTEL CORE I3-12100 TRAY, LGA 1700, 3.3-4.3GHz, 12MB, 10nm, Intel UHD
+      <- 338078 (4 img) Procesor INTEL Intel® Core™ i3-12100,, S1700, 3.3-4.3GHz, 4C(4P+0Е) / 8T
+      <- 288911 (3 img) Procesor INTEL Core i3-12100 Box, LGA 1700, 3.3-4.3GHz, 12MB, 10nm, Inte
+      <- 368976 (3 img) Procesor INTEL Intel® Core™ i3-12100, S1700, 3.3-4.3GHz, 4C(4P+0Е) / 8T,
+302758  [RYZEN55500]  Procesor AMD RYZEN 5 5500 TRAY, AM4, 3.6-4.2GHz, 16MB, 7nm, 65W, 6 Cores/12 Th
+      <- 293617 (1 img) Procesor AMD Ryzen 5 5500 Bulk+Cooler, AM4, 3.6-4.2GHz, 16MB, 7nm, 65W, 
+      <- 292748 (6 img) Procesor AMD Ryzen 5 5500 Box, AM4, 3.6-4.2GHz, 16MB, 7nm, 65W, 6 Cores/
+313727  [I313100F]  Procesor INTEL CORE I3-13100F 3.4-4.5GHZ, (4P+0E/8T, 12MB,S1700, 10nm, No Inte
+      <- 312878 (4 img) Procesor INTEL CORE I3-13100F, BOX, 3.4-4.5GHz (4P+0E/8T, 12MB,S1700, 10
+318853  [RYZEN97950X]  Procesor AMD CPU AMD Ryzen 9 7950X (4.5-5.7GHz, 16C/32T, L2 16MB, L3 64MB, 5nm
+      <- 306375 (8 img) Procesor AMD RYZEN 9 7950X, AM5, (4.5-5.7GHz, 16C/32T, L2 16MB, L3 64MB,
+      <- 362397 (2 img) Procesor AMD Ryzen 9 7950X 16-Core
+331359  [RYZEN97950X3D]  Procesor AMD Ryzen™ 9 7950X3D, Socket AM5, 4.2-5.7GHz (16C/32T), 16MB L2 + 128
+      <- 330755 (3 img) Procesor AMD RYZEN™ 9 7950X3D, SOCKET AM5, 4.2-5.7GHZ (16C/32T), 16MB L2
+341781  [I514600KF]  Procesor INTEL CORE I5-14600KF 2.6-5.3GHZ, (6P+8E/20T, 20MB,S1700,10nm, No Int
+      <- 344265 (3 img) Procesor INTEL ® Core™ i5-14600KF, S1700, 2.6-5.3GHz, 14C (6P+8Е) / 20T,
+341782  [I714700K]  Procesor INTEL CORE™ I7-14700K, TRAY, S1700, 2.5-5.6GHz (8P+12E/28T, 28MB, 10n
+      <- 344157 (4 img) Procesor INTEL ® Core™ i7-14700K, S1700, 2.5-5.6GHz, 20C (8P+12Е) / 28T,
+      <- 345799 (2 img) Procesor INTEL Core i7-14700K 2.5-5.6GHz 20 Cores 28-Threads (LGA1700, 2
+341783  [I714700KF]  Procesor INTEL CORE™ I7-14700KF, TRAY, S1700, 2.5-5.6GHz (8P+12E/28T, 28MB,10n
+      <- 344264 (4 img) Procesor INTEL ® Core™ i7-14700KF, S1700, 2.5-5.6GHz, 20C (8P+12Е) / 28T
+      <- 345798 (2 img) Procesor INTEL Core i7-14700KF 2.5-5.6GHz 20 Cores 28-Threads (LGA1700, 
+341784  [I914900K]  Procesor INTEL CORE™ I9-14900K, TRAY, S1700, (8P+16E/32T, 32MB,10nm, Integ.UHD
+      <- 375072 (2 img) Procesor INTEL Core i9-14900K 2.4-6.0GHz, BOX, 24 Cores 32-Threads (LGA1
+344266  [I914900KF]  Procesor INTEL Core™ i9-14900KF, Tray, S1700, 2.4-6.0GHz, 24C (8P+16Е) / 32T, 
+      <- 345800 (2 img) Procesor INTEL CPU CORE I9-14900KF 2.4-6.0GHZ 24 CORES 32-THREADS, (LGA1
+348327  [I314100F]  Procesor INTEL CORE I3-14100F 3.5-4.7GHZ, (4P+0E/8T,12MB,S1700, 10nm, No Integ
+      <- 348641 (1 img) Procesor INTEL Core™ i3-14100F, Box, S1700, 3.5-4.7GHz, 4C (4P+0Е) / 8T,
+348328  [I514400F]  Procesor INTEL CORE I5-14400F, TRAY, 2.5-4.7GHz (6P+4E/16T,20MB,S1700, 10nm, N
+      <- 348645 (3 img) Procesor INTEL ® Core™ i5-14400F, S1700, 1.8-4.7GHz, 10C (6P+4E) / 16T, 
+348420  [RYZEN78700G]  Procesor AMD CPU Ryzen 7 8700G, (4.2-5.1GHz, 8C/16T, L2 8MB, L3 16MB, 4nm, 65W
+      <- 364541 (2 img) Procesor AMD RYZEN™ 7 8700G, SOCKET AM5, 4.2-5.1GHZ (8C/16T), 8MB L2 + 1
+      <- 354885 (1 img) Procesor AMD Ryzen 7 8700G, Socket AM5, 4.2-5.1GHz, 8C/16T, L2 8MB, L3 1
+348640  [RYZEN77700]  Procesor AMD RYZEN™ 7 7700, SOCKET AM5, 3.8-5.3GHZ (8C/16T), 8MB L2 + 32MB L3 
+      <- 330754 (4 img) Procesor AMD Ryzen™ 7 7700, Socket AM5, 3.8-5.3GHz (8C/16T), 8MB L2 + 32
+      <- 332359 (5 img) Procesor AMD CPU AMD Ryzen 7 7700 8-Core, 16 Threads, 3.8-5.3GHz, Unlock
+      <- 312565 (5 img) Procesor AMD CPU Ryzen 7 7700 8-Core, 16 Threads, 3.8-5.3GHz, Unlocked, 
+354371  [I514400]  Procesor INTEL CORE™ I5-14400, S1700, 1.8-4.7GHz, 10C (6P+4E) / 16T, 20MB L3 +
+      <- 348644 (2 img) Procesor INTEL ® Core™ i5-14400, S1700, 1.8-4.7GHz, 10C (6P+4E) / 16T, 2
+      <- 368973 (2 img) Procesor INTEL CPU  CORE I5-14400 2.5-4.7GHZ 10 CORES 16-THREADS (LGA170
+358989  [I714700]  Procesor INTEL CORE™ I7-14700, TRAY, LGA 1700, 2.1-5.4GHz 8P+12E/28T, 28MB,S17
+      <- 348646 (3 img) Procesor INTEL Core™ i7-14700, Box, S1700, 1.5-5.4GHz, 20C (8P+12Е) / 28
+362395  [RYZEN58500G]  Procesor AMD Ryzen 5 8500G 6-Core
+      <- 354368 (1 img) Procesor AMD Ryzen™ 5 8500G, Socket AM5, 3.5-5.0GHz (6C/12T), 6MB L2 + 1
+      <- 375338 (2 img) Procesor AMD RYZEN™ 5 8500G, SOCKET AM5, 3.5-5.0GHZ (6C/12T), 6MB L2 + 1
+      <- 400059 (1 img)  Ryzen™ 5 8500G, Socket AM5, 3.5-5.0GHz (6C/12T), 6MB L2 + 16MB L3 Cache
+369181  [RYZEN78700F]  Procesor AMD Ryzen 7 8700F, (4.1-5.0GHz, 8C/16T, L2 8MB, L3 16MB, 4nm, 65W), S
+      <- 374209 (1 img) Procesor AMD AMD Ryzen™ 7 8700F, Socket AM5, 4.1-5.0GHz (8C/16T), 8MB L2
+369184  [I314100]  Procesor INTEL CORE™ I3-14100, TRAY, S1700, 3.5-4.7GHz, 4C (4P+0Е) / 8T, 12MB 
+      <- 348643 (2 img) Procesor INTEL ® Core™ i3-14100, S1700, 3.5-4.7GHz, 4C (4P+0Е) / 8T, 12M
+369233  [RYZEN79700X]  Procesor AMD RYZEN™ 7 9700X, SOCKET AM5, 3.8-5.5GHZ (8C/16T), 8MB L2 + 32MB L3
+      <- 367299 (3 img) Procesor AMD CPU AMD Ryzen 7 9700X 8-Core, 16 Threads, 3.8-5.5GHz, Unloc
+374210  [RYZEN99900X]  Procesor AMD RYZEN™ 9 9900X, SOCKET AM5, 4.4-5.6GHZ (12C/24T), 12MB L2 + 64MB 
+      <- 376120 (2 img) Procesor AMD AMD Ryzen™ 9 9900X, Socket AM5, 4.4-5.6GHz (12C/24T), 12MB 
+378185  [COREULTRA5225]  Procesor INTEL CPU  CORE ULTRA 5 225 3.3-4.9GHZ (6P+4E/10T,22MB, S1851, 3NM, I
+      <- 377097 (5 img) Procesor INTEL CPU  CORE ULTRA 5 225 3.3GHZ (6P+0E/6T, 20MB, S1851, 3NM 
+378186  [COREULTRA5225F]  Procesor INTEL CPU  CORE ULTRA 5 225F 3.3-4.9GHZ (6P+4E/10T,22MB, S1851, 3NM, 
+      <- 377101 (5 img) Procesor INTEL CPU  CORE ULTRA 5 225F 3.3GHZ (6P+0E/6T, 20MB, S1851, 3NM
+382095  [RYZEN99900X3D]  Procesor AMD RYZEN 9 9900X3D, Tray (4.4-5.5 GHz/128 MB/AM5)
+      <- 380198 (1 img) Procesor AMD RYZEN 9 9900X3D WOF
+382422  [RYZEN99950X]  Procesor AMD RYZEN 9 9950X, Tray (4.3-5.7GHz/64 MB/AM5)
+      <- 369179 (1 img) Procesor AMD Ryzen™ 9 9950X, Retail, AM5, 4.3-5.7GHz (16C/32T), 16MB L2 
+391961  [I514600K]  Procesor INTEL Core i5-14600K 2.6-5.3GHz 14 Cores 20-Threads (LGA1700, 2.6-5.3
+      <- 345797 (2 img) Procesor INTEL Core i5-14600K 2.6-5.3GHz 14 Cores 20-Threads (LGA1700, 2
+395948  [RYZEN79850X3D]  Procesor AMD Ryzen 7 9850X3D (4.7-5.6GHz, 8C/16T, L2 8MB, L3 96MB, 5nm, 120W),
+      <- 400622 (2 img) CPU  Ryzen 7 9850X3D 8-Core, 16 Threads, 4.7-5.6GHz, Unlocked,  Radeon G
+400517  [COREULTRA5250K]  Procesor INTEL CPU Intel Core Ultra 5 250K Plus 3.3-5.3GHz (6P+12E/18T,30MB, S
+      <- 401730 (1 img) ® Core™ Ultra 5 250K Plus, S1851, 3.3-5.3GHz, 18C (6P+12Е) / 18T, 30MB L
+400518  [COREULTRA7270K]  CPU  Core Ultra 7 270K Plus 3.2-5.5GHz (8P+16E/24T,40MB,S1851, 3nm, Integ. Gra
+      <- 400624 (2 img) CPU  Core Ultra 7 270K Plus 3.7-5.5GHz 24 Cores 24-Threads (LGA1851, 3.7
+
+FARA GEAMAN (12):
+  279159 [I712700K] Procesor INTEL CORE I7-12700K TRAY, LGA 1700, 3.6-5.0GHz,  25MB,  10nm,  125W. Intel UHD
+  335686 [RYZEN57500F] Procesor AMD RYZEN 5 7500F,TRAY, AM5, (3.7-5.0GHz, 6C/12T, L2 6MB, L3 32MB, 5nm, 65W)
+  367016 [RYZEN59600X] Procesor AMD RYZEN 5 9600X, TRAY, AM5, (3.9-5.4GHz, 6C/12T, L2 6MB, L3 32MB, 5nm, 65W)
+  369178 [RYZEN58400F] Procesor AMD AMD Ryzen™ 5 8400F, Socket AM5, 4.2-4.7GHz (6C/12T), 6MB L2 + 16MB L3 Cache
+  369182 [RYZEN55600GT] Procesor AMD RYZEN™ 5 5600GT, SOCKET AM4, 3.6-4.6GHZ (6C/12T), 3MB L2 + 16MB L3 CACHE, I
+  373186 [COREULTRA5245KF] Procesor INTEL CORE™ ULTRA 5 245KF, TRAY, S1851, 3.6-5.2GHz, 14C (6P+8Е) / 14T, 24MB L3 
+  373189 [COREULTRA7265K] Procesor INTEL CORE™ ULTRA 7 265K TRAY 3.3-5.5GHZ, TRAY, LGA 1851, Integrated ® Graphics
+  377069 [COREULTRA9285K] Procesor INTEL CPU Intel Core Ultra 9 285K 3.2-5.7GHz (8P+16E/24T,36MB,S1851, 10nm, Inte
+  379900 [COREULTRA9285] Procesor INTEL CPU CORE ULTRA 9 285 2.5-5.6GHZ (8P+16E/24T,36MB,S1851, 10NM, INTEG. GRAP
+  392639 [RYZEN5PRO8500G] Procesor AMD Ryzen 5 PRO 8500G (3.5-5.0GHz, 6C/12T, L2 6MB, L3 16MB, 4nm, 65W), Socket A
+  399971 [RYZEN57400] CPU  Ryzen 5 7400 6-Core, 12 Threads, 3.3-4.3GHz, Unlocked,  Radeon Graphics, 6MB L2 Cac
+  402317 [COREULTRA7265K] Procesor INTEL CPU Intel Core Ultra 7 265K 3.3-5.5GHz 20 Cores 20-Threads (LGA1851, 3.3-

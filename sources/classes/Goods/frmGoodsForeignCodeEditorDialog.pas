@@ -11,6 +11,14 @@ uses
   cxDBVGrid, cxInplaceContainer, dxBarBuiltInMenu, cxPC, cxLabel, cxDBLabel, cxClasses,
   dxUIAClasses, dxCoreGraphics;
 
+const
+  // Parametrii vinzarii in rate cu dobinda 0%. Folositi doar pentru afisaj:
+  // pretul insusi se calculeaza in baza. Trebuie sa ramina sincronizati cu
+  // DB Model\goods_foreign_price_credit0.sql (coloana calculata PRICE_CREDIT0
+  // si procedura GET_GOODS_PRICE_CREDIT0).
+  cCredit0Months = 6;
+  cCredit0CostMarkup = 1.16;
+
 type
   TfrmGoodsForeignCodeEditorDlg = class(TSWNMasteredFormClass)
     dtDialogTitle: TDialogTitle;
@@ -86,6 +94,9 @@ type
     IBCTrLocal: TIBCTransaction;
     Label16: TLabel;
     teURL: TcxDBTextEdit;
+    Label17: TLabel;
+    cePriceCredit0: TcxDBCalcEdit;
+    lbCredit0Info: TcxLabel;
     procedure FormCreate(Sender: TObject);
     procedure beFirmaPropertiesButtonClick(Sender: TObject; AButtonIndex: Integer);
     procedure bbGenerateCodeClick(Sender: TObject);
@@ -123,6 +134,7 @@ type
   protected    { protected declarations }
     procedure BindingDataSource; override;
     procedure CalculateMargins;
+    procedure UpdateCredit0Info;
     procedure Prepare; override;
     function IsFormDataPosted: Boolean; override;
     procedure WhenCancelForm; override;
@@ -320,6 +332,7 @@ begin
 
   ceMMargin5.DataBinding.DataSource := fMasterDataSource;
   ceMMargin6.DataBinding.DataSource := fMasterDataSource;
+  cePriceCredit0.DataBinding.DataSource := fMasterDataSource;
 
   teURL.DataBinding.DataSource := fMasterDataSource;
 
@@ -372,6 +385,32 @@ end;
 procedure TfrmGoodsForeignCodeEditorDlg.cePrice5Exit(Sender: TObject);
 begin
   CalculateMargins;
+end;
+
+// PRICE_CREDIT0 este coloana calculata in baza:
+//   max(PRICE1, PRICE7 in MDL * cCredit0CostMarkup).
+// Aici doar se afiseaza din ce se compune si cit iese rata lunara.
+// Formula: DB Model\goods_foreign_price_credit0.sql.
+procedure TfrmGoodsForeignCodeEditorDlg.UpdateCredit0Info;
+var
+  Credit0: Double;
+  Price1: Double;
+  Price7Lei: Double;
+begin
+  Credit0 := fMasterDataSet.FieldByName('PRICE_CREDIT0').AsFloat;
+  Price1 := fMasterDataSet.FieldByName('PRICE1').AsFloat;
+  Price7Lei := fMasterDataSet.FieldByName('PRICE7_LEI').AsFloat;
+
+  if Credit0 <= 0 then begin
+    lbCredit0Info.Caption := 'fara pret - fara rate 0%';
+    Exit;
+  end;
+
+  if Price1 >= Round(Price7Lei * cCredit0CostMarkup) then
+    lbCredit0Info.Caption := Format('= Web; rata %n MDL/luna', [Credit0 / cCredit0Months])
+  else
+    lbCredit0Info.Caption := Format('= Indicativ +16%% (Web %n); rata %n MDL/luna',
+      [Price1, Credit0 / cCredit0Months]);
 end;
 
 function TfrmGoodsForeignCodeEditorDlg.IsFormDataPosted: Boolean;
@@ -505,6 +544,7 @@ begin
   IBCQueryCurrency.Open;
 
   CalculateMargins;
+  UpdateCredit0Info;
 
 end;
 

@@ -1,0 +1,1 @@
+SWNService.exe /uninstall

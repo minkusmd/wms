@@ -407,7 +407,7 @@ inherited frame10NakladnieRN: Tframe10NakladnieRN
       Font.Style = []
       ParentFont = False
       TabOrder = 0
-      Properties.ActivePage = cxTabSheet1
+      Properties.ActivePage = tbsDelivery
       Properties.CustomButtons.Buttons = <>
       Properties.Images = dmAdditions.cxImageDocs
       Properties.TabPosition = tpBottom
@@ -842,10 +842,6 @@ inherited frame10NakladnieRN: Tframe10NakladnieRN
         Margins.Right = 2
         Margins.Bottom = 2
         Caption = 'cashback (&3)'
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object cxGrid1: TcxGrid
           Left = 0
           Top = 0
@@ -1419,17 +1415,17 @@ inherited frame10NakladnieRN: Tframe10NakladnieRN
       WholeRow = False
     end
     object bbActionPKO: TdxBarButton
-      Caption = 'Ordin de incasare in numerar...'#13#10
+      Caption = 'Incasare numerar'
       Category = 0
-      Hint = 'Ordin de incasare in numerar'#13#10
+      Hint = 'Incasare numerar'
       Visible = ivAlways
       ShortCut = 32841
       OnClick = bbActionPKOClick
     end
     object bbActionRKO: TdxBarButton
-      Caption = 'Ordin de plata in numerar'
+      Caption = 'Plata numerar'
       Category = 0
-      Hint = 'Ordin de plata in numerar'
+      Hint = 'Plata numerar'
       Visible = ivAlways
       ShortCut = 32847
       OnClick = bbActionRKOClick
@@ -1770,10 +1766,6 @@ inherited frame10NakladnieRN: Tframe10NakladnieRN
         end
         item
           Visible = True
-          ItemName = 'bbActionRKO'
-        end
-        item
-          Visible = True
           ItemName = 'bbBankIn'
         end
         item
@@ -1788,6 +1780,11 @@ inherited frame10NakladnieRN: Tframe10NakladnieRN
         item
           Visible = True
           ItemName = 'bbActionSNS'
+        end
+        item
+          BeginGroup = True
+          Visible = True
+          ItemName = 'bbActionRKO'
         end
         item
           BeginGroup = True
@@ -1847,9 +1844,9 @@ inherited frame10NakladnieRN: Tframe10NakladnieRN
       OnClick = bbApplyCashbackClick
     end
     object bbBankIn: TdxBarButton
-      Caption = 'Ordin de incasare bancar'
+      Caption = 'Incasare cu Card bancar, MIA'
       Category = 0
-      Hint = 'Ordin de incasare bancar'
+      Hint = 'Incasare cu Card bancar, MIA'
       Visible = ivAlways
       OnClick = bbBankInClick
     end

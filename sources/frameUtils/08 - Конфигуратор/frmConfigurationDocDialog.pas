@@ -82,6 +82,7 @@ type
     lcbCURRENCY: TcxDBLookupComboBox;
     cbFLG_FURNITURE: TcxDBCheckBox;
     lcbDocumentState: TcxDBLookupComboBox;
+    Panel1: TPanel;
     procedure beContractKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure lcbCURRENCYPropertiesEditValueChanged(Sender: TObject);

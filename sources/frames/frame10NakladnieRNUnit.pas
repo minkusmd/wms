@@ -486,6 +486,7 @@ end;
 
 procedure Tframe10NakladnieRN.bbActionRKOClick(Sender: TObject);
 begin
+
   if CheckIfDocumentisLocked then
     Exit;
   DoActionRashodniiKasoviiOrder;
@@ -2479,6 +2480,7 @@ begin
 
      // Menu: Отменить проводку
   fSYS_OtmenitiOtgruzku := SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_НАКЛАДНЫЕ_РНОУ_Отменить_отгрузку);
+  bbActionRKO.Enabled := fSYS_OtmenitiOtgruzku;
 
   if (not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_VINZARE_R_V_Modifica_utilizatorul_in_document)) then
     bbChangeDocUser.Visible := ivNever;

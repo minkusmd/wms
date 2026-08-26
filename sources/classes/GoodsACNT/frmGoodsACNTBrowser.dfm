@@ -13,10 +13,8 @@ object frmGoodsACNTDlg: TfrmGoodsACNTDlg
   Font.Height = -12
   Font.Name = 'Segoe UI'
   Font.Style = []
-  OldCreateOrder = False
   Position = poOwnerFormCenter
   OnCreate = FormCreate
-  PixelsPerInch = 96
   TextHeight = 15
   object dtDialogTitle: TDialogTitle
     Left = 0
@@ -75,7 +73,6 @@ object frmGoodsACNTDlg: TfrmGoodsACNTDlg
       object cxGridGoodsAcntTable: TcxGridDBTableView
         PopupMenu = dxBarPopupMenu
         OnKeyDown = cxGridGoodsAcntTableKeyUp
-        Navigator.Buttons.CustomButtons = <>
         Navigator.Buttons.First.Visible = True
         Navigator.Buttons.PriorPage.Visible = True
         Navigator.Buttons.Prior.Visible = True
@@ -92,17 +89,14 @@ object frmGoodsACNTDlg: TfrmGoodsACNTDlg
         Navigator.Buttons.SaveBookmark.Visible = True
         Navigator.Buttons.GotoBookmark.Visible = True
         Navigator.Buttons.Filter.Visible = True
-        ScrollbarAnnotations.CustomAnnotations = <>
         OnCellDblClick = cxGridGoodsAcntTableCellDblClick
         OnCustomDrawCell = cxGridGoodsAcntTableCustomDrawCell
         OnFocusedRecordChanged = cxGridGoodsAcntTableFocusedRecordChanged
+        OnSelectionChanged = cxGridGoodsAcntTableSelectionChanged
         DataController.DataModeController.GridMode = True
         DataController.DataModeController.GridModeBufferCount = 50
         DataController.DataSource = IBCDataSourceGoodsAcnt
         DataController.KeyFieldNames = 'GOODS_ACNT_ID'
-        DataController.Summary.DefaultGroupSummaryItems = <>
-        DataController.Summary.FooterSummaryItems = <>
-        DataController.Summary.SummaryGroups = <>
         OptionsBehavior.IncSearch = True
         OptionsBehavior.ImmediateEditor = False
         OptionsCustomize.ColumnFiltering = False
@@ -111,6 +105,7 @@ object frmGoodsACNTDlg: TfrmGoodsACNTDlg
         OptionsData.Deleting = False
         OptionsData.Editing = False
         OptionsData.Inserting = False
+        OptionsSelection.MultiSelect = True
         OptionsSelection.InvertSelect = False
         OptionsView.NoDataToDisplayInfoText = '<'#1053#1077#1090' '#1079#1072#1087#1080#1089#1077#1081'>'
         OptionsView.ScrollBars = ssVertical
@@ -223,6 +218,24 @@ object frmGoodsACNTDlg: TfrmGoodsACNTDlg
           MinWidth = 80
           Options.HorzSizing = False
           Width = 80
+        end
+        object cxGridGoodsAcnt_GOODS_TYPE_TITLE: TcxGridDBColumn
+          Caption = 'Categorie produs'
+          DataBinding.FieldName = 'GOODS_TYPE_TITLE'
+          HeaderAlignmentHorz = taCenter
+          MinWidth = 120
+          Options.Editing = False
+          Width = 180
+        end
+        object cxGridGoodsAcnt_GOODS_TYPEID: TcxGridDBColumn
+          Caption = 'Cod categorie'
+          DataBinding.FieldName = 'GOODS_TYPEID'
+          Visible = False
+          HeaderAlignmentHorz = taCenter
+          MinWidth = 60
+          Options.Editing = False
+          VisibleForCustomization = False
+          Width = 60
         end
       end
       object cxGridGoodsAcntLevel: TcxGridLevel
@@ -466,6 +479,15 @@ object frmGoodsACNTDlg: TfrmGoodsACNTDlg
         item
           BeginGroup = True
           Visible = True
+          ItemName = 'bbSetGoodsType'
+        end
+        item
+          Visible = True
+          ItemName = 'bbMergeGoodsAcnt'
+        end
+        item
+          BeginGroup = True
+          Visible = True
           ItemName = 'dxBarButton1'
         end
         item
@@ -511,6 +533,21 @@ object frmGoodsACNTDlg: TfrmGoodsACNTDlg
       Visible = ivAlways
       OnClick = bbChangeParentClick
     end
+    object bbMergeGoodsAcnt: TdxBarButton
+      Caption = 'Uneste denumirile selectate...'
+      Category = 1
+      Hint = 'Uneste inregistrarile selectate intr-o singura denumire'
+      Visible = ivAlways
+      OnClick = bbMergeGoodsAcntClick
+    end
+    object bbSetGoodsType: TdxBarButton
+      Caption = 'Atribuie categoria produsului...'
+      Category = 1
+      Hint = 'Atribuie categoria produsului pentru inregistrarile selectate'
+      Visible = ivAlways
+      ShortCut = 16468
+      OnClick = bbSetGoodsTypeClick
+    end
     object bbSortFolders: TdxBarButton
       Caption = 'Sorteaza mapele'
       Category = 1
@@ -540,7 +577,8 @@ object frmGoodsACNTDlg: TfrmGoodsACNTDlg
       '  NAMEACNT,'
       '  PRICE_ACNT,'
       '  PRCODE,'
-      '  PERCENT_BOUNDS'
+      '  PERCENT_BOUNDS,'
+      '  GOODS_TYPEID'
       ' )'
       'VALUES'
       ' ('
@@ -550,7 +588,8 @@ object frmGoodsACNTDlg: TfrmGoodsACNTDlg
       '  :NAMEACNT,'
       '  :PRICE_ACNT,'
       '  :PRCODE,'
-      '  :PERCENT_BOUNDS '
+      '  :PERCENT_BOUNDS, '
+      '  :GOODS_TYPEID'
       ' )')
     SQLDelete.Strings = (
       'DELETE FROM TS_GOODS_ACNT'
@@ -566,7 +605,8 @@ object frmGoodsACNTDlg: TfrmGoodsACNTDlg
       ' NAMEACNT = :NAMEACNT,'
       ' PRICE_ACNT = :PRICE_ACNT,'
       ' PRCODE = :PRCODE,'
-      ' PERCENT_BOUNDS = :PERCENT_BOUNDS'
+      ' PERCENT_BOUNDS = :PERCENT_BOUNDS,'
+      ' GOODS_TYPEID = :GOODS_TYPEID'
       'WHERE'
       ' GOODS_ACNT_ID = :Old_GOODS_ACNT_ID')
     SQLRefresh.Strings = (
@@ -581,7 +621,11 @@ object frmGoodsACNTDlg: TfrmGoodsACNTDlg
         'CNT.GOODS_ACNT_ID) AND (DT=:DT)),0)) QTY_ACCOUNT,'
       ' PRICE_ACNT,'
       ' PRCODE,'
-      ' PERCENT_BOUNDS'
+      ' PERCENT_BOUNDS,'
+      ' GOODS_TYPEID,'
+      
+        ' (SELECT GT.TITLE FROM TS_GOODS_TYPE GT WHERE GT.GOODSTYPEID=TS_' +
+        'GOODS_ACNT.GOODS_TYPEID) GOODS_TYPE_TITLE'
       'FROM '
       ' TS_GOODS_ACNT'
       'WHERE'
@@ -618,6 +662,10 @@ object frmGoodsACNTDlg: TfrmGoodsACNTDlg
       '                ), 0)'
       ' ) QTY_STOCK,'
       ' A.PERCENT_BOUNDS,'
+      ' A.GOODS_TYPEID,'
+      
+        ' (SELECT GT.TITLE FROM TS_GOODS_TYPE GT WHERE GT.GOODSTYPEID=A.G' +
+        'OODS_TYPEID) GOODS_TYPE_TITLE,'
       
         ' IIF(A2.PERCENT_BOUNDS IS NOT NULL AND A2.PERCENT_BOUNDS>0 AND A' +
         '.PARENTID>0 AND A.FLG_FOLDER=0, A.PRICE_ACNT-ROUND(A.PRICE_ACNT*' +
@@ -674,6 +722,15 @@ object frmGoodsACNTDlg: TfrmGoodsACNTDlg
         BeginGroup = True
         Visible = True
         ItemName = 'bbChangeParent'
+      end
+      item
+        BeginGroup = True
+        Visible = True
+        ItemName = 'bbSetGoodsType'
+      end
+      item
+        Visible = True
+        ItemName = 'bbMergeGoodsAcnt'
       end>
     UseOwnFont = False
     Left = 160

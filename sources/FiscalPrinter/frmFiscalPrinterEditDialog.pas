@@ -24,6 +24,13 @@ type
       edSERIAL_NUMBER: TcxDBTextEdit;
       lcbFIRMA_ID: TcxDBLookupComboBox;
       lcbWS_ID: TcxDBLookupComboBox;
+      Label5: TLabel;
+      edSERVER_ADDRESS: TcxDBTextEdit;
+      Label6: TLabel;
+      edCOM_PORT: TcxDBTextEdit;
+      Label7: TLabel;
+      edBAUD_RATE: TcxDBTextEdit;
+      Label8: TLabel;
       IBCQueryWS: TIBCQuery;
       IBCDataSourceWS: TIBCDataSource;
       procedure FormDestroy(Sender: TObject);
@@ -68,6 +75,15 @@ begin
 //     if fMasterDataSet.FieldByName('WS_ID').IsNull or (fMasterDataSet.FieldByName('WS_ID').AsInteger<=0)
 //       then AddErrorToStr(Error,'Workstation!');
 
+   // MCC din retea: portul apartine altui calculator, deci trebuie indicat explicit
+   if Trim(fMasterDataSet.FieldByName('SERVER_ADDRESS').AsString) <> '' then
+   begin
+      if Trim(fMasterDataSet.FieldByName('COM_PORT').AsString) = '' then
+         AddErrorToStr(Error, 'Port COM (obligatoriu pentru MCC din retea)!');
+      if fMasterDataSet.FieldByName('BAUD_RATE').AsInteger <= 0 then
+         AddErrorToStr(Error, 'Viteza portului (obligatorie pentru MCC din retea)!');
+   end;
+
    if Error = '' then
       Result := True
    else
@@ -86,6 +102,9 @@ begin
    mmDESCRIPTION.DataBinding.DataSource := fMasterDataSource;
    lcbFIRMA_ID.DataBinding.DataSource := fMasterDataSource;
    lcbWS_ID.DataBinding.DataSource := fMasterDataSource;
+   edSERVER_ADDRESS.DataBinding.DataSource := fMasterDataSource;
+   edCOM_PORT.DataBinding.DataSource := fMasterDataSource;
+   edBAUD_RATE.DataBinding.DataSource := fMasterDataSource;
 end;
 
 function TfrmFiscalPrinterEditDlg.IsFormDataPosted: Boolean;

@@ -47,7 +47,7 @@ object frmGoodsEditorDialog: TfrmGoodsEditorDialog
   object cxPageControl: TPageControl
     AlignWithMargins = True
     Left = 8
-    Top = 209
+    Top = 240
     Width = 954
     Height = 439
     Margins.Left = 8
@@ -59,6 +59,7 @@ object frmGoodsEditorDialog: TfrmGoodsEditorDialog
     TabOrder = 2
     TabStop = False
     OnChange = cxPageControlChange
+    ExplicitTop = 209
     object tbsGeneral: TTabSheet
       Caption = '(&1) Date generale'
       Highlighted = True
@@ -413,12 +414,7 @@ object frmGoodsEditorDialog: TfrmGoodsEditorDialog
             Align = alClient
             TabOrder = 0
             object ridTable: TcxGridDBTableView
-              Navigator.Buttons.CustomButtons = <>
-              ScrollbarAnnotations.CustomAnnotations = <>
               DataController.DataSource = IBCDataSourcePriceHistory
-              DataController.Summary.DefaultGroupSummaryItems = <>
-              DataController.Summary.FooterSummaryItems = <>
-              DataController.Summary.SummaryGroups = <>
               OptionsBehavior.ImmediateEditor = False
               OptionsCustomize.ColumnFiltering = False
               OptionsCustomize.ColumnSorting = False
@@ -436,7 +432,6 @@ object frmGoodsEditorDialog: TfrmGoodsEditorDialog
               object cxGridPriceHistory_DATA: TcxGridDBColumn
                 Caption = 'Data'
                 DataBinding.FieldName = 'DATA'
-                DataBinding.IsNullValueType = True
                 MinWidth = 110
                 Options.HorzSizing = False
                 Styles.Content = dmAdditions.cxStyle_GirdContentInactive
@@ -445,7 +440,6 @@ object frmGoodsEditorDialog: TfrmGoodsEditorDialog
               object cxGridPriceHistory_CURRENCY_NAME: TcxGridDBColumn
                 Caption = 'Valuta'
                 DataBinding.FieldName = 'CURRENCY_NAME'
-                DataBinding.IsNullValueType = True
                 PropertiesClassName = 'TcxLabelProperties'
                 Properties.Alignment.Horz = taCenter
                 HeaderAlignmentHorz = taCenter
@@ -457,7 +451,6 @@ object frmGoodsEditorDialog: TfrmGoodsEditorDialog
               object cxGridPriceHistory_PRICE0: TcxGridDBColumn
                 Caption = 'Pret 0'
                 DataBinding.FieldName = 'PRICE0'
-                DataBinding.IsNullValueType = True
                 PropertiesClassName = 'TcxCurrencyEditProperties'
                 Properties.DisplayFormat = '0.00'
                 HeaderAlignmentHorz = taCenter
@@ -468,7 +461,6 @@ object frmGoodsEditorDialog: TfrmGoodsEditorDialog
               object cxGridPriceHistory_PRICE1: TcxGridDBColumn
                 Caption = 'Pret 1'
                 DataBinding.FieldName = 'PRICE1'
-                DataBinding.IsNullValueType = True
                 PropertiesClassName = 'TcxCurrencyEditProperties'
                 Properties.DisplayFormat = '0.00'
                 HeaderAlignmentHorz = taCenter
@@ -479,7 +471,6 @@ object frmGoodsEditorDialog: TfrmGoodsEditorDialog
               object cxGridPriceHistory_PRICE2: TcxGridDBColumn
                 Caption = 'Pret 2'
                 DataBinding.FieldName = 'PRICE2'
-                DataBinding.IsNullValueType = True
                 PropertiesClassName = 'TcxCurrencyEditProperties'
                 Properties.DisplayFormat = '0.00'
                 HeaderAlignmentHorz = taCenter
@@ -490,7 +481,6 @@ object frmGoodsEditorDialog: TfrmGoodsEditorDialog
               object cxGridPriceHistory_PRICE3: TcxGridDBColumn
                 Caption = 'Pret 3'
                 DataBinding.FieldName = 'PRICE3'
-                DataBinding.IsNullValueType = True
                 PropertiesClassName = 'TcxCurrencyEditProperties'
                 Properties.DisplayFormat = '0.00'
                 HeaderAlignmentHorz = taCenter
@@ -501,7 +491,6 @@ object frmGoodsEditorDialog: TfrmGoodsEditorDialog
               object cxGridPriceHistory_PRICE4: TcxGridDBColumn
                 Caption = 'Pret 4'
                 DataBinding.FieldName = 'PRICE4'
-                DataBinding.IsNullValueType = True
                 PropertiesClassName = 'TcxCurrencyEditProperties'
                 Properties.DisplayFormat = '0.00'
                 HeaderAlignmentHorz = taCenter
@@ -512,7 +501,6 @@ object frmGoodsEditorDialog: TfrmGoodsEditorDialog
               object cxGridPriceHistory_PRICE5: TcxGridDBColumn
                 Caption = 'Pret 5'
                 DataBinding.FieldName = 'PRICE5'
-                DataBinding.IsNullValueType = True
                 PropertiesClassName = 'TcxCurrencyEditProperties'
                 Properties.DisplayFormat = '0.00'
                 HeaderAlignmentHorz = taCenter
@@ -523,7 +511,6 @@ object frmGoodsEditorDialog: TfrmGoodsEditorDialog
               object cxGridPriceHistory_PRICE6: TcxGridDBColumn
                 Caption = 'Pret 6'
                 DataBinding.FieldName = 'PRICE6'
-                DataBinding.IsNullValueType = True
                 PropertiesClassName = 'TcxCurrencyEditProperties'
                 Properties.DisplayFormat = '0.00'
                 MinWidth = 46
@@ -533,7 +520,6 @@ object frmGoodsEditorDialog: TfrmGoodsEditorDialog
               object cxGridPriceHistory_PRICE7: TcxGridDBColumn
                 Caption = 'Pret 7'
                 DataBinding.FieldName = 'PRICE7'
-                DataBinding.IsNullValueType = True
                 PropertiesClassName = 'TcxCurrencyEditProperties'
                 Properties.DisplayFormat = '0.00'
                 MinWidth = 46
@@ -543,7 +529,6 @@ object frmGoodsEditorDialog: TfrmGoodsEditorDialog
               object cxGridPriceHistory_MODIFIED_BY_NAME: TcxGridDBColumn
                 Caption = 'Modificat de'
                 DataBinding.FieldName = 'MODIFIED_BY_NAME'
-                DataBinding.IsNullValueType = True
                 MinWidth = 50
                 Width = 100
               end
@@ -607,12 +592,7 @@ object frmGoodsEditorDialog: TfrmGoodsEditorDialog
         Align = alClient
         TabOrder = 0
         object cxGrid1DBTableView1: TcxGridDBTableView
-          Navigator.Buttons.CustomButtons = <>
-          ScrollbarAnnotations.CustomAnnotations = <>
           DataController.DataSource = IBCDataSourceRelatedGoods
-          DataController.Summary.DefaultGroupSummaryItems = <>
-          DataController.Summary.FooterSummaryItems = <>
-          DataController.Summary.SummaryGroups = <>
           OptionsBehavior.IncSearch = True
           OptionsBehavior.ImmediateEditor = False
           OptionsData.CancelOnExit = False
@@ -626,7 +606,6 @@ object frmGoodsEditorDialog: TfrmGoodsEditorDialog
           object cxGrid1DBTableView1_GOODSID: TcxGridDBColumn
             Caption = 'Cod'
             DataBinding.FieldName = 'RELATEDGOODSID'
-            DataBinding.IsNullValueType = True
             HeaderAlignmentHorz = taCenter
             MinWidth = 64
             Options.HorzSizing = False
@@ -634,7 +613,6 @@ object frmGoodsEditorDialog: TfrmGoodsEditorDialog
           object cxGrid1DBTableView1_WEBGOODSTYPE: TcxGridDBColumn
             Caption = 'Tip produs'
             DataBinding.FieldName = 'WEBGOODSTYPE_TITLE'
-            DataBinding.IsNullValueType = True
             MinWidth = 201
             Options.HorzSizing = False
             Width = 201
@@ -642,14 +620,12 @@ object frmGoodsEditorDialog: TfrmGoodsEditorDialog
           object cxGrid1DBTableView1_GOODS_NAME: TcxGridDBColumn
             Caption = 'Produs'
             DataBinding.FieldName = 'TITLE'
-            DataBinding.IsNullValueType = True
             HeaderAlignmentHorz = taCenter
             Width = 547
           end
           object cxGrid1DBTableView1_PRICE_MDL: TcxGridDBColumn
             Caption = 'Pret'
             DataBinding.FieldName = 'PRICE1_LEI'
-            DataBinding.IsNullValueType = True
             PropertiesClassName = 'TcxCurrencyEditProperties'
             Properties.DisplayFormat = ',0.00;-,0.00'
             Properties.UseThousandSeparator = True
@@ -661,7 +637,6 @@ object frmGoodsEditorDialog: TfrmGoodsEditorDialog
           object cxGrid1DBTableView1_FLG_IN_PRICE: TcxGridDBColumn
             Caption = 'P'
             DataBinding.FieldName = 'FLG_IN_PRICE'
-            DataBinding.IsNullValueType = True
             PropertiesClassName = 'TcxCheckBoxProperties'
             Properties.ValueChecked = '1'
             Properties.ValueGrayed = 0
@@ -721,12 +696,7 @@ object frmGoodsEditorDialog: TfrmGoodsEditorDialog
         Height = 286
         TabOrder = 0
         object cxGridDBTableViewDictionary: TcxGridDBTableView
-          Navigator.Buttons.CustomButtons = <>
-          ScrollbarAnnotations.CustomAnnotations = <>
           DataController.DataSource = IBCDataSourceGoodsDictionary
-          DataController.Summary.DefaultGroupSummaryItems = <>
-          DataController.Summary.FooterSummaryItems = <>
-          DataController.Summary.SummaryGroups = <>
           OptionsBehavior.IncSearch = True
           OptionsData.CancelOnExit = False
           OptionsData.Deleting = False
@@ -736,28 +706,15 @@ object frmGoodsEditorDialog: TfrmGoodsEditorDialog
           OptionsView.GroupByBox = False
           object cxGridDBTableViewDictionary_WORD: TcxGridDBColumn
             DataBinding.FieldName = 'WORD'
-            DataBinding.IsNullValueType = True
             Width = 842
           end
           object cxGridDBTableViewDictionary_PRIORITY: TcxGridDBColumn
             DataBinding.FieldName = 'PRIORITY'
-            DataBinding.IsNullValueType = True
           end
         end
         object cxGrid2Level1: TcxGridLevel
           GridView = cxGridDBTableViewDictionary
         end
-      end
-    end
-    object tbsAttributes: TTabSheet
-      Caption = '(&6) Atribute'
-      inline frameGoodsAttributes1: TframeGoodsAttributes
-        Left = 0
-        Top = 0
-        Width = 946
-        Height = 460
-        Align = alClient
-        TabOrder = 0
       end
     end
   end
@@ -766,7 +723,7 @@ object frmGoodsEditorDialog: TfrmGoodsEditorDialog
     Left = 8
     Top = 72
     Width = 954
-    Height = 129
+    Height = 160
     Margins.Left = 8
     Margins.Top = 8
     Margins.Right = 8
@@ -777,9 +734,10 @@ object frmGoodsEditorDialog: TfrmGoodsEditorDialog
     Color = clWindow
     ParentBackground = False
     TabOrder = 0
+    ExplicitLeft = 13
     object Label4: TLabel
-      Left = 12
-      Top = 99
+      Left = 13
+      Top = 103
       Width = 127
       Height = 15
       Caption = 'Denumire pentru facturi'
@@ -797,7 +755,7 @@ object frmGoodsEditorDialog: TfrmGoodsEditorDialog
       Width = 926
     end
     object beGoodsACNT: TcxButtonEdit
-      Left = 144
+      Left = 156
       Top = 95
       TabStop = False
       ParentFont = False
@@ -851,7 +809,27 @@ object frmGoodsEditorDialog: TfrmGoodsEditorDialog
       Properties.ViewStyle = vsHideCursor
       Properties.OnButtonClick = beGoodsACNTPropertiesButtonClick
       TabOrder = 1
-      Width = 794
+      Width = 783
+    end
+    object lcbGoodsAcnt: TcxDBLookupComboBox
+      Left = 156
+      Top = 127
+      DataBinding.DataField = 'GOODS_ACNT_ID'
+      Properties.KeyFieldNames = 'GOODS_ACNT_ID'
+      Properties.ListColumns = <
+        item
+          FieldName = 'GOODS_ACNT_ID'
+        end
+        item
+          FieldName = 'NAMEACNT'
+        end
+        item
+          FieldName = 'PRICE_ACNT'
+        end>
+      Properties.ListFieldIndex = 1
+      Properties.ListSource = IBCDataSourceGOODS_ACNT
+      TabOrder = 2
+      Width = 783
     end
   end
   object dtDialogTitle: TDialogTitle
@@ -942,8 +920,8 @@ object frmGoodsEditorDialog: TfrmGoodsEditorDialog
     ImageOptions.Images = dmAdditions.cxImageList_SWN
     PopupMenuLinks = <>
     UseSystemFont = False
-    Left = 307
-    Top = 29
+    Left = 303
+    Top = 9
     PixelsPerInch = 96
     object dxBarManagerGoodsBar1: TdxBar
       AllowClose = False
@@ -1295,5 +1273,24 @@ object frmGoodsEditorDialog: TfrmGoodsEditorDialog
     DataSet = IBCQueryGoodsDictionary
     Left = 656
     Top = 280
+  end
+  object IBCQueryGOODS_ACNT: TIBCQuery
+    Connection = dmDB.IBCConnection
+    SQL.Strings = (
+      'select * from TS_goods_acnt'
+      'where goods_TYPEID = :GOODS_TYPEID and flg_FOLDER=0')
+    Left = 52
+    Top = 488
+    ParamData = <
+      item
+        DataType = ftUnknown
+        Name = 'GOODS_TYPEID'
+        Value = nil
+      end>
+  end
+  object IBCDataSourceGOODS_ACNT: TIBCDataSource
+    DataSet = IBCQueryGOODS_ACNT
+    Left = 52
+    Top = 428
   end
 end

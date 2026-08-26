@@ -29,6 +29,7 @@ type
     chkFeed: TcxDBCheckBox;
     Label8: TLabel;
     btnAttributes: TcxButton;
+    Panel1: TPanel;
     procedure beGoodsFolderPropertiesButtonClick(Sender: TObject;
       AButtonIndex: Integer);
     procedure btnAttributesClick(Sender: TObject);
@@ -55,7 +56,7 @@ implementation
 
 uses
   SWNUtils, SWNConst, frmGoods, frmWebDescriptionTemplateDialog,
-  frmGoodsTypeAttributesDialog;
+  frmGoodsTypeFiltersDialog;
 
 {$R *.dfm}
 
@@ -81,12 +82,12 @@ end;
 
 procedure TfrmGoodsTypeEditorDlg.btnAttributesClick(Sender: TObject);
 var
-  d: TfrmGoodsTypeAttributesDlg;
+  d: TfrmGoodsTypeFiltersDlg;
   gtid: Integer;
 begin
   if FCreateNewType then
   begin
-    ShowMessage('Salvati mai intai tipul de produs, apoi adaugati atribute.');
+    ShowMessage('Salvati mai intai tipul de produs, apoi adaugati filtre.');
     Exit;
   end;
   gtid := fMasterDataSet.FieldByName('GOODSTYPEID').AsInteger;
@@ -95,7 +96,7 @@ begin
     ShowMessage('Tip de produs invalid.');
     Exit;
   end;
-  d := TfrmGoodsTypeAttributesDlg.Create(Self);
+  d := TfrmGoodsTypeFiltersDlg.Create(Self);
   try
     d.GoodsTypeID := gtid;
     d.ShowModal;

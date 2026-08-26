@@ -483,7 +483,7 @@ object frameSipClient: TframeSipClient
     object TransferBtn: TcxButton
       Left = 61
       Top = 97
-      Width = 24
+      Width = 107
       Height = 24
       Margins.Left = 5
       Margins.Top = 5

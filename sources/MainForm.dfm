@@ -1322,18 +1322,16 @@ object frmMainForm: TfrmMainForm
           ExplicitHeight = 26
         end
         inherited TransferBtn: TcxButton
-          Left = 106
-          Top = 96
-          Width = 27
+          Left = 80
+          Width = 75
           Height = 26
           Margins.Left = 4
           Margins.Top = 4
           Margins.Right = 4
           Margins.Bottom = 4
           OptionsImage.Spacing = 3
-          ExplicitLeft = 106
-          ExplicitTop = 96
-          ExplicitWidth = 27
+          ExplicitLeft = 80
+          ExplicitWidth = 75
           ExplicitHeight = 26
         end
         inherited TransferEdit: TcxLookupComboBox
@@ -1346,9 +1344,9 @@ object frmMainForm: TfrmMainForm
           Style.Font.Charset = RUSSIAN_CHARSET
           Style.IsFontAssigned = True
           ExplicitTop = 98
-          ExplicitWidth = 100
+          ExplicitWidth = 68
           ExplicitHeight = 23
-          Width = 100
+          Width = 68
         end
         inherited cxButton1: TcxButton
           Left = 240
@@ -1393,8 +1391,6 @@ object frmMainForm: TfrmMainForm
     Font.Style = []
     ParentFont = False
     TabOrder = 4
-    ExplicitLeft = 333
-    ExplicitTop = 50
     object pnShutdownWarning: TPanel
       AlignWithMargins = True
       Left = 0
@@ -2021,6 +2017,7 @@ object frmMainForm: TfrmMainForm
       OneOnRow = True
       Row = 0
       UseOwnFont = False
+      UseRestSpace = True
       Visible = True
       WholeRow = False
     end
@@ -2936,6 +2933,13 @@ object frmMainForm: TfrmMainForm
       Visible = ivAlways
       OnClick = bbMCCClick
     end
+    object bbWorkStations: TdxBarButton
+      Caption = 'Statii de lucru'
+      Category = 0
+      Hint = 'Calculatoarele care pot fi legate la MCC'
+      Visible = ivAlways
+      OnClick = bbWorkStationsClick
+    end
     object bbWebUrlManager: TdxBarButton
       Caption = 'Gestionarea URL de pe site...'
       Category = 0
@@ -3518,6 +3522,10 @@ object frmMainForm: TfrmMainForm
         end
         item
           Visible = True
+          ItemName = 'bbWorkStations'
+        end
+        item
+          Visible = True
           ItemName = 'bbAutoTransport'
         end
         item
@@ -3593,6 +3601,7 @@ object frmMainForm: TfrmMainForm
       Category = 2
       Hint = 'Categorii de produse'
       Visible = ivAlways
+      ShortCut = 49236
       OnClick = bbMainMenuRef_GoodsTypeClick
     end
     object bbMainMenuRef_GoodsACNT: TdxBarButton
@@ -3654,6 +3663,11 @@ object frmMainForm: TfrmMainForm
           BeginGroup = True
           Visible = True
           ItemName = 'bbStopDatabase1Min'
+        end
+        item
+          BeginGroup = True
+          Visible = True
+          ItemName = 'bbApiConfig'
         end>
     end
     object bbMainMenuAcs_UserGroups: TdxBarButton
@@ -3677,6 +3691,13 @@ object frmMainForm: TfrmMainForm
       Hint = 'Tipuri de documente'
       Visible = ivAlways
       OnClick = bbMainMenuAcs_DocTypesClick
+    end
+    object bbApiConfig: TdxBarButton
+      Caption = 'Configurari API'
+      Category = 3
+      Hint = 'Parametrii si credentialele API-urilor externe'
+      Visible = ivAlways
+      OnClick = bbApiConfigClick
     end
     object bbCreateNewVersion: TdxBarSubItem
       Caption = 'Ajutor'

@@ -82,7 +82,6 @@ object frmSelectSyssEditorWin: TfrmSelectSyssEditorWin
         object cxGridGroupsTable: TcxGridDBTableView
           PopupMenu = dxBarPopupMenuGroups
           OnKeyDown = cxGridGroupsTableKeyDown
-          Navigator.Buttons.CustomButtons = <>
           Navigator.Buttons.First.Visible = True
           Navigator.Buttons.PriorPage.Visible = True
           Navigator.Buttons.Prior.Visible = True
@@ -99,14 +98,10 @@ object frmSelectSyssEditorWin: TfrmSelectSyssEditorWin
           Navigator.Buttons.SaveBookmark.Visible = True
           Navigator.Buttons.GotoBookmark.Visible = True
           Navigator.Buttons.Filter.Visible = True
-          ScrollbarAnnotations.CustomAnnotations = <>
           OnCellDblClick = cxGridGroupsTableCellDblClick
           OnFocusedRecordChanged = cxGridGroupsTableFocusedRecordChanged
           DataController.DataSource = IBCDataSourceSYSS
           DataController.KeyFieldNames = 'SYSSID'
-          DataController.Summary.DefaultGroupSummaryItems = <>
-          DataController.Summary.FooterSummaryItems = <>
-          DataController.Summary.SummaryGroups = <>
           OptionsCustomize.ColumnsQuickCustomization = True
           OptionsData.Deleting = False
           OptionsData.Editing = False
@@ -123,7 +118,6 @@ object frmSelectSyssEditorWin: TfrmSelectSyssEditorWin
             AlternateCaption = #1050#1086#1076' '#1075#1088#1091#1087#1087#1099
             Caption = 'Cod'
             DataBinding.FieldName = 'SYSSID'
-            DataBinding.IsNullValueType = True
             HeaderAlignmentHorz = taCenter
             MinWidth = 50
             Options.Filtering = False
@@ -137,7 +131,6 @@ object frmSelectSyssEditorWin: TfrmSelectSyssEditorWin
           object cxGridGroupsCol_TITLE: TcxGridDBColumn
             Caption = 'Mapa'
             DataBinding.FieldName = 'TITLE'
-            DataBinding.IsNullValueType = True
             Options.Moving = False
             Styles.Content = dmAdditions.cxStyle_Bold
             VisibleForCustomization = False
@@ -191,7 +184,6 @@ object frmSelectSyssEditorWin: TfrmSelectSyssEditorWin
         object cxGridDataTable: TcxGridDBTableView
           PopupMenu = dxBarPopupMenuData
           OnKeyDown = cxGridDataTableKeyDown
-          Navigator.Buttons.CustomButtons = <>
           Navigator.Buttons.First.Visible = True
           Navigator.Buttons.PriorPage.Visible = True
           Navigator.Buttons.Prior.Visible = True
@@ -208,14 +200,10 @@ object frmSelectSyssEditorWin: TfrmSelectSyssEditorWin
           Navigator.Buttons.SaveBookmark.Visible = True
           Navigator.Buttons.GotoBookmark.Visible = True
           Navigator.Buttons.Filter.Visible = True
-          ScrollbarAnnotations.CustomAnnotations = <>
           OnCellDblClick = cxGridDataTableCellDblClick
           OnFocusedRecordChanged = cxGridDataTableFocusedRecordChanged
           DataController.DataSource = IBCDataSourceSYSSData
           DataController.KeyFieldNames = 'SYSSID'
-          DataController.Summary.DefaultGroupSummaryItems = <>
-          DataController.Summary.FooterSummaryItems = <>
-          DataController.Summary.SummaryGroups = <>
           OptionsBehavior.IncSearch = True
           OptionsCustomize.ColumnsQuickCustomization = True
           OptionsData.Deleting = False
@@ -230,7 +218,6 @@ object frmSelectSyssEditorWin: TfrmSelectSyssEditorWin
           OptionsView.GroupByBox = False
           Styles.Header = dmAdditions.cxStyle_GridHeader
           object cxGridDataCol_IMG: TcxGridDBColumn
-            DataBinding.IsNullValueType = True
             PropertiesClassName = 'TcxImageComboBoxProperties'
             Properties.DefaultImageIndex = 50
             Properties.Images = dmAdditions.cxImageList_SWN
@@ -248,7 +235,6 @@ object frmSelectSyssEditorWin: TfrmSelectSyssEditorWin
             AlternateCaption = #1050#1086#1076' '#1079#1072#1087#1080#1089#1080
             Caption = 'Cod'
             DataBinding.FieldName = 'SYSSID'
-            DataBinding.IsNullValueType = True
             MinWidth = 50
             Options.Filtering = False
             Options.Focusing = False
@@ -259,14 +245,12 @@ object frmSelectSyssEditorWin: TfrmSelectSyssEditorWin
           object cxGridDataCol_TITLE: TcxGridDBColumn
             Caption = 'Valoare'
             DataBinding.FieldName = 'TITLE'
-            DataBinding.IsNullValueType = True
             Options.Moving = False
             VisibleForCustomization = False
             Width = 288
           end
           object cxGridDataCol_VALUE_INT2: TcxGridDBColumn
             DataBinding.FieldName = 'VALUE_INT'
-            DataBinding.IsNullValueType = True
             PropertiesClassName = 'TcxLookupComboBoxProperties'
             Properties.KeyFieldNames = 'SYSSID'
             Properties.ListColumns = <
@@ -283,7 +267,6 @@ object frmSelectSyssEditorWin: TfrmSelectSyssEditorWin
           end
           object cxGridDataCol_ValueSTR: TcxGridDBColumn
             DataBinding.FieldName = 'VALUE_STR'
-            DataBinding.IsNullValueType = True
             Options.Moving = False
             VisibleForCustomization = False
             Width = 127
@@ -291,7 +274,6 @@ object frmSelectSyssEditorWin: TfrmSelectSyssEditorWin
           end
           object cxGridDataCol_VALUE_INT1: TcxGridDBColumn
             DataBinding.FieldName = 'VALUE_INT'
-            DataBinding.IsNullValueType = True
             MinWidth = 100
             Options.HorzSizing = False
             Options.Moving = False

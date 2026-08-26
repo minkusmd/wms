@@ -3,8 +3,8 @@ object frmWebZakazDocDlg: TfrmWebZakazDocDlg
   Top = 0
   BorderStyle = bsDialog
   Caption = 'Web comanda'
-  ClientHeight = 512
-  ClientWidth = 766
+  ClientHeight = 580
+  ClientWidth = 1000
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -14,13 +14,13 @@ object frmWebZakazDocDlg: TfrmWebZakazDocDlg
   Position = poOwnerFormCenter
   OnClose = FormClose
   DesignSize = (
-    766
-    512)
+    1000
+    580)
   TextHeight = 15
   object dtDialogTitle: TDialogTitle
     Left = 0
     Top = 0
-    Width = 766
+    Width = 1000
     Height = 64
     Title = 'Web comanda'
     Text = ''
@@ -39,8 +39,8 @@ object frmWebZakazDocDlg: TfrmWebZakazDocDlg
   end
   object dxStatusBar1: TdxStatusBar
     Left = 0
-    Top = 492
-    Width = 766
+    Top = 560
+    Width = 1000
     Height = 20
     Panels = <
       item
@@ -53,181 +53,228 @@ object frmWebZakazDocDlg: TfrmWebZakazDocDlg
     Font.Name = 'Tahoma'
     Font.Style = []
     ParentFont = False
-    ExplicitTop = 519
   end
   object pnClient: TScrollBox
     Left = 8
     Top = 70
-    Width = 750
-    Height = 363
+    Width = 984
+    Height = 445
     Color = clWindow
     ParentColor = False
     TabOrder = 2
     UseWheelForScrolling = True
-    object cxLabel5: TLabel
+    object lblSecDocument: TLabel
       Left = 12
-      Top = 21
-      Width = 82
+      Top = 8
+      Width = 86
       Height = 15
-      Caption = 'Data document'
+      Caption = 'Date document'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -12
+      Font.Name = 'Segoe UI'
+      Font.Style = [fsBold]
+      ParentFont = False
       Transparent = True
     end
-    object Bevel1: TBevel
+    object bvDocument: TBevel
       Left = 12
-      Top = 56
-      Width = 613
+      Top = 27
+      Width = 480
       Height = 4
       Shape = bsTopLine
     end
+    object cxLabel5: TLabel
+      Left = 12
+      Top = 41
+      Width = 25
+      Height = 15
+      Caption = 'Data'
+      Transparent = True
+    end
+    object lblStare: TLabel
+      Left = 282
+      Top = 41
+      Width = 30
+      Height = 15
+      Caption = 'Stare'
+      Transparent = True
+    end
+    object lblOrganizatie: TLabel
+      Left = 12
+      Top = 77
+      Width = 64
+      Height = 15
+      Caption = 'Organizatie'
+      Transparent = True
+    end
+    object lblAnaliticaOrg: TLabel
+      Left = 12
+      Top = 113
+      Width = 77
+      Height = 15
+      Caption = 'Analitica org.'
+      Transparent = True
+    end
     object cxLabel1: TLabel
       Left = 12
-      Top = 69
-      Width = 46
+      Top = 149
+      Width = 78
       Height = 15
-      Caption = 'Analitica'
+      Caption = 'Analitica doc.'
       Transparent = True
     end
     object cxLabel2: TLabel
       Left = 12
-      Top = 108
+      Top = 185
       Width = 31
       Height = 15
       Caption = 'Client'
       Transparent = True
     end
-    object cxLabel3: TLabel
-      Left = 14
-      Top = 181
-      Width = 66
-      Height = 15
-      Alignment = taRightJustify
-      Caption = 'Valuta si rata'
-      Transparent = True
-    end
-    object cxLabel8: TLabel
-      Left = 12
-      Top = 268
-      Width = 48
-      Height = 15
-      Caption = 'Mentiuni'
-      Transparent = True
-    end
     object cxLabel6: TLabel
       Left = 12
-      Top = 139
+      Top = 221
       Width = 40
       Height = 15
       Caption = 'Depozit'
       Transparent = True
     end
+    object lblSecFinante: TLabel
+      Left = 12
+      Top = 258
+      Width = 87
+      Height = 15
+      Caption = 'Valuta si sume'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -12
+      Font.Name = 'Segoe UI'
+      Font.Style = [fsBold]
+      ParentFont = False
+      Transparent = True
+    end
+    object bvFinante: TBevel
+      Left = 12
+      Top = 277
+      Width = 480
+      Height = 4
+      Shape = bsTopLine
+    end
+    object cxLabel3: TLabel
+      Left = 12
+      Top = 291
+      Width = 35
+      Height = 15
+      Caption = 'Valuta'
+      Transparent = True
+    end
+    object lblRata: TLabel
+      Left = 248
+      Top = 291
+      Width = 25
+      Height = 15
+      Caption = 'Rata'
+      Transparent = True
+    end
     object Label1: TLabel
-      Left = 330
-      Top = 181
+      Left = 12
+      Top = 327
       Width = 48
       Height = 15
       Caption = 'Rata USD'
       Transparent = True
     end
     object Label2: TLabel
-      Left = 12
-      Top = 227
+      Left = 248
+      Top = 327
       Width = 51
       Height = 15
       Caption = 'Cashback'
       Transparent = True
     end
-    object lcbCURRENCY: TcxDBLookupComboBox
-      Left = 108
-      Top = 178
-      DataBinding.DataField = 'CURRENCYID'
-      DataBinding.DataSource = dmDB.IBCDataSourceDocs
-      Enabled = False
-      Properties.DropDownListStyle = lsFixedList
-      Properties.ImmediatePost = True
-      Properties.KeyFieldNames = 'CURRENCYID'
-      Properties.ListColumns = <
-        item
-          Caption = #1053#1072#1079#1074#1072#1085#1080#1077
-          Width = 150
-          FieldName = 'TITLE'
-        end>
-      Properties.ListOptions.ShowHeader = False
-      Properties.ListSource = dmDB.IBCDataSourceCurrency
-      TabOrder = 0
-      Width = 89
+    object lblSecLivrare: TLabel
+      Left = 516
+      Top = 8
+      Width = 42
+      Height = 15
+      Caption = 'Livrare'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -12
+      Font.Name = 'Segoe UI'
+      Font.Style = [fsBold]
+      ParentFont = False
+      Transparent = True
     end
-    object ceRATE: TcxDBCalcEdit
-      Left = 204
-      Top = 179
-      DataBinding.DataField = 'RATE'
-      DataBinding.DataSource = dmDB.IBCDataSourceDocs
-      Enabled = False
-      Properties.ImmediatePost = True
-      TabOrder = 1
-      Width = 113
+    object bvLivrare: TBevel
+      Left = 516
+      Top = 27
+      Width = 460
+      Height = 4
+      Shape = bsTopLine
     end
-    object lcbDTSC: TcxDBLookupComboBox
-      Left = 541
-      Top = 18
-      Hint = #1040#1085#1072#1083#1080#1090#1080#1082#1072' '#1086#1088#1075#1072#1085#1080#1079#1072#1094#1080#1080
-      DataBinding.DataField = 'DTSC'
-      DataBinding.DataSource = dmDB.IBCDataSourceDocs
-      ParentShowHint = False
-      Properties.DropDownListStyle = lsFixedList
-      Properties.DropDownRows = 16
-      Properties.KeyFieldNames = 'SYSSID'
-      Properties.ListColumns = <
-        item
-          FieldName = 'TITLE'
-        end>
-      Properties.ListOptions.ShowHeader = False
-      Properties.ListSource = dmDB.IBCDataSourceAnalitica
-      ShowHint = True
-      TabOrder = 2
-      Width = 179
+    object cxLabel8: TLabel
+      Left = 516
+      Top = 326
+      Width = 55
+      Height = 15
+      Caption = 'Mentiuni'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -12
+      Font.Name = 'Segoe UI'
+      Font.Style = [fsBold]
+      ParentFont = False
+      Transparent = True
     end
-    object mmCOMMENTS: TcxDBMemo
-      Left = 95
-      Top = 265
-      DataBinding.DataField = 'COMMENTS'
-      DataBinding.DataSource = dmDB.IBCDataSourceDocComments
-      Properties.ReadOnly = True
-      Properties.ScrollBars = ssVertical
-      Properties.VisibleLineCount = 5
-      Properties.WantReturns = False
-      TabOrder = 3
-      OnClick = mmCOMMENTSClick
-      Width = 625
+    object bvMentiuni: TBevel
+      Left = 516
+      Top = 345
+      Width = 460
+      Height = 4
+      Shape = bsTopLine
     end
     object deDATA: TcxDBDateEdit
-      Left = 108
-      Top = 18
+      Left = 112
+      Top = 38
+      Hint = 'Data documentului'
       DataBinding.DataField = 'DATA'
       DataBinding.DataSource = dmDB.IBCDataSourceDocs
+      ParentShowHint = False
       Properties.DateButtons = [btnNow]
       Properties.ImmediatePost = True
       Properties.Kind = ckDateTime
       Properties.WeekNumbers = True
-      TabOrder = 4
-      Width = 93
+      ShowHint = True
+      TabOrder = 0
+      Width = 150
     end
-    object cbFLG_ACNT: TcxDBCheckBox
-      Left = 225
-      Top = 224
-      Caption = 'Contabilitate'
-      DataBinding.DataField = 'FLG_ACNT'
+    object lcbSTATEID: TcxDBLookupComboBox
+      Left = 332
+      Top = 38
+      Hint = 'Statutul documentului'
+      DataBinding.DataField = 'STATEID'
       DataBinding.DataSource = dmDB.IBCDataSourceDocs
-      Properties.Alignment = taLeftJustify
-      Properties.ImmediatePost = True
-      Properties.NullStyle = nssUnchecked
-      Properties.ValueChecked = 1
-      Properties.ValueUnchecked = 0
-      Style.TransparentBorder = False
-      TabOrder = 5
+      ParentShowHint = False
+      Properties.DropDownRows = 16
+      Properties.DropDownWidth = 300
+      Properties.KeyFieldNames = 'STATEID'
+      Properties.ListColumns = <
+        item
+          FieldName = 'TITLE'
+        end>
+      Properties.ListOptions.ShowHeader = False
+      Properties.ListSource = dmDB.IBCDataSourceDocTypeStates
+      ShowHint = True
+      TabOrder = 1
+      Width = 160
     end
     object beDT_NAME: TcxButtonEdit
-      Left = 225
-      Top = 17
+      Left = 112
+      Top = 74
+      Hint = 'Organizatia emitenta - F4 pentru alegere'
+      ParentShowHint = False
       Properties.Buttons = <
         item
           Default = True
@@ -272,13 +319,64 @@ object frmWebZakazDocDlg: TfrmWebZakazDocDlg
       Properties.ClickKey = 115
       Properties.ViewStyle = vsHideCursor
       Properties.OnButtonClick = beDT_NAMEPropertiesButtonClick
-      TabOrder = 6
+      ShowHint = True
+      TabOrder = 2
       Text = 'beDT_NAME'
-      Width = 309
+      Width = 380
+    end
+    object lcbDTSC: TcxDBLookupComboBox
+      Left = 112
+      Top = 110
+      Hint = 'Analitica organizatiei'
+      DataBinding.DataField = 'DTSC'
+      DataBinding.DataSource = dmDB.IBCDataSourceDocs
+      ParentShowHint = False
+      Properties.DropDownListStyle = lsFixedList
+      Properties.DropDownRows = 16
+      Properties.KeyFieldNames = 'SYSSID'
+      Properties.ListColumns = <
+        item
+          FieldName = 'TITLE'
+        end>
+      Properties.ListOptions.ShowHeader = False
+      Properties.ListSource = dmDB.IBCDataSourceAnalitica
+      ShowHint = True
+      TabOrder = 3
+      Width = 380
+    end
+    object lcbAnalytics: TcxDBLookupComboBox
+      Left = 112
+      Top = 146
+      Hint = 'Analitica documentului'
+      DataBinding.DataField = 'SC2'
+      DataBinding.DataSource = dmDB.IBCDataSourceDocs
+      ParentShowHint = False
+      Properties.DropDownAutoSize = True
+      Properties.DropDownListStyle = lsFixedList
+      Properties.DropDownRows = 16
+      Properties.KeyFieldNames = 'ANALITICAID'
+      Properties.ListColumns = <
+        item
+          Fixed = True
+          Width = 180
+          FieldName = 'TITLE'
+        end
+        item
+          Fixed = True
+          Width = 180
+          FieldName = 'PARENT_TITLE'
+        end>
+      Properties.ListOptions.ShowHeader = False
+      Properties.ListSource = dmDB.IBCDataSourceAnalytics
+      ShowHint = True
+      TabOrder = 4
+      Width = 380
     end
     object beCT_NAME: TcxButtonEdit
-      Left = 108
-      Top = 105
+      Left = 112
+      Top = 182
+      Hint = 'Clientul comenzii - F4 pentru alegere'
+      ParentShowHint = False
       Properties.Buttons = <
         item
           Default = True
@@ -323,15 +421,18 @@ object frmWebZakazDocDlg: TfrmWebZakazDocDlg
       Properties.ClickKey = 115
       Properties.ViewStyle = vsHideCursor
       Properties.OnButtonClick = beCT_NAMEPropertiesButtonClick
-      TabOrder = 7
+      ShowHint = True
+      TabOrder = 5
       Text = 'beCT_NAME'
-      Width = 309
+      Width = 380
     end
     object lcbDTDEP: TcxDBLookupComboBox
-      Left = 108
-      Top = 135
+      Left = 112
+      Top = 218
+      Hint = 'Depozitul de expediere'
       DataBinding.DataField = 'DTDEP'
       DataBinding.DataSource = dmDB.IBCDataSourceDocs
+      ParentShowHint = False
       Properties.DropDownListStyle = lsFixedList
       Properties.DropDownRows = 16
       Properties.DropDownWidth = 300
@@ -349,100 +450,124 @@ object frmWebZakazDocDlg: TfrmWebZakazDocDlg
         end>
       Properties.ListOptions.ShowHeader = False
       Properties.ListSource = dmDB.IBCDataSourceStocks
-      TabOrder = 8
-      Width = 309
+      ShowHint = True
+      TabOrder = 6
+      Width = 380
     end
-    object lcbAnalytics: TcxDBLookupComboBox
-      Left = 108
-      Top = 66
-      Hint = #1040#1085#1072#1083#1080#1090#1080#1082#1072' '#1076#1086#1082#1091#1084#1077#1085#1090#1072
-      DataBinding.DataField = 'SC2'
+    object lcbCURRENCY: TcxDBLookupComboBox
+      Left = 112
+      Top = 288
+      DataBinding.DataField = 'CURRENCYID'
       DataBinding.DataSource = dmDB.IBCDataSourceDocs
-      ParentShowHint = False
-      Properties.DropDownAutoSize = True
+      Enabled = False
       Properties.DropDownListStyle = lsFixedList
-      Properties.DropDownRows = 16
-      Properties.KeyFieldNames = 'ANALITICAID'
+      Properties.ImmediatePost = True
+      Properties.KeyFieldNames = 'CURRENCYID'
       Properties.ListColumns = <
         item
-          Fixed = True
-          Width = 180
+          Caption = #1053#1072#1079#1074#1072#1085#1080#1077
+          Width = 150
           FieldName = 'TITLE'
-        end
-        item
-          Fixed = True
-          Width = 180
-          FieldName = 'PARENT_TITLE'
         end>
       Properties.ListOptions.ShowHeader = False
-      Properties.ListSource = dmDB.IBCDataSourceAnalytics
-      ShowHint = True
-      TabOrder = 9
-      Width = 309
+      Properties.ListSource = dmDB.IBCDataSourceCurrency
+      TabOrder = 7
+      Width = 120
+    end
+    object ceRATE: TcxDBCalcEdit
+      Left = 306
+      Top = 288
+      DataBinding.DataField = 'RATE'
+      DataBinding.DataSource = dmDB.IBCDataSourceDocs
+      Enabled = False
+      Properties.ImmediatePost = True
+      TabOrder = 8
+      Width = 100
     end
     object ceRATEUSD: TcxDBCalcEdit
-      Left = 384
-      Top = 178
+      Left = 112
+      Top = 324
       DataBinding.DataField = 'RATEUSD'
       DataBinding.DataSource = dmDB.IBCDataSourceDocs
       Enabled = False
       Properties.ImmediatePost = True
-      TabOrder = 10
-      Width = 113
-    end
-    object cxDBLookupComboBox1: TcxDBLookupComboBox
-      Left = 444
-      Top = 66
-      Hint = 'Statutul documentului'
-      DataBinding.DataField = 'STATEID'
-      DataBinding.DataSource = dmDB.IBCDataSourceDocs
-      ParentShowHint = False
-      Properties.DropDownRows = 16
-      Properties.DropDownWidth = 300
-      Properties.KeyFieldNames = 'STATEID'
-      Properties.ListColumns = <
-        item
-          FieldName = 'TITLE'
-        end>
-      Properties.ListOptions.ShowHeader = False
-      Properties.ListSource = dmDB.IBCDataSourceDocTypeStates
-      ShowHint = True
-      TabOrder = 11
-      Width = 276
+      TabOrder = 9
+      Width = 120
     end
     object ceCashback: TcxDBCalcEdit
-      Left = 108
-      Top = 224
+      Left = 306
+      Top = 324
+      Hint = 'Cashback utilizat in aceasta comanda'
       DataBinding.DataField = 'CASHBACK_USED'
       DataBinding.DataSource = IBCDataSourceCashback
+      ParentShowHint = False
       Properties.ReadOnly = True
+      ShowHint = True
+      TabOrder = 10
+      Width = 100
+    end
+    object cbFLG_ACNT: TcxDBCheckBox
+      Left = 112
+      Top = 360
+      Caption = 'Contabilitate'
+      DataBinding.DataField = 'FLG_ACNT'
+      DataBinding.DataSource = dmDB.IBCDataSourceDocs
+      Properties.Alignment = taLeftJustify
+      Properties.ImmediatePost = True
+      Properties.NullStyle = nssUnchecked
+      Properties.ValueChecked = 1
+      Properties.ValueUnchecked = 0
+      Style.TransparentBorder = False
+      TabOrder = 11
+      Width = 130
+    end
+    inline frameDelivery: TframeDocsDelivery
+      Left = 516
+      Top = 34
+      Width = 460
+      Height = 280
       TabOrder = 12
-      Width = 81
+      ExplicitLeft = 516
+      ExplicitTop = 34
+    end
+    object mmCOMMENTS: TcxDBMemo
+      Left = 516
+      Top = 356
+      Hint = 'Click pentru a edita mentiunile documentului'
+      DataBinding.DataField = 'COMMENTS'
+      DataBinding.DataSource = dmDB.IBCDataSourceDocComments
+      ParentShowHint = False
+      Properties.ReadOnly = True
+      Properties.ScrollBars = ssVertical
+      Properties.VisibleLineCount = 4
+      Properties.WantReturns = False
+      ShowHint = True
+      TabOrder = 13
+      OnClick = mmCOMMENTSClick
+      Width = 460
     end
   end
-  object btnCancel: TcxButton
-    Left = 668
-    Top = 457
-    Width = 90
-    Height = 29
-    Anchors = [akRight, akBottom]
-    Cancel = True
-    Caption = 'Renunta'
-    ModalResult = 2
-    TabOrder = 3
-    ExplicitTop = 484
-  end
   object btnOk: TcxButton
-    Left = 564
-    Top = 457
+    Left = 804
+    Top = 523
     Width = 90
     Height = 29
     Anchors = [akRight, akBottom]
     Caption = 'OK'
     Default = True
     ModalResult = 1
+    TabOrder = 3
+  end
+  object btnCancel: TcxButton
+    Left = 902
+    Top = 523
+    Width = 90
+    Height = 29
+    Anchors = [akRight, akBottom]
+    Cancel = True
+    Caption = 'Renunta'
+    ModalResult = 2
     TabOrder = 4
-    ExplicitTop = 484
   end
   object IBCQueryCashback: TIBCQuery
     Connection = dmDB.IBCConnection

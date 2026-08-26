@@ -19,6 +19,7 @@ uses
   SWNBaseUnit,
   StdCtrls,
   SysUtils,
+  System.JSON,
   Variants,
   Windows,
   cxButtons,
@@ -75,11 +76,40 @@ uses
   B2BClientUltra;
 
 const
-  C_eMail = 'duca.al@gmail.com';
-  C_Password = 'Uno2025!@';
+  // Credentialele API-urilor de furnizor NU stau in cod: se citesc din
+  // TS_API_CONFIG (vezi "DB Model\ts_api_config.sql"), randurile cu PARAM_NAME
+  // in (BASE_URL, USERNAME, PASSWORD). Se administreaza din meniul
+  // Setari > Configurari API. Aici raman doar codurile si valorile implicite.
+  C_UltraApiCode = 'ULTRA_ESHOP';
+  C_UltraApiDefaultURL = 'https://eshop.ultra.md/api';
+  C_ScopApiCode = 'SCOP';
+  C_ScopApiDefaultURL = 'https://api.scop.md';
+  // DMLink nu se apeleaza prin HTTP din WMS, ci prin DLL-ul construit din
+  // proiectul separat sources\b2b.api\dmlink\B2BDMLInkDLL.dproj (adresa
+  // serviciului este in DLL). Calea se poate suprascrie cu parametrul DLL_PATH.
+  C_DMLinkApiCode = 'DMLINK';
+  C_DMLinkDefaultDLL = 'B2BDMLInk.dll';
 
 type
   TdxSpreadSheetCustomConditionalFormattingRuleAccess = class(TdxSpreadSheetCustomConditionalFormattingRule);
+
+  // Rezultatul interogarii Ultra.md eShop API pentru un cod de produs (ultra_code).
+  // Moneda goala inseamna ca tipul de pret respectiv nu vine pentru produsul cerut.
+  TUltraStockInfo = record
+    Code: string;
+    Name: string;
+    Quantity: Double;
+    UpdatedAt: string;
+    PriceUser: Double;
+    PriceUserCurrency: string;
+    PriceD: Double;
+    PriceDCurrency: string;
+    PriceFixed: Double;
+    PriceFixedCurrency: string;
+    PricePromo: Double;
+    PricePromoCurrency: string;
+    StatusCode: Integer;
+  end;
 
 TfrmGoodsForeignCodeDlg = class(TSWNCustomForm)
     dxBarPopupMenu1: TdxBarPopupMenu;
@@ -188,6 +218,7 @@ TfrmGoodsForeignCodeDlg = class(TSWNCustomForm)
     cxGridForeignDBBandedTableView1Column2: TcxGridDBBandedColumn;
     bbCopyToPartner: TdxBarButton;
     TV1_DIF01: TcxGridDBBandedColumn;
+    TV1_PRICE_CREDIT0: TcxGridDBBandedColumn;
     procedure cxGridForeignTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord:
       TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
     procedure bbForeignNewClick(Sender: TObject);
@@ -221,8 +252,13 @@ TfrmGoodsForeignCodeDlg = class(TSWNCustomForm)
     fGoodsInfo: TGoodsInfo;
     fGoodsID: Integer;
     FQty: Double;
-    FMDLinkToken: string;
     FSupplierID: Integer;
+    FUltraToken: string;
+    FUltraTokenExpires: TDateTime;
+    FUltraApiURL: string;
+    FUltraApiUser: string;
+    FUltraApiPassword: string;
+    FUltraConfigLoaded: Boolean;
     procedure ReadGoodsInfo;
     procedure SelectionChanged;
     procedure ShowAddNewCodeDialog;
@@ -238,10 +274,13 @@ TfrmGoodsForeignCodeDlg = class(TSWNCustomForm)
     procedure GetMuncitorulProductStock(GoodsCode: string);
     procedure GetScopProductStock(GoodsCode: string);
     procedure GetUltraProductStock(GoodsCode: string);
+    procedure ReadApiConfig(const AApiCode: string; AValues: TStrings);
+    procedure LoadApiConfig(const AApiCode, ADefaultURL: string;
+      out ABaseURL, AUser, APassword: string);
+    procedure LoadUltraApiConfig;
+    function UltraApiLogin: Boolean;
+    function UltraApiGetJson(const APath: string; out AJson: TJSONValue; out AStatusCode: Integer): Boolean;
     procedure ParseBallanceQty(url: string);
-
-    procedure OnDMLinkLoginDone(const AResult: TB2BThreadResult);
-    procedure OnDMLinkProductDone(const AResult: TB2BThreadResult);
 
   protected { protected declarations }
     procedure Prepare; override;
@@ -252,6 +291,9 @@ TfrmGoodsForeignCodeDlg = class(TSWNCustomForm)
     procedure LoadStates; override;
   public
     function GetLowestPrice7RowIndex(Sender: TcxGridDBBandedTableView): Integer; overload;
+    function GetUltraStock(const AGoodsCode: string; out AInfo: TUltraStockInfo): Boolean;
+    function GetDMLinkStock(const AGoodsCode: string; out AInfo: TB2BProductInfo;
+      out AError: string): Boolean;
     { Public declarations }
     property GoodsID: Integer read fGoodsID write SetGoodsID;
     property Qty: Double read FQty write SetQty;
@@ -275,7 +317,6 @@ uses
   frmSelectPhoneNumberUnit,
   System.UITypes,
   IdHTTP,
-  System.JSON,
   System.Math,
   System.Generics.Collections,
   frmCrediteRetailUnit,
@@ -286,6 +327,8 @@ uses
   Winapi.ActiveX,
   System.Net.URLClient,
   System.NetConsts,
+  System.NetEncoding,
+  System.DateUtils,
   AccentGuidRepo,
   AccentAuthService;
 
@@ -609,16 +652,117 @@ begin
     FreeAndNil(fGoodsInfo);
 end;
 
+function TfrmGoodsForeignCodeDlg.GetDMLinkStock(const AGoodsCode: string;
+  out AInfo: TB2BProductInfo; out AError: string): Boolean;
+// Furnizorul 229466. Cererea se face prin B2BDMLInk.dll (proiect Delphi separat):
+// DLL-ul se autentifica singur si intoarce produsul dupa SKU. Credentialele vin
+// din TS_API_CONFIG (API_CODE = 'DMLINK'), calea DLL-ului din parametrul optional
+// DLL_PATH - implicit se cauta langa SWN.exe.
+var
+  Values: TStringList;
+  Client: TB2BDMLinkClient;
+  DllPath: string;
+  User: string;
+  Password: string;
+begin
+  Result := False;
+  AError := '';
+  FillChar(AInfo, SizeOf(AInfo), 0);
+
+  if Trim(AGoodsCode) = '' then
+    Exit;
+
+  Values := TStringList.Create;
+  try
+    ReadApiConfig(C_DMLinkApiCode, Values);
+    User := Values.Values['USERNAME'];
+    Password := Values.Values['PASSWORD'];
+    DllPath := Values.Values['DLL_PATH'];
+  finally
+    Values.Free;
+  end;
+
+  if (User = '') or (Password = '') then
+    raise Exception.Create('Lipsesc credentialele pentru API-ul ' + C_DMLinkApiCode +
+      '. Completati randurile USERNAME si PASSWORD in TS_API_CONFIG ' +
+      '(meniul Setari > Configurari API).');
+
+  if DllPath = '' then
+    DllPath := C_DMLinkDefaultDLL;
+  if ExtractFilePath(DllPath) = '' then
+    DllPath := ExtractFilePath(Application.ExeName) + DllPath;
+  if not FileExists(DllPath) then
+    raise Exception.Create('Nu s-a gasit biblioteca DMLink: ' + DllPath);
+
+  Client := TB2BDMLinkClient.Create(DllPath);
+  try
+    if not Client.Initialize then
+      raise Exception.Create('Initializarea bibliotecii DMLink a esuat: ' + Client.LastError);
+
+    if not Client.Login(User, Password) then
+      raise Exception.Create('Autentificare DMLink esuata: ' + Client.LastError);
+
+    Result := Client.GetProduct(Trim(AGoodsCode), AInfo);
+    if not Result then
+      AError := Client.LastError;
+  finally
+    Client.Free;
+  end;
+end;
+
 procedure TfrmGoodsForeignCodeDlg.GetDMLinkProductStock(GoodsCode: string);
 var
-  FClient: TB2BDMLinkClient;
-  FToken: string;
-  T: TB2BThread;
+  Info: TB2BProductInfo;
+  Error: string;
+  Found: Boolean;
+  Msg: string;
 begin
-  // 229466
-  T := TB2BThread.Create('B2BDMlink.dll');
-  T.SetupLogin(C_eMail, C_Password, OnDMLinkLoginDone);
-  T.Start;
+  Screen.Cursor := crHourGlass;
+  try
+    try
+      Found := GetDMLinkStock(GoodsCode, Info, Error);
+    except
+      on E: Exception do
+      begin
+        MessageDlg('DMLink API: ' + E.Message, mtError, [mbOK], 0);
+        Exit;
+      end;
+    end;
+  finally
+    Screen.Cursor := crDefault;
+  end;
+
+  if not Found then
+  begin
+    if Error = '' then
+      MessageDlg(Format('Codul "%s" nu a fost gasit in API-ul DMLink.', [GoodsCode]),
+        mtWarning, [mbOK], 0)
+    else
+      MessageDlg('DMLink API: ' + Error, mtError, [mbOK], 0);
+    Exit;
+  end;
+
+  Msg := Format('Cod DMLink: %s', [string(Info.SKU)]);
+  if string(Info.Name) <> '' then
+    Msg := Msg + #13#10 + string(Info.Name);
+
+  Msg := Msg + Format(#13#10#13#10'Stoc disponibil: %d', [Info.Stock]);
+  if Info.Transit > 0 then
+    Msg := Msg + Format(#13#10'In tranzit: %d', [Info.Transit]);
+
+  if Info.NPrice > 0 then
+    Msg := Msg + Format(#13#10#13#10'Pret net: %.2f', [Info.NPrice]);
+  if Info.SPrice > 0 then
+    Msg := Msg + Format(#13#10'Pret special: %.2f', [Info.SPrice]);
+  if Info.RPrice > 0 then
+    Msg := Msg + Format(#13#10'Pret recomandat: %.2f', [Info.RPrice]);
+
+  if string(Info.BrandName) <> '' then
+    Msg := Msg + Format(#13#10#13#10'Brand: %s', [string(Info.BrandName)]);
+  if Info.WarrantyPeriod > 0 then
+    Msg := Msg + Format(#13#10'Garantie: %d luni', [Info.WarrantyPeriod]);
+
+  MessageDlg(Msg, mtInformation, [mbOK], 0);
 end;
 
 function TfrmGoodsForeignCodeDlg.IsFormDataPosted: Boolean;
@@ -643,46 +787,6 @@ begin
   if AppUserConfigStorage.BooleanValues.GetValue(cSETTINGS_UserSaveGridColumns) then
   begin
     AppUserConfigStorage.GridColumns.ReadGridStructure(cxGridForeignDBBandedTableView1);
-  end;
-end;
-
-procedure TfrmGoodsForeignCodeDlg.OnDMLinkLoginDone(const AResult: TB2BThreadResult);
-var
-  T: TB2BThread;
-begin
-  if AResult.Success then
-  begin
-        // Login succeeded
-    FMDLinkToken := AResult.Token;
-        // Step 2: Start GetProduct thread immediately
-        // ← FIXED: Pass credentials so thread can re-authenticate
-    T := TB2BThread.Create('B2BDMlink.dll');
-    var s := IBCQueryForeign.FieldByName('GOODS_CODE').AsString;
-
-    T.SetupGetProduct(s, C_eMail, C_Password, OnDMLinkProductDone);
-    T.Start;
-  end
-  else
-  begin
-        // Login failed - stop here
-    ShowMessage('Login failed: ' + AResult.ErrorMsg);
-  end;
-end;
-
-procedure TfrmGoodsForeignCodeDlg.OnDMLinkProductDone(const AResult: TB2BThreadResult);
-var
-  P: TB2BProductInfo;
-begin
-  if AResult.Success then
-  begin
-        // Product found
-    P := AResult.ProductInfo;
-    ShowMessage(Format('Product: %s'#13#10'Price: %.2f$'#13#10'Stock: %d', [string(P.Name), P.NPrice, P.Stock]));
-  end
-  else
-  begin
-        // Product not found or error
-    ShowMessage('Error: ' + AResult.ErrorMsg);
   end;
 end;
 
@@ -954,51 +1058,423 @@ procedure TfrmGoodsForeignCodeDlg.GetScopProductStock(GoodsCode: string);
 var
   APIClient: TSCOPAPIClient;
   ProductInfo: TScopProductInfo;
+  BaseURL: string;
+  User: string;
+  Password: string;
 begin
-
-  // Creare client cu credențiale
-  APIClient := TSCOPAPIClient.Create('marketing@fantastic.md', 'Gama654!!');
+  // Credentialele stau in TS_API_CONFIG (API_CODE = 'SCOP'), nu in cod.
   try
-    // Login automat la prima cerere
-    if APIClient.GetProductInfoBySKU(GoodsCode, ProductInfo) then
+    LoadApiConfig(C_ScopApiCode, C_ScopApiDefaultURL, BaseURL, User, Password);
+  except
+    on E: Exception do
     begin
-      ShowMessage(Format('Produs: %s' + #13#10 + 'Preț: %.2f' + #13#10 + 'Stoc: %d' + #13#10,
-//        'Disponibil: %s',
-        [ProductInfo.Name, ProductInfo.Price, ProductInfo.StockQuantity]));
+      MessageDlg('SCOP API: ' + E.Message, mtError, [mbOK], 0);
+      Exit;
     end;
+  end;
 
-    // Sau după slug
-    if APIClient.GetProductInfoBySlug('slug-produs', ProductInfo) then
+  Screen.Cursor := crHourGlass;
+  try
+    APIClient := TSCOPAPIClient.Create(User, Password);
+    try
+      APIClient.BaseURL := BaseURL;
+      // Login automat la prima cerere
+      if APIClient.GetProductInfoBySKU(GoodsCode, ProductInfo) then
+        MessageDlg(Format('Produs: %s'#13#10'Pret: %.2f'#13#10'Stoc: %d',
+          [ProductInfo.Name, ProductInfo.Price, ProductInfo.StockQuantity]),
+          mtInformation, [mbOK], 0)
+      else
+        MessageDlg(Format('Codul "%s" nu a fost gasit in API-ul SCOP.', [GoodsCode]),
+          mtWarning, [mbOK], 0);
+    finally
+      APIClient.Free;
+    end;
+  except
+    on E: Exception do
+      MessageDlg('SCOP API: ' + E.Message, mtError, [mbOK], 0);
+  end;
+  Screen.Cursor := crDefault;
+end;
+
+// -- Ultra.md eShop REST API (https://eshop.ultra.md/api) --------------------
+// Doc: "ESHOP API DOCUMENTATION v1.1"; acelasi flux ca pipeline-ul python
+// ultra2_* care umple TS_ULTRA2_*: POST /auth/token (Bearer), apoi
+// GET /quantity/<ultra_code> pentru stoc si GET /product/<ultra_code> pentru
+// preturi. GOODS_CODE din TS_GOODS_FOREIGN (furnizor 202294) = ultra_code.
+
+function UltraAsObject(AJson: TJSONValue): TJSONObject;
+begin
+  Result := nil;
+  if AJson is TJSONObject then
+    Result := TJSONObject(AJson)
+  else if (AJson is TJSONArray) and (TJSONArray(AJson).Count > 0) and (TJSONArray(AJson).Items[0] is TJSONObject) then
+    Result := TJSONObject(TJSONArray(AJson).Items[0]);
+end;
+
+function UltraJsonNumber(AObj: TJSONObject; const AName: string; const ADefault: Double = 0): Double;
+var
+  Value: TJSONValue;
+begin
+  Result := ADefault;
+  if not Assigned(AObj) then
+    Exit;
+  Value := AObj.GetValue(AName);
+  if Value is TJSONNumber then
+    Result := TJSONNumber(Value).AsDouble
+  else if Value is TJSONString then
+    Result := StrToFloatDef(Value.Value, ADefault, TFormatSettings.Invariant);
+end;
+
+function UltraPlainText(const AValue: string): string;
+// product_name vine ca STRING care contine JSON multilingv
+// {"ro":..,"ru":..,"en":..} - luam varianta romana, altfel prima disponibila.
+var
+  Json: TJSONValue;
+  Obj: TJSONObject;
+  Lang: string;
+begin
+  Result := Trim(AValue);
+  if (Result = '') or (Result[1] <> '{') then
+    Exit;
+
+  Json := TJSONObject.ParseJSONValue(Result);
+  if not Assigned(Json) then
+    Exit;
+  try
+    Obj := UltraAsObject(Json);
+    if not Assigned(Obj) then
+      Exit;
+    for Lang in TArray<string>.Create('ro', 'ru', 'en') do
+      if Obj.GetValue<string>(Lang, '') <> '' then
+      begin
+        Result := Obj.GetValue<string>(Lang, '');
+        Break;
+      end;
+  finally
+    Json.Free;
+  end;
+end;
+
+procedure UltraReadPrice(AProduct: TJSONObject; const AField: string; out AAmount: Double; out ACurrency: string);
+// user_price / price_d / fixed_price / promo_b2b = {amount, currency:{code,name,rate}}
+var
+  PriceObj: TJSONObject;
+  CurrencyObj: TJSONObject;
+begin
+  AAmount := 0;
+  ACurrency := '';
+  if not Assigned(AProduct) then
+    Exit;
+
+  PriceObj := UltraAsObject(AProduct.GetValue(AField));
+  if not Assigned(PriceObj) then
+    Exit;
+
+  AAmount := UltraJsonNumber(PriceObj, 'amount', -1);
+  if AAmount < 0 then
+  begin
+    AAmount := 0;
+    Exit;
+  end;
+
+  CurrencyObj := UltraAsObject(PriceObj.GetValue('currency'));
+  if Assigned(CurrencyObj) then
+  begin
+    ACurrency := CurrencyObj.GetValue<string>('name', '');
+    if ACurrency = '' then
+      // currency.code este NUMERIC (ISO 4217), nu literal
+      case Trunc(UltraJsonNumber(CurrencyObj, 'code')) of
+        840: ACurrency := 'USD';
+        978: ACurrency := 'EUR';
+        498: ACurrency := 'MDL';
+      end;
+  end;
+
+  if ACurrency = '' then
+    ACurrency := 'MDL';
+end;
+
+procedure TfrmGoodsForeignCodeDlg.ReadApiConfig(const AApiCode: string; AValues: TStrings);
+// Parametrii API-urilor externe stau in TS_API_CONFIG, ca sa poata fi schimbati
+// fara recompilare (dialogul Setari > Configurari API). Intoarce toti parametrii
+// activi ai unui API ca perechi NUME=valoare.
+var
+  Query: TIBCQuery;
+begin
+  AValues.Clear;
+
+  Query := TIBCQuery.Create(Self);
+  try
+    dmDB.OpenQuery(Query, 'select PARAM_NAME, PARAM_VALUE from TS_API_CONFIG' +
+      ' where API_CODE = ' + QuotedStr(AApiCode) + ' and FLG_ACTIVE = 1', []);
+    while not Query.Eof do
     begin
-      // Procesare date
+      AValues.Values[UpperCase(Trim(Query.FieldByName('PARAM_NAME').AsString))] :=
+        Trim(Query.FieldByName('PARAM_VALUE').AsString);
+      Query.Next;
     end;
   finally
-    APIClient.Free;
+    Query.Free;
+  end;
+end;
+
+procedure TfrmGoodsForeignCodeDlg.LoadApiConfig(const AApiCode, ADefaultURL: string;
+  out ABaseURL, AUser, APassword: string);
+// Lipsa credentialelor este eroare - preferam un mesaj clar unui 401 de la furnizor.
+var
+  Values: TStringList;
+begin
+  Values := TStringList.Create;
+  try
+    ReadApiConfig(AApiCode, Values);
+
+    ABaseURL := Values.Values['BASE_URL'];
+    if ABaseURL = '' then
+      ABaseURL := ADefaultURL;
+    while (ABaseURL <> '') and (ABaseURL[Length(ABaseURL)] = '/') do
+      SetLength(ABaseURL, Length(ABaseURL) - 1);
+
+    AUser := Values.Values['USERNAME'];
+    APassword := Values.Values['PASSWORD'];
+  finally
+    Values.Free;
+  end;
+
+  if (AUser = '') or (APassword = '') then
+    raise Exception.Create('Lipsesc credentialele pentru API-ul ' + AApiCode +
+      '. Completati randurile USERNAME si PASSWORD in TS_API_CONFIG ' +
+      '(meniul Setari > Configurari API).');
+end;
+
+procedure TfrmGoodsForeignCodeDlg.LoadUltraApiConfig;
+begin
+  if FUltraConfigLoaded then
+    Exit;
+
+  LoadApiConfig(C_UltraApiCode, C_UltraApiDefaultURL,
+    FUltraApiURL, FUltraApiUser, FUltraApiPassword);
+  FUltraConfigLoaded := True;
+end;
+
+function TfrmGoodsForeignCodeDlg.UltraApiLogin: Boolean;
+var
+  Http: THTTPClient;
+  Request: TJSONObject;
+  Body: TStringStream;
+  Response: IHTTPResponse;
+  Json: TJSONValue;
+  Obj: TJSONObject;
+  ExpiresIn: Integer;
+begin
+  Result := False;
+  FUltraToken := '';
+  FUltraTokenExpires := 0;
+  LoadUltraApiConfig;
+
+  Http := THTTPClient.Create;
+  try
+    Http.ConnectionTimeout := 15000;
+    Http.ResponseTimeout := 60000;
+
+    Request := TJSONObject.Create;
+    try
+      Request.AddPair('username', FUltraApiUser);
+      Request.AddPair('password', FUltraApiPassword);
+
+      Body := TStringStream.Create(Request.ToJSON, TEncoding.UTF8);
+      try
+        Response := Http.Post(FUltraApiURL + '/auth/token', Body, nil,
+          [TNetHeader.Create('Content-Type', 'application/json'),
+           TNetHeader.Create('Accept', 'application/json')]);
+      finally
+        Body.Free;
+      end;
+    finally
+      Request.Free;
+    end;
+
+    if Response.StatusCode <> 200 then
+      raise Exception.CreateFmt('Autentificare Ultra esuata (HTTP %d): %s',
+        [Response.StatusCode, Copy(Response.ContentAsString(TEncoding.UTF8), 1, 200)]);
+
+    Json := TJSONObject.ParseJSONValue(Response.ContentAsString(TEncoding.UTF8));
+    if not Assigned(Json) then
+      Exit;
+    try
+      Obj := UltraAsObject(Json);
+      if not Assigned(Obj) then
+        Exit;
+      FUltraToken := Obj.GetValue<string>('access_token', '');
+      ExpiresIn := Trunc(UltraJsonNumber(Obj, 'expires_in', 3600));
+    finally
+      Json.Free;
+    end;
+
+    if FUltraToken = '' then
+      Exit;
+
+    // /auth/refresh nu este implementat pe server - ne reautentificam cu 2 minute
+    // inainte de expirare
+    FUltraTokenExpires := IncSecond(Now, Max(60, ExpiresIn - 120));
+    Result := True;
+  finally
+    Http.Free;
+  end;
+end;
+
+function TfrmGoodsForeignCodeDlg.UltraApiGetJson(const APath: string; out AJson: TJSONValue;
+  out AStatusCode: Integer): Boolean;
+var
+  Http: THTTPClient;
+  Response: IHTTPResponse;
+  Attempt: Integer;
+begin
+  Result := False;
+  AJson := nil;
+  AStatusCode := 0;
+
+  LoadUltraApiConfig;
+
+  Http := THTTPClient.Create;
+  try
+    Http.ConnectionTimeout := 15000;
+    Http.ResponseTimeout := 60000;
+
+    for Attempt := 1 to 2 do
+    begin
+      if (FUltraToken = '') or (Now >= FUltraTokenExpires) then
+        if not UltraApiLogin then
+          Exit;
+
+      Response := Http.Get(FUltraApiURL + APath, nil,
+        [TNetHeader.Create('Authorization', 'Bearer ' + FUltraToken),
+         TNetHeader.Create('Accept', 'application/json')]);
+      AStatusCode := Response.StatusCode;
+
+      // token invalidat pe server - fortam o reautentificare, o singura data
+      if AStatusCode <> 401 then
+        Break;
+      FUltraToken := '';
+    end;
+
+    if AStatusCode <> 200 then
+      Exit;
+
+    AJson := TJSONObject.ParseJSONValue(Response.ContentAsString(TEncoding.UTF8));
+    Result := Assigned(AJson);
+  finally
+    Http.Free;
+  end;
+end;
+
+function TfrmGoodsForeignCodeDlg.GetUltraStock(const AGoodsCode: string; out AInfo: TUltraStockInfo): Boolean;
+var
+  Json: TJSONValue;
+  Obj: TJSONObject;
+  Path: string;
+  Status: Integer;
+begin
+  Result := False;
+  AInfo := Default(TUltraStockInfo);
+
+  if Trim(AGoodsCode) = '' then
+    Exit;
+  Path := TNetEncoding.URL.Encode(Trim(AGoodsCode));
+
+  // 1. stocul - GET /quantity/<ultra_code>
+  if not UltraApiGetJson('/quantity/' + Path, Json, Status) then
+  begin
+    AInfo.StatusCode := Status;
+    Exit;
+  end;
+
+  try
+    AInfo.StatusCode := Status;
+    Obj := UltraAsObject(Json);
+    if not Assigned(Obj) then
+      Exit;
+
+    AInfo.Code := Obj.GetValue<string>('ultra_code', Trim(AGoodsCode));
+    AInfo.Name := UltraPlainText(Obj.GetValue<string>('product_name', ''));
+    AInfo.Quantity := UltraJsonNumber(Obj, 'quantity');
+    AInfo.UpdatedAt := StringReplace(Obj.GetValue<string>('updated_at', ''), 'T', ' ', []);
+    Result := True;
+  finally
+    Json.Free;
+  end;
+
+  // 2. preturile - GET /product/<ultra_code>; daca esueaza, stocul ramane valid
+  if UltraApiGetJson('/product/' + Path, Json, Status) then
+  try
+    Obj := UltraAsObject(Json);
+    if Assigned(Obj) then
+    begin
+      if AInfo.Name = '' then
+        AInfo.Name := UltraPlainText(Obj.GetValue<string>('product_name', ''));
+      UltraReadPrice(Obj, 'user_price', AInfo.PriceUser, AInfo.PriceUserCurrency);
+      UltraReadPrice(Obj, 'price_d', AInfo.PriceD, AInfo.PriceDCurrency);
+      UltraReadPrice(Obj, 'fixed_price', AInfo.PriceFixed, AInfo.PriceFixedCurrency);
+      UltraReadPrice(Obj, 'promo_b2b', AInfo.PricePromo, AInfo.PricePromoCurrency);
+    end;
+  finally
+    Json.Free;
   end;
 end;
 
 procedure TfrmGoodsForeignCodeDlg.GetUltraProductStock(GoodsCode: string);
 var
-  C: TB2BClientUltra;
-  Items: TArray<TUltraProductInfo>;
-  I: TUltraProductInfo;
-  OK: Boolean;
-begin
-  // Endpoint = adresa fără ?wsdl (WSDL e pentru generator; aici facem POST direct)
-  C := TB2BClientUltra.Create('SimionI', 'yYw3nv', 'https://web1c.it-ultra.com/b2b/ru/ws/b2b.1cws');
-  try
-    // IMPORTANT: metoda primește UUID-ul produsului (nomenclature UUID)
-    OK := C.GetProductStockByUUID('{UUID-PRODUS-AICI}', Items);
+  Info: TUltraStockInfo;
+  Msg: string;
+  Found: Boolean;
 
-    if OK then
-      for I in Items do
-        Writeln(Format('%s | %s | qty=%.2f showroom=%.2f | price=%.2f %s | char=%s', [I.Code, I.Name, I.Quantity, I.QuantityShowroom,
-          I.Price, I.Currency, I.CharacteristicUUID]))
-    else
-      Writeln('Nu s-au găsit date.');
-  finally
-    C.Free;
+  procedure AddPriceLine(const ACaption: string; const AAmount: Double; const ACurrency: string);
+  begin
+    if ACurrency <> '' then
+      Msg := Msg + Format(#13#10'%s: %.2f %s', [ACaption, AAmount, ACurrency]);
   end;
+
+begin
+  Screen.Cursor := crHourGlass;
+  try
+    try
+      Found := GetUltraStock(GoodsCode, Info);
+    except
+      on E: Exception do
+      begin
+        MessageDlg('Ultra API: ' + E.Message, mtError, [mbOK], 0);
+        Exit;
+      end;
+    end;
+  finally
+    Screen.Cursor := crDefault;
+  end;
+
+  if not Found then
+  begin
+    // API-ul eShop expune un sortiment mai mic decat serviciul B2B SOAP:
+    // pozitiile pur-B2B intorc 404 Product not found
+    if Info.StatusCode = 404 then
+      MessageDlg(Format('Codul "%s" nu exista in API-ul Ultra eShop.', [GoodsCode]), mtWarning, [mbOK], 0)
+    else
+      MessageDlg(Format('Nu s-a putut citi stocul Ultra pentru "%s" (HTTP %d).',
+        [GoodsCode, Info.StatusCode]), mtError, [mbOK], 0);
+    Exit;
+  end;
+
+  Msg := Format('Cod Ultra: %s', [Info.Code]);
+  if Info.Name <> '' then
+    Msg := Msg + #13#10 + Info.Name;
+  Msg := Msg + Format(#13#10#13#10'Stoc disponibil: %.0f', [Info.Quantity]);
+
+  AddPriceLine('Pret contract', Info.PriceUser, Info.PriceUserCurrency);
+  AddPriceLine('Pret D', Info.PriceD, Info.PriceDCurrency);
+  AddPriceLine('Pret fix', Info.PriceFixed, Info.PriceFixedCurrency);
+  AddPriceLine('Promo B2B', Info.PricePromo, Info.PricePromoCurrency);
+
+  if Info.UpdatedAt <> '' then
+    Msg := Msg + Format(#13#10#13#10'Actualizat: %s', [Info.UpdatedAt]);
+
+  MessageDlg(Msg, mtInformation, [mbOK], 0);
 end;
 
 procedure TfrmGoodsForeignCodeDlg.ParseBallanceQty(url: string);

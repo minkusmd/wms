@@ -117,7 +117,6 @@ type
     cxGridDataDBTableView1: TcxGridDBTableView;
     cxGridDataDBTableView1_PLID: TcxGridDBColumn;
     cxGridDataDBTableView1DATA: TcxGridDBColumn;
-    cxGridDataDBTableView1MENTIUNI: TcxGridDBColumn;
     cxGridDataDB_CREATED_BY_NAME: TcxGridDBColumn;
     cxGridDataLevel1: TcxGridLevel;
     dxBarDockControl2: TdxBarDockControl;
@@ -328,6 +327,7 @@ type
     cxGridItemsDBTableView1Price1_LEI: TcxGridDBColumn;
     cxGridItemsDBTableView1EXCHANGE_RATE3: TcxGridDBColumn;
     dxBarButton21: TdxBarButton;
+    cxGridDataDBTableView1_FLG_DONE: TcxGridDBColumn;
     procedure actAnalizaPriceLIstExecute(Sender: TObject);
     procedure ActReevaluareExecute(Sender: TObject);
     procedure bbAnalizeClick(Sender: TObject);
@@ -699,14 +699,15 @@ begin
 
   try
     Query.SQL.Text :=
-      'insert into tdb_goods_price (docid, goodsid, supplier_goods_code, price3, currencyid, currency3id, barcode, flags) ' +
-      ' values( :DOCID, :GOODSID, :SUPPLIER_GOODS_CODE, :PRICE3, :currencyid, :CURRENCY3ID, :BARCODE, set_flg_value(set_flg_value(0, 3, :flg_in_price), 4, :flg_epp ))';
+      'insert into tdb_goods_price (docid, goodsid, supplier_goods_code, price0, price3, currencyid, currency3id, barcode, flags) ' +
+      ' values( :DOCID, :GOODSID, :SUPPLIER_GOODS_CODE, :PRICE0, :PRICE3, :currencyid, :CURRENCY3ID, :BARCODE, set_flg_value(set_flg_value(0, 3, :flg_in_price), 4, :flg_epp ))';
 
     Query.ParamByName('DOCID').Value := DOCID;
     Query.ParamByName('GOODSID').Value := goodsid;
     Query.ParamByName('SUPPLIER_GOODS_CODE').Value := SupplierGoodsCode;
+    Query.ParamByName('PRICE0').Value := price0;
     Query.ParamByName('PRICE3').Value := iif(flg_rrp, price3, 0.00);
-    Query.ParamByName('CURRENCYID').Value := Currency3ID;
+    Query.ParamByName('CURRENCYID').Value := currency0id;
     Query.ParamByName('CURRENCY3ID').Value := Currency3ID;
     Query.ParamByName('BARCODE').Value := Barcode;
     Query.ParamByName('FLG_IN_PRICE').Value := iif(flg_in_price, 1, 0);
@@ -1534,6 +1535,7 @@ begin
           Currency3ID := 0;
           currency7id := 0;
           price3 := 0;
+          Price7 := 0;
           if VarIsNumeric(ATableView.DataController.Values[aRowIndex, ATableView.GetColumnByFieldName('PRICE3').Index]) then
             price3 := ATableView.DataController.Values[aRowIndex, ATableView.GetColumnByFieldName('PRICE3').Index];
 
@@ -1605,6 +1607,11 @@ begin
 
           if Model <> '' then
             R.CodeRO := Model;
+
+          // fara pret indicativ de la furnizor produsul nou nu are din ce sa-si
+          // calculeze pretul de vinzare - il cream direct in modul EPP, pe baza RRP-ului
+          if (Price7 = 0) and (price3 > 0) then
+            FlgRRP := 1;
 
           AccountingCostFormationTypeID := iif(R.AccountingCostFormationTypeID = -1, 4201, R.AccountingCostFormationTypeID);
           if VendorID <= 0 then
@@ -2206,8 +2213,22 @@ begin
         goodsid := ATableView.DataController.Values[aRecIndex, GoodsIDIndex];
 
       price3 := 0;
-      if (FLG_UseRRP and VarIsNumeric(ATableView.DataController.Values[aRecIndex, Price3Index])) then
+      if VarIsNumeric(ATableView.DataController.Values[aRecIndex, Price3Index]) then
         price3 := ATableView.DataController.Values[aRecIndex, Price3Index];
+
+      Price7 := 0;
+      if VarIsNumeric(ATableView.DataController.Values[aRecIndex, Price7Index]) and (ATableView.Controller.SelectedRecords
+        [I].Values[Price7Index] <> 0) then
+        Price7 := ATableView.DataController.Values[aRecIndex, Price7Index];
+
+      // Furnizorul nu da pret indicativ pentru pozitia asta (ex. Ultra: produse
+      // cu pret retail, fara pretul 'd'). Singurul reper ramane RRP-ul din
+      // pricelist, deci fortam modul EPP ca pretul de vinzare sa se calculeze din el.
+      if (Price7 = 0) and (price3 > 0) then
+        FLG_UseRRP := True;
+
+      if not FLG_UseRRP then
+        price3 := 0;
 
       if (FLG_UseRRP or not VarIsNull(ATableView.DataController.Values[aRecIndex, Currency3Index])) then
         Currency3ID := ATableView.DataController.Values[aRecIndex, Currency3Index];
@@ -2218,11 +2239,6 @@ begin
           now), goodsid]));
       end;
 
-      Price7 := 0;
-      if VarIsNumeric(ATableView.DataController.Values[aRecIndex, Price7Index]) and (ATableView.Controller.SelectedRecords
-        [I].Values[Price7Index] <> 0) then
-        Price7 := ATableView.DataController.Values[aRecIndex, Price7Index];
-
       if not Variants.VarIsNull(ATableView.DataController.Values[aRecIndex, Currency7Index]) then
         currency7id := ATableView.DataController.Values[aRecIndex, Currency7Index];
 
@@ -2232,7 +2248,10 @@ begin
         price0 := ATableView.DataController.Values[aRecIndex, Price0Index];
       end;
 
-      if (currency7id = '') then
+      if (Price7 = 0) and FLG_UseRRP then
+        // pozitie fara pret indicativ: valuta 7 nu vine din pricelist, luam valuta RRP
+        currency7id := iif(Currency3ID = '', '840', Currency3ID)
+      else if (currency7id = '') then
         raise Exception.create('Valuta 7 nu este setata');
 
       currency0id := iif(currency7id = '', Currency3ID, currency7id);
@@ -2280,9 +2299,8 @@ begin
       end;
     end;
 
-    dmDB.ExecuteQuery('execute procedure close_reevaluare(:docid)', [DOCID]);
-        // micsorarea preturilui recomandat cu 1 % automat, exceptie accent
 
+     // micsorarea preturilui recomandat cu 1 % automat, exceptie accent
     var qq := TIBCQuery.Create(nil);
     CustomerRrpDiscount := 0;
     try
@@ -2295,6 +2313,7 @@ begin
     end;
 
     dmDB.ExecuteQuery('EXECUTE PROCEDURE ADJUST_RRP_REEVALUATION(:DOCID, :PERCENT)', [DOCID, CustomerRrpDiscount]);
+    dmDB.ExecuteQuery('execute procedure close_reevaluare(:docid)', [DOCID]);
   except
     if dmDB.IBCTrDefaultUpdate.Active then
       dmDB.IBCTrDefaultUpdate.Rollback;
@@ -2401,6 +2420,9 @@ procedure Tframe78PriceList.btnAnalizaReevaluareClick(Sender: TObject);
 begin
   DoAnalizePrice(IBCQueryPriceToCompare.FieldByName('PLID').AsInteger, IBCQueryPriceData.FieldByName('PLID').AsInteger);
   bbToateReevaluarileClick(Sender);
+  ibcquerypricedata.Edit;
+  IBCQUERYPRICEDATA.FieldByName('flg_done').AsInteger := 1;
+  IBCQueryPriceData.post;
 end;
 
 procedure Tframe78PriceList.cxGridDBTableView2KeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);

@@ -224,6 +224,8 @@ type
         cxGridGoods_TableColumn1: TcxGridDBColumn;
         dxBarButton12: TdxBarButton;
         dxBarButton13: TdxBarButton;
+    bbAcntGoods: TdxBarButton;
+        procedure bbAcntGoodsClick(Sender: TObject);
         procedure cxGridGoods_TableKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure bbHomeClick(Sender: TObject);
         procedure bbBackClick(Sender: TObject);
@@ -461,6 +463,7 @@ type
         function IsSerialTypeSerialNumber(const SerialType: Integer): Boolean;
         function IsSerialTypePartNumber(const SerialType: Integer): Boolean;
         function SelectWebCatalog: Integer;
+        procedure ShowAcntGoodsDlg(GoodsID: Integer);
     published
         property GoodsVendorID: Integer read FGoodsVendorID write SetGoodsVendorID;
         property WebGoodsTypeID: Integer read FWebGoodsTypeID write SetWebGoodsTypeID;
@@ -1481,6 +1484,11 @@ end;
 procedure TfrmGoodsBrowser.AdjustGoodsName(Values: Integer);
 begin
 
+end;
+
+procedure TfrmGoodsBrowser.bbAcntGoodsClick(Sender: TObject);
+begin
+  ShowAcntGoodsDlg(GoodsID);
 end;
 
 procedure TfrmGoodsBrowser.DisplayBurstAddFailed;
@@ -3953,6 +3961,11 @@ end;
 procedure TfrmGoodsBrowser.SetWebGoodsTypeID(const Value: Integer);
 begin
     FWebGoodsTypeID := Value;
+end;
+
+procedure TfrmGoodsBrowser.ShowAcntGoodsDlg(GoodsID: Integer);
+begin
+
 end;
 
 procedure TfrmGoodsBrowser.ShowPriceRules;

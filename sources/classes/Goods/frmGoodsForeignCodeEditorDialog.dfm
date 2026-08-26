@@ -5,7 +5,7 @@ object frmGoodsForeignCodeEditorDlg: TfrmGoodsForeignCodeEditorDlg
   Anchors = [akLeft]
   BorderStyle = bsDialog
   Caption = 'Cod produs furnizor'
-  ClientHeight = 554
+  ClientHeight = 593
   ClientWidth = 863
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -17,7 +17,7 @@ object frmGoodsForeignCodeEditorDlg: TfrmGoodsForeignCodeEditorDlg
   OnCreate = FormCreate
   DesignSize = (
     863
-    554)
+    593)
   TextHeight = 15
   object Label14: TLabel
     Left = 328
@@ -58,7 +58,7 @@ object frmGoodsForeignCodeEditorDlg: TfrmGoodsForeignCodeEditorDlg
     Left = 8
     Top = 72
     Width = 847
-    Height = 434
+    Height = 473
     Margins.Left = 8
     Margins.Top = 8
     Margins.Right = 8
@@ -330,7 +330,7 @@ object frmGoodsForeignCodeEditorDlg: TfrmGoodsForeignCodeEditorDlg
       Left = 16
       Top = 223
       Width = 649
-      Height = 193
+      Height = 232
       BevelKind = bkFlat
       BevelOuter = bvNone
       Color = clWindow
@@ -937,6 +937,64 @@ object frmGoodsForeignCodeEditorDlg: TfrmGoodsForeignCodeEditorDlg
         OnExit = cePrice5Exit
         Width = 70
       end
+      object Label17: TLabel
+        Left = 9
+        Top = 200
+        Width = 91
+        Height = 15
+        Caption = 'Rate 0% | 6 luni'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -12
+        Font.Name = 'Segoe UI'
+        Font.Style = [fsBold]
+        ParentFont = False
+      end
+      object cePriceCredit0: TcxDBCalcEdit
+        Left = 107
+        Top = 196
+        Hint = 
+          'Pret de vinzare in rate 6 luni 0%, MDL. Calculat automat: max(Web, ' +
+          'Indicativ in MDL + 16%).'
+        DataBinding.DataField = 'PRICE_CREDIT0'
+        ParentFont = False
+        ParentShowHint = False
+        Properties.DisplayFormat = '0.00'
+        Properties.ImmediatePost = True
+        Properties.QuickClose = True
+        Properties.ReadOnly = True
+        Properties.UseThousandSeparator = True
+        ShowHint = True
+        Style.Font.Charset = RUSSIAN_CHARSET
+        Style.Font.Color = clWindowText
+        Style.Font.Height = -12
+        Style.Font.Name = 'Segoe UI'
+        Style.Font.Style = [fsBold]
+        Style.IsFontAssigned = True
+        TabStop = False
+        TabOrder = 29
+        Width = 70
+      end
+      object lbCredit0Info: TcxLabel
+        Left = 190
+        Top = 199
+        AutoSize = False
+        Caption = 'lbCredit0Info'
+        ParentFont = False
+        Style.BorderStyle = ebsNone
+        Style.Font.Charset = DEFAULT_CHARSET
+        Style.Font.Color = clGrayText
+        Style.Font.Height = -12
+        Style.Font.Name = 'Segoe UI'
+        Style.Font.Style = []
+        Style.TextColor = clGrayText
+        Style.TransparentBorder = False
+        Style.IsFontAssigned = True
+        TabOrder = 30
+        Height = 16
+        Width = 440
+        AnchorX = 410
+      end
     end
     object teURL: TcxDBTextEdit
       Left = 48
@@ -949,7 +1007,7 @@ object frmGoodsForeignCodeEditorDlg: TfrmGoodsForeignCodeEditorDlg
   end
   object btnOk: TcxButton
     Left = 661
-    Top = 517
+    Top = 556
     Width = 90
     Height = 29
     Anchors = [akRight, akBottom]
@@ -960,7 +1018,7 @@ object frmGoodsForeignCodeEditorDlg: TfrmGoodsForeignCodeEditorDlg
   end
   object btnCancel: TcxButton
     Left = 757
-    Top = 517
+    Top = 556
     Width = 90
     Height = 29
     Anchors = [akRight, akBottom]
@@ -971,7 +1029,7 @@ object frmGoodsForeignCodeEditorDlg: TfrmGoodsForeignCodeEditorDlg
   end
   object btnResetValues: TcxButton
     Left = 25
-    Top = 517
+    Top = 556
     Width = 90
     Height = 29
     Anchors = [akRight, akBottom]

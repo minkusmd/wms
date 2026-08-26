@@ -52,6 +52,10 @@ type
     cxGridGoodsAcnt_LOW_BOUND: TcxGridDBColumn;
     cxGridGoodsAcnt_HIGH_BOUND: TcxGridDBColumn;
     dxBarButton1: TdxBarButton;
+    cxGridGoodsAcnt_GOODS_TYPE_TITLE: TcxGridDBColumn;
+    cxGridGoodsAcnt_GOODS_TYPEID: TcxGridDBColumn;
+    bbSetGoodsType: TdxBarButton;
+    bbMergeGoodsAcnt: TdxBarButton;
     procedure bbForwardClick(Sender: TObject);
     procedure bbBackClick(Sender: TObject);
     procedure bbHomeClick(Sender: TObject);
@@ -73,6 +77,9 @@ type
     procedure cxGridGoodsAcntTableCustomDrawCell(Sender: TcxCustomGridTableView; ACanvas: TcxCanvas; AViewInfo: TcxGridTableDataCellViewInfo; var ADone: Boolean);
     procedure cxGridGoodsAcntTableTitleStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
     procedure dxBarButton1Click(Sender: TObject);
+    procedure bbSetGoodsTypeClick(Sender: TObject);
+    procedure bbMergeGoodsAcntClick(Sender: TObject);
+    procedure cxGridGoodsAcntTableSelectionChanged(Sender: TcxCustomGridTableView);
   private
     { Private declarations }
     fCurrentParentID: integer;
@@ -106,6 +113,9 @@ type
     procedure ShowGoodsFromAcntCode(const acntCode: Integer);
     procedure ShowGoodsInfoCardDialog(const acntCode: integer; const acntName: string);
     procedure SetupQtyFields;
+    function GetSelectedGoodsAcntIDs(out ADefaultGoodsTypeID: integer): TArray<integer>;
+    procedure SetGoodsTypeForSelectedItems;
+    procedure ShowMergeGoodsAcntDialog;
   protected
     procedure Prepare; override;
     procedure LoadStates; override;
@@ -131,7 +141,7 @@ uses
   frmGoodsAcntEditorDialog, DataModuleDB, ClipBrd, SWNSearchUnit,
   frmChangeParentFolderDialog, frmChangeOrderNoDialog, SWNValueStorageUnit,
   SWNSecurityFlags, SWNDBErrors, frmGoodsFromAcnt, frmGoodsInfoCardDialog,
-  SWNConst;
+  frmGoodsTypeDialog, frmMergeGoodsAcntUnit, SWNConst;
 
 {$R *.dfm}
 
@@ -209,6 +219,16 @@ begin
 
   if (S <> '') then
     NavigateSearch(S);
+end;
+
+procedure TfrmGoodsACNTDlg.bbMergeGoodsAcntClick(Sender: TObject);
+begin
+  ShowMergeGoodsAcntDialog;
+end;
+
+procedure TfrmGoodsACNTDlg.bbSetGoodsTypeClick(Sender: TObject);
+begin
+  SetGoodsTypeForSelectedItems;
 end;
 
 procedure TfrmGoodsACNTDlg.bbSortFoldersClick(Sender: TObject);
@@ -301,6 +321,11 @@ begin
     Shift := [];
   end;
 
+end;
+
+procedure TfrmGoodsACNTDlg.cxGridGoodsAcntTableSelectionChanged(Sender: TcxCustomGridTableView);
+begin
+  SelectedRecordChanged;
 end;
 
 procedure TfrmGoodsACNTDlg.cxGridGoodsAcntTableTitleStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
@@ -603,6 +628,11 @@ begin
 
   bbGoodsInfoCard.Enabled := fInfoCard;
   bbRelatedGoods.Enabled := fRelatedGoods;
+  // OnFocusedRecordChanged se declanseaza inainte de actualizarea selectiei,
+  // deci butoanele ramin active cit timp exista inregistrari, iar numarul
+  // inregistrarilor selectate se verifica in momentul apelului
+  bbSetGoodsType.Enabled := cxGridGoodsAcntTable.DataController.RecordCount > 0;
+  bbMergeGoodsAcnt.Enabled := cxGridGoodsAcntTable.DataController.RecordCount > 0;
 end;
 
 function TfrmGoodsACNTDlg.SelectGoodsACNT(const DefaultGoodsAcntID: integer): Boolean;
@@ -610,6 +640,123 @@ begin
   GoodsAcntID := DefaultGoodsAcntID;
   SelectMode := True;
   Result := ShowModal = mrOk;
+end;
+
+function TfrmGoodsACNTDlg.GetSelectedGoodsAcntIDs(out ADefaultGoodsTypeID:
+    integer): TArray<integer>;
+var
+  i, RecordIndex: integer;
+  V: Variant;
+begin
+  SetLength(Result, 0);
+  ADefaultGoodsTypeID := -1;
+
+  for i := 0 to cxGridGoodsAcntTable.Controller.SelectedRecordCount - 1 do
+  begin
+    RecordIndex := cxGridGoodsAcntTable.Controller.SelectedRows[i].RecordIndex;
+
+    // mapele nu au categorie de produs (in GridMode valoarea poate lipsi
+    // din buffer - atunci inregistrarea nu se exclude)
+    V := cxGridGoodsAcntTable.DataController.Values[RecordIndex, cxGridGoodsAcntTableFolder.Index];
+    if (not VarIsNull(V)) and (V <> 0) then
+      Continue;
+
+    V := cxGridGoodsAcntTable.DataController.Values[RecordIndex, cxGridGoodsAcnt_GOODS_ACNT_ID.Index];
+    if VarIsNull(V) then
+      // in GridMode citim cheia inregistrarii (DataController.KeyFieldNames)
+      V := cxGridGoodsAcntTable.DataController.GetRecordId(RecordIndex);
+    if VarIsNull(V) or VarIsEmpty(V) then
+      Continue;
+
+    SetLength(Result, Length(Result) + 1);
+    Result[High(Result)] := V;
+
+    if ADefaultGoodsTypeID <= 0 then
+    begin
+      V := cxGridGoodsAcntTable.DataController.Values[RecordIndex, cxGridGoodsAcnt_GOODS_TYPEID.Index];
+      if not VarIsNull(V) then
+        ADefaultGoodsTypeID := V;
+    end;
+  end;
+end;
+
+procedure TfrmGoodsACNTDlg.SetGoodsTypeForSelectedItems;
+var
+  dialog: TfrmGoodsTypeDlg;
+  q: TIBCQuery;
+  i: integer;
+  IDs: TArray<integer>;
+  DefaultGoodsTypeID, NewGoodsTypeID, FocusedGoodsAcntID: integer;
+  NewGoodsTypeTitle: string;
+begin
+  IDs := GetSelectedGoodsAcntIDs(DefaultGoodsTypeID);
+  if Length(IDs) = 0 then
+  begin
+    ShowInfoDialog('Categorie produs', 'Selectati cel putin o denumire de contabilitate (mapele nu se accepta).');
+    Exit;
+  end;
+
+  NewGoodsTypeID := -1;
+  NewGoodsTypeTitle := '';
+  dialog := TfrmGoodsTypeDlg.Create(Self);
+  try
+    if dialog.SelectGoodsType(DefaultGoodsTypeID) then
+    begin
+      NewGoodsTypeID := dialog.GoodsTypeID;
+      NewGoodsTypeTitle := dialog.GoodsTypeTitle;
+    end;
+  finally
+    dialog.Free;
+  end;
+
+  if NewGoodsTypeID <= 0 then
+    Exit;
+
+  if Length(IDs) > 1 then
+    if ShowAskDialog('Categorie produs',
+                     Format('Atribuiti categoria "%s" la %d denumiri selectate?', [NewGoodsTypeTitle, Length(IDs)])) <> mrYes then
+      Exit;
+
+  FocusedGoodsAcntID := IBCQueryGoodsAcnt.FieldByName('GOODS_ACNT_ID').AsInteger;
+
+  q := TIBCQuery.Create(nil);
+  try
+    q.Connection := dmDB.IBCConnection;
+    q.Transaction := IBCTrUpdateGoodsAcnt;
+    q.AutoCommit := False;
+    q.SQL.Text := 'UPDATE TS_GOODS_ACNT SET GOODS_TYPEID = :GOODS_TYPEID WHERE GOODS_ACNT_ID = :GOODS_ACNT_ID';
+    q.Prepare;
+
+    if not IBCTrUpdateGoodsAcnt.Active then
+      IBCTrUpdateGoodsAcnt.StartTransaction;
+    try
+      for i := 0 to High(IDs) do
+      begin
+        q.ParamByName('GOODS_TYPEID').AsInteger := NewGoodsTypeID;
+        q.ParamByName('GOODS_ACNT_ID').AsInteger := IDs[i];
+        q.Execute;
+      end;
+      IBCTrUpdateGoodsAcnt.Commit;
+      fItemsChanged := True;
+    except
+      on E: Exception do
+      begin
+        if IBCTrUpdateGoodsAcnt.Active then
+          IBCTrUpdateGoodsAcnt.Rollback;
+        if not ProcessSWNError(E) then
+          raise;
+        Exit;
+      end;
+    end;
+  finally
+    q.Free;
+  end;
+
+  IBCQueryGoodsAcnt.Close;
+  IBCQueryGoodsAcnt.Open;
+  if FocusedGoodsAcntID > 0 then
+    IBCQueryGoodsAcnt.Locate('GOODS_ACNT_ID', FocusedGoodsAcntID, []);
+  SelectedRecordChanged;
 end;
 
 procedure TfrmGoodsACNTDlg.SetGoodsAcntID(const Value: integer);
@@ -768,6 +915,43 @@ begin
     finally
       dialogItem.Free;
     end;
+  end;
+end;
+
+procedure TfrmGoodsACNTDlg.ShowMergeGoodsAcntDialog;
+var
+  dialog: TfrmMergeGoodsAcntDlg;
+  IDs: TArray<integer>;
+  DefaultGoodsTypeID, TargetGoodsAcntID: integer;
+begin
+  IDs := GetSelectedGoodsAcntIDs(DefaultGoodsTypeID);
+  if Length(IDs) < 2 then
+  begin
+    ShowInfoDialog('Unirea denumirilor',
+                   'Selectati cel putin doua denumiri de contabilitate (mapele nu se accepta).');
+    Exit;
+  end;
+
+  dialog := TfrmMergeGoodsAcntDlg.Create(Self);
+  try
+    dialog.SetGoodsAcntIDs(IDs);
+    if dialog.ShowModal = mrOk then
+    begin
+      fItemsChanged := True;
+      TargetGoodsAcntID := dialog.TargetGoodsAcntID;
+
+      IBCQueryGoodsAcnt.Close;
+      IBCQueryGoodsAcnt.Open;
+      if TargetGoodsAcntID > 0 then
+        IBCQueryGoodsAcnt.Locate('GOODS_ACNT_ID', TargetGoodsAcntID, []);
+      SelectedRecordChanged;
+
+      ShowInfoDialog('Unirea denumirilor',
+                     Format('Au fost unite %d inregistrari in "%s".',
+                            [dialog.MergedCount, dialog.TargetGoodsAcntTitle]));
+    end;
+  finally
+    dialog.Free;
   end;
 end;
 

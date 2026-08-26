@@ -91,7 +91,8 @@ type
 implementation
 
 uses
-  SWNUtils, SWNConst, SWNSecurityUtils, SWNValueStorageUnit, frmPasswordDlg, frmNewVersionDialog, ShellApi;
+  SWNUtils, SWNConst, SWNSecurityUtils, SWNValueStorageUnit, frmPasswordDlg, frmNewVersionDialog, ShellApi,
+  SWNUpdateClientDBClass;
 
 {$R *.dfm}
 
@@ -368,8 +369,7 @@ begin
     dialog.SetVersionInfo(FileVersionToStr(fAppVersion), FileVersionToStr(fDBVersion), fDBChanges, fDBCritical);
     if dialog.ShowModal = mrOk then
     begin
-      if ShellExecute(0, PWideChar('open'), PWideChar(FUpdaterAppName), PWideChar('"' + Application.ExeName +
-        '" RUNAPP'), nil, SW_SHOWNORMAL) > 32 then
+      if LaunchUpdater(FUpdaterAppName) then
       begin
         Application.Terminate;
       end;

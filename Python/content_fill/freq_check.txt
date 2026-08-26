@@ -1,0 +1,9 @@
+295406  titlu=3.8-4.6 GHz    ultra=3.8-4 GHz       Procesor AMD RYZEN 7 5700G TRAY, AM4, 3.8-4.6GHz,  16MB,  
+341781  titlu=2.6-5.3 GHz    ultra=3.5-5.3 GHz     Procesor INTEL CORE I5-14600KF 2.6-5.3GHZ, (6P+8E/20T, 20M
+341782  titlu=2.5-5.6 GHz    ultra=3.4-5.6 GHz     Procesor INTEL CORE™ I7-14700K, TRAY, S1700, 2.5-5.6GHz (8
+341783  titlu=2.5-5.6 GHz    ultra=3.4-5.6 GHz     Procesor INTEL CORE™ I7-14700KF, TRAY, S1700, 2.5-5.6GHz (
+344266  titlu=2.4-6.0 GHz    ultra=3.2-6 GHz       Procesor INTEL Core™ i9-14900KF, Tray, S1700, 2.4-6.0GHz, 
+354371  titlu=1.8-4.7 GHz    ultra=2.5-4.7 GHz     Procesor INTEL CORE™ I5-14400, S1700, 1.8-4.7GHz, 10C (6P+
+391961  titlu=2.6-5.3 GHz    ultra=3.5-5.3 GHz     Procesor INTEL Core i5-14600K 2.6-5.3GHz 14 Cores 20-Threa
+
+identice=45 diferite=7 fara=2

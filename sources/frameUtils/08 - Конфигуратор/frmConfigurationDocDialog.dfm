@@ -2,8 +2,8 @@ object frmConfigurationDocDlg: TfrmConfigurationDocDlg
   Left = 0
   Top = 0
   BorderStyle = bsDialog
-  ClientHeight = 598
-  ClientWidth = 678
+  ClientHeight = 650
+  ClientWidth = 697
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -13,13 +13,13 @@ object frmConfigurationDocDlg: TfrmConfigurationDocDlg
   Position = poOwnerFormCenter
   OnClose = FormClose
   DesignSize = (
-    678
-    598)
+    697
+    650)
   TextHeight = 15
   object dtDialogTitle: TDialogTitle
     Left = 0
     Top = 0
-    Width = 678
+    Width = 697
     Height = 64
     Title = 'Oferte'
     Text = ''
@@ -35,13 +35,14 @@ object frmConfigurationDocDlg: TfrmConfigurationDocDlg
     FontText.Style = []
     ImageList = dmAdditions.cxImageList_DialogIcons
     ImageIndex = 16
+    ExplicitWidth = 678
   end
   object pnClient: TPanel
     AlignWithMargins = True
     Left = 8
     Top = 72
-    Width = 662
-    Height = 468
+    Width = 681
+    Height = 520
     Margins.Left = 8
     Margins.Top = 8
     Margins.Right = 8
@@ -53,11 +54,12 @@ object frmConfigurationDocDlg: TfrmConfigurationDocDlg
     Color = clWindow
     ParentBackground = False
     TabOrder = 1
+    ExplicitWidth = 665
     object cxScrollBox1: TcxScrollBox
-      Left = 16
+      Left = 17
       Top = 10
-      Width = 701
-      Height = 439
+      Width = 640
+      Height = 495
       TabOrder = 0
       object cxLabel5: TLabel
         Left = 13
@@ -124,8 +126,8 @@ object frmConfigurationDocDlg: TfrmConfigurationDocDlg
         Transparent = True
       end
       object cxLabel8: TLabel
-        Left = 9
-        Top = 360
+        Left = 12
+        Top = 286
         Width = 63
         Height = 15
         Caption = 'Comentariu'
@@ -158,16 +160,16 @@ object frmConfigurationDocDlg: TfrmConfigurationDocDlg
         Transparent = True
       end
       object Label3: TLabel
-        Left = 13
-        Top = 269
+        Left = 14
+        Top = 228
         Width = 46
         Height = 15
         Caption = 'Analitica'
         Transparent = True
       end
       object Label4: TLabel
-        Left = 13
-        Top = 311
+        Left = 15
+        Top = 257
         Width = 31
         Height = 15
         Caption = 'Statut'
@@ -283,7 +285,7 @@ object frmConfigurationDocDlg: TfrmConfigurationDocDlg
         Properties.ListOptions.SyncMode = True
         Properties.ListSource = dmDB.IBCDataSourceStocks
         TabOrder = 3
-        Width = 327
+        Width = 276
       end
       object beCT_NAME: TcxButtonEdit
         Left = 107
@@ -333,7 +335,7 @@ object frmConfigurationDocDlg: TfrmConfigurationDocDlg
         Properties.OnButtonClick = beCT_NAMEPropertiesButtonClick
         TabOrder = 4
         Text = 'beCT_NAME'
-        Width = 327
+        Width = 276
       end
       object cxDBLookupComboBox1: TcxDBLookupComboBox
         Left = 389
@@ -369,13 +371,13 @@ object frmConfigurationDocDlg: TfrmConfigurationDocDlg
         Width = 87
       end
       object mmCOMMENTS: TcxDBMemo
-        Left = 105
-        Top = 357
+        Left = 108
+        Top = 283
         DataBinding.DataField = 'COMMENTS'
         DataBinding.DataSource = IBCDataSourceDocProps
         Properties.ReadOnly = True
         Properties.ScrollBars = ssVertical
-        Properties.VisibleLineCount = 4
+        Properties.VisibleLineCount = 2
         TabOrder = 7
         OnClick = mmCOMMENTSClick
         OnEnter = mmCOMMENTSClick
@@ -383,7 +385,7 @@ object frmConfigurationDocDlg: TfrmConfigurationDocDlg
       end
       object cbFLG_ACNT: TcxDBCheckBox
         Left = 489
-        Top = 294
+        Top = 250
         Caption = 'Export contabilitate'
         DataBinding.DataField = 'FLG_ACNT'
         DataBinding.DataSource = dmDB.IBCDataSourceDocs
@@ -407,8 +409,8 @@ object frmConfigurationDocDlg: TfrmConfigurationDocDlg
         Width = 89
       end
       object lcbAnalytics: TcxDBLookupComboBox
-        Left = 109
-        Top = 266
+        Left = 104
+        Top = 224
         Hint = #1040#1085#1072#1083#1080#1090#1080#1082#1072' '#1076#1086#1082#1091#1084#1077#1085#1090#1072
         DataBinding.DataField = 'SC2'
         DataBinding.DataSource = dmDB.IBCDataSourceDocs
@@ -431,7 +433,7 @@ object frmConfigurationDocDlg: TfrmConfigurationDocDlg
         Properties.ListSource = dmDB.IBCDataSourceAnalytics
         ShowHint = True
         TabOrder = 10
-        Width = 290
+        Width = 282
       end
       object beContract: TcxButtonEdit
         Left = 109
@@ -503,11 +505,11 @@ object frmConfigurationDocDlg: TfrmConfigurationDocDlg
         Properties.ListSource = dmDB.IBCDataSourceCurrency
         Properties.OnEditValueChanged = lcbCURRENCYPropertiesEditValueChanged
         TabOrder = 12
-        Width = 73
+        Width = 80
       end
       object cbFLG_FURNITURE: TcxDBCheckBox
         Left = 489
-        Top = 269
+        Top = 225
         Caption = 'Producere mobila'
         DataBinding.DataField = 'FLG_FURNITURE'
         DataBinding.DataSource = dmDB.IBCDataSourceDocs
@@ -521,8 +523,8 @@ object frmConfigurationDocDlg: TfrmConfigurationDocDlg
         TabOrder = 13
       end
       object lcbDocumentState: TcxDBLookupComboBox
-        Left = 109
-        Top = 308
+        Left = 106
+        Top = 254
         DataBinding.DataField = 'STATEID'
         DataBinding.DataSource = dmDB.IBCDataSourceDocs
         Properties.DropDownWidth = 300
@@ -547,13 +549,24 @@ object frmConfigurationDocDlg: TfrmConfigurationDocDlg
         Properties.ListFieldIndex = 1
         Properties.ListSource = dmDB.IBCDataSourceDocTypeStates
         TabOrder = 14
-        Width = 290
+        Width = 281
+      end
+      object Panel1: TPanel
+        Left = 13
+        Top = 327
+        Width = 612
+        Height = 163
+        BevelKind = bkFlat
+        BevelOuter = bvNone
+        Color = clWindow
+        ParentBackground = False
+        TabOrder = 15
       end
     end
   end
   object btnOk: TcxButton
-    Left = 468
-    Top = 554
+    Left = 487
+    Top = 606
     Width = 90
     Height = 29
     Anchors = [akRight, akBottom]
@@ -561,10 +574,12 @@ object frmConfigurationDocDlg: TfrmConfigurationDocDlg
     Default = True
     ModalResult = 1
     TabOrder = 2
+    ExplicitLeft = 468
+    ExplicitTop = 554
   end
   object btnCancel: TcxButton
-    Left = 564
-    Top = 554
+    Left = 583
+    Top = 606
     Width = 90
     Height = 29
     Anchors = [akRight, akBottom]
@@ -572,6 +587,8 @@ object frmConfigurationDocDlg: TfrmConfigurationDocDlg
     Caption = 'Renunta'
     ModalResult = 2
     TabOrder = 3
+    ExplicitLeft = 564
+    ExplicitTop = 554
   end
   object IBCQueryDocProps: TIBCQuery
     KeyFields = 'DOCID'

@@ -254,8 +254,7 @@ end;
 
 procedure Tframe05BankPDNSIC.DoCloseDocument(const DocID: Integer);
 begin
-  inherited;
-  PopupForSelection;
+  DoAction_Provesti;
 end;
 
 procedure Tframe05BankPDNSIC.DoFrameHide;

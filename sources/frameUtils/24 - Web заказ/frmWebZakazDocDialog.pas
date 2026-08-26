@@ -7,7 +7,7 @@ uses
   StdCtrls, cxButtonEdit, cxDBEdit, cxDBLookupComboBox, ExtCtrls, cxButtons, cxGraphics, cxControls, cxLookAndFeels,
   cxLookAndFeelPainters, cxContainer, cxEdit, Vcl.Menus, DBAccess, MemDS, cxCheckBox, cxCalendar, cxMemo, cxDropDownEdit,
   cxCalc, cxTextEdit, cxMaskEdit, cxLookupEdit, cxDBLookupEdit, dxStatusBar,
-  dxCoreGraphics, dxUIAClasses;
+  dxCoreGraphics, dxUIAClasses, frameDocsDeliveryUnit;
 
 type
   TfrmWebZakazDocDlg = class(TSWNCustomForm)
@@ -17,30 +17,41 @@ type
     dxStatusBar1: TdxStatusBar;
     Timer1: TTimer;
     pnClient: TScrollBox;
+    lblSecDocument: TLabel;
+    bvDocument: TBevel;
     cxLabel5: TLabel;
-    Bevel1: TBevel;
+    lblStare: TLabel;
+    lblOrganizatie: TLabel;
+    lblAnaliticaOrg: TLabel;
     cxLabel1: TLabel;
     cxLabel2: TLabel;
-    cxLabel3: TLabel;
-    cxLabel8: TLabel;
     cxLabel6: TLabel;
+    lblSecFinante: TLabel;
+    bvFinante: TBevel;
+    cxLabel3: TLabel;
+    lblRata: TLabel;
     Label1: TLabel;
     Label2: TLabel;
-    lcbCURRENCY: TcxDBLookupComboBox;
-    ceRATE: TcxDBCalcEdit;
-    lcbDTSC: TcxDBLookupComboBox;
-    mmCOMMENTS: TcxDBMemo;
+    lblSecLivrare: TLabel;
+    bvLivrare: TBevel;
+    cxLabel8: TLabel;
+    bvMentiuni: TBevel;
     deDATA: TcxDBDateEdit;
-    cbFLG_ACNT: TcxDBCheckBox;
+    lcbSTATEID: TcxDBLookupComboBox;
     beDT_NAME: TcxButtonEdit;
+    lcbDTSC: TcxDBLookupComboBox;
+    lcbAnalytics: TcxDBLookupComboBox;
     beCT_NAME: TcxButtonEdit;
     lcbDTDEP: TcxDBLookupComboBox;
-    lcbAnalytics: TcxDBLookupComboBox;
+    lcbCURRENCY: TcxDBLookupComboBox;
+    ceRATE: TcxDBCalcEdit;
     ceRATEUSD: TcxDBCalcEdit;
-    cxDBLookupComboBox1: TcxDBLookupComboBox;
     ceCashback: TcxDBCalcEdit;
-    btnCancel: TcxButton;
+    cbFLG_ACNT: TcxDBCheckBox;
+    frameDelivery: TframeDocsDelivery;
+    mmCOMMENTS: TcxDBMemo;
     btnOk: TcxButton;
+    btnCancel: TcxButton;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure beDT_NAMEPropertiesButtonClick(Sender: TObject; AButtonIndex: Integer);
     procedure beCT_NAMEPropertiesButtonClick(Sender: TObject; AButtonIndex: Integer);
@@ -138,6 +149,7 @@ begin
   if CheckParams then
   begin
     dmDB.IBCQueryDocs.Post;
+    frameDelivery.PostData(dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger);
     if dmdb.IBCQueryDocComments.State in dsEditModes then
       dmdb.IBCQueryDocComments.Post;
     dmDB.IBCQueryDocs.UpdateTransaction.Commit;
@@ -223,6 +235,9 @@ begin
     IBCQueryCashback.ParamByName('DOCID').AsInteger := dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger;
     IBCQueryCashback.Open;
 
+    frameDelivery.ReadOnly := fReadOnly;
+    frameDelivery.PrepareData(dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger);
+
     dmDB.OpenAnalyticsDataSource;
 
   except
@@ -307,6 +322,8 @@ begin
   if dmdb.IBCQueryDocComments.State in dsEditModes then
     dmdb.IBCQueryDocComments.Cancel;
 
+  frameDelivery.CancelData;
+
   dmDB.IBCQueryDocs.Cancel;
   if not fReadOnly then
     dmDB.IBCQueryDocs.UpdateTransaction.Rollback;
@@ -315,6 +332,7 @@ end;
 procedure TfrmWebZakazDocDlg.CloseAdditionaldataSources;
 begin
      // close additional datasets
+  frameDelivery.CloseData;
   dmDB.IBCQueryCurrency.Close;
   dmDB.IBCQueryAnalitica.Close;
   dmDB.IBCQueryAnalytics.Close;

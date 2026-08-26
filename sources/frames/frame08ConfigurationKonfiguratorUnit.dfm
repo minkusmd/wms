@@ -303,7 +303,7 @@ inherited frame08ConfigurationBRK: Tframe08ConfigurationBRK
       Font.Style = []
       ParentFont = False
       TabOrder = 0
-      Properties.ActivePage = tbsGoods
+      Properties.ActivePage = cxTabSheet1
       Properties.CustomButtons.Buttons = <>
       Properties.TabPosition = tpBottom
       ClientRectBottom = 236
@@ -1006,6 +1006,14 @@ inherited frame08ConfigurationBRK: Tframe08ConfigurationBRK
           UseOwnSunkenBorder = True
         end
       end
+      object cxTabSheet1: TcxTabSheet
+        Caption = 'cxTabSheet1'
+        ImageIndex = 2
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
+      end
     end
   end
   object cxSplitter: TcxSplitter
@@ -1023,6 +1031,7 @@ inherited frame08ConfigurationBRK: Tframe08ConfigurationBRK
     PositionAfterOpen = 19
     MinSize = 128
     Control = pnBottom
+    ExplicitWidth = 8
   end
   object dxBarManager: TdxBarManager
     Font.Charset = RUSSIAN_CHARSET

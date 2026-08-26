@@ -26,9 +26,11 @@ type
     cxGridSelTable_WSID: TcxGridColumn;
     cxGridSelTable_IMG: TcxGridColumn;
     cxGridSelTable_TITLE: TcxGridColumn;
+    cxGridSelTable_FIRMA: TcxGridColumn;
     cxGridAvTable_WSID: TcxGridColumn;
     cxGridAvTable_IMG: TcxGridColumn;
     cxGridAvTable_TITLE: TcxGridColumn;
+    cxGridAvTable_FIRMA: TcxGridColumn;
     btnOk: TButton;
     btnCancel: TButton;
     procedure cxGridAvTableSelectionChanged(Sender: TcxCustomGridTableView);
@@ -77,6 +79,8 @@ begin
         [N1, cxGridAvTable_WSID.Index];
       cxGridSelTable.DataController.Values[N2, cxGridSelTable_TITLE.Index] := cxGridAvTable.DataController.Values
         [N1, cxGridAvTable_TITLE.Index];
+      cxGridSelTable.DataController.Values[N2, cxGridSelTable_FIRMA.Index] := cxGridAvTable.DataController.Values
+        [N1, cxGridAvTable_FIRMA.Index];
     end;
     cxGridAvTable.Controller.DeleteSelection;
 
@@ -123,10 +127,11 @@ begin
   try
     Query.Connection := dmDB.IBCConnection;
         // lista computerilor selectate
-    Query.SQL.Add('SELECT DA.WS_ID, WS.COMPUTER_NAME');
+    Query.SQL.Add('SELECT DA.WS_ID, WS.COMPUTER_NAME, WS.FIRMA_NAME');
     Query.SQL.Add('FROM FP_DEVICE_ACCESS DA');
-    Query.SQL.Add('INNER JOIN WS_WORK_STATIONS WS ON DA.WS_ID = WS.WSID');
+    Query.SQL.Add('INNER JOIN VW_WS_WORK_STATIONS WS ON DA.WS_ID = WS.WS_ID');
     Query.SQL.Add('WHERE DA.FP_ID=:ID');
+    Query.SQL.Add('ORDER BY WS.COMPUTER_NAME');
     Query.ParamByName('ID').AsInteger := fMasterDataSet.FieldByName('FP_ID').asInteger;
     Query.ExecSQL;
     while not Query.Eof do
@@ -134,23 +139,28 @@ begin
       N := cxGridSelTable.DataController.AppendRecord;
       cxGridSelTable.DataController.Values[N, cxGridSelTable_WSID.Index] := Query.Fields[0].AsInteger;
       cxGridSelTable.DataController.Values[N, cxGridSelTable_TITLE.Index] := Query.Fields[1].AsString;
+      cxGridSelTable.DataController.Values[N, cxGridSelTable_FIRMA.Index] := Query.Fields[2].AsString;
       Query.Next;
     end;
 
     Query.Close;
     Query.SQL.Clear;
-        // lista computerilor disponibile
-    Query.SQL.Add('SELECT WS.WSID, WS.COMPUTER_NAME');
-    Query.SQL.Add('FROM WS_WORK_STATIONS WS');
-    Query.SQL.Add('WHERE (WS.FIRMAID=:FIRMA_ID) AND NOT EXISTS(SELECT 1 FROM FP_DEVICE_ACCESS WHERE FP_ID=:FP_ID AND WS_ID=WS.WSID)');
+        // Lista computerilor disponibile. Nu filtram dupa subdiviziunea MCC: MCC din retea
+        // este folosita tocmai de calculatoare din alta parte. Dreptul de tipar ramine
+        // controlat de SP_CANPRINTFPDEVICE (firma curenta + numarul de serie al MCC).
+    Query.SQL.Add('SELECT WS.WS_ID, WS.COMPUTER_NAME, WS.FIRMA_NAME');
+    Query.SQL.Add('FROM VW_WS_WORK_STATIONS WS');
+    Query.SQL.Add('WHERE (WS.FLG_ENABLED=1)');
+    Query.SQL.Add('  AND NOT EXISTS(SELECT 1 FROM FP_DEVICE_ACCESS WHERE FP_ID=:FP_ID AND WS_ID=WS.WS_ID)');
+    Query.SQL.Add('ORDER BY WS.COMPUTER_NAME');
     Query.ParamByName('FP_ID').AsInteger := fMasterDataSet.FieldByName('FP_ID').asInteger;
-    Query.ParamByName('FIRMA_ID').AsInteger := fMasterDataSet.FieldByName('FIRMA_ID').asInteger;
     Query.ExecSQL;
     while not Query.Eof do
     begin
       N := cxGridAvTable.DataController.AppendRecord;
       cxGridAvTable.DataController.Values[N, cxGridAvTable_WSID.Index] := Query.Fields[0].AsInteger;
       cxGridAvTable.DataController.Values[N, cxGridAvTable_TITLE.Index] := Query.Fields[1].AsString;
+      cxGridAvTable.DataController.Values[N, cxGridAvTable_FIRMA.Index] := Query.Fields[2].AsString;
       Query.Next;
     end;
   finally
@@ -176,6 +186,8 @@ begin
         [N1, cxGridSelTable_WSID.Index];
       cxGridAvTable.DataController.Values[N2, cxGridAvTable_TITLE.Index] := cxGridSelTable.DataController.Values
         [N1, cxGridSelTable_TITLE.Index];
+      cxGridAvTable.DataController.Values[N2, cxGridAvTable_FIRMA.Index] := cxGridSelTable.DataController.Values
+        [N1, cxGridSelTable_FIRMA.Index];
     end;
     cxGridSelTable.Controller.DeleteSelection;
   finally

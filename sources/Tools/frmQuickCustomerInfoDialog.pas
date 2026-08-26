@@ -117,15 +117,27 @@ type
     procedure dxBarButton1Click(Sender: TObject);
     procedure dxBarButton2Click(Sender: TObject);
     procedure TrackBar1Change(Sender: TObject);
-    procedure cxBarEditItem1Change(Sender: TObject);
+    procedure DXAudioOut1Done(Sender: TComponent);
   private
     { Private declarations }
     fCT: integer;
     fDT: integer;
     fCustomerIDToOpen: integer;
+    fAudioInput: TAuFileIn;    // inputul activ: MP3In1 sau WaveIn1
+    fTrackUpdating: Boolean;   // TrackBar1.Position este schimbat din cod, nu de utilizator
+    fTrackScrubbing: Boolean;  // utilizatorul trage cursorul cu mouse-ul
+    fPendingSeek: Integer;     // pozitia ceruta inainte ca redarea sa devina activa (-1 = nimic)
+    fTrackWndProc: TWndMethod; // WindowProc original al TrackBar1
+    procedure TrackBarWndProc(var Message: TMessage);
     procedure SetCT(const Value: integer);
     procedure SetDT(const Value: integer);
     procedure ShowCustomerInfo(const CustomerID: integer);
+    procedure StopPlayback;
+    procedure ResetTrackBar;
+    procedure SetTrackPosition(const APos: Integer);
+    procedure ApplySeek(const ATrackPos: Integer);
+    procedure SeekToTrackPosition;
+    procedure UpdatePlaybackInfo(const ATrackPos: Integer = -1);
   protected
     function GetCashbackAmount(const CT: integer): Double;
     { protected declarations }
@@ -146,44 +158,50 @@ uses
 
 {$R *.dfm}
 
+const
+  // TrackBar-ul lucreaza in miimi din durata totala, independent de numarul de sample-uri
+  TrackScale = 1000;
+
+function FormatSeconds(const ASeconds: Integer): string;
+begin
+  Result := Format('%.2d:%.2d', [ASeconds div 60, ASeconds mod 60]);
+end;
+
 { TfrmQuickCustomerInfoDlg }
 
 procedure TfrmQuickCustomerInfoDlg.bbPlayClick(Sender: TObject);
 var
   tmpFilename: string;
 begin
+  StopPlayback;
+
+  // eliberam fisierul temporar inainte de a-l suprascrie
+  fAudioInput := nil;
+  MP3In1.FileName := '';
+  WaveIn1.FileName := '';
+
   tmpFilename := 'tmpvoice';//tpath.GetTempFileName;
-//  tmpFilename := ChangeFileExt(tmpFilename, '.mp3');
   TBlobField(IBCQueryDialHistory.FieldByName('WAV')).SaveToFile(tmpFilename);
 
   MP3In1.FileName := tmpFilename;
-  if MP3In1.Valid then begin
-    DXAudioOut1.Input := MP3In1;
-    TrackBar1.Position := 0;
-    TrackBar1.max := mp3in1.TotalSamples;
-    DXAudioOut1.Run;
-  end
+  if MP3In1.Valid then
+    fAudioInput := MP3In1
   else begin
     WaveIn1.FileName := tmpFileName;
-    if WaveIn1.Valid then begin
-      DXAudioOut1.Input := WaveIn1;
-      TrackBar1.Min := 0;
-      TrackBar1.Max := WaveIn1.TotalSamples;
-      DXAudioOut1.Run;
-    end;
+    if WaveIn1.Valid then
+      fAudioInput := WaveIn1;
   end;
 
-//  with MediaPlayer1 do begin
-//    MediaPlayer1.Close;
-//    MediaPlayer1.FileName := tmpFilename;
-//    TimeFormat := tfMilliSeconds;
-//    MediaPlayer1.Open;
-//    TrackBar1.Min := 0;
-//    TrackBar1.Max := Length;
-//    MediaPlayer1.Position := TrackBar1.Position;
-//    MediaPlayer1.Play;
-//    AudioTimer.Enabled := True;
-//  end;
+  ResetTrackBar;
+
+  if fAudioInput = nil then begin
+    UpdatePlaybackInfo;
+    Exit;
+  end;
+
+  DXAudioOut1.Input := fAudioInput;
+  DXAudioOut1.Run;
+  UpdatePlaybackInfo;
 end;
 
 procedure TfrmQuickCustomerInfoDlg.bbSaveAsClick(Sender: TObject);
@@ -201,11 +219,6 @@ begin
   finally
     dialog.Free;
   end;
-end;
-
-procedure TfrmQuickCustomerInfoDlg.cxBarEditItem1Change(Sender: TObject);
-begin
-  DXAudioOut1.Jump(1000);
 end;
 
 procedure TfrmQuickCustomerInfoDlg.cxButton1Click(Sender: TObject);
@@ -243,29 +256,61 @@ begin
   frameCustomerPhones1.IBCQueryCustomerPhones.Active := True;
 end;
 
-procedure TfrmQuickCustomerInfoDlg.DXAudioOut1Progress(Sender: TComponent);
+procedure TfrmQuickCustomerInfoDlg.DXAudioOut1Done(Sender: TComponent);
 begin
-  TrackBar1.Position := dxAudioout1.Progress * 1000;
-cxBarEditItem1.Caption :=  IntToStr(DXAudioOut1.Progress);
-//  Application.ProcessMessages;
+  if fTrackScrubbing or (fPendingSeek >= 0) then
+    Exit;
+  SetTrackPosition(TrackBar1.Max);
+  UpdatePlaybackInfo(TrackBar1.Max);
+end;
+
+procedure TfrmQuickCustomerInfoDlg.DXAudioOut1Progress(Sender: TComponent);
+var
+  Pending: Integer;
+begin
+  if fAudioInput = nil then
+    Exit;
+
+  // pozitia ceruta inainte de pornire se aplica dupa ce redarea a devenit activa
+  if fPendingSeek >= 0 then begin
+    Pending := fPendingSeek;
+    fPendingSeek := -1;
+    ApplySeek(Pending);
+    Exit;
+  end;
+
+  // cat timp utilizatorul trage cursorul nu il mutam sub mouse
+  if fTrackScrubbing then
+    Exit;
+
+  if fAudioInput.Size > 0 then
+    SetTrackPosition(Round(fAudioInput.Position / fAudioInput.Size * TrackScale));
+  UpdatePlaybackInfo;
 end;
 
 procedure TfrmQuickCustomerInfoDlg.dxBarButton1Click(Sender: TObject);
 begin
-  dxAudioOut1.Stop(false);
+  StopPlayback;
+  ResetTrackBar;
+  UpdatePlaybackInfo(0);
 end;
 
 procedure TfrmQuickCustomerInfoDlg.dxBarButton2Click(Sender: TObject);
 begin
- if DxAudioOut1.Status = tosPlaying then
-    DxAudioOut1.Pause
-  else
-    DxAudioOut1.Resume;
+  case DXAudioOut1.Status of
+    tosPlaying: DXAudioOut1.Pause;
+    tosPaused:  DXAudioOut1.Resume;
+  end;
 end;
 
 procedure TfrmQuickCustomerInfoDlg.FormCreate(Sender: TObject);
 begin
   fCustomerIDToOpen := -1;
+  fAudioInput := nil;
+  fPendingSeek := -1;
+
+  fTrackWndProc := TrackBar1.WindowProc;
+  TrackBar1.WindowProc := TrackBarWndProc;
 end;
 
 procedure TfrmQuickCustomerInfoDlg.FormShow(Sender: TObject);
@@ -329,7 +374,7 @@ begin
   IBCQueryCustomers.Active := True;
 
   lbCashback.Enabled := False;
-  TrackBar1.Position := 0;
+  ResetTrackBar;
 end;
 
 procedure TfrmQuickCustomerInfoDlg.sbOpenCustomerClick(Sender: TObject);
@@ -358,16 +403,149 @@ end;
 
 procedure TfrmQuickCustomerInfoDlg.TrackBar1Change(Sender: TObject);
 begin
-  DXAudioOut1.Stop();
-  WaveIn1.Seek(TrackBar1.Position);
-  DXAudioOut1.Run;
+  // pozitia a fost setata din cod (progresul redarii) - nu este o comanda a utilizatorului
+  if fTrackUpdating then
+    Exit;
+
+  if fTrackScrubbing then
+    // in timpul tragerii aratam doar timpul; seek-ul se face la eliberarea butonului
+    UpdatePlaybackInfo(TrackBar1.Position)
+  else
+    SeekToTrackPosition;
+end;
+
+procedure TfrmQuickCustomerInfoDlg.TrackBarWndProc(var Message: TMessage);
+var
+  ScrollCode: Integer;
+begin
+  // TTrackBar nu publica OnMouseDown/OnMouseUp, asa ca urmarim direct notificarile de scroll:
+  // TB_THUMBTRACK = utilizatorul trage cursorul, restul codurilor incheie deplasarea
+  if (Message.Msg = CN_HSCROLL) or (Message.Msg = CN_VSCROLL) then begin
+    ScrollCode := TWMScroll(Message).ScrollCode;
+    fTrackScrubbing := True; // pe durata prelucrarii, OnChange doar actualizeaza timpul
+    try
+      fTrackWndProc(Message);
+    finally
+      fTrackScrubbing := ScrollCode = TB_THUMBTRACK;
+    end;
+
+    if not fTrackScrubbing then
+      SeekToTrackPosition;
+    Exit;
+  end;
+
+  fTrackWndProc(Message);
+end;
+
+procedure TfrmQuickCustomerInfoDlg.SeekToTrackPosition;
+begin
+  if fAudioInput = nil then
+    Exit;
+
+  case DXAudioOut1.Status of
+    tosPlaying, tosPaused:
+      ApplySeek(TrackBar1.Position);
+    tosIdle:
+      begin
+        // redarea s-a terminat sau a fost oprita: pornim din nou si sarim la pozitia ceruta
+        fPendingSeek := TrackBar1.Position;
+        UpdatePlaybackInfo(TrackBar1.Position);
+        DXAudioOut1.Input := fAudioInput;
+        DXAudioOut1.Run;
+      end;
+  end;
+end;
+
+procedure TfrmQuickCustomerInfoDlg.ApplySeek(const ATrackPos: Integer);
+var
+  TotalSamples, TargetSample: Int64;
+begin
+  if (fAudioInput = nil) or (not fAudioInput.Seekable) then
+    Exit;
+
+  TotalSamples := fAudioInput.TotalSamples;
+  if TotalSamples <= 0 then
+    Exit;
+
+  TargetSample := Round(TotalSamples * (ATrackPos / TrackScale));
+  if TargetSample >= TotalSamples then
+    TargetSample := TotalSamples - 1;
+  if TargetSample < 0 then
+    TargetSample := 0;
+
+  // Seek functioneaza si in timpul redarii - nu oprim si nu repornim iesirea audio
+  // (Stop asincron urmat imediat de Run producea EAuException 'Component is Busy')
+  fAudioInput.Seek(TargetSample);
+  UpdatePlaybackInfo(ATrackPos);
+end;
+
+procedure TfrmQuickCustomerInfoDlg.StopPlayback;
+begin
+  fPendingSeek := -1;
+  if Assigned(DXAudioOut1) and (DXAudioOut1.Status <> tosIdle) then
+    DXAudioOut1.Stop(False); // sincron: asteptam oprirea efectiva a firului de redare
+end;
+
+procedure TfrmQuickCustomerInfoDlg.ResetTrackBar;
+begin
+  fTrackScrubbing := False;
+  fTrackUpdating := True;
+  try
+    TrackBar1.Min := 0;
+    TrackBar1.Max := TrackScale;
+    TrackBar1.PageSize := TrackScale div 20;
+    TrackBar1.Frequency := TrackScale div 10;
+    TrackBar1.Position := 0;
+  finally
+    fTrackUpdating := False;
+  end;
+end;
+
+procedure TfrmQuickCustomerInfoDlg.SetTrackPosition(const APos: Integer);
+var
+  Pos: Integer;
+begin
+  Pos := APos;
+  if Pos < TrackBar1.Min then
+    Pos := TrackBar1.Min;
+  if Pos > TrackBar1.Max then
+    Pos := TrackBar1.Max;
+
+  fTrackUpdating := True;
+  try
+    TrackBar1.Position := Pos;
+  finally
+    fTrackUpdating := False;
+  end;
+end;
+
+procedure TfrmQuickCustomerInfoDlg.UpdatePlaybackInfo(const ATrackPos: Integer);
+var
+  Total, Elapsed: Integer;
+begin
+  if fAudioInput = nil then begin
+    cxBarEditItem1.Caption := '';
+    Exit;
+  end;
+
+  Total := fAudioInput.TotalTime;
+  if ATrackPos >= 0 then
+    Elapsed := Round(Total * (ATrackPos / TrackScale))
+  else
+    Elapsed := DXAudioOut1.TimeElapsed;
+
+  if Elapsed > Total then
+    Elapsed := Total;
+  if Elapsed < 0 then
+    Elapsed := 0;
+
+  cxBarEditItem1.Caption := Format('%s / %s', [FormatSeconds(Elapsed), FormatSeconds(Total)]);
 end;
 
 procedure TfrmQuickCustomerInfoDlg.WhenCancelForm;
 begin
   inherited;
-  if Assigned(DXAudioOut1) then
-    DXAudioOut1.Stop;
+  StopPlayback;
 end;
 
 end.

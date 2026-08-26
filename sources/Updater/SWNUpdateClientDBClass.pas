@@ -57,8 +57,31 @@ type
     procedure CheckForUpdateNow(const Silent:Boolean=False);
   end;
 
+  // Porneste updaterul aplicatiei.
+  // Pe langa calea executabilului curent se transmite explicit si folderul in care
+  // aplicatia isi tine fisierul .config (APPFOLDER=...). Este obligatoriu: updaterul
+  // poate rula sub alt token de utilizator (elevare UAC pe Windows 10/11), caz in care
+  // %LOCALAPPDATA% se rezolva la profilul administratorului si configul nu mai este gasit.
+  function LaunchUpdater(const UpdaterAppName:String):Boolean;
+
 implementation
-Uses Windows, SysUtils, DB, Forms, ShellApi;
+Uses Windows, SysUtils, DB, Forms, ShellApi, SWNValueStorageUnit;
+
+function LaunchUpdater(const UpdaterAppName:String):Boolean;
+var updaterPath, params, configFolder:String;
+begin
+     // cale absoluta: ShellExecute cu nume relativ se rezolva prin directorul curent
+     // al procesului, care nu este obligatoriu folderul aplicatiei
+     updaterPath:=ExtractFilePath(Application.ExeName)+ExtractFileName(UpdaterAppName);
+     if Not FileExists(updaterPath) then updaterPath:=UpdaterAppName;
+
+     configFolder:=ExcludeTrailingPathDelimiter(globalPATH_LOCAL_APPDATA);
+
+     params:='"'+Application.ExeName+'" RUNAPP';
+     if configFolder<>'' then params:=params+' APPFOLDER="'+configFolder+'"';
+
+     Result:=ShellExecute(0,PWideChar('open'),PWideChar(updaterPath),PWideChar(params),nil,SW_SHOWNORMAL)>32;
+end;
 
 { TSWNUpdateDBClient }
 
@@ -111,7 +134,7 @@ procedure TSWNUpdateDBClient.DoUpdateApplication(const UpdaterAppName:String);
 begin
      if fNewVersionAvailable then
      begin
-          if ShellExecute(0,PWideChar('open'),PWideChar(UpdaterAppName),PWideChar('"'+Application.ExeName+'" RUNAPP'),nil,SW_SHOWNORMAL)>32 then
+          if LaunchUpdater(UpdaterAppName) then
           begin
                // stop thread
                if Assigned(fCheckThread) then fCheckThread.Terminate;

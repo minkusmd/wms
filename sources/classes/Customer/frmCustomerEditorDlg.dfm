@@ -1,7 +1,7 @@
 object frmCustomerEditorDialog: TfrmCustomerEditorDialog
   Left = 0
   Top = 0
-  ActiveControl = edName
+  ActiveControl = btnDeleteSufix
   BorderStyle = bsDialog
   Caption = 'RRP_DISCOUNT'
   ClientHeight = 650
@@ -37,7 +37,6 @@ object frmCustomerEditorDialog: TfrmCustomerEditorDialog
     FontText.Style = []
     ImageList = dmAdditions.cxImageList_DialogIcons
     ImageIndex = 2
-    ExplicitWidth = 813
   end
   object pcPageControl: TPageControl
     AlignWithMargins = True
@@ -268,7 +267,6 @@ object frmCustomerEditorDialog: TfrmCustomerEditorDialog
               Top = 95
             end
             inherited dxBarManager1: TdxBarManager
-              Font.Height = -12
               Left = 208
               Top = 40
               PixelsPerInch = 96
@@ -294,7 +292,6 @@ object frmCustomerEditorDialog: TfrmCustomerEditorDialog
               ExplicitHeight = 151
             end
             inherited dxBarManager1: TdxBarManager
-              Font.Height = -12
               PixelsPerInch = 96
             end
             inherited IBCQueryCustomerPhones: TIBCQuery
@@ -342,7 +339,6 @@ object frmCustomerEditorDialog: TfrmCustomerEditorDialog
               Top = 103
             end
             inherited dxBarManager1: TdxBarManager
-              Font.Height = -12
               PixelsPerInch = 96
             end
           end
@@ -366,7 +362,6 @@ object frmCustomerEditorDialog: TfrmCustomerEditorDialog
               ExplicitHeight = 151
             end
             inherited dxBarManager1: TdxBarManager
-              Font.Height = -12
               Left = 296
               Top = 24
               PixelsPerInch = 96
@@ -480,8 +475,8 @@ object frmCustomerEditorDialog: TfrmCustomerEditorDialog
         TabOrder = 5
       end
       object edChief: TcxDBTextEdit
-        Left = 228
-        Top = 155
+        Left = 15
+        Top = 159
         DataBinding.DataField = 'CHIEF'
         ParentFont = False
         Properties.CharCase = ecUpperCase
@@ -489,8 +484,8 @@ object frmCustomerEditorDialog: TfrmCustomerEditorDialog
         Width = 207
       end
       object edAccountant: TcxDBTextEdit
-        Left = 15
-        Top = 155
+        Left = 228
+        Top = 159
         DataBinding.DataField = 'ACCOUNTANT'
         ParentFont = False
         Properties.CharCase = ecUpperCase
@@ -612,8 +607,6 @@ object frmCustomerEditorDialog: TfrmCustomerEditorDialog
     Default = True
     ModalResult = 1
     TabOrder = 2
-    ExplicitLeft = 592
-    ExplicitTop = 589
   end
   object btnCancel: TcxButton
     Left = 698
@@ -625,8 +618,6 @@ object frmCustomerEditorDialog: TfrmCustomerEditorDialog
     Caption = 'Renunta'
     ModalResult = 2
     TabOrder = 3
-    ExplicitLeft = 696
-    ExplicitTop = 589
   end
   object dxStatusBar1: TdxStatusBar
     Left = 0
@@ -643,8 +634,6 @@ object frmCustomerEditorDialog: TfrmCustomerEditorDialog
     Font.Name = 'Tahoma'
     Font.Style = []
     ParentFont = False
-    ExplicitTop = 622
-    ExplicitWidth = 813
   end
   object cxButton1: TcxButton
     Left = 6
@@ -655,8 +644,6 @@ object frmCustomerEditorDialog: TfrmCustomerEditorDialog
     Caption = 'Note despre client'
     TabOrder = 5
     OnClick = cxButton1Click
-    ExplicitLeft = 4
-    ExplicitTop = 580
   end
   object IBCQueryCity: TIBCQuery
     SQL.Strings = (

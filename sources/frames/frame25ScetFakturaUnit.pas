@@ -2338,8 +2338,8 @@ begin
                 Attributes['BranchTitle'] := FieldByName('CT_BANKNAME').AsString;
                 Attributes['BranchCode'] := FieldByName('CT_BANKACCOUNT').AsString;
                 Attributes['Account'] := FieldByName('CT_ACCOUNT').AsString;
-                if FieldByName('CT_ACCOUNT').AsString = '' then
-                  ErrorStr := ErrorStr + 'Eroare! Nu sunt indicate conturile bancare a cumparatorului!'#13#10;
+//                if FieldByName('CT_ACCOUNT').AsString = '' then
+//                  ErrorStr := ErrorStr + 'Eroare! Nu sunt indicate conturile bancare a cumparatorului!'#13#10;
               end;
             end;
             {$ENDREGION}
@@ -2622,7 +2622,6 @@ begin
   finally
     dialog.Free;
   end;
-
 end;
 
 procedure Tframe25ScetFaktura.ShowModifyGoodsDialog;

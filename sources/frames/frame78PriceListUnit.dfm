@@ -38,6 +38,10 @@ inherited frame78PriceList: Tframe78PriceList
       Margins.Bottom = 2
       Caption = 'Price list'
       ImageIndex = 0
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object pnClient: TPanel
         Left = 0
         Top = 0
@@ -306,20 +310,21 @@ inherited frame78PriceList: Tframe78PriceList
                     MinWidth = 10
                     Width = 54
                   end
-                  object cxGridDataDBTableView1MENTIUNI: TcxGridDBColumn
-                    Caption = 'Mentiuni'
-                    DataBinding.FieldName = 'MENTIUNI'
-                    Visible = False
-                    HeaderAlignmentHorz = taCenter
-                    MinWidth = 10
-                    Width = 62
-                  end
                   object cxGridDataDB_CREATED_BY_NAME: TcxGridDBColumn
                     Caption = 'Create de'
                     DataBinding.FieldName = 'CREATED_BY_NAME'
                     HeaderAlignmentHorz = taCenter
                     MinWidth = 10
                     Width = 42
+                  end
+                  object cxGridDataDBTableView1_FLG_DONE: TcxGridDBColumn
+                    Caption = 'G'
+                    DataBinding.FieldName = 'FLG_DONE'
+                    PropertiesClassName = 'TcxCheckBoxProperties'
+                    Properties.NullStyle = nssUnchecked
+                    Properties.ReadOnly = True
+                    Properties.ValueChecked = '1'
+                    Properties.ValueUnchecked = '0'
                   end
                 end
                 object cxGridDataLevel1: TcxGridLevel
@@ -515,6 +520,10 @@ inherited frame78PriceList: Tframe78PriceList
               Margins.Bottom = 2
               Caption = '(1) Toate produsele'
               ImageIndex = 5
+              ExplicitLeft = 0
+              ExplicitTop = 0
+              ExplicitWidth = 0
+              ExplicitHeight = 0
               object cxGridItems: TcxGrid
                 Left = 0
                 Top = 0
@@ -916,6 +925,10 @@ inherited frame78PriceList: Tframe78PriceList
                 object tsLog: TcxTabSheet
                   Caption = 'tsLog'
                   ImageIndex = 0
+                  ExplicitLeft = 0
+                  ExplicitTop = 0
+                  ExplicitWidth = 0
+                  ExplicitHeight = 0
                   object meLog: TcxMemo
                     Left = 0
                     Top = 0
@@ -940,6 +953,10 @@ inherited frame78PriceList: Tframe78PriceList
                 object cxTabSheet2: TcxTabSheet
                   Caption = 'tsGoodsInfo'
                   ImageIndex = 1
+                  ExplicitLeft = 0
+                  ExplicitTop = 0
+                  ExplicitWidth = 0
+                  ExplicitHeight = 0
                   object cxGrid6: TcxGrid
                     Left = 0
                     Top = 0
@@ -3174,24 +3191,28 @@ inherited frame78PriceList: Tframe78PriceList
     KeyFields = 'PLID'
     KeyGenerator = 'GEN_TS_PRICELISTS_ID'
     SQLInsert.Strings = (
-      'INSERT INTO TS_PRICELISTS'
-      '  (PLID, SUPPLIERID, price_categoryid, DATA, MENTIUNI)'
+      'INSERT INTO VW_TS_PRICELISTS'
+      '  (PLID, SUPPLIERID, price_categoryid, DATA, MENTIUNI, FLG_DONE)'
       'VALUES'
-      '  (:PLID, :SUPPLIERID, :price_categoryid, :DATA, :MENTIUNI)')
+      
+        '  (:PLID, :SUPPLIERID, :price_categoryid, :DATA, :MENTIUNI, :FLG' +
+        '_DONE)')
     SQLDelete.Strings = (
       'DELETE FROM TS_PRICELISTS'
       'WHERE'
       '  PLID = :Old_PLID')
     SQLUpdate.Strings = (
-      'UPDATE TS_PRICELISTS'
+      'UPDATE vw_TS_PRICELISTS'
       'SET'
       
         '  PLID = :PLID, SUPPLIERID = :SUPPLIERID, DATA = :DATA, MENTIUNI' +
-        ' = :MENTIUNI,  price_categoryid = :price_categoryid'
+        ' = :MENTIUNI,  '
+      '  price_categoryid = :price_categoryid,'
+      '  FLG_DONE = :FLG_DONE'
       'WHERE'
       '  PLID = :Old_PLID')
     SQLRefresh.Strings = (
-      'SELECT * FROM TS_PRICELISTS'
+      'SELECT * FROM VW_TS_PRICELISTS'
       'WHERE'
       '  PLID = :PLID')
     SQLLock.Strings = (
@@ -3216,8 +3237,9 @@ inherited frame78PriceList: Tframe78PriceList
       '  MENTIUNI, '
       
         '  (select (last_name ||'#39' '#39'||first_name) from ts_users u where u.' +
-        'userid = created_by) created_by_name'
-      'from TS_PRICELISTS '
+        'userid = created_by) created_by_name,'
+      '  FLG_DONE'
+      'from vw_TS_PRICELISTS '
       
         'where supplierid=:supplierid and price_categoryid = :price_categ' +
         'oryid'
@@ -3407,6 +3429,9 @@ inherited frame78PriceList: Tframe78PriceList
         '          (coalesce(P_NEW.PRICE7, 0) > coalesce(gf.PRICE7, 0)) o' +
         'r'
       
+        '          (coalesce(P_NEW.PRICE0, 0) > 0 and coalesce(P_NEW.PRIC' +
+        'E0, 0) > coalesce(gf.PRICE0, 0)) or'
+      
         '          iif(get_flg_value(GF.flags, 4) = 1, (coalesce(P_NEW.PR' +
         'ICE3, 0) > coalesce(gf.PRICE3, 0)), false) '
       '      )'
@@ -3489,6 +3514,9 @@ inherited frame78PriceList: Tframe78PriceList
       
         '          (coalesce(P_old.PRICE7, 0) < coalesce(gf.PRICE7, 0)) o' +
         'r'
+      
+        '          (coalesce(P_old.PRICE0, 0) > 0 and coalesce(P_old.PRIC' +
+        'E0, 0) < coalesce(gf.PRICE0, 0)) or'
       
         '          iif(get_flg_value(GF.flags, 4) = 1, (coalesce(P_old.PR' +
         'ICE3, 0) < coalesce(gf.PRICE3, 0)), false) '
@@ -3873,7 +3901,8 @@ inherited frame78PriceList: Tframe78PriceList
       'select * from ts_pricelist_items_images'
       
         'where supplierid = :supplierid and supplier_goods_code = :SUPPLI' +
-        'ER_GOODS_CODE')
+        'ER_GOODS_CODE'
+      'order by orderno nulls last, process_date, image_url')
     MasterFields = 'SUPPLIERID;SUPPLIER_GOODS_CODE'
     DetailFields = 'SUPPLIERID;SUPPLIER_GOODS_CODE'
     MasterSource = IBCDataSourcePriceItems

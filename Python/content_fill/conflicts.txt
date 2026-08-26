@@ -1,0 +1,28 @@
+Neconcordante intre denumirea produsului si filtre (ultima coloana = sursa folosita):
+
+202626  Procesor AMD Ryzen 3 3200G Tray, AM4, 3.6-4.0GHz,  4MB,  12nm,  65W,  Radeon Vega 8,  4 
+    freq     titlu=3.6-4.0 GHz            filtru=3.6-3.8 GHz            -> titlu
+246155  Procesor AMD RYZEN 7 5700G BOX, AM4, 3.8-4.6GHz,  16MB,  7nm,  65W,  Radeon Graphics(8C)
+    igpu     titlu=Radeon Graphics        filtru=AMD Radeon Graphics    -> filtru
+304415  Procesor INTEL CELERON DUAL CORE B820, (FCPGA988, 1.70 GHz, 2M, SR0HQ), Tray
+    freq     titlu=1.70 GHz               filtru=1.7 GHz                -> titlu
+306366  Procesor INTEL Core i9-13900K 2.2-5.8GHz, 8P+16E/32T, 36MB,S1700,10nm, Integ.UHD Graphic
+    igpu     titlu=Integ.UHD Graphics 770 filtru=Intel UHD Graphics 770 -> filtru
+306374  Procesor AMD Ryzen 9 7900X, AM5, (4.7-5.6GHz, 12C/24T, L2 12MB, L3 64MB, 5nm, 170W), Soc
+    nm       titlu=5 nm                   filtru=5 nm, FinFET           -> filtru
+306823  Procesor INTEL I5-13600K, (6P+8E/20T, 20MB,S1700,10nm, Integ. UHD Graphics 770, 125W) Tr
+    igpu     titlu=Integ. UHD Graphics 770 filtru=Intel UHD Graphics 770 -> filtru
+309800  Procesor INTEL Core i7-13700KF 2.5-5.4GHz, Tray, (8P+8E/24T, 24MB,S1700,10nm, No Integ. 
+    threads  titlu=24                     filtru=12                     -> titlu
+312564  Procesor AMD CPU Ryzen 5 7600X 6-Core, 12 Threads, 4.7-5.3GHz, Unlocked, AMD Radeon Grap
+    igpu     titlu=Radeon Graphics        filtru=Radeon™ Graphics       -> filtru
+312567  Procesor AMD CPU RYZEN 9 7900X 12-CORE, 24 THREADS, 4.7-5.6GHZ, UNLOCKED,  RADEON GRAPHI
+    igpu     titlu=RADEON GRAPHICS        filtru=Radeon™ Graphics       -> filtru
+379900  Procesor INTEL CPU CORE ULTRA 9 285 2.5-5.6GHZ (8P+16E/24T,36MB,S1851, 10NM, INTEG. GRAP
+    cores    titlu=24                     filtru=16                     -> titlu
+    nm       titlu=10 nm                  filtru=3 nm                   -> filtru
+    freq     titlu=2.5-5.6 GHz            filtru=4.7 - 5.3 GHz          -> titlu
+400517  Procesor INTEL CPU Intel Core Ultra 5 250K Plus 3.3-5.3GHz (6P+12E/18T,30MB, S1851, 3nm,
+    cores    titlu=18                     filtru=8                      -> titlu
+
+total produse cu neconcordante: 11

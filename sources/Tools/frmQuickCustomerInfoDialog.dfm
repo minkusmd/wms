@@ -548,6 +548,9 @@ object frmQuickCustomerInfoDlg: TfrmQuickCustomerInfoDlg
               Width = 573
               Height = 17
               Align = alTop
+              Max = 1000
+              Frequency = 100
+              PageSize = 50
               PositionToolTip = ptBottom
               TabOrder = 0
               ThumbLength = 16
@@ -888,7 +891,6 @@ object frmQuickCustomerInfoDlg: TfrmQuickCustomerInfoDlg
       Category = 0
       Hint = 'New Item'
       Visible = ivAlways
-      OnChange = cxBarEditItem1Change
       PropertiesClassName = 'TcxLabelProperties'
     end
     object bbPlay: TdxBarButton
@@ -1450,6 +1452,8 @@ object frmQuickCustomerInfoDlg: TfrmQuickCustomerInfoDlg
     PollingInterval = 100
     FramesInBuffer = 24576
     SpeedFactor = 1.000000000000000000
+    OnDone = DXAudioOut1Done
+    OnProgress = DXAudioOut1Progress
     Left = 424
     Top = 352
   end

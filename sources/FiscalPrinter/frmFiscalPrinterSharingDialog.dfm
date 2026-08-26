@@ -4,21 +4,19 @@ object frmFiscalPrinterSharingDlg: TfrmFiscalPrinterSharingDlg
   BorderStyle = bsDialog
   Caption = 'Acces la MCC'
   ClientHeight = 381
-  ClientWidth = 513
+  ClientWidth = 733
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -12
   Font.Name = 'Segoe UI'
   Font.Style = []
-  OldCreateOrder = False
   Position = poOwnerFormCenter
-  PixelsPerInch = 96
   TextHeight = 15
   object dtDialogTitle: TDialogTitle
     Left = 0
     Top = 0
-    Width = 513
+    Width = 733
     Height = 64
     Title = 'Acces la MCC'
     Text = 
@@ -41,7 +39,7 @@ object frmFiscalPrinterSharingDlg: TfrmFiscalPrinterSharingDlg
     AlignWithMargins = True
     Left = 8
     Top = 72
-    Width = 497
+    Width = 717
     Height = 257
     Margins.Left = 8
     Margins.Top = 8
@@ -62,14 +60,14 @@ object frmFiscalPrinterSharingDlg: TfrmFiscalPrinterSharingDlg
       Caption = 'Calculatoarele alese'
     end
     object Label2: TLabel
-      Left = 272
+      Left = 382
       Top = 20
       Width = 129
       Height = 15
       Caption = 'Calculatoarele accesibile'
     end
     object sbAddToSelected: TSpeedButton
-      Left = 229
+      Left = 339
       Top = 56
       Width = 32
       Height = 28
@@ -83,7 +81,7 @@ object frmFiscalPrinterSharingDlg: TfrmFiscalPrinterSharingDlg
       OnClick = sbAddToSelectedClick
     end
     object sbRemoveFromSelected: TSpeedButton
-      Left = 229
+      Left = 339
       Top = 90
       Width = 32
       Height = 28
@@ -99,16 +97,12 @@ object frmFiscalPrinterSharingDlg: TfrmFiscalPrinterSharingDlg
     object cxGridSel: TcxGrid
       Left = 16
       Top = 37
-      Width = 201
+      Width = 311
       Height = 200
       TabOrder = 0
       object cxGridSelTable: TcxGridTableView
-        Navigator.Buttons.CustomButtons = <>
         OnFocusedRecordChanged = cxGridAvTableFocusedRecordChanged
         OnSelectionChanged = cxGridAvTableSelectionChanged
-        DataController.Summary.DefaultGroupSummaryItems = <>
-        DataController.Summary.FooterSummaryItems = <>
-        DataController.Summary.SummaryGroups = <>
         OptionsCustomize.ColumnFiltering = False
         OptionsCustomize.ColumnSorting = False
         OptionsData.Deleting = False
@@ -143,6 +137,12 @@ object frmFiscalPrinterSharingDlg: TfrmFiscalPrinterSharingDlg
         end
         object cxGridSelTable_TITLE: TcxGridColumn
           Caption = 'Nume calculator'
+          MinWidth = 110
+          Width = 130
+        end
+        object cxGridSelTable_FIRMA: TcxGridColumn
+          Caption = 'Subdiviziune'
+          Width = 145
         end
       end
       object cxGridSelLevel: TcxGridLevel
@@ -150,18 +150,14 @@ object frmFiscalPrinterSharingDlg: TfrmFiscalPrinterSharingDlg
       end
     end
     object cxGridAv: TcxGrid
-      Left = 272
+      Left = 382
       Top = 37
-      Width = 201
+      Width = 311
       Height = 200
       TabOrder = 1
       object cxGridAvTable: TcxGridTableView
-        Navigator.Buttons.CustomButtons = <>
         OnFocusedRecordChanged = cxGridAvTableFocusedRecordChanged
         OnSelectionChanged = cxGridAvTableSelectionChanged
-        DataController.Summary.DefaultGroupSummaryItems = <>
-        DataController.Summary.FooterSummaryItems = <>
-        DataController.Summary.SummaryGroups = <>
         OptionsCustomize.ColumnFiltering = False
         OptionsData.Deleting = False
         OptionsData.DeletingConfirmation = False
@@ -194,6 +190,12 @@ object frmFiscalPrinterSharingDlg: TfrmFiscalPrinterSharingDlg
         end
         object cxGridAvTable_TITLE: TcxGridColumn
           Caption = 'Nume calculator'
+          MinWidth = 110
+          Width = 130
+        end
+        object cxGridAvTable_FIRMA: TcxGridColumn
+          Caption = 'Subdiviziune'
+          Width = 145
         end
       end
       object cxGridAvLevel: TcxGridLevel
@@ -202,7 +204,7 @@ object frmFiscalPrinterSharingDlg: TfrmFiscalPrinterSharingDlg
     end
   end
   object btnOk: TButton
-    Left = 297
+    Left = 517
     Top = 340
     Width = 90
     Height = 29
@@ -212,7 +214,7 @@ object frmFiscalPrinterSharingDlg: TfrmFiscalPrinterSharingDlg
     TabOrder = 2
   end
   object btnCancel: TButton
-    Left = 401
+    Left = 621
     Top = 340
     Width = 90
     Height = 29

@@ -3,7 +3,7 @@ object frmGoodsAcntEditorDlg: TfrmGoodsAcntEditorDlg
   Top = 0
   BorderStyle = bsDialog
   Caption = 'Denumirea pentru contabilitate'
-  ClientHeight = 258
+  ClientHeight = 321
   ClientWidth = 494
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -11,12 +11,10 @@ object frmGoodsAcntEditorDlg: TfrmGoodsAcntEditorDlg
   Font.Height = -12
   Font.Name = 'Segoe UI'
   Font.Style = []
-  OldCreateOrder = False
   Position = poOwnerFormCenter
   DesignSize = (
     494
-    258)
-  PixelsPerInch = 96
+    321)
   TextHeight = 15
   object dtDialogTitle: TDialogTitle
     Left = 0
@@ -43,7 +41,7 @@ object frmGoodsAcntEditorDlg: TfrmGoodsAcntEditorDlg
     Left = 8
     Top = 72
     Width = 478
-    Height = 130
+    Height = 193
     Margins.Left = 8
     Margins.Top = 8
     Margins.Right = 8
@@ -55,23 +53,31 @@ object frmGoodsAcntEditorDlg: TfrmGoodsAcntEditorDlg
     Color = clWindow
     ParentBackground = False
     TabOrder = 1
+    ExplicitLeft = 13
     object cxLabel1: TLabel
       Left = 16
-      Top = 16
+      Top = 76
       Width = 52
       Height = 15
       Caption = 'Denumire'
     end
     object Label1: TLabel
       Left = 16
-      Top = 68
+      Top = 132
       Width = 87
       Height = 15
       Caption = 'Pret evidenta, lei'
     end
+    object Label2: TLabel
+      Left = 16
+      Top = 12
+      Width = 91
+      Height = 15
+      Caption = 'Categorie produs'
+    end
     object edNAMEACNT: TcxDBTextEdit
       Left = 16
-      Top = 33
+      Top = 97
       DataBinding.DataField = 'NAMEACNT'
       Properties.MaxLength = 255
       Properties.ValidateOnEnter = True
@@ -80,7 +86,7 @@ object frmGoodsAcntEditorDlg: TfrmGoodsAcntEditorDlg
     end
     object cePRICE_ACNT: TcxDBCurrencyEdit
       Left = 16
-      Top = 85
+      Top = 149
       DataBinding.DataField = 'PRICE_ACNT'
       Properties.Alignment.Horz = taLeftJustify
       Properties.DisplayFormat = '#,##0.00'
@@ -88,10 +94,28 @@ object frmGoodsAcntEditorDlg: TfrmGoodsAcntEditorDlg
       TabOrder = 1
       Width = 153
     end
+    object cxButtonEdit1: TcxButtonEdit
+      Left = 16
+      Top = 33
+      Properties.Buttons = <
+        item
+          Default = True
+          Kind = bkEllipsis
+        end
+        item
+          Caption = 'X'
+          Hint = 'Sterge categoria'
+          Kind = bkText
+        end>
+      Properties.ReadOnly = True
+      Properties.OnButtonClick = cxButtonEdit1PropertiesButtonClick
+      TabOrder = 2
+      Width = 437
+    end
   end
   object btnOk: TcxButton
     Left = 280
-    Top = 213
+    Top = 276
     Width = 90
     Height = 29
     Anchors = [akRight, akBottom]
@@ -99,10 +123,11 @@ object frmGoodsAcntEditorDlg: TfrmGoodsAcntEditorDlg
     Default = True
     ModalResult = 1
     TabOrder = 2
+    ExplicitTop = 213
   end
   object btnCancel: TcxButton
     Left = 376
-    Top = 213
+    Top = 276
     Width = 90
     Height = 29
     Anchors = [akRight, akBottom]
@@ -110,5 +135,6 @@ object frmGoodsAcntEditorDlg: TfrmGoodsAcntEditorDlg
     Caption = 'Renunta'
     ModalResult = 2
     TabOrder = 3
+    ExplicitTop = 213
   end
 end

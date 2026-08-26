@@ -8,7 +8,7 @@ uses
   MemDS, dxBar, cxBarEditItem, cxGridChartView, cxGridDBChartView, cxGridLevel,
   cxGridCustomTableView, cxGridDBTableView, cxGrid, cxDBEdit, cxDBLookupComboBox,
   cxContainer, StdCtrls, ComCtrls, cxButtonEdit, Buttons, ExtCtrls, cxButtons,
-  dxStatusBar, frameGoodsEditDescriptionUnit, frameGoodsAttributesUnit, cxGraphics, cxControls,
+  dxStatusBar, frameGoodsEditDescriptionUnit, cxGraphics, cxControls,
   cxLookAndFeels, cxLookAndFeelPainters, cxStyles, cxCustomData, cxFilter,
   cxData, cxDataStorage, cxNavigator, dxDateRanges, dxScrollbarAnnotations,
   cxDBData, cxCurrencyEdit, cxCalendar, cxClasses, cxMemo, cxGridTableView,
@@ -124,8 +124,9 @@ type
     bbGoodsTitleModify: TdxBarButton;
     cxGridDBTableViewDictionary_PRIORITY: TcxGridDBColumn;
     frameGoodsEditDescription1: TframeGoodsEditDescription;
-    tbsAttributes: TTabSheet;
-    frameGoodsAttributes1: TframeGoodsAttributes;
+    lcbGoodsAcnt: TcxDBLookupComboBox;
+    IBCQueryGOODS_ACNT: TIBCQuery;
+    IBCDataSourceGOODS_ACNT: TIBCDataSource;
     procedure actSaveSearchKeysExecute(Sender: TObject);
     procedure actSaveSearchKeysUpdate(Sender: TObject);
     procedure ceMargin1PropertiesValidate(Sender: TObject; var DisplayValue: Variant; var ErrorText: TCaption; var Error: Boolean);
@@ -171,6 +172,7 @@ type
     procedure LoadStates; override;
     procedure SaveStates; override;
   public
+    procedure SelectGoodsAcnt2(GoodsID: Integer);
     { Public declarations }
     property CreateNewRecord: Boolean read FCreateNewRecord write SetCreateNewRecord;
     property GoodsID: Integer read fGoodsID;
@@ -244,7 +246,8 @@ procedure TfrmGoodsEditorDialog.beGoodsACNTPropertiesButtonClick(Sender: TObject
 begin
   if (AButtonIndex = 0) then
     SelectGoodsAcnt;
-//  if (AButtonIndex = 1) then GenerateAndInsertAcntGoods(fMasterDataSet.FieldByName('GOODSID').AsInteger);
+  if (AButtonIndex = 1) then
+    SelectGoodsAcnt2(fMasterDataSet.FieldByName('GOODSID').AsInteger);
 end;
 
 procedure TfrmGoodsEditorDialog.ceMargin1PropertiesValidate(Sender: TObject; var DisplayValue: Variant; var ErrorText: TCaption; var Error: Boolean);
@@ -317,10 +320,6 @@ procedure TfrmGoodsEditorDialog.cxPageControlChange(Sender: TObject);
 begin
   if (cxPageControl.ActivePage = tbsPriceHistory) and (not IBCQueryPriceHistory.Active) then
     OpenPriceHistoryData;
-
-  if cxPageControl.ActivePage = tbsAttributes then
-    frameGoodsAttributes1.LoadData(fMasterDataSet.FieldByName('GOODSID').AsInteger,
-      fMasterDataSet.FieldByName('WEBGOODSTYPE_ID').AsInteger, fMasterDataSet.UpdateTransaction);
 end;
 
 //procedure TfrmGoodsEditorDialog.DoCreateDefaultSupplierGoodsCode(GoodsID: Integer);
@@ -393,9 +392,10 @@ begin
   cbFLG_WEB_HIDE_COMPLECT_ITEMS.DataBinding.DataSource := fMasterDataSource;
 
   IBCQuerySearchkeys.UpdateTransaction := fMasterDataSet.UpdateTransaction;
-//  IBCQuerySearchkeys.ParamByName('GOODSID').AsInteger := fMasterDataSet.FieldByName('GOODSID').AsInteger;
   IBCQuerySearchkeys.MasterSource := fMasterDataSource;
   IBCQuerySearchkeys.Open;
+
+  lcbGoodsAcnt.DataBinding.DataSource := fMasterDataSource;
 end;
 
 procedure TfrmGoodsEditorDialog.btnUpdateDictClick(Sender: TObject);
@@ -419,15 +419,6 @@ function TfrmGoodsEditorDialog.IsFormDataPosted: Boolean;
 begin
   if CheckParams then
   begin
-    // avertisment neblocant: atribute recomandate necompletate
-    var missingAttrs := GetMissingRecommendedAttributes(
-      fMasterDataSet.FieldByName('GOODSID').AsInteger,
-      fMasterDataSet.FieldByName('WEBGOODSTYPE_ID').AsInteger,
-      fMasterDataSet.UpdateTransaction);
-    if missingAttrs <> '' then
-      MessageDlg('Atribute recomandate necompletate: ' + missingAttrs + #13#10 +
-        'Produsul se salveaza oricum.', mtWarning, [mbOK], 0);
-
     if not (fMasterDataSet.State in dsEditModes) then
       fMasterDataSet.Edit;
 
@@ -659,6 +650,17 @@ begin
   finally
     goodsACNT.Free;
   end;
+end;
+
+procedure TfrmGoodsEditorDialog.SelectGoodsAcnt2(GoodsID: Integer);
+begin
+//  var d:=TGoodsAcnt2Dlg.Create(self);
+//  try
+//    d.Showmodal;
+//  finally
+//    d.Free;
+//  end;
+
 end;
 
 procedure TfrmGoodsEditorDialog.SetCreateNewRecord(const Value: Boolean);

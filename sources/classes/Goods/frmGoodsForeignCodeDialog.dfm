@@ -548,6 +548,19 @@ object frmGoodsForeignCodeDlg: TfrmGoodsForeignCodeDlg
           Position.ColIndex = 2
           Position.RowIndex = 1
         end
+        object TV1_PRICE_CREDIT0: TcxGridDBBandedColumn
+          AlternateCaption = 'Pret rate 6 luni 0%, calculat = max(Web, Indicativ MDL + 16%)'
+          Caption = 'Rate 0%'
+          DataBinding.FieldName = 'PRICE_CREDIT0'
+          HeaderAlignmentHorz = taCenter
+          MinWidth = 64
+          Options.Editing = False
+          Options.HorzSizing = False
+          Width = 64
+          Position.BandIndex = 1
+          Position.ColIndex = 12
+          Position.RowIndex = 0
+        end
       end
       object cxGridForeignLevel1: TcxGridLevel
         GridView = cxGridForeignDBBandedTableView1

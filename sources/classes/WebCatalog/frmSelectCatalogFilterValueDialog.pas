@@ -16,7 +16,8 @@ uses
     cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit,
     cxClasses, cxStyles, cxCustomData, cxFilter, cxData, cxDataStorage, cxNavigator,
     cxGridCustomTableView, cxGridTableView, cxGridDBTableView, cxGridLevel, cxGridCustomView,
-    cxGrid, cxButtons, dxScrollbarAnnotations, dxDateRanges;
+    cxGrid, cxButtons, dxScrollbarAnnotations, dxDateRanges, cxDBData,
+  dxCoreGraphics, cxTextEdit, cxMaskEdit, cxButtonEdit;
 
 type
     TfrmSelectCatalogFilterValueDlg = class(TSWNCustomForm)
@@ -37,9 +38,14 @@ type
         cxGridParams_PARAM_VALUE_RUS: TcxGridDBColumn;
         btnOk: TcxButton;
         btnCancel: TcxButton;
+    cxGridFilters_FILTERID: TcxGridDBColumn;
+    cxGridParams_FILTERPARAMID: TcxGridDBColumn;
+    cxButtonEdit1: TcxButtonEdit;
         procedure cxGridParamsTableCellDblClick(Sender: TcxCustomGridTableView;
             ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton;
             AShift: TShiftState; var AHandled: Boolean);
+    procedure cxButtonEdit1PropertiesButtonClick(Sender: TObject;
+      AButtonIndex: Integer);
     private
         FFilterID: Integer;
         FParamIDs: string;
@@ -47,6 +53,7 @@ type
         procedure Prepare; override;
         function IsFormDataPosted: Boolean; override;
     public
+        function SelectSyssID(Value: Integer): Integer;
         property FilterID: Integer read FFilterID write FFilterID;
         property ParamIDs: string read FParamIDs write FParamIDs;
     end;
@@ -54,7 +61,7 @@ type
 implementation
 
 uses
-    DataModuleDB;
+  DataModuleDB, frmSyssDataEditor, frmSyssEditorWindow;
 
 {$R *.dfm}
 
@@ -95,12 +102,31 @@ begin
     Result := True;
 end;
 
+procedure TfrmSelectCatalogFilterValueDlg.cxButtonEdit1PropertiesButtonClick(
+  Sender: TObject; AButtonIndex: Integer);
+begin
+    if (FilterID = 10) then
+    begin
+      // producatori
+//      FilterParamID := SelectSyssID(2);
+    end;
+
+end;
+
 procedure TfrmSelectCatalogFilterValueDlg.cxGridParamsTableCellDblClick(Sender: TcxCustomGridTableView;
     ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState;
     var AHandled: Boolean);
 begin
     AHandled := True;
     ModalResult := mrOk;
+end;
+
+function TfrmSelectCatalogFilterValueDlg.SelectSyssID(Value: Integer): Integer;
+begin
+  Result := -1;
+//  var d:=TfrmSelectSyssEditorWin.Create(Self);
+//  d.SelectMode := True;
+//  d.
 end;
 
 end.

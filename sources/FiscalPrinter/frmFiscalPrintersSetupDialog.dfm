@@ -155,6 +155,11 @@ object frmFiscalPrintersSetupDlg: TfrmFiscalPrintersSetupDlg
           DataBinding.FieldName = 'COMPUTER_NAME'
           Width = 130
         end
+        object cxGridFPTable_SERVER_ADDRESS: TcxGridDBColumn
+          Caption = 'Server ZFPLab'
+          DataBinding.FieldName = 'SERVER_ADDRESS'
+          Width = 180
+        end
         object cxGridFPTable_DESCRIPTION: TcxGridDBColumn
           Caption = 'Descriere'
           DataBinding.FieldName = 'DESCRIPTION'
@@ -275,13 +280,11 @@ object frmFiscalPrintersSetupDlg: TfrmFiscalPrintersSetupDlg
     GeneratorMode = gmInsert
     SQLInsert.Strings = (
       'INSERT INTO FP_DEVICES'
-      
-        '  (FP_ID, FIRMA_ID, WS_ID, SERIAL_NUMBER, DESCRIPTION, FLG_ENABL' +
-        'ED)'
+      '  (FP_ID, FIRMA_ID, WS_ID, SERIAL_NUMBER, DESCRIPTION,'
+      '   FLG_ENABLED, SERVER_ADDRESS, COM_PORT, BAUD_RATE)'
       'VALUES'
-      
-        '  (:FP_ID, :FIRMA_ID, :WS_ID, :SERIAL_NUMBER, :DESCRIPTION, :FLG' +
-        '_ENABLED)')
+      '  (:FP_ID, :FIRMA_ID, :WS_ID, :SERIAL_NUMBER, :DESCRIPTION,'
+      '   :FLG_ENABLED, :SERVER_ADDRESS, :COM_PORT, :BAUD_RATE)')
     SQLDelete.Strings = (
       'DELETE FROM FP_DEVICES'
       'WHERE'
@@ -294,7 +297,10 @@ object frmFiscalPrintersSetupDlg: TfrmFiscalPrintersSetupDlg
       '  WS_ID = :WS_ID, '
       '  SERIAL_NUMBER = :SERIAL_NUMBER, '
       '  DESCRIPTION = :DESCRIPTION, '
-      '  FLG_ENABLED = :FLG_ENABLED'
+      '  FLG_ENABLED = :FLG_ENABLED, '
+      '  SERVER_ADDRESS = :SERVER_ADDRESS, '
+      '  COM_PORT = :COM_PORT, '
+      '  BAUD_RATE = :BAUD_RATE'
       'WHERE'
       '  FP_ID = :Old_FP_ID')
     SQLRefresh.Strings = (
@@ -306,7 +312,10 @@ object frmFiscalPrintersSetupDlg: TfrmFiscalPrintersSetupDlg
       ' COMPUTER_NAME, '
       ' SERIAL_NUMBER, '
       ' DESCRIPTION, '
-      ' FLG_ENABLED'
+      ' FLG_ENABLED, '
+      ' SERVER_ADDRESS, '
+      ' COM_PORT, '
+      ' BAUD_RATE'
       'FROM '
       ' VW_FP_DEVICES'
       'WHERE'
@@ -328,7 +337,10 @@ object frmFiscalPrintersSetupDlg: TfrmFiscalPrintersSetupDlg
       ' COMPUTER_NAME, '
       ' SERIAL_NUMBER, '
       ' DESCRIPTION, '
-      ' FLG_ENABLED'
+      ' FLG_ENABLED, '
+      ' SERVER_ADDRESS, '
+      ' COM_PORT, '
+      ' BAUD_RATE'
       'FROM '
       ' VW_FP_DEVICES')
     AutoCommit = False

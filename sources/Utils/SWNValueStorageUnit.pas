@@ -1043,7 +1043,7 @@ begin
 
      if Not FileExists(FileName) then Exit;
 
-     F:=TFileStream.Create(FileName,fmOpenRead);
+     F:=TFileStream.Create(FileName,fmOpenRead or fmShareDenyNone);
      MS:=TMemoryStream.Create;
      try
         if CheckHeader(F,MS) then
@@ -1107,7 +1107,7 @@ var F:TFileStream;
     MS:TMemoryStream;
     MS2:TMemoryStream;
 begin
-     F:=TFileStream.Create(FileName,fmCreate);
+     F:=TFileStream.Create(FileName,fmCreate or fmShareDenyWrite);
      MS:=TMemoryStream.Create;
      MS2:=TMemoryStream.Create;
      try
@@ -1207,7 +1207,7 @@ begin
 
      if Not FileExists(FileName) then Exit;
 
-     F:=TFileStream.Create(FileName,fmOpenRead);
+     F:=TFileStream.Create(FileName,fmOpenRead or fmShareDenyNone);
      MS:=TMemoryStream.Create;
      try
         if CheckHeader(F,MS) then
@@ -1241,7 +1241,7 @@ procedure TAppInternalDataStorage.SaveToFile(const FileName: String);
 var F:TFileStream;
     MS:TMemoryStream;
 begin
-     F:=TFileStream.Create(FileName,fmCreate);
+     F:=TFileStream.Create(FileName,fmCreate or fmShareDenyWrite);
      MS:=TMemoryStream.Create;
      try
         fIntValues.SaveToStream(MS);

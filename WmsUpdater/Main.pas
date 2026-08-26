@@ -23,12 +23,14 @@ const cDBLogin = 'USER_UPDATE';
       sReadingSettings = 'Se citesc setările de conexiune...';
       sSettingsInfo = 'Parametri: server %s:%d, bază %s, utilizator %s';
       sConfigLoaded = 'Fișierul de configurare a fost încărcat: ';
-      sConfigNotFound = 'EROARE! Fișierul de configurare nu a fost găsit: ';
+      sConfigNotFound = 'EROARE! Fișierul de configurare nu a fost găsit. Căi verificate:';
+      sConfigFromParam = 'Folder de configurare primit de la aplicație: ';
+      sConfigUnreadable = 'EROARE! Fișierul de configurare există, dar nu a putut fi interpretat (deteriorat?): ';
+      sConfigHint = 'Indicație: dacă updaterul rulează ca administrator, iar programul principal ca utilizator obișnuit, cele două folosesc profiluri diferite. Porniți-le sub același utilizator.';
       sNoServerAddress = 'EROARE! În configurare nu este specificată adresa serverului (SERVER_ADDRESS).';
       sNoServerPort = 'EROARE! În configurare nu este specificat portul serverului (SERVER_PORT).';
       sNoDatabaseAlias = 'EROARE! În configurare nu este specificat numele bazei de date (DATABASE_ALIAS).';
       sNoAppDataFolder = 'EROARE! Nu s-a putut determina folderul LOCAL_APPDATA.';
-      sCanNotCreateWorkFolder = 'EROARE! Nu s-a putut crea folderul de lucru (drepturi insuficiente?): ';
       sTargetFolder = 'Folderul de destinație pentru fișiere: ';
       sUpdateingFile = 'se actualizează fișierul: ';
 type
@@ -72,6 +74,7 @@ type
     function ProcessDataStream:Boolean;
 
     function ReadConnectionSettings(var DBName, DBServer: String; var DBPort:Integer):Boolean;
+    function LocateConfigFile(out ConfigPath:String):Boolean;
     function GetApplicationAppFolderFromParams(const DefaultAppFolder:String):String;
 
   public
@@ -260,20 +263,21 @@ begin
 end;
 
 function TfMainForm.GetApplicationAppFolderFromParams(const DefaultAppFolder: String): String;
-var i,k:Integer;
+const cPrefix = 'APPFOLDER=';
+var i:Integer;
     S:String;
 begin
      Result:=DefaultAppFolder;
      for i := 1 to ParamCount do
      begin
-          S:=UpperCase(ParamStr(i));
-          k:=Pos('APPFOLDER=',S);
-          if (k=1) then
+          S:=ParamStr(i);
+          // comparam case-insensitive, dar pastram calea exact asa cum a fost transmisa
+          if Pos(cPrefix,UpperCase(S))=1 then
           begin
-               S:=Trim(Copy(S,k+10,Length(S)));
+               S:=Trim(Copy(S,Length(cPrefix)+1,Length(S)));
                if S<>'' then
                begin
-                    Result:=S;
+                    Result:=ExcludeTrailingPathDelimiter(S);
                     Break;
                end;
           end;
@@ -385,48 +389,68 @@ begin
 
 end;
 
+function TfMainForm.LocateConfigFile(out ConfigPath: String): Boolean;
+var candidates:TStringList;
+    configName, appFolder, localAppData, paramFolder:String;
+    i:Integer;
+begin
+     Result:=False;
+     ConfigPath:='';
+
+     configName:=ChangeFileExt(ExtractFileName(fTargetAppFileName), '.config');
+     appFolder :=UpperCase(TPath.GetFileNameWithoutExtension(fTargetAppFileName));
+
+     candidates:=TStringList.Create;
+     try
+        // 1. folderul transmis explicit de aplicatie (APPFOLDER=...).
+        //    Are prioritate: este singurul valid atunci cand updaterul ruleaza elevat,
+        //    sub alt profil de utilizator decat programul principal, iar %LOCALAPPDATA%
+        //    se rezolva la profilul administratorului.
+        paramFolder:=GetApplicationAppFolderFromParams('');
+        if paramFolder<>'' then
+        begin
+             ShowInfoMessage(sConfigFromParam + paramFolder);
+             candidates.Add(IncludeTrailingPathDelimiter(paramFolder) + configName);
+        end;
+
+        // 2. %LOCALAPPDATA%\<APP>\ - comportamentul istoric, pentru versiunile de
+        //    aplicatie care nu transmit inca APPFOLDER=
+        if Get_LOCAL_APPDATA_Folder(localAppData)
+          then candidates.Add(IncludeTrailingPathDelimiter(localAppData + appFolder) + configName)
+          else ShowInfoMessage(sNoAppDataFolder);
+
+        // 3. langa executabilul care se actualizeaza - permite o interventie manuala
+        if fTargetAppPath<>'' then candidates.Add(fTargetAppPath + configName);
+
+        for i := 0 to candidates.Count - 1 do
+        begin
+             if FileExists(candidates[i]) then
+             begin
+                  ConfigPath:=candidates[i];
+                  Result:=True;
+                  Break;
+             end;
+        end;
+
+        if Not Result then
+        begin
+             ShowInfoMessage(sConfigNotFound);
+             for i := 0 to candidates.Count - 1 do ShowInfoMessage('    ' + candidates[i]);
+             ShowInfoMessage(sConfigHint);
+        end;
+     finally
+        candidates.Free;
+     end;
+end;
+
 function TfMainForm.ReadConnectionSettings(var DBName, DBServer: String; var DBPort:Integer): Boolean;
-var globalPATH_LOCAL_APPDATA:String;
-    FileName:String;
-    appFolder:String;
-    fullConfigPath:String;
+var fullConfigPath:String;
 begin
      Result:=False;
 
      ShowInfoMessage(sReadingSettings);
 
-     appFolder:=UpperCase(TPath.GetFileNameWithoutExtension(fTargetAppFileName));
-
-     if Get_LOCAL_APPDATA_Folder(globalPATH_LOCAL_APPDATA) then
-     begin
-          // for LOCAL_APPDATA folder, create working folder
-          if DirectoryExists(globalPATH_LOCAL_APPDATA + appFolder)
-            then globalPATH_LOCAL_APPDATA := globalPATH_LOCAL_APPDATA + appFolder
-            else
-            begin
-                 if CreateDir(globalPATH_LOCAL_APPDATA + appFolder)
-                   then globalPATH_LOCAL_APPDATA := globalPATH_LOCAL_APPDATA + appFolder
-                   else
-                   begin
-                        ShowInfoMessage(sCanNotCreateWorkFolder + globalPATH_LOCAL_APPDATA + appFolder);
-                        Exit;
-                   end;
-            end;
-     end
-     else
-     begin
-          ShowInfoMessage(sNoAppDataFolder);
-          Exit;
-     end;
-
-     FileName := ChangeFileExt(ExtractFileName(fTargetAppFileName), '.config');
-     fullConfigPath := Format('%s\%s',[globalPATH_LOCAL_APPDATA, FileName]);
-
-     if not FileExists(fullConfigPath) then
-     begin
-          ShowInfoMessage(sConfigNotFound + fullConfigPath);
-          Exit;
-     end;
+     if Not LocateConfigFile(fullConfigPath) then Exit;
 
      try
         AppConfigStorage.LoadFromFile(fullConfigPath);
@@ -441,6 +465,14 @@ begin
      DBServer:=AppConfigStorage.TextValues.GetValue('SERVER_ADDRESS');
      DBPort:=AppConfigStorage.IntValues.GetValue('SERVER_PORT');
      DBName:=AppConfigStorage.TextValues.GetValue('DATABASE_ALIAS');
+
+     // LoadFromFile nu ridica exceptie daca antetul sau CRC-ul nu corespund: in acest
+     // caz toate valorile raman goale. Raportam separat de "lipseste o setare anume".
+     if (DBServer='') and (DBPort<=0) and (DBName='') then
+     begin
+          ShowInfoMessage(sConfigUnreadable + fullConfigPath);
+          Exit;
+     end;
 
      if DBServer='' then begin ShowInfoMessage(sNoServerAddress); Exit; end;
      if DBPort<=0 then begin ShowInfoMessage(sNoServerPort); Exit; end;
@@ -477,18 +509,19 @@ end;
 
 procedure TfMainForm.TakeInitialActions;
 var canStartUpdate:Boolean;
+    i:Integer;
 begin
      canStartUpdate:=false;
 
      // input params
-     if ParamCount>=0 then
+     if ParamCount>=1 then
      begin
           fTargetAppFileName:=ParamStr(1);
 
-          if ParamCount>1 then
-          begin
-               fRunBackTargetApp:=SameText(ParamStr(2),'RUNAPP');
-          end;
+          // RUNAPP nu mai este obligatoriu al doilea parametru: dupa el poate urma
+          // (sau il poate preceda) APPFOLDER=..., asa ca il cautam printre toti
+          for i := 2 to ParamCount do
+              if SameText(ParamStr(i),'RUNAPP') then fRunBackTargetApp:=True;
 
           // check if file exists
           if FileExists(fTargetAppFileName) then

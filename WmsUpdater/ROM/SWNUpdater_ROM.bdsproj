@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+  <PersonalityInfo>
+    <Option>
+      <Option Name="Personality">W32ResourceDLL.Personality</Option>
+      <Option Name="ProjectType">ResourceDLL</Option>
+      <Option Name="Version">1.0</Option>
+      <Option Name="GUID">{1C82797A-DB4C-4B94-B914-09CD7873B18A}</Option>
+    </Option>
+  </PersonalityInfo>
+  <W32ResourceDLL.Personality>
+    <Source>
+      <Source Name="MainSource">SWNUpdater.dpr</Source>
+    </Source>
+    <Options>
+      <Options Name="BaseLang">2073</Options>
+      <Options Name="TargetName">..\..\..\..\Projects Seatle\WMS\exe\SWNUpdater.ROM</Options>
+      <Options Name="BRCC_IncludePath"></Options>
+      <Options Name="Company"></Options>
+      <Options Name="Configuration"></Options>
+      <Options Name="Copyright"></Options>
+      <Options Name="Description"></Options>
+      <Options Name="Trademark"></Options>
+      <Options Name="Product"></Options>
+      <Options Name="ProductVersion"></Options>
+      <Options Name="Title"></Options>
+      <Options Name="FileVersion"></Options>
+      <Options Name="Evidence"></Options>
+      <Options Name="KeyFile"></Options>
+      <Options Name="KeyName"></Options>
+    </Options>
+    <FileList>
+      <File FileName="Main.dfm" ContainerId="W32Form" ModuleName="Main.dfm"/>
+      <File FileName="C\Projects\Projects Seatle\WMS\exe\SWNUpdater_DRC.rc" ContainerId="W32RC" ModuleName="SWNUpdater_DRC.rc"/>
+    </FileList>
+  </W32ResourceDLL.Personality>
+</BorlandProject>

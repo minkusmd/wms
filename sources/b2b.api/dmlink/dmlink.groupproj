@@ -1,0 +1,48 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{27ECBDA4-CAB8-4EB0-A2D5-4ECF58AC6BEF}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="dmlink_api.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="B2BDMLInkDLL.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="dmlink_api">
+        <MSBuild Projects="dmlink_api.dproj"/>
+    </Target>
+    <Target Name="dmlink_api:Clean">
+        <MSBuild Projects="dmlink_api.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="dmlink_api:Make">
+        <MSBuild Projects="dmlink_api.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="B2BDMLInkDLL">
+        <MSBuild Projects="B2BDMLInkDLL.dproj"/>
+    </Target>
+    <Target Name="B2BDMLInkDLL:Clean">
+        <MSBuild Projects="B2BDMLInkDLL.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="B2BDMLInkDLL:Make">
+        <MSBuild Projects="B2BDMLInkDLL.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="dmlink_api;B2BDMLInkDLL"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="dmlink_api:Clean;B2BDMLInkDLL:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="dmlink_api:Make;B2BDMLInkDLL:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>

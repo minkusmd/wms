@@ -4,7 +4,7 @@ object frmFiscalPrinterEditDlg: TfrmFiscalPrinterEditDlg
   ActiveControl = cbFLG_ENABLED
   BorderStyle = bsDialog
   Caption = 'MCC'
-  ClientHeight = 447
+  ClientHeight = 597
   ClientWidth = 384
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -17,7 +17,7 @@ object frmFiscalPrinterEditDlg: TfrmFiscalPrinterEditDlg
   OnDestroy = FormDestroy
   DesignSize = (
     384
-    447)
+    597)
   PixelsPerInch = 96
   TextHeight = 15
   object dtDialogTitle: TDialogTitle
@@ -45,7 +45,7 @@ object frmFiscalPrinterEditDlg: TfrmFiscalPrinterEditDlg
     Left = 8
     Top = 72
     Width = 368
-    Height = 321
+    Height = 471
     Margins.Left = 8
     Margins.Top = 8
     Margins.Right = 8
@@ -150,10 +150,63 @@ object frmFiscalPrinterEditDlg: TfrmFiscalPrinterEditDlg
       TabOrder = 4
       Width = 321
     end
+    object Label5: TLabel
+      Left = 20
+      Top = 304
+      Width = 160
+      Height = 15
+      Caption = 'Adresa server ZFPLab (gol = MCC locala)'
+    end
+    object edSERVER_ADDRESS: TcxDBTextEdit
+      Left = 20
+      Top = 321
+      DataBinding.DataField = 'SERVER_ADDRESS'
+      TabOrder = 5
+      Width = 321
+    end
+    object Label6: TLabel
+      Left = 20
+      Top = 352
+      Width = 50
+      Height = 15
+      Caption = 'Port COM'
+    end
+    object edCOM_PORT: TcxDBTextEdit
+      Left = 20
+      Top = 369
+      DataBinding.DataField = 'COM_PORT'
+      Properties.CharCase = ecUpperCase
+      TabOrder = 6
+      Width = 140
+    end
+    object Label7: TLabel
+      Left = 180
+      Top = 352
+      Width = 70
+      Height = 15
+      Caption = 'Viteza (baud)'
+    end
+    object edBAUD_RATE: TcxDBTextEdit
+      Left = 180
+      Top = 369
+      DataBinding.DataField = 'BAUD_RATE'
+      TabOrder = 7
+      Width = 161
+    end
+    object Label8: TLabel
+      Left = 20
+      Top = 400
+      Width = 320
+      Height = 30
+      Caption =
+        'Portul si viteza sint obligatorii doar pentru MCC din retea - pe' +
+        ' calculatorul strain nu se face cautare automata.'
+      WordWrap = True
+    end
   end
   object btnOk: TButton
     Left = 169
-    Top = 404
+    Top = 554
     Width = 90
     Height = 29
     Anchors = [akRight, akBottom]
@@ -164,7 +217,7 @@ object frmFiscalPrinterEditDlg: TfrmFiscalPrinterEditDlg
   end
   object btnCancel: TButton
     Left = 273
-    Top = 404
+    Top = 554
     Width = 90
     Height = 29
     Anchors = [akRight, akBottom]

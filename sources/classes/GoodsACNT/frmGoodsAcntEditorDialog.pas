@@ -7,7 +7,7 @@ uses
   cxDBEdit, ExtCtrls, DialogTitle,
   Data.DB,
   IBC, cxButtons, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, Vcl.Menus,
-  cxCurrencyEdit, cxTextEdit;
+  cxCurrencyEdit, cxTextEdit, dxCoreGraphics, cxMaskEdit, cxButtonEdit;
 
 type
   TfrmGoodsAcntEditorDlg = class(TSWNMasteredFormClass)
@@ -19,6 +19,10 @@ type
     cePRICE_ACNT: TcxDBCurrencyEdit;
     btnOk: TcxButton;
     btnCancel: TcxButton;
+    Label2: TLabel;
+    cxButtonEdit1: TcxButtonEdit;
+    procedure cxButtonEdit1PropertiesButtonClick(Sender: TObject;
+      AButtonIndex: Integer);
   private
     { Private declarations }
     FCreateNewItem: Boolean;
@@ -26,6 +30,9 @@ type
     procedure SetCreateNewItem(const Value: Boolean);
     procedure SetParentID(const Value: integer);
     function CheckParams:Boolean;
+    function GetGoodsTypeTitle(const AGoodsTypeID: integer): string;
+    procedure ShowGoodsTypeInfo;
+    procedure ClearGoodsType;
   protected
     { Protected declarations }
     procedure BindingDataSource;override;
@@ -34,6 +41,7 @@ type
     function IsFormDataPosted:Boolean;override;
     procedure WhenCancelForm;override;
   public
+    procedure SelectGoodsCategoryDlg;
     { Public declarations }
     property ParentID:integer read FParentID write SetParentID;
     property CreateNewItem:Boolean read FCreateNewItem write SetCreateNewItem;
@@ -42,7 +50,8 @@ type
 
 implementation
 
-uses SWNUtils, SWNConst;
+uses
+  DataModuleDB, frmGoodsTypeDialog, SWNUtils, SWNConst;
 
 {$R *.dfm}
 
@@ -61,6 +70,55 @@ begin
      end;
      if ErrorStr='' then Result:=True
      else ShowErrorDialog(cMSG_GeneralInputError_Title,cMSG_GeneralInputError_Text,ErrorStr);
+end;
+
+procedure TfrmGoodsAcntEditorDlg.ClearGoodsType;
+begin
+     if not (fMasterDataSet.State in dsEditModes) then fMasterDataSet.Edit;
+     fMasterDataSet.FieldByName('GOODS_TYPEID').Clear;
+     ShowGoodsTypeInfo;
+end;
+
+procedure TfrmGoodsAcntEditorDlg.cxButtonEdit1PropertiesButtonClick(
+  Sender: TObject; AButtonIndex: Integer);
+begin
+  if AButtonIndex = 1 then ClearGoodsType
+  else SelectGoodsCategoryDlg;
+end;
+
+function TfrmGoodsAcntEditorDlg.GetGoodsTypeTitle(const AGoodsTypeID: integer): string;
+var q: TIBCQuery;
+begin
+     Result:='';
+     if AGoodsTypeID<=0 then Exit;
+
+     q:=TIBCQuery.Create(nil);
+     try
+        q.Connection:=dmDB.IBCConnection;
+        q.Transaction:=dmDB.IBCTrDefaultSelect;
+        q.SQL.Text:='SELECT TITLE FROM TS_GOODS_TYPE WHERE GOODSTYPEID = :GOODSTYPEID';
+        q.ParamByName('GOODSTYPEID').AsInteger:=AGoodsTypeID;
+        q.Open;
+        if not q.Eof then Result:=q.Fields[0].AsString;
+     finally
+        q.Free;
+     end;
+end;
+
+procedure TfrmGoodsAcntEditorDlg.ShowGoodsTypeInfo;
+var GoodsTypeID: integer;
+    F: TField;
+begin
+     F:=fMasterDataSet.FindField('GOODS_TYPEID');
+     if (F=nil) or F.IsNull then
+     begin
+          cxButtonEdit1.Text:='';
+          Exit;
+     end;
+
+     GoodsTypeID:=F.AsInteger;
+     cxButtonEdit1.Text:=GetGoodsTypeTitle(GoodsTypeID);
+     if cxButtonEdit1.Text='' then cxButtonEdit1.Text:=IntToStr(GoodsTypeID);
 end;
 
 procedure TfrmGoodsAcntEditorDlg.BindingDataSource;
@@ -102,10 +160,33 @@ begin
              dtDialogTitle.Text:='Modifica inregistrarea';
              fMasterDataSet.Edit;
         end;
+        ShowGoodsTypeInfo;
      except
         if fMasterDataSet.State in dsEditModes then fMasterDataSet.Cancel;
         fMasterDataSet.UpdateTransaction.Rollback;
         raise;
+     end;
+end;
+
+procedure TfrmGoodsAcntEditorDlg.SelectGoodsCategoryDlg;
+var d: TfrmGoodsTypeDlg;
+    DefaultGoodsTypeID: integer;
+    F: TField;
+begin
+     DefaultGoodsTypeID:=-1;
+     F:=fMasterDataSet.FindField('GOODS_TYPEID');
+     if (F<>nil) and (not F.IsNull) then DefaultGoodsTypeID:=F.AsInteger;
+
+     d:=TfrmGoodsTypeDlg.Create(Self);
+     try
+        if d.SelectGoodsType(DefaultGoodsTypeID) and (d.GoodsTypeID>0) then
+        begin
+             if not (fMasterDataSet.State in dsEditModes) then fMasterDataSet.Edit;
+             fMasterDataSet.FieldByName('GOODS_TYPEID').AsInteger:=d.GoodsTypeID;
+             ShowGoodsTypeInfo;
+        end;
+     finally
+        d.Free;
      end;
 end;
 

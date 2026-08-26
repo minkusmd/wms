@@ -179,6 +179,7 @@ type
     bbWebFilters: TdxBarButton;
     bbWebCatalog: TdxBarButton;
     bbWebBlockedIp: TdxBarButton;
+    bbApiConfig: TdxBarButton;
     bbStockRecalc: TdxBarButton;
     bbGoodsPriceSynchronize: TdxBarButton;
     bbMainMenuAcs_Analytics: TdxBarButton;
@@ -282,6 +283,7 @@ type
     bbPriceRules: TdxBarButton;
     dxBarSubItem3: TdxBarSubItem;
     bbMCC: TdxBarButton;
+    bbWorkStations: TdxBarButton;
     bbWebUrlManager: TdxBarButton;
     bbWebGoodsGroups: TdxBarButton;
     dxBarSubItem4: TdxBarSubItem;
@@ -399,6 +401,7 @@ type
     procedure bbWebFiltersClick(Sender: TObject);
     procedure bbWebCatalogClick(Sender: TObject);
     procedure bbWebBlockedIpClick(Sender: TObject);
+    procedure bbApiConfigClick(Sender: TObject);
     procedure bbStockRecalcClick(Sender: TObject);
     procedure bbGoodsPriceSynchronizeClick(Sender: TObject);
     procedure bbMainMenuAcs_AnalyticsClick(Sender: TObject);
@@ -466,6 +469,7 @@ type
     procedure bbPromoPerDayClick(Sender: TObject);
     procedure bbPriceRulesClick(Sender: TObject);
     procedure bbMCCClick(Sender: TObject);
+    procedure bbWorkStationsClick(Sender: TObject);
     procedure bbWebUrlManagerClick(Sender: TObject);
     procedure bbWebGoodsGroupsClick(Sender: TObject);
     procedure bbECBClick(Sender: TObject);
@@ -879,6 +883,7 @@ uses
   frmWebActiuniDialog,
   frmWebBlogDialog,
   frmBlockedIpDialog,
+  frmApiConfigDialog,
   frmWebCatalogDialog,
   frmWebDeliveryDialog,
   frmWebDescriptionTemplateDialog,
@@ -891,6 +896,7 @@ uses
   frmWebShopsDialog,
   frmWebStaticPagesDialog,
   frmWebUrlsUnit,
+  frmWorkStationsSetupDialog,
   uAnalizePriceList,
   uAnalizeSupplierPrice,
   uCrediteDlg,
@@ -1626,6 +1632,18 @@ var
   dialog: TfrmBlockedIpDlg;
 begin
   dialog := TfrmBlockedIpDlg.Create(Self);
+  try
+    dialog.ShowModal;
+  finally
+    dialog.Free;
+  end;
+end;
+
+procedure TfrmMainForm.bbApiConfigClick(Sender: TObject);
+var
+  dialog: TfrmApiConfigDlg;
+begin
+  dialog := TfrmApiConfigDlg.Create(Self);
   try
     dialog.ShowModal;
   finally
@@ -2694,6 +2712,18 @@ var
   dialog: TfrmFiscalPrintersSetupDlg;
 begin
   dialog := TfrmFiscalPrintersSetupDlg.Create(Self);
+  try
+    dialog.ShowModal;
+  finally
+    dialog.Free;
+  end;
+end;
+
+procedure TfrmMainForm.bbWorkStationsClick(Sender: TObject);
+var
+  dialog: TfrmWorkStationsSetupDlg;
+begin
+  dialog := TfrmWorkStationsSetupDlg.Create(Self);
   try
     dialog.ShowModal;
   finally
@@ -3861,6 +3891,8 @@ begin
   if not SWNSecurityManager.IsSuperUser then
   begin
     bbActiveUsers.Visible := ivNever;
+    // >> credentialele API-urilor externe
+    bbApiConfig.Visible := ivNever;
     // >> SQL Repository
     bbSQLRepository.Visible := ivNever;
     // >> Справочники - Service+
@@ -3964,6 +3996,7 @@ begin
     bbMainMenuRef_Customers.Visible := ivNever;
     bbMainMenuRef_Enterprises.Visible := ivNever;
     bbMCC.Visible := ivNever;
+    bbWorkStations.Visible := ivNever;
     bbAutoTransport.Visible := ivNever;
     bbSYSS.Visible := ivNever;
     bbRegistrulBancar.Visible := ivNever;

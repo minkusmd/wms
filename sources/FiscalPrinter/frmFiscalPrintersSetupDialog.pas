@@ -31,6 +31,7 @@ type
     cxGridFPTable_SERIAL_NUMBER: TcxGridDBColumn;
     cxGridFPTable_FIRMA_NAME: TcxGridDBColumn;
     cxGridFPTable_COMPUTER_NAME: TcxGridDBColumn;
+    cxGridFPTable_SERVER_ADDRESS: TcxGridDBColumn;
     cxGridFPTable_DESCRIPTION: TcxGridDBColumn;
     cxGridFPTable_FLG_ENABLED: TcxGridDBColumn;
     cxGridFPTable_IMG: TcxGridDBColumn;

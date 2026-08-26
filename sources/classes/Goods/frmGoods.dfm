@@ -448,7 +448,7 @@ object frmGoodsBrowser: TfrmGoodsBrowser
         Properties.ValueChecked = 1
         Properties.ValueUnchecked = 0
         HeaderAlignmentHorz = taCenter
-        MinWidth = 30
+        MinWidth = 40
         Options.Editing = False
         Options.Grouping = False
         Options.HorzSizing = False
@@ -1682,6 +1682,13 @@ object frmGoodsBrowser: TfrmGoodsBrowser
       Visible = ivAlways
       OnClick = dxBarButton13Click
     end
+    object bbAcntGoods: TdxBarButton
+      Caption = 'Produse in contabilitate'
+      Category = 0
+      Hint = 'Produse in contabilitate'
+      Visible = ivAlways
+      OnClick = bbAcntGoodsClick
+    end
     object bbHome: TdxBarButton
       Caption = 'Inceput'
       Category = 1
@@ -1857,6 +1864,10 @@ object frmGoodsBrowser: TfrmGoodsBrowser
           BeginGroup = True
           Visible = True
           ItemName = 'bbChangeParent'
+        end
+        item
+          Visible = True
+          ItemName = 'bbAcntGoods'
         end
         item
           Visible = True
@@ -2068,7 +2079,12 @@ object frmGoodsBrowser: TfrmGoodsBrowser
       
         ' iif(exists(select * from ts_related_goods where goodsid = a.goo' +
         'dsid), 1, 0) FLG_HAS_KEYS'
-      ' , iif((a.flg_folder = 0) and exists(select 1 from ts_goods g join ts_attribute att on att.goods_type_id = g.webgoodstype_id where g.goodsid = a.goodsid and att.flg_recommended = 1 and not exists(select 1 from ts_goods_attribute ga where ga.attrid = att.attrid and ga.goodsid = a.goodsid)), 1, 0) FLG_ATTRS_INCOMPLETE'
+      
+        ' , iif((a.flg_folder = 0) and exists(select 1 from ts_goods g jo' +
+        'in ts_attribute att on att.goods_type_id = g.webgoodstype_id whe' +
+        're g.goodsid = a.goodsid and att.flg_recommended = 1 and not exi' +
+        'sts(select 1 from ts_goods_attribute ga where ga.attrid = att.at' +
+        'trid and ga.goodsid = a.goodsid)), 1, 0) FLG_ATTRS_INCOMPLETE'
       'FROM '
       ' SP_GET_TS_GOODS_M0(:DT,:GOODSID) A')
     SQLLock.Strings = (
@@ -2092,7 +2108,12 @@ object frmGoodsBrowser: TfrmGoodsBrowser
       
         ' iif(exists(select * from ts_related_goods where goodsid = a.goo' +
         'dsid), 1, 0) FLG_HAS_KEYS'
-      ' , iif((a.flg_folder = 0) and exists(select 1 from ts_goods g join ts_attribute att on att.goods_type_id = g.webgoodstype_id where g.goodsid = a.goodsid and att.flg_recommended = 1 and not exists(select 1 from ts_goods_attribute ga where ga.attrid = att.attrid and ga.goodsid = a.goodsid)), 1, 0) FLG_ATTRS_INCOMPLETE'
+      
+        ' , iif((a.flg_folder = 0) and exists(select 1 from ts_goods g jo' +
+        'in ts_attribute att on att.goods_type_id = g.webgoodstype_id whe' +
+        're g.goodsid = a.goodsid and att.flg_recommended = 1 and not exi' +
+        'sts(select 1 from ts_goods_attribute ga where ga.attrid = att.at' +
+        'trid and ga.goodsid = a.goodsid)), 1, 0) FLG_ATTRS_INCOMPLETE'
       ' '
       'FROM '
       

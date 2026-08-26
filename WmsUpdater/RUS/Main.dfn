@@ -1,0 +1,508 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE xliff PUBLIC "-//XLIFF//DTD XLIFF//EN" "http://www.oasis-open.org/committees/xliff/documents/xliff.dtd">
+<xliff version="1.0">
+  <file original="C:\Projects\Projects 10.1\WMS\WmsUpdater\Main.dfm" source-language="ru-MD" target-language="ru-RU" datatype="delphiform" tool="ETM v10.0" ts="C:\Projects\Projects 10.1\WMS\WmsUpdater\Main.dfm">
+    <header>
+      <prop-group name="ITEHeaderProp">
+        <prop prop-type="Version">9.0</prop>
+        <prop prop-type="SelfDateTime">43044.7538657407</prop>
+        <prop prop-type="OrigDateTime">42383.9096296296</prop>
+        <prop prop-type="XlatDateTime">42383.9096296296</prop>
+        <prop prop-type="Translated">0</prop>
+        <prop prop-type="UnTranslated">98</prop>
+      </prop-group>
+    </header>
+    <body>
+      <trans-unit id="O:fMainForm.Left" resname="O:fMainForm.Left">
+        <source>0</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">0</prop><prop prop-type="Type">TfMainForm</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.Top" resname="O:fMainForm.Top">
+        <source>0</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">1</prop><prop prop-type="Type">TfMainForm</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.BorderIcons" resname="O:fMainForm.BorderIcons">
+        <source>[]</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">2</prop><prop prop-type="Type">TfMainForm</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.BorderStyle" resname="O:fMainForm.BorderStyle">
+        <source>bsDialog</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">3</prop><prop prop-type="Type">TfMainForm</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.Caption" resname="O:fMainForm.Caption">
+        <source>'Модуль автоматического обновления'</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">4</prop><prop prop-type="Type">TfMainForm</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.ClientHeight" resname="O:fMainForm.ClientHeight">
+        <source>355</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">5</prop><prop prop-type="Type">TfMainForm</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.ClientWidth" resname="O:fMainForm.ClientWidth">
+        <source>484</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">6</prop><prop prop-type="Type">TfMainForm</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.Color" resname="O:fMainForm.Color">
+        <source>clBtnFace</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">7</prop><prop prop-type="Type">TfMainForm</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.Font.Charset" resname="O:fMainForm.Font.Charset">
+        <source>DEFAULT_CHARSET</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">8</prop><prop prop-type="Type">TfMainForm</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.Font.Color" resname="O:fMainForm.Font.Color">
+        <source>clWindowText</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">9</prop><prop prop-type="Type">TfMainForm</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.Font.Height" resname="O:fMainForm.Font.Height">
+        <source>-12</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">10</prop><prop prop-type="Type">TfMainForm</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.Font.Name" resname="O:fMainForm.Font.Name">
+        <source>'Segoe UI'</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">11</prop><prop prop-type="Type">TfMainForm</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.Font.Style" resname="O:fMainForm.Font.Style">
+        <source>[]</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">12</prop><prop prop-type="Type">TfMainForm</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.OldCreateOrder" resname="O:fMainForm.OldCreateOrder">
+        <source>False</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">13</prop><prop prop-type="Type">TfMainForm</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.Position" resname="O:fMainForm.Position">
+        <source>poScreenCenter</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">14</prop><prop prop-type="Type">TfMainForm</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.OnCreate" resname="O:fMainForm.OnCreate">
+        <source>FormCreate</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">15</prop><prop prop-type="Type">TfMainForm</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.OnDestroy" resname="O:fMainForm.OnDestroy">
+        <source>FormDestroy</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">16</prop><prop prop-type="Type">TfMainForm</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.OnShow" resname="O:fMainForm.OnShow">
+        <source>FormShow</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">17</prop><prop prop-type="Type">TfMainForm</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.PixelsPerInch" resname="O:fMainForm.PixelsPerInch">
+        <source>96</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">18</prop><prop prop-type="Type">TfMainForm</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.TextHeight" resname="O:fMainForm.TextHeight">
+        <source>15</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">19</prop><prop prop-type="Type">TfMainForm</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:lbVersion.Left" resname="O:fMainForm.O:lbVersion.Left">
+        <source>16</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">20</prop><prop prop-type="Type">TLabel</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:lbVersion.Top" resname="O:fMainForm.O:lbVersion.Top">
+        <source>314</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">21</prop><prop prop-type="Type">TLabel</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:lbVersion.Width" resname="O:fMainForm.O:lbVersion.Width">
+        <source>48</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">22</prop><prop prop-type="Type">TLabel</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:lbVersion.Height" resname="O:fMainForm.O:lbVersion.Height">
+        <source>15</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">23</prop><prop prop-type="Type">TLabel</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:lbVersion.Caption" resname="O:fMainForm.O:lbVersion.Caption">
+        <source>'lbVersion'</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">24</prop><prop prop-type="Type">TLabel</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:DialogTitle1.Left" resname="O:fMainForm.O:DialogTitle1.Left">
+        <source>0</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">25</prop><prop prop-type="Type">TDialogTitle</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:DialogTitle1.Top" resname="O:fMainForm.O:DialogTitle1.Top">
+        <source>0</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">26</prop><prop prop-type="Type">TDialogTitle</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:DialogTitle1.Width" resname="O:fMainForm.O:DialogTitle1.Width">
+        <source>484</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">27</prop><prop prop-type="Type">TDialogTitle</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:DialogTitle1.Height" resname="O:fMainForm.O:DialogTitle1.Height">
+        <source>64</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">28</prop><prop prop-type="Type">TDialogTitle</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:DialogTitle1.Image.Data" resname="O:fMainForm.O:DialogTitle1.Image.Data">
+        <source>0B546478504E47496D61676589504E470D0A1A0A0000000D49484452000000300000003008060000005702F9870000000467414D410000B18F0BFC6105000000206348524D00007A26000080840000FA00000080E8000075300000EA6000003A98000017709CBA513C00001602494441546843D558675855D7B6DD80881541C14213104EA12852A45AE8455111B161474454040B82C602B6A858504105147BEFB15C136BD4183B45C52E2AF6884604A48F37E73E602021F7DE77DFFDF3FCBEF19D7DD6DE9C3DC69C63CEB9960280FF0A1C835D1A9A05F692EA0644F5693F20265A363C6EB1DE88EDEBF446ED5A6F11F6FD628BF0F9333A452E18E2377FB255E88671EAF5FDC67F827A17FF0E0BCE460AB107C60A91E9C1C2B8D5FE42D01C3F559BB1A39C4D46AF5C661F73F6E69035B985B30E7C46E2E932A45CAC42DAA50AACBF508E653F5560CEE112846CFC04F7EF73CBCDA26F3EEE34F3F0E6A0B4D57D175E99ABBEE3FD5C616F6182B0BB6085909EB7505871335688FB71A230E3E0587A5FE837D4C7A9DEC57F85891B82555D6267F496471D3F3F62FDABCAED572B70FD0590F506B8469F979E02671E0227EF01C7EE023FDC010EDDA64FBABEF80438FD00587CA20C5ECB3EC27C56CE8301DB0EC6A6BC5CA955DFBBFE15EA5DFC3B2CFB65BC109C32CBC638F2C4A98149EF702AA70ACF3E01F7DF01579F01E71F01A7EE03C79934113E9405ECB9056CBB0EFC48627248E02F24EE08DDFB899EBB48D71B7E01FC93CAD069FEE387638FED1BBC316F9ED29AAC68CA40C47F3703ABB2662ABB2F4F9F621AFDA430E96C195EFD0E3CCBA7A8BF022EE7026729E24CF204913F4A113F9C0DECBA091C20118FDE032F49E861BA4EBA00245F04D2AF5076E8B98C3CE02661C929C06E41115C13CF6D8B3F3FFBDFCE46BD8B7FC6C6BC45CD9C979CDE6213FF5924985F043CFD006413798EE819B2049367CBB0909F2913FCFDE7C7C0E7627AF6374516D65D02D61256FF0CAC3C0FACA7EB232434E325F0989ED949D9F24DAA807C4656C6B81DB3CDE71E1D29C4EC0F15A6ED1E2D4CDD35AA5E6EF52ED6C6EE82954D7BACFAE560F78432D122BF13A1171F1576B84CE44F93159838E32211CE22327C8FB35355A588FE966B14F15F8134028B6001CBCF52D44F036B28236C291671EF2DB0999EF55F570993E8BBCF46A6CDB0AD8F536DD4BB5883FD5F5737F45AF7EB1EF79515622132F9D7641D26C59EE7C833F17FE428BCCF56C8A5CC147CA5BFA67FEF0B1445BC95A2BFF92AF99D04AC27CFAFA916B0886CB3E0478520B6DD4D6A00FCBB4BE99EDFDA0A1846653C1C9C18693A31A59F10BA26A85E8EF52ED6A067DAB9841E14F9CD44E0B72FC007C2738A3EFB96AD72928833792E5A510011E0E7F8DFD732E0F66BC57DB6CF66F27C1D01E7A8135106E2FEA1403265827FE7FA73602F5929EA10E0B8A4187AE1672F0F5A30A005F3A90FF52E32C61ED91AD071CE277C4F2FC926221C558EE803EA3817C82A35C4191C3D2EC84CB2416525505AA1A81126C3DDE82F1920B22BAA05C49F04661E03E69C0052E91E5BF227CAEA6CFA1EBC0D907CF701A661A9AB07C4F6A89767BD8BF197E6694962EE3E18B353D149B8837CA4C2CDA3CF1B1465B60D93AE01936401F985400591BF5B5D1F4C6437B751F2756D01DC89569200AE8179D502A61D01E6D3F50E12CBD66471C3B6031ED462DB8CBF5F6933669C577D5CFFB2C0705DBA6BBEFDA22231FA073381379F15E022E301C59D830B8F8933B855F2BD2A8AFE6DEA4CE27DC2DE0C4500B6DFA82E64B2516AAD2CB08DBEA73AE0E84F3D4C20DB2C3DA368C52C70D016A0672A6031F7035A0D3D74C131A88BEA9FB9D6F9C208DF1AA9DF3EEACEDB61DBAA9040C5B49F0470E4D912BF52BF67C22C8AFB3CE32091E7889590E7DF92481E5EFB883893DF532D600709E03A602B6D25219B281B6997A9A5D23CE076BAE82720F62810710088A64CECA4E793E85EDF8D80D7BA2A382EFD8C56E37260E01FD6FFCF7CEB7C61D8C5264F97CFCAC744FAB105F4C3FC7226CF038B7B3B9363514C9CC91EA0EBE7D4324BCB156D940B90D7F6578B600B317822F3DF8AE2E89A85B11816C25D88BB116761FC3EC5776EB7DEEBABD06355A928C0706A2E9A066CA57CD5E55BE74BF0E2FE0D74C2CE5CEBBEB2448C067B932371878A98071613E3173309BE66823CB4B8E370DFE7B51AB000512C8185D6D48958F8D575C341D84DBFB789ACC5A4D94A13F6535D88ADB50AAEAB4BE0B4EC0B6C177E8034F6191A0FBD5CAA65E36E559B731D01DD2687DB6887E794FBADAFC0D83D40E441C58F32792E5CF632A3269A1CC927949DC252C53E88D798942880C056E35A604F7341B3D5CED1730C6EC3BCC64D80FF8EEB2381FC3F85B2308302B7EC6C15BA2EFF021B22DF71EE6B48629E427D4C36D41C274FAFCDB98E00E3118B26EA463D830F4D426E61A1BB803012B293A2C47EE79770DA396A9C096EA53CDC38FA4C96C9F3270BE06B2E747E86779FBCADE0405CA13AE261C59FFC9DC5B040CE266F336611F9E93F2802D76DD927581279D98C67309AF2002DC76641C93385A6C6DF086835287DA751F40BB8259523800A68307581A04D1495435522E154F22BB7432E32CE044FDECF341F9808674314500D31F2D5E4579E2CC088B45C84A73F4744FA0B446D788169A92F317D431EA6A5BCC0D475AF09EF307EED1B8C59972FD6C264EA48DD13F2611A930BE3A90FA11771075A611950EA75E0A57223F516E64EDB05C637F29D7BD929370A3A76A5E3EC977027EFB92555A217B530860BF970DE8912B18F730761F25C98B914F957D4A1D8CFEC7526CE7EE76CB135D8228732CB6132E72EDAC464A0CDE41B6833E12AB4437E41CB2117A1D1EF67A8F73C8BA61EA7D0C4FD141ABB9F8669CFF318B6595183DD96BC47FBA8FB22F9B6E199D00EBB0595A07325425B7BB985C34E81F14D80B49B857AA30147F32C66E561DCAE120C4C2F43B75565E84E5DC07CCE1B38CE7B4603A852CC00830972DBE4EE54D379983CA3C6F7ECF9C0D4B768157F1F5AB373A01D9B0DEDA85B14C96B6839FC3234822EA0B9FF3934F53A4DE44FA1B9C73998F7398D5EEBCBC45AE8B6E41DDA8EBF2D926F4DE45B8FCB80EA90CB10F4DDDD3BD86C1718DF0418743669D564C0F14F86539FC279F17BC41E2943CC0F95E8B9B608B2992FD0323413BD12DF8875C03D9D27ED7BDAF79C276F7336D8FBB5A3CF45BFFC6C09ACD6E4C172F573982FCF85D9A2C790CFBE0FE9D43B30199709A361D7A1D7FF57B4ED75019A445ECBE3024C7D8F60C8E64AD1465DE6BF14A32E9227B421010D83AF9000B73EBA969B04C63701DA2606AD1A9380F6931F42422DCB2A8EFCB8AD48DCAB8CDC560ADBF897308E7E8A90ED5FC51D26172E6FDCD8FFB5871B172EB74B3E718D38528C0E699FD021351F26C91F2059F11B240BDFD1FEE60D4CA25EC378EC4BB40F7E01BDC0E7D0F47901758F2CC8BCF620E17415E6532BB59EFB1C5AA137EB086844A22903BD0DCD76088C6F029AB56BA3A91678F453BB0977614C15CFC52399F11C4E8BDE2228F50B46EC0046EFACC2ECE355A23DB8FB307846702761F20C1653B33B1D75AC0CEA6B0B0905504F2C408BC5BFA3C5DC4F508FFE8866E33FA0F188F750EDFF06CABD5E41F07903358F3BE8E8B90B3FD251752365DA7EC12B688DAD9B8146C3498081476F3DF91681F14D806A9366CD1B061C79AD3D2E0BBA13B2A978EEC178DA236A5F0FA13B91523EED017A277F1627271F5A78F29611DED10E95F7413587758E3C172F5F8F395A0ECD355F1548242C21C417A3454C119A4714A2494801D4067F824ADF0FD45DF2A1E67E0FB6DEBBF1F85D15F6931D9D97E6FF45801A67C0C0C35BDD244D607C13A0D2CE5AA561FFE3B75A51CAF8C176E349C8C4DBD09F7457045FCBBE7B250E38CEC027DA9D7211F3F69A779FF749C4133A16B2B5F8CCC0A7B669272BA0B9AC049ACB094B4AA0B1A0142DE694A2F9F432349D588A46216568105C02A5C06208012550F5CC8583DF1EF1375328509DE2DFD5B110A3E1D02B654AF2A1961ABADB05C6370162167CD3F76984FCF1072C429F5A9841648E38482CE6BC469FB40A711EF0B191F7EEBC57E2433A83E703DB87B3718B66C4E41F2A44D222E629C8ABC796A15954191A8F2B47C391E5501E5C0EA17F19A10AAA3E79B0F6D927EEB9A61CAC44FBA98FEB90D71A4B5D28F0D83BA536561A06516305461D010DBD37CC681172436C5B3A64238EBCE1E4FBE84056E2516E4511715B532E1636DB8449F34E92F7F40BE973296DBFF9A8B88AF6357C60EF47D35C63E657B4F8AE04EA33AA23CFE4C3CBA116528E0643CBA13480040492802085004BCF03B48DA021B6F437E84DCA1133CF7CD8159A636E40B5EFA1B3E6CFB4841AD411D0A0FBCEAECD47FD5A87B8E9F427E22837FBEE05AC17FC06F7A40A7193C793792E0D75061F3E785BCC07958D677EC74EDA2C6D3D5F8088B4B7508B22E2930AD16C52119A4EF88AC66125501B5D4AE4CBA03C908833F95A02246E87307A7BB9F84E7E3F679E1DC0425A845C878AF7EE78B3BB7A420D44E2823C41893F95AC929B370DFEF9617B222F8DCDFD46DC72CE2B74A2B66AF7FD47782457889B2DDE137126F860CEC743DEB51EDF7800B746BBE28A9F2132FC8C3163D0220814E9A6A3F2099FA8EB7C865A700154077D814AFF42F23D79BFEF57D1FF4260251AFABC82CC731F7A251788B3473EF3B9987916C2229A8DBC0C65A72D8E2271D96225F15390C42B09B2A5CA82D92AF1B4A3D6EB87A5BA9401266C15FF56840D45DE6E513EEDCB0BE0B9B6423C74F04063DBF0A167EFFEEB78183714F9E112BC0B3545DE70095E07B6C59C5ED3C9DB9FD1B8FF2B34A276A916F816AA01EFA1D2FB3728FBE753E7F90825FFDFA1D4BB4014A2D2E335BA84AE87E3F213B05DBE155D9292D125658318447D12D028E8F43525CBA4C6823C51990508A6739548C0BC1A010D05D94A5515FB8D369A63AE173271A78402F130E140E0EBAE2B8AE984548949B4CDE6424EDDFB08B76647A26062077C994C986282824853FC3E4186F21003AC088886E0F51A6A3E8FA0E6FB942C928B06DECFC9067950F1790915DFD750F67B07E59EEF49C4EF50E99A0BFB2827786F680BF7342378EC95C2E77C67D8ED5C012DAA8106AEBB23C4A88B5C59409C92C2420A016A841624A249E33E27B69850EA5C57978A9671A7DDA9EBEA32B1807DD72BB6D86C99C771C35038DD025F62CD083214449380291DF039A203AAC275911C1001C1218F0E1A8F20F4784A87EDE710DCE9BBDB2B28777F03A51E6FE9FA1DADBD87E049F672CD82C70253F8AD3380FF4E13049C36479F2B36F0BBE600BD854BDE2859ADD3A7E83715B9CA162BCBEEEAFF5103A22AB3551A244053C56E835DCB31D7F3F934C4E7D2A0CDB4294B077AA7D13975034F64C5E1FB49FC60144F3542F18C0E289A2D41619C19A123BECCB242517427E4863861B3EF70843B8E420FAB31E86A1D0147EB5898F68887766002DAF65F8776FDB6A0759FFDD0F03B0BFD816B3168A32E461DED80916725187CD11CFDAE59A3E7F52E70BB6C5F2A3B69E32A0699ECCE19906519D411D080A04ED01124CB5BA9791D986538ED3109A842081D6CC2F7026377D3F680C8F32717F0C305C3513CCD18C5B146288A35442123C6185FA64B5030AD134AA677C58761E6D8E7D41AB32C5B21C6A22566493531A0670B38CD6F8281DB3431E1A836220F6B23EA485B441ED3C1E4334688386F8AD0F366184DD11F91E182C1992EE893E100EF1BF6AF8C57BBC944AEB2A54A56670CFF68A3B4C836E2F4B4A534192A99AD326C1674FA78E7796F104A96E1C29D755C81EFA80BF121FCC1C210144F2101319405518411598A044C262B8D3741E10819B27B4BB1C3D910AB6C0D31D9D20093A506E8EBAB87AEDFB745F0165D449C34C0A24B1D917CDD1E29990E5897ED8435B79DB1F25E572C7DD41DF14FBA21FA9933C2F21C31E49103EC532CFA096689CACE9B0D05466D0135366A4530222B99A8745E6FA739E272B6DB8A8FE2318F49F3A04AA49ECFFFAFF36061388A2791802924209A308D44500D144E324541981445C32D90DD5386CD0E86D8EA608445D6ED112533406F12E095DC0E4336E922F28801B63CB2C4AE8716D8FE4086F4075224DF972081AEE3686DDAE34E087F6A8B91CF1D11F0C01E361BA47E2440C96E537B81F14D40B508150267419760264857481BD8A579B50DCB78D26BED17C4916D983CFFC7149FCE1E2D8840F1B80E289E48225848245F53E4C3C8422365281E6C894C6F19D2EC0D498411D20871E68608EAA707DF741D0CD8A08B09FBF5917ACF04A9778D91926382A41C0996DF9362C17D33CC78D809931E5923E469170C7AEE845E4F1DD03EC8D843DB5C4F68D3595FC49F05701654091A04638215D583A5AADD065FFDF1D9B7FDD71789BD3F8504F01C78101785E251A6281E6382E2B1D5182341D108290A07CBF1B57F476478CA91D2C510E9449EB1DECA082143F4E14602FAA6E860CC1E7D91F4EADB2648BC638A841C229F23C3CC7B6688BADF09A10FAD31E4893D025E38C337D701BA6E86EEEAEABA82466B3D117504D412C12D559B2025D851266C943B26F7D01B7DFD98F7DAAF984DDB878D9481EC39D3513488040C250C6348501C4CD619284361A0194AFA5922C34B8EF52460437506365A1B61C2500338A7EAC0275907C13BF491704782C559A658785B82B83B52C4DE912332C71CA1F73A21F8810DFA9100FF172EF079EC045D77038F165ABA82A6AE9E88BF08A816C105DD88D086202738900827AA0B07ADBE27E7392EFEF4761C0DB30BB133F1B11F111F48C44548511C44D60994A3A89F194A032D48800CEB48402A914F669080908106B05DAB43E76D1D046CD1475CB614DF6598223653822959524CC89663F41D0B0CBE6745BEB785FF6307F47CD60D5E0F9CA1D3A3BD2F095026F24A7F2B80514B44EB6A118ED49D5C05930427559BD4BEA661995BD347C596BCE84576E92F41C90029BE06550BE8AF105116684E3520C51A129044E49711968F0EC3AC6DC9E8B45A075D96B783F7467D4CCB9462D20D5384DF9420E496144333E5E89F6D89DE399DE177BF0B7C1E3A917D7AC033A72B74BA19F42301CD897CC37F2A8041A46B3A9326A103C18EE04AD9F02021DDFD6CA3A6C67B055F3B11E853F832A8239197A274808C20470989A8E86F865B24601915F1227B232C8C598CC5D404C2F795565A2EB329EBB8B81DBAA6E8611C911E79CD14C1D72508BA2943EF0C33F86659C2EB8E0D91B687D77D17F83E7187E7ED1E68E76230B885B66E3B22AF4150A997786D10E19A21D78CA043302738113C05C90A1FA1C3520F6579624F976E71313303220EEF1D10F4247BA04BE1C74079551509C9F49322C6C9B23C64C2BA7B6EB1D987CD46FEBCAAA5C79E08ED50CFA5F2853AB04BD643F00D1902AF48E07F550AEF6B72B8DDB080EBAD4E70CBB281FB6D0778DDEB0EDFC79EF0CC70AD6CEB603052435B5746E45B12147BA17F0744B8261B3CCA69334E6D966BC36C953B59CB8FBA554FC178A9AF6094E0DB44BA24C0DF7AF4E4E52EEEA9F3ECACFF61240D9D20C8127B0B1D96F9D2333E82E9725FAA27DFF6B30D6E754ED247C07539BC2F4BE07A458AAE57E570B966816E374840A61D3CB29D49801BFC9EFAC0FB9607DAD81A0CD768ADABC9F661D44BF65F81487346785E70A732225810D85E5D096E827C951789F226F85483AF3DC57B66AB5C08B604F356610EFE5649FA95BE37E4E8FEAB04CE9401E7AB6670B96C81AEBF7446F74B7625DD2F3ABEE871C1E59AEBA5EE7B9CF63B2CD4B6D4D3D468A320FFBF16402FFD336AECD598C099A1824FA421986848A039924875F30DBCC6F7F8199E334D08AAA6ABB496753F237F6E7FC2E44297C3A6DBBA1C308DB3DB2B196EBD43DACD76B77907DBDD96CDBAECEF2CD81FB3156C367516B42CA9FFFFA702FE19881475AD95AA827CA51AA109A119A1792DF05A23023F43133F513C05FE5F51EFE2FF1F40F81F1D760E1DA68A747F0000000049454E44AE426082</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">29</prop><prop prop-type="Type">TDialogTitle</prop><prop prop-type="Localize">1</prop><prop prop-type="Open">{</prop><prop prop-type="Close">}</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:DialogTitle1.Title" resname="O:fMainForm.O:DialogTitle1.Title">
+        <source>'SWN 6 Auto Updater'</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">30</prop><prop prop-type="Type">TDialogTitle</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:DialogTitle1.Text" resname="O:fMainForm.O:DialogTitle1.Text">
+        <source>'Автоматическое обновление программы SWN 5'</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">31</prop><prop prop-type="Type">TDialogTitle</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:DialogTitle1.FontTitle.Charset" resname="O:fMainForm.O:DialogTitle1.FontTitle.Charset">
+        <source>DEFAULT_CHARSET</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">32</prop><prop prop-type="Type">TDialogTitle</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:DialogTitle1.FontTitle.Color" resname="O:fMainForm.O:DialogTitle1.FontTitle.Color">
+        <source>clWindowText</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">33</prop><prop prop-type="Type">TDialogTitle</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:DialogTitle1.FontTitle.Height" resname="O:fMainForm.O:DialogTitle1.FontTitle.Height">
+        <source>-13</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">34</prop><prop prop-type="Type">TDialogTitle</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:DialogTitle1.FontTitle.Name" resname="O:fMainForm.O:DialogTitle1.FontTitle.Name">
+        <source>'Segoe UI'</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">35</prop><prop prop-type="Type">TDialogTitle</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:DialogTitle1.FontTitle.Style" resname="O:fMainForm.O:DialogTitle1.FontTitle.Style">
+        <source>[fsBold]</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">36</prop><prop prop-type="Type">TDialogTitle</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:DialogTitle1.FontText.Charset" resname="O:fMainForm.O:DialogTitle1.FontText.Charset">
+        <source>DEFAULT_CHARSET</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">37</prop><prop prop-type="Type">TDialogTitle</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:DialogTitle1.FontText.Color" resname="O:fMainForm.O:DialogTitle1.FontText.Color">
+        <source>clWindowText</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">38</prop><prop prop-type="Type">TDialogTitle</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:DialogTitle1.FontText.Height" resname="O:fMainForm.O:DialogTitle1.FontText.Height">
+        <source>-12</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">39</prop><prop prop-type="Type">TDialogTitle</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:DialogTitle1.FontText.Name" resname="O:fMainForm.O:DialogTitle1.FontText.Name">
+        <source>'Segoe UI'</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">40</prop><prop prop-type="Type">TDialogTitle</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:DialogTitle1.FontText.Style" resname="O:fMainForm.O:DialogTitle1.FontText.Style">
+        <source>[]</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">41</prop><prop prop-type="Type">TDialogTitle</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:pnClient.AlignWithMargins" resname="O:fMainForm.O:pnClient.AlignWithMargins">
+        <source>True</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">42</prop><prop prop-type="Type">TPanel</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:pnClient.Left" resname="O:fMainForm.O:pnClient.Left">
+        <source>8</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">43</prop><prop prop-type="Type">TPanel</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:pnClient.Top" resname="O:fMainForm.O:pnClient.Top">
+        <source>72</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">44</prop><prop prop-type="Type">TPanel</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:pnClient.Width" resname="O:fMainForm.O:pnClient.Width">
+        <source>468</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">45</prop><prop prop-type="Type">TPanel</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:pnClient.Height" resname="O:fMainForm.O:pnClient.Height">
+        <source>225</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">46</prop><prop prop-type="Type">TPanel</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:pnClient.Margins.Left" resname="O:fMainForm.O:pnClient.Margins.Left">
+        <source>8</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">47</prop><prop prop-type="Type">TPanel</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:pnClient.Margins.Top" resname="O:fMainForm.O:pnClient.Margins.Top">
+        <source>8</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">48</prop><prop prop-type="Type">TPanel</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:pnClient.Margins.Right" resname="O:fMainForm.O:pnClient.Margins.Right">
+        <source>8</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">49</prop><prop prop-type="Type">TPanel</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:pnClient.Margins.Bottom" resname="O:fMainForm.O:pnClient.Margins.Bottom">
+        <source>8</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">50</prop><prop prop-type="Type">TPanel</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:pnClient.Align" resname="O:fMainForm.O:pnClient.Align">
+        <source>alTop</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">51</prop><prop prop-type="Type">TPanel</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:pnClient.BevelKind" resname="O:fMainForm.O:pnClient.BevelKind">
+        <source>bkFlat</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">52</prop><prop prop-type="Type">TPanel</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:pnClient.BevelOuter" resname="O:fMainForm.O:pnClient.BevelOuter">
+        <source>bvNone</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">53</prop><prop prop-type="Type">TPanel</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:pnClient.Color" resname="O:fMainForm.O:pnClient.Color">
+        <source>clWindow</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">54</prop><prop prop-type="Type">TPanel</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:pnClient.ParentBackground" resname="O:fMainForm.O:pnClient.ParentBackground">
+        <source>False</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">55</prop><prop prop-type="Type">TPanel</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:pnClient.TabOrder" resname="O:fMainForm.O:pnClient.TabOrder">
+        <source>1</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">56</prop><prop prop-type="Type">TPanel</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:pnClient.O:Label1.AlignWithMargins" resname="O:fMainForm.O:pnClient.O:Label1.AlignWithMargins">
+        <source>True</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">57</prop><prop prop-type="Type">TLabel</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:pnClient.O:Label1.Left" resname="O:fMainForm.O:pnClient.O:Label1.Left">
+        <source>8</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">58</prop><prop prop-type="Type">TLabel</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:pnClient.O:Label1.Top" resname="O:fMainForm.O:pnClient.O:Label1.Top">
+        <source>8</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">59</prop><prop prop-type="Type">TLabel</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:pnClient.O:Label1.Width" resname="O:fMainForm.O:pnClient.O:Label1.Width">
+        <source>448</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">60</prop><prop prop-type="Type">TLabel</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:pnClient.O:Label1.Height" resname="O:fMainForm.O:pnClient.O:Label1.Height">
+        <source>15</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">61</prop><prop prop-type="Type">TLabel</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:pnClient.O:Label1.Margins.Left" resname="O:fMainForm.O:pnClient.O:Label1.Margins.Left">
+        <source>8</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">62</prop><prop prop-type="Type">TLabel</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:pnClient.O:Label1.Margins.Top" resname="O:fMainForm.O:pnClient.O:Label1.Margins.Top">
+        <source>8</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">63</prop><prop prop-type="Type">TLabel</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:pnClient.O:Label1.Margins.Right" resname="O:fMainForm.O:pnClient.O:Label1.Margins.Right">
+        <source>8</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">64</prop><prop prop-type="Type">TLabel</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:pnClient.O:Label1.Margins.Bottom" resname="O:fMainForm.O:pnClient.O:Label1.Margins.Bottom">
+        <source>2</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">65</prop><prop prop-type="Type">TLabel</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:pnClient.O:Label1.Align" resname="O:fMainForm.O:pnClient.O:Label1.Align">
+        <source>alTop</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">66</prop><prop prop-type="Type">TLabel</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:pnClient.O:Label1.Caption" resname="O:fMainForm.O:pnClient.O:Label1.Caption">
+        <source>'Журнал событий'</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">67</prop><prop prop-type="Type">TLabel</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:pnClient.O:Label1.ExplicitWidth" resname="O:fMainForm.O:pnClient.O:Label1.ExplicitWidth">
+        <source>95</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">68</prop><prop prop-type="Type">TLabel</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:pnClient.O:mmInfo.AlignWithMargins" resname="O:fMainForm.O:pnClient.O:mmInfo.AlignWithMargins">
+        <source>True</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">69</prop><prop prop-type="Type">TMemo</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:pnClient.O:mmInfo.Left" resname="O:fMainForm.O:pnClient.O:mmInfo.Left">
+        <source>8</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">70</prop><prop prop-type="Type">TMemo</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:pnClient.O:mmInfo.Top" resname="O:fMainForm.O:pnClient.O:mmInfo.Top">
+        <source>25</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">71</prop><prop prop-type="Type">TMemo</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:pnClient.O:mmInfo.Width" resname="O:fMainForm.O:pnClient.O:mmInfo.Width">
+        <source>448</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">72</prop><prop prop-type="Type">TMemo</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:pnClient.O:mmInfo.Height" resname="O:fMainForm.O:pnClient.O:mmInfo.Height">
+        <source>188</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">73</prop><prop prop-type="Type">TMemo</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:pnClient.O:mmInfo.Margins.Left" resname="O:fMainForm.O:pnClient.O:mmInfo.Margins.Left">
+        <source>8</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">74</prop><prop prop-type="Type">TMemo</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:pnClient.O:mmInfo.Margins.Top" resname="O:fMainForm.O:pnClient.O:mmInfo.Margins.Top">
+        <source>0</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">75</prop><prop prop-type="Type">TMemo</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:pnClient.O:mmInfo.Margins.Right" resname="O:fMainForm.O:pnClient.O:mmInfo.Margins.Right">
+        <source>8</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">76</prop><prop prop-type="Type">TMemo</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:pnClient.O:mmInfo.Margins.Bottom" resname="O:fMainForm.O:pnClient.O:mmInfo.Margins.Bottom">
+        <source>8</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">77</prop><prop prop-type="Type">TMemo</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:pnClient.O:mmInfo.TabStop" resname="O:fMainForm.O:pnClient.O:mmInfo.TabStop">
+        <source>False</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">78</prop><prop prop-type="Type">TMemo</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:pnClient.O:mmInfo.Align" resname="O:fMainForm.O:pnClient.O:mmInfo.Align">
+        <source>alClient</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">79</prop><prop prop-type="Type">TMemo</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:pnClient.O:mmInfo.ReadOnly" resname="O:fMainForm.O:pnClient.O:mmInfo.ReadOnly">
+        <source>True</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">80</prop><prop prop-type="Type">TMemo</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:pnClient.O:mmInfo.ScrollBars" resname="O:fMainForm.O:pnClient.O:mmInfo.ScrollBars">
+        <source>ssVertical</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">81</prop><prop prop-type="Type">TMemo</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:pnClient.O:mmInfo.TabOrder" resname="O:fMainForm.O:pnClient.O:mmInfo.TabOrder">
+        <source>0</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">82</prop><prop prop-type="Type">TMemo</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:btnClose.Left" resname="O:fMainForm.O:btnClose.Left">
+        <source>374</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">83</prop><prop prop-type="Type">TButton</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:btnClose.Top" resname="O:fMainForm.O:btnClose.Top">
+        <source>308</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">84</prop><prop prop-type="Type">TButton</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:btnClose.Width" resname="O:fMainForm.O:btnClose.Width">
+        <source>90</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">85</prop><prop prop-type="Type">TButton</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:btnClose.Height" resname="O:fMainForm.O:btnClose.Height">
+        <source>29</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">86</prop><prop prop-type="Type">TButton</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:btnClose.Caption" resname="O:fMainForm.O:btnClose.Caption">
+        <source>'Закрыть'</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">87</prop><prop prop-type="Type">TButton</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:btnClose.Enabled" resname="O:fMainForm.O:btnClose.Enabled">
+        <source>False</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">88</prop><prop prop-type="Type">TButton</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:btnClose.TabOrder" resname="O:fMainForm.O:btnClose.TabOrder">
+        <source>2</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">89</prop><prop prop-type="Type">TButton</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:btnClose.OnClick" resname="O:fMainForm.O:btnClose.OnClick">
+        <source>btnCloseClick</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">90</prop><prop prop-type="Type">TButton</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:IBCConnection.Database" resname="O:fMainForm.O:IBCConnection.Database">
+        <source>'SW'</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">91</prop><prop prop-type="Type">TIBCConnection</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:IBCConnection.ClientLibrary" resname="O:fMainForm.O:IBCConnection.ClientLibrary">
+        <source>'fbclient.dll'</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">92</prop><prop prop-type="Type">TIBCConnection</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:IBCConnection.Port" resname="O:fMainForm.O:IBCConnection.Port">
+        <source>'3050'</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">93</prop><prop prop-type="Type">TIBCConnection</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:IBCConnection.Server" resname="O:fMainForm.O:IBCConnection.Server">
+        <source>'192.168.106.254'</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">94</prop><prop prop-type="Type">TIBCConnection</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:IBCConnection.LoginPrompt" resname="O:fMainForm.O:IBCConnection.LoginPrompt">
+        <source>False</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">95</prop><prop prop-type="Type">TIBCConnection</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:IBCConnection.Left" resname="O:fMainForm.O:IBCConnection.Left">
+        <source>116</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">96</prop><prop prop-type="Type">TIBCConnection</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+      <trans-unit id="O:fMainForm.O:IBCConnection.Top" resname="O:fMainForm.O:IBCConnection.Top">
+        <source>176</source>
+        <prop-group name="ITEFieldProp">
+        <prop prop-type="Created">43044.7538748148</prop><prop prop-type="Status">0</prop><prop prop-type="Order">97</prop><prop prop-type="Type">TIBCConnection</prop><prop prop-type="Localize">1</prop></prop-group>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

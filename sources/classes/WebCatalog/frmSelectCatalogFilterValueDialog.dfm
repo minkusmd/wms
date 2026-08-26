@@ -3,8 +3,8 @@ object frmSelectCatalogFilterValueDlg: TfrmSelectCatalogFilterValueDlg
   Top = 0
   BorderStyle = bsDialog
   Caption = 'Alege atributul si valoarea'
-  ClientHeight = 460
-  ClientWidth = 700
+  ClientHeight = 463
+  ClientWidth = 895
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -13,13 +13,13 @@ object frmSelectCatalogFilterValueDlg: TfrmSelectCatalogFilterValueDlg
   Font.Style = []
   Position = poOwnerFormCenter
   DesignSize = (
-    700
-    460)
+    895
+    463)
   TextHeight = 15
   object dtDialogTitle: TDialogTitle
     Left = 0
     Top = 0
-    Width = 700
+    Width = 895
     Height = 64
     Title = 'Alege atributul si valoarea'
     Text = ''
@@ -35,26 +35,29 @@ object frmSelectCatalogFilterValueDlg: TfrmSelectCatalogFilterValueDlg
     FontText.Style = []
     ImageList = dmAdditions.cxImageList_DialogIcons
     ImageIndex = 16
+    ExplicitWidth = 700
   end
   object cxGridFilters: TcxGrid
     Left = 8
-    Top = 72
-    Width = 336
-    Height = 340
+    Top = 70
+    Width = 422
+    Height = 343
     Anchors = [akLeft, akTop, akBottom]
     TabOrder = 0
     object cxGridFiltersTable: TcxGridDBTableView
-      Navigator.Buttons.CustomButtons = <>
+      FindPanel.DisplayMode = fpdmAlways
+      FindPanel.UseExtendedSyntax = True
       DataController.DataSource = IBCDataSourceFilters
-      DataController.Summary.DefaultGroupSummaryItems = <>
-      DataController.Summary.FooterSummaryItems = <>
-      DataController.Summary.SummaryGroups = <>
       OptionsData.Deleting = False
       OptionsData.Editing = False
       OptionsData.Inserting = False
       OptionsSelection.CellSelect = False
       OptionsView.ColumnAutoWidth = True
       OptionsView.GroupByBox = False
+      object cxGridFilters_FILTERID: TcxGridDBColumn
+        Caption = 'Cod'
+        DataBinding.FieldName = 'FILTERID'
+      end
       object cxGridFilters_FILTERNAME: TcxGridDBColumn
         Caption = 'Atribut RO'
         DataBinding.FieldName = 'FILTERNAME'
@@ -71,25 +74,27 @@ object frmSelectCatalogFilterValueDlg: TfrmSelectCatalogFilterValueDlg
     end
   end
   object cxGridParams: TcxGrid
-    Left = 352
-    Top = 72
-    Width = 340
-    Height = 340
+    Left = 436
+    Top = 70
+    Width = 451
+    Height = 119
     Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 1
     object cxGridParamsTable: TcxGridDBTableView
-      Navigator.Buttons.CustomButtons = <>
+      FindPanel.DisplayMode = fpdmAlways
+      FindPanel.UseExtendedSyntax = True
       OnCellDblClick = cxGridParamsTableCellDblClick
       DataController.DataSource = IBCDataSourceParams
-      DataController.Summary.DefaultGroupSummaryItems = <>
-      DataController.Summary.FooterSummaryItems = <>
-      DataController.Summary.SummaryGroups = <>
       OptionsData.Deleting = False
       OptionsData.Editing = False
       OptionsData.Inserting = False
       OptionsSelection.CellSelect = False
       OptionsView.ColumnAutoWidth = True
       OptionsView.GroupByBox = False
+      object cxGridParams_FILTERPARAMID: TcxGridDBColumn
+        Caption = 'Cod'
+        DataBinding.FieldName = 'FILTERPARAMID'
+      end
       object cxGridParams_PARAM_VALUE: TcxGridDBColumn
         Caption = 'Valoare RO'
         DataBinding.FieldName = 'PARAM_VALUE'
@@ -106,8 +111,8 @@ object frmSelectCatalogFilterValueDlg: TfrmSelectCatalogFilterValueDlg
     end
   end
   object btnOk: TcxButton
-    Left = 506
-    Top = 421
+    Left = 701
+    Top = 424
     Width = 90
     Height = 29
     Anchors = [akRight, akBottom]
@@ -115,10 +120,12 @@ object frmSelectCatalogFilterValueDlg: TfrmSelectCatalogFilterValueDlg
     Default = True
     ModalResult = 1
     TabOrder = 2
+    ExplicitLeft = 506
+    ExplicitTop = 421
   end
   object btnCancel: TcxButton
-    Left = 602
-    Top = 421
+    Left = 797
+    Top = 424
     Width = 90
     Height = 29
     Anchors = [akRight, akBottom]
@@ -126,6 +133,21 @@ object frmSelectCatalogFilterValueDlg: TfrmSelectCatalogFilterValueDlg
     Caption = 'Renunta'
     ModalResult = 2
     TabOrder = 3
+    ExplicitLeft = 602
+    ExplicitTop = 421
+  end
+  object cxButtonEdit1: TcxButtonEdit
+    Left = 436
+    Top = 204
+    Properties.Buttons = <
+      item
+        Default = True
+        Kind = bkEllipsis
+      end>
+    Properties.OnButtonClick = cxButtonEdit1PropertiesButtonClick
+    TabOrder = 5
+    Text = 'cxButtonEdit1'
+    Width = 451
   end
   object IBCQueryFilters: TIBCQuery
     SQL.Strings = (

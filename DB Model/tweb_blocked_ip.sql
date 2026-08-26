@@ -1,0 +1,158 @@
+/* ============================================================================
+   TWEB_BLOCKED_IP - lista IP-urilor blocate pe site (fantastic.md)
+
+   Sursa de adevar pentru blocarile de IP. Site-ul (SecurityGuard.php) scrie
+   aici blocarile automate si citeste lista manuala/whitelist; WMS gestioneaza
+   lista prin dialogul "Gestiunea IP-urilor blocate".
+
+   "Blocat acum" =
+       FLG_ACTIVE = 1
+   AND FLG_WHITELIST = 0
+   AND (EXPIRES_AT IS NULL OR EXPIRES_AT > CURRENT_TIMESTAMP)
+
+   Script RE-RULABIL: se poate executa de mai multe ori fara efecte adverse.
+   ============================================================================ */
+
+SET TERM ^ ;
+
+/* --- 1. Tabela ---------------------------------------------------------- */
+EXECUTE BLOCK AS
+BEGIN
+    IF (NOT EXISTS(SELECT 1 FROM RDB$RELATIONS
+                   WHERE TRIM(RDB$RELATION_NAME) = 'TWEB_BLOCKED_IP')) THEN
+        EXECUTE STATEMENT
+        'CREATE TABLE TWEB_BLOCKED_IP (
+             BLOCKID       INTEGER NOT NULL,
+             IP_ADDRESS    VARCHAR(45) NOT NULL,
+             SOURCE        SMALLINT DEFAULT 0 NOT NULL,
+             REASON        VARCHAR(256),
+             BLOCKED_AT    TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+             EXPIRES_AT    TIMESTAMP,
+             FLG_ACTIVE    SMALLINT DEFAULT 1 NOT NULL,
+             FLG_WHITELIST SMALLINT DEFAULT 0 NOT NULL,
+             BLOCK_COUNT   INTEGER DEFAULT 1 NOT NULL,
+             REQ_COUNT     INTEGER DEFAULT 0 NOT NULL,
+             LAST_HIT_AT   TIMESTAMP,
+             CREATED_BY    VARCHAR(64),
+             UNBLOCKED_AT  TIMESTAMP,
+             UNBLOCKED_BY  VARCHAR(64),
+             NOTE          VARCHAR(512)
+         )';
+END^
+
+/* --- 2. Coloane (pentru baze unde tabela exista deja) -------------------- */
+EXECUTE BLOCK AS
+DECLARE VARIABLE CNT INTEGER;
+BEGIN
+    SELECT COUNT(*) FROM RDB$RELATION_FIELDS
+      WHERE TRIM(RDB$RELATION_NAME) = 'TWEB_BLOCKED_IP'
+        AND TRIM(RDB$FIELD_NAME) = 'FLG_WHITELIST' INTO :CNT;
+    IF (CNT = 0) THEN
+        EXECUTE STATEMENT
+        'ALTER TABLE TWEB_BLOCKED_IP ADD FLG_WHITELIST SMALLINT DEFAULT 0 NOT NULL';
+
+    SELECT COUNT(*) FROM RDB$RELATION_FIELDS
+      WHERE TRIM(RDB$RELATION_NAME) = 'TWEB_BLOCKED_IP'
+        AND TRIM(RDB$FIELD_NAME) = 'BLOCK_COUNT' INTO :CNT;
+    IF (CNT = 0) THEN
+        EXECUTE STATEMENT
+        'ALTER TABLE TWEB_BLOCKED_IP ADD BLOCK_COUNT INTEGER DEFAULT 1 NOT NULL';
+
+    SELECT COUNT(*) FROM RDB$RELATION_FIELDS
+      WHERE TRIM(RDB$RELATION_NAME) = 'TWEB_BLOCKED_IP'
+        AND TRIM(RDB$FIELD_NAME) = 'REQ_COUNT' INTO :CNT;
+    IF (CNT = 0) THEN
+        EXECUTE STATEMENT
+        'ALTER TABLE TWEB_BLOCKED_IP ADD REQ_COUNT INTEGER DEFAULT 0 NOT NULL';
+
+    SELECT COUNT(*) FROM RDB$RELATION_FIELDS
+      WHERE TRIM(RDB$RELATION_NAME) = 'TWEB_BLOCKED_IP'
+        AND TRIM(RDB$FIELD_NAME) = 'LAST_HIT_AT' INTO :CNT;
+    IF (CNT = 0) THEN
+        EXECUTE STATEMENT
+        'ALTER TABLE TWEB_BLOCKED_IP ADD LAST_HIT_AT TIMESTAMP';
+
+    SELECT COUNT(*) FROM RDB$RELATION_FIELDS
+      WHERE TRIM(RDB$RELATION_NAME) = 'TWEB_BLOCKED_IP'
+        AND TRIM(RDB$FIELD_NAME) = 'NOTE' INTO :CNT;
+    IF (CNT = 0) THEN
+        EXECUTE STATEMENT
+        'ALTER TABLE TWEB_BLOCKED_IP ADD NOTE VARCHAR(512)';
+END^
+
+/* --- 3. Cheia primara ---------------------------------------------------- */
+EXECUTE BLOCK AS
+BEGIN
+    IF (NOT EXISTS(SELECT 1 FROM RDB$RELATION_CONSTRAINTS
+                   WHERE TRIM(RDB$RELATION_NAME) = 'TWEB_BLOCKED_IP'
+                     AND RDB$CONSTRAINT_TYPE = 'PRIMARY KEY')) THEN
+        EXECUTE STATEMENT
+        'ALTER TABLE TWEB_BLOCKED_IP ADD CONSTRAINT PK_TWEB_BLOCKED_IP PRIMARY KEY (BLOCKID)';
+END^
+
+/* --- 4. Indecsi ---------------------------------------------------------- */
+EXECUTE BLOCK AS
+BEGIN
+    IF (NOT EXISTS(SELECT 1 FROM RDB$INDICES
+                   WHERE TRIM(RDB$INDEX_NAME) = 'UNQ_TWEB_BLOCKED_IP_ADDR')) THEN
+        EXECUTE STATEMENT
+        'CREATE UNIQUE INDEX UNQ_TWEB_BLOCKED_IP_ADDR ON TWEB_BLOCKED_IP (IP_ADDRESS)';
+
+    IF (NOT EXISTS(SELECT 1 FROM RDB$INDICES
+                   WHERE TRIM(RDB$INDEX_NAME) = 'IDX_TWEB_BLOCKED_IP_ACTIVE')) THEN
+        EXECUTE STATEMENT
+        'CREATE INDEX IDX_TWEB_BLOCKED_IP_ACTIVE ON TWEB_BLOCKED_IP (FLG_ACTIVE, EXPIRES_AT)';
+END^
+
+/* --- 5. Generator + trigger BI ------------------------------------------ */
+EXECUTE BLOCK AS
+BEGIN
+    IF (NOT EXISTS(SELECT 1 FROM RDB$GENERATORS
+                   WHERE TRIM(RDB$GENERATOR_NAME) = 'SQ_TWEB_BLOCKED_IP_ID')) THEN
+        EXECUTE STATEMENT 'CREATE GENERATOR SQ_TWEB_BLOCKED_IP_ID';
+END^
+
+CREATE OR ALTER TRIGGER TWEB_BLOCKED_IP_BI FOR TWEB_BLOCKED_IP
+ACTIVE BEFORE INSERT POSITION 0
+AS
+BEGIN
+    IF (NEW.BLOCKID IS NULL) THEN
+        NEW.BLOCKID = GEN_ID(SQ_TWEB_BLOCKED_IP_ID, 1);
+    IF (NEW.BLOCKED_AT IS NULL) THEN
+        NEW.BLOCKED_AT = CURRENT_TIMESTAMP;
+END^
+
+SET TERM ; ^
+
+/* --- 6. Seed whitelist (IP-urile hardcodate azi in SecurityGuard.php) ----- */
+UPDATE OR INSERT INTO TWEB_BLOCKED_IP
+    (IP_ADDRESS, SOURCE, REASON, FLG_ACTIVE, FLG_WHITELIST, BLOCK_COUNT, CREATED_BY)
+    VALUES ('127.0.0.1', 1, 'Whitelist - localhost', 0, 1, 0, 'SYSTEM')
+    MATCHING (IP_ADDRESS);
+
+UPDATE OR INSERT INTO TWEB_BLOCKED_IP
+    (IP_ADDRESS, SOURCE, REASON, FLG_ACTIVE, FLG_WHITELIST, BLOCK_COUNT, CREATED_BY)
+    VALUES ('::1', 1, 'Whitelist - localhost IPv6', 0, 1, 0, 'SYSTEM')
+    MATCHING (IP_ADDRESS);
+
+UPDATE OR INSERT INTO TWEB_BLOCKED_IP
+    (IP_ADDRESS, SOURCE, REASON, FLG_ACTIVE, FLG_WHITELIST, BLOCK_COUNT, CREATED_BY)
+    VALUES ('192.168.100.180', 1, 'Whitelist - retea interna', 0, 1, 0, 'SYSTEM')
+    MATCHING (IP_ADDRESS);
+
+UPDATE OR INSERT INTO TWEB_BLOCKED_IP
+    (IP_ADDRESS, SOURCE, REASON, FLG_ACTIVE, FLG_WHITELIST, BLOCK_COUNT, CREATED_BY)
+    VALUES ('192.168.106.254', 1, 'Whitelist - server DB', 0, 1, 0, 'SYSTEM')
+    MATCHING (IP_ADDRESS);
+
+COMMIT;
+
+/* --- 7. Drepturi pentru utilizatorul web -------------------------------- */
+GRANT SELECT, INSERT, UPDATE, DELETE ON TWEB_BLOCKED_IP TO WEBUSER;
+
+/* USAGE pe generator: triggerul BI ruleaza cu drepturile invocatorului
+   (SQL SECURITY INVOKER), deci WEBUSER are nevoie de acces la secventa,
+   altfel INSERT-ul din SecurityGuard.php esueaza cu
+   "no permission for USAGE access to GENERATOR SQ_TWEB_BLOCKED_IP_ID". */
+GRANT USAGE ON SEQUENCE SQ_TWEB_BLOCKED_IP_ID TO WEBUSER;
+COMMIT;
