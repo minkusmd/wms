@@ -1,0 +1,37 @@
+# ─── Rezultate de compilare ────────────────────────────────────────────────
+# Iesirile de build sunt configurate in optset spre ../dcu si ../exe.
+/dcu/
+/exe/
+*.dcu
+*.exe
+*.dll
+*.bpl
+*.dcp
+*.map
+*.drc
+*.rsm
+*.tds
+*.obj
+*.otares
+
+# ─── Stare locala a RAD Studio (per dezvoltator, nu per proiect) ───────────
+*.local
+*.identcache
+*.dsk
+*.~dsk
+*.stat
+*.dsv
+*.user
+*.dxsettings
+*.vlb
+*.delphilsp.json
+__history/
+__recovery/
+
+# ─── Configurari locale cu date de conectare ──────────────────────────────
+# Contin host, port, baza, utilizator si PAROLA in clar - nu au ce cauta in
+# istoric. Fiecare instalare isi genereaza propriul fisier din UI-ul
+# SWNServiceManager (SetupConnectionDialog).
+DB Service Manager/settings.dat
+DB Service Manager/tasks.dat
+DB Service Managersettings.dat
