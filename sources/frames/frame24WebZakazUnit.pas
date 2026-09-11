@@ -188,6 +188,7 @@ type
 implementation
 
 uses
+  SWNGoodsServicesUnit,
   DataModuleDB,
   DataModuleAdditions,
   IBC,
@@ -481,9 +482,13 @@ begin
   S := #13#10 + dmDB.IBCQueryJurnal.FieldByName('GOODS_NAME').AsString + ' ?';
   if ShowAskDialog('Web-Order', 'Sterge produsul:' + S) = mrYes then
   begin
+    var delDocID := dmDB.IBCQueryJurnal.FieldByName('DOCID').AsInteger;
+    var delGoodsID := dmDB.IBCQueryJurnal.FieldByName('GOODSID').AsInteger;
     try
       dmDB.IBCQueryJurnal.Delete;
       dmDB.IBCQueryJurnal.UpdateTransaction.Commit;
+      // servicii adiacente legate de produsul sters
+      DeleteLinkedServices(delDocID, delGoodsID);
       dmDB.IBCQueryDocs.Refresh;
     except
       dmDB.IBCQueryJurnal.UpdateTransaction.Rollback;
@@ -795,7 +800,12 @@ begin
     dialog.AddNewGoods := True;
     if dialog.ShowModal = mrOk then
     begin
+      var addedDocID := dmDB.IBCQueryJurnal.FieldByName('DOCID').AsInteger;
+      var addedGoodsID := dmDB.IBCQueryJurnal.FieldByName('GOODSID').AsInteger;
       dmDB.IBCQueryDocs.Refresh;
+      // servicii adiacente ale produsului adaugat (TS_GOODS_SERVICE)
+      if OfferGoodsServices(addedDocID, addedGoodsID) then
+        dmDB.IBCQueryDocs.Refresh;
     end;
   finally
     dialog.Free;

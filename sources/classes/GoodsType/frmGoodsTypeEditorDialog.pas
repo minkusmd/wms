@@ -29,10 +29,12 @@ type
     chkFeed: TcxDBCheckBox;
     Label8: TLabel;
     btnAttributes: TcxButton;
+    btnServices: TcxButton;
     Panel1: TPanel;
     procedure beGoodsFolderPropertiesButtonClick(Sender: TObject;
       AButtonIndex: Integer);
     procedure btnAttributesClick(Sender: TObject);
+    procedure btnServicesClick(Sender: TObject);
   private
     { Private declarations }
     FCreateNewType: Boolean;
@@ -56,7 +58,7 @@ implementation
 
 uses
   SWNUtils, SWNConst, frmGoods, frmWebDescriptionTemplateDialog,
-  frmGoodsTypeFiltersDialog;
+  frmGoodsTypeFiltersDialog, frmGoodsTypeServicesDialog;
 
 {$R *.dfm}
 
@@ -97,6 +99,31 @@ begin
     Exit;
   end;
   d := TfrmGoodsTypeFiltersDlg.Create(Self);
+  try
+    d.GoodsTypeID := gtid;
+    d.ShowModal;
+  finally
+    d.Free;
+  end;
+end;
+
+procedure TfrmGoodsTypeEditorDlg.btnServicesClick(Sender: TObject);
+var
+  d: TfrmGoodsTypeServicesDlg;
+  gtid: Integer;
+begin
+  if FCreateNewType then
+  begin
+    ShowMessage('Salvati mai intai tipul de produs, apoi adaugati servicii.');
+    Exit;
+  end;
+  gtid := fMasterDataSet.FieldByName('GOODSTYPEID').AsInteger;
+  if gtid <= 0 then
+  begin
+    ShowMessage('Tip de produs invalid.');
+    Exit;
+  end;
+  d := TfrmGoodsTypeServicesDlg.Create(Self);
   try
     d.GoodsTypeID := gtid;
     d.ShowModal;

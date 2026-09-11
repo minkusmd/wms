@@ -371,6 +371,7 @@ type
 implementation
 
 uses
+  SWNGoodsServicesUnit,
   DataModuleAdditions, DataModuleDB, DateUtils, SWNCommonDialogs, SWNConst, SWNDBErrors, SWNSecurity, SWNSecurityFlags,
   SWNTypes, SWNUtils, SWNValueStorageUnit, frm82SelectLivrareUnit, frmActiuneTVAInapoiDialog,
   frmAddGoodsToSupplierOrderDlgUnit, frmApplyActiuneCodeDialog, frmApplyPromoCodeDialog, frmBringGoodsDialog,
@@ -1803,7 +1804,12 @@ begin
 
     if dialog.ShowModal = mrOk then
     begin
+      var addedDocID := dmDB.IBCQueryJurnal.FieldByName('DOCID').AsInteger;
+      var addedGoodsID := dmDB.IBCQueryJurnal.FieldByName('GOODSID').AsInteger;
       dmDB.IBCQueryDocs.Refresh;
+      // servicii adiacente ale produsului adaugat (TS_GOODS_SERVICE)
+      if OfferGoodsServices(addedDocID, addedGoodsID) then
+        dmDB.IBCQueryDocs.Refresh;
     end;
   finally
     dialog.Free;
@@ -1974,10 +1980,14 @@ begin
   if ShowAskDialog(cMSG_DELETERECORD_DeleteGoods, S) <> mrYes then
     Exit;
 
+  var delDocID := dmDB.IBCQueryJurnal.FieldByName('DOCID').AsInteger;
+  var delGoodsID := dmDB.IBCQueryJurnal.FieldByName('GOODSID').AsInteger;
   dmDB.IBCQueryJurnal.UpdateTransaction.StartTransaction;
   try
     dmDB.IBCQueryJurnal.Delete;
     dmDB.IBCQueryJurnal.UpdateTransaction.Commit;
+    // servicii adiacente legate de produsul sters
+    DeleteLinkedServices(delDocID, delGoodsID);
     dmDB.IBCQueryDocs.Refresh;
   except
     on E: Exception do

@@ -184,6 +184,16 @@ object frmGoodsTypeEditorDlg: TfrmGoodsTypeEditorDlg
     OnClick = btnAttributesClick
     ExplicitTop = 298
   end
+  object btnServices: TcxButton
+    Left = 216
+    Top = 598
+    Width = 160
+    Height = 29
+    Anchors = [akLeft, akBottom]
+    Caption = 'Servicii adiacente'
+    TabOrder = 5
+    OnClick = btnServicesClick
+  end
   object IBCQueryImage: TIBCQuery
     KeyFields = 'GOODSTYPEID'
     SQLInsert.Strings = (

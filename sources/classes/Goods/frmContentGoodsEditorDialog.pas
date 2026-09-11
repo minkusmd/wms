@@ -6,7 +6,7 @@ uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, SWNBaseUnit, JPEG, PngImage, Types, Dialogs,
   cxStyles, cxLabel, DB, dxBar, ExtDlgs, DBAccess, IBC, MemDS, cxDBEdit, StdCtrls, cxGridDBTableView, cxTextEdit, cxGridLevel,
   cxGridCustomTableView, cxGridTableView, cxGrid, ExtCtrls, ComCtrls, cxGridPopupMenu, dxPSCore, dxPScxGridLnk, GifImg,
-  dxBarExtItems, cxButtons, frameGoodsEditDescriptionUnit, frameGoodsAttributesUnit, cxGraphics, cxControls, cxLookAndFeels,
+  dxBarExtItems, cxButtons, frameGoodsEditDescriptionUnit, frameGoodsAttributesUnit, frameGoodsServicesUnit, cxGraphics, cxControls, cxLookAndFeels,
   cxLookAndFeelPainters,
   cxContainer, cxEdit, cxCustomData, cxFilter, cxData, cxDataStorage, cxNavigator, dxDateRanges, dxScrollbarAnnotations,
   cxDBData, cxImageComboBox, cxCheckBox, Vcl.Menus, dxBarBuiltInMenu, dxPSGlbl, dxPSUtl, dxPSEngn, dxPrnPg, dxBkgnd, dxWrap,
@@ -219,6 +219,8 @@ type
     btnOpenYouTube: TcxButton;
     tbsAttributes: TcxTabSheet;
     frameGoodsAttributes1: TframeGoodsAttributes;
+    tbsServices: TcxTabSheet;
+    frameGoodsServices1: TframeGoodsServices;
     procedure actSaveImagesExecute(Sender: TObject);
     procedure actSaveImagesUpdate(Sender: TObject);
     procedure actSaveSearchKeysExecute(Sender: TObject);
@@ -2469,6 +2471,12 @@ begin
   if NewPage = tbsDescriptions then
   begin
     IBCQueryDSC.Active := True;
+  end;
+
+  if NewPage = tbsServices then
+  begin
+    frameGoodsServices1.LoadData(fMasterDataSet.FieldByName('GOODSID').AsInteger, fMasterDataSet.FieldByName('WEBGOODSTYPE_ID').AsInteger,
+      fMasterDataSet.UpdateTransaction);
   end;
 
   if NewPage = tbsAttributes then

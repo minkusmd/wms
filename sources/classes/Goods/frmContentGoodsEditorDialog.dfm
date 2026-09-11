@@ -976,6 +976,26 @@ object frmContentGoodsEditorDlg: TfrmContentGoodsEditorDlg
         end
       end
     end
+    object tbsServices: TcxTabSheet
+      Caption = '&6 - Servicii'
+      ImageIndex = 5
+      inline frameGoodsServices1: TframeGoodsServices
+        Left = 0
+        Top = 0
+        Width = 957
+        Height = 432
+        Align = alClient
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -12
+        Font.Name = 'Segoe UI'
+        Font.Style = []
+        ParentFont = False
+        TabOrder = 0
+        ExplicitWidth = 957
+        ExplicitHeight = 432
+      end
+    end
   end
   object dxBarManager: TdxBarManager
     Font.Charset = DEFAULT_CHARSET
