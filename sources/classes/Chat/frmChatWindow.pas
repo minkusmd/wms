@@ -200,7 +200,7 @@ begin
   hitTest := cxDBTreeListChat.HitTest;
   if (hitTest.HitAtNode) and Assigned(hitTest.HitNode) then
   begin
-    lbChatPrivatePerson.Caption := Format('для'#13#10'%s:', [hitTest.HitNode.Values
+    lbChatPrivatePerson.Caption := Format('pentru'#13#10'%s:', [hitTest.HitNode.Values
       [cxDBTreeListChat_AUTHOR_NAME.ItemIndex]]);
     lbChatPrivatePerson.Visible := True;
     lbChatPrivatePerson.Tag := hitTest.HitNode.Values[cxDBTreeListChat_MESSAGEID.ItemIndex];
@@ -426,7 +426,7 @@ begin
     TargetRoomID := cxGridChatGroupsTable.Controller.FocusedRecord.Values[cxGridChatGroups_ROOMID.Index]
   else
   begin
-    ShowErrorDialog(cMSG_GeneralError_Title, 'Выберите комнату чата!');
+    ShowErrorDialog(cMSG_GeneralError_Title, 'Selectati camera de chat!');
     Exit;
   end;
 

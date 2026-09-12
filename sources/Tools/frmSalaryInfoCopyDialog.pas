@@ -56,7 +56,7 @@ var Error:String;
 begin
      Result:=False;
 
-     if (cmbMonth.ItemIndex=-1) or (cmbYear.ItemIndex=-1) then Error:='Âûבונטעו םמגûי לוסÿצ!';
+     if (cmbMonth.ItemIndex=-1) or (cmbYear.ItemIndex=-1) then Error:='Selectati luna noua!';
 
      if (Error='') then Result:=True
      else ShowErrorDialog(cMSG_GeneralInputError_Title,cMSG_GeneralInputError_Text,Error);

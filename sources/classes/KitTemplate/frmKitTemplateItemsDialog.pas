@@ -224,7 +224,7 @@ begin
   if not FSelectMode then
   begin
     btnOk.Visible := False;
-    btnCancel.Caption := 'Закрыть';
+    btnCancel.Caption := 'Inchide';
   end;
 end;
 
@@ -232,7 +232,7 @@ procedure TfrmKitTemplatesDlg.SelectedTemplateChanged;
 var
   f1, f2, f3, f4, f5, f6: Boolean;
 begin
-  f1 := True; // Новый шаблон + Security
+  f1 := True; // Sablon nou + Security
   f2 := False;
   f3 := False;
   f4 := False;
@@ -240,11 +240,11 @@ begin
   f6 := False;
   if IBCQueryKit.RecordCount > 0 then
   begin
-    f2 := True; // Новый товар + Security
-    f3 := True; // Изменить шаблон + Security
-    f4 := True; // Удалить шаблон + Security
-    f5 := True; // Изменить товар + Security
-    f6 := True; // Удалить товар + Security
+    f2 := True; // Produs nou + Security
+    f3 := True; // Modifica sablonul + Security
+    f4 := True; // Sterge sablonul + Security
+    f5 := True; // Modifica marfa + Security
+    f6 := True; // Sterge marfa + Security
   end;
   bbNew.Enabled := f1;
   bbNewGoods.Enabled := f2;
@@ -262,8 +262,8 @@ begin
   f6 := False;
   if IBCQueryItems.RecordCount > 0 then
   begin
-    f5 := True; // Изменить товар + Security
-    f6 := True; // Удалить товар + Security
+    f5 := True; // Modifica marfa + Security
+    f6 := True; // Sterge marfa + Security
   end;
   bbModifyItem.Enabled := f5;
   bbRemoveItem.Enabled := f6;

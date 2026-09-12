@@ -200,7 +200,7 @@ end;
 
 procedure TfrmPriceSynchronizeDlg.bbProcessDataClick(Sender: TObject);
 begin
-     if ShowAskDialog(cmbFinalAction.Text,'Вы действительно хотите это сделать?')=mrYes then
+     if ShowAskDialog(cmbFinalAction.Text,'Sigur doriti sa faceti acest lucru?')=mrYes then
      begin
           cmbFinalAction.Enabled:=False;
           bbProcessData.Enabled:=False;
@@ -209,7 +209,7 @@ begin
 
           btnPrev.Visible:=False;
           btnNext.Visible:=False;
-          btnCancel.Caption:='Закрыть';
+          btnCancel.Caption:='Inchide';
      end;
 end;
 
@@ -366,14 +366,14 @@ begin
      ErrorStr:='';
      moneyWarning:=False;
 
-     if cxGridSourceTable.DataController.RecordCount=0 then AddErrorToStr(ErrorStr,'Не выбранны начальные данные!')
+     if cxGridSourceTable.DataController.RecordCount=0 then AddErrorToStr(ErrorStr,'Nu sunt selectate datele initiale!')
      else
      begin
           // check Title column
           for i := 0 to cxGridSourceTable.DataController.RecordCount - 1 do
           if cxGridSourceTable.DataController.Values[i,cxGridSource_TITLE.Index]='' then
           begin
-               AddErrorToStr(ErrorStr,'Не указанны названия товаров!');
+               AddErrorToStr(ErrorStr,'Nu sunt indicate denumirile marfurilor!');
                break;
           end;
 
@@ -393,7 +393,7 @@ begin
           begin
                cmbFinalAction.Enabled:=False;
                cmbFinalAction.ItemIndex:=0;
-               ShowWarningDialog('Внимание','Не указанны цены, функция обновления цен будет недоступна.');
+               ShowWarningDialog('Atentie','Nu sunt indicate preturile, functia de actualizare a preturilor va fi indisponibila.');
           end
           else
           begin
@@ -412,7 +412,7 @@ begin
      Result:=False;
      ErrorStr:='';
 
-     if fTargetFirmaID=-1 then AddErrorToStr(ErrorStr,'Выберите фирму из которой происходят товары и проведите поиск товаров!')
+     if fTargetFirmaID=-1 then AddErrorToStr(ErrorStr,'Selectati firma din care provin marfurile si efectuati cautarea marfurilor!')
      else
      begin
           // check if search result for each goods has exact 1 match
@@ -422,7 +422,7 @@ begin
                results:=TSearchResultSet(fSearchResult[index]);
                if results.Count>1 then
                begin
-                    AddErrorToStr(ErrorStr,'У некоторых товаров указанны более одного соответствия!');
+                    AddErrorToStr(ErrorStr,'La unele marfuri sunt indicate mai multe corespondente!');
                     break;
                end;
           end;

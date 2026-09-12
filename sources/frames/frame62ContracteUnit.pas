@@ -1,6 +1,6 @@
 unit frame62ContracteUnit;
 {
-  ДОГОВОРА. Договора
+  CONTRACTE. Contracte
   DocTypeID = 105
   Frame Index = 62
 }
@@ -196,9 +196,9 @@ end;
 
 procedure Tframe62Contracte.bbCloseContractClick(Sender: TObject);
 begin
-     if ShowAskDialog('Закрытие контракта',
-                      Format('Вы точно хотите закрыть контракт №%s c "%s"?',[IBCQueryContracte.FieldByName('CODE').asString,IBCQueryContracte.FieldByName('CT_NAME').asString]),
-                      'Дальнейшие операции с этим контрактом будут невозможны!')=mrYes then
+     if ShowAskDialog('Inchidere contract',
+                      Format('Sigur doriti sa inchideti contractul nr.%s cu "%s"?',[IBCQueryContracte.FieldByName('CODE').asString,IBCQueryContracte.FieldByName('CT_NAME').asString]),
+                      'Operatiile ulterioare cu acest contract nu vor mai fi posibile!')=mrYes then
      begin
           if DoCloseContractDB then RefreshData;
      end;
@@ -386,7 +386,7 @@ end;
 
 procedure Tframe62Contracte.DeleteSelectedFile;
 begin
-     if ShowAskDialog('Удаление файла',Format('Вы хотите удалить файл "%s"?',[IBCQueryFiles.FieldByName('TITLE').AsString]))<>mrYes then Exit;
+     if ShowAskDialog('Stergere fisier',Format('Doriti sa stergeti fisierul "%s"?',[IBCQueryFiles.FieldByName('TITLE').AsString]))<>mrYes then Exit;
 
      IBCQueryFiles.UpdateTransaction.StartTransaction;
      try
@@ -508,7 +508,7 @@ begin
           // context from Contracts
           if cxGridContracts_CT_NAME.Focused then
           begin
-               // Контрагент
+               // Contraagent
                Result.Context := ffCustomer;
                Result.ValueInt := IBCQueryContracte.FieldByName('CT').AsInteger;
                Result.ValueStr := IBCQueryContracte.FieldByName('CT_NAME').AsString;
@@ -516,7 +516,7 @@ begin
           else
               if cxGridContracts_CREATED_DATE.Focused then
               begin
-                   // Дата
+                   // Data
                    Result.Context := ffDate;
                    Result.ValueDateTime := IBCQueryContracte.FieldByName('CREATED_DATE').AsDateTime;
               end;
@@ -556,7 +556,7 @@ end;
 
 function Tframe62Contracte.InitFrameID: integer;
 begin
-     // ДОГОВОРА - Договора
+     // CONTRACTE - Contracte
      Result:=62;
 
      fLastFilePath:='';
@@ -652,7 +652,7 @@ procedure Tframe62Contracte.SaveFileToDisk;
 var dir:String;
 begin
      dir:=fLastFilePath;
-     if SelectDirectory('Выберите куда записать файл','',dir) then
+     if SelectDirectory('Alegeti unde sa salvati fisierul','',dir) then
      begin
           SaveFileToDiskDB(IBCQueryFiles.FieldByName('CONTRACTFILEID').AsInteger,dir);
           fLastFilePath:=dir;

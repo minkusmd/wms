@@ -9,9 +9,33 @@ unit frmAttributeEditorDialog;
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, SWNBaseUnit, StdCtrls,
-  cxDBEdit, ExtCtrls, DialogTitle, Data.DB, IBC, cxButtons, cxGraphics, cxControls, cxLookAndFeels,
-  cxLookAndFeelPainters, cxContainer, cxEdit, Vcl.Menus, cxTextEdit, cxCheckBox, cxMaskEdit, cxSpinEdit;
+  Windows,
+  Messages,
+  SysUtils,
+  Variants,
+  Classes,
+  Graphics,
+  Controls,
+  Forms,
+  SWNBaseUnit,
+  StdCtrls,
+  cxDBEdit,
+  ExtCtrls,
+  DialogTitle,
+  Data.DB,
+  IBC,
+  cxButtons,
+  cxGraphics,
+  cxControls,
+  cxLookAndFeels,
+  cxLookAndFeelPainters,
+  cxContainer,
+  cxEdit,
+  Vcl.Menus,
+  cxTextEdit,
+  cxCheckBox,
+  cxMaskEdit,
+  cxSpinEdit;
 
 type
   TfrmAttributeEditorDlg = class(TSWNMasteredFormClass)
@@ -51,7 +75,9 @@ type
 
 implementation
 
-uses SWNUtils, SWNConst;
+uses
+  SWNUtils,
+  SWNConst;
 
 {$R *.dfm}
 
@@ -135,3 +161,4 @@ begin
 end;
 
 end.
+

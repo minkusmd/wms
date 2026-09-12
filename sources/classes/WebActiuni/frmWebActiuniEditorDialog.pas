@@ -85,24 +85,24 @@ begin
   Result := False;
 
   if fMasterDataSet.FieldByName('TITLE_RUS').IsNull or (fMasterDataSet.FieldByName('TITLE_RUS').AsString = '') then
-    AddErrorToStr(Errors, 'Название, Русский?');
+    AddErrorToStr(Errors, 'Denumire, Rusa?');
   if fMasterDataSet.FieldByName('TITLE_ROM').IsNull or (fMasterDataSet.FieldByName('TITLE_ROM').AsString = '') then
-    AddErrorToStr(Errors, 'Название, Româna?');
+    AddErrorToStr(Errors, 'Denumire, Romana?');
   if fMasterDataSet.FieldByName('TEXT_RUS').IsNull or (fMasterDataSet.FieldByName('TEXT_RUS').AsString = '') then
-    AddErrorToStr(Errors, 'Описание, Русский?');
+    AddErrorToStr(Errors, 'Descriere, Rusa?');
   if fMasterDataSet.FieldByName('TEXT_ROM').IsNull or (fMasterDataSet.FieldByName('TEXT_ROM').AsString = '') then
-    AddErrorToStr(Errors, 'Описание, Româna?');
+    AddErrorToStr(Errors, 'Descriere, Romana?');
   if fMasterDataSet.FieldByName('START_DATE').IsNull then
-    AddErrorToStr(Errors, 'Дата проведения, Начало?');
+    AddErrorToStr(Errors, 'Data desfasurarii, Inceput?');
   if fMasterDataSet.FieldByName('END_DATE').IsNull then
-    AddErrorToStr(Errors, 'Дата проведения, Конец?');
+    AddErrorToStr(Errors, 'Data desfasurarii, Sfarsit?');
 
   if (fMasterDataSet.FieldByName('FLG_HIDE_BUTTON').AsInteger = 0) then
   begin
     if fMasterDataSet.FieldByName('BUTTON_TITLE_RUS').IsNull or (fMasterDataSet.FieldByName('BUTTON_TITLE_RUS').AsString = '') then
-      AddErrorToStr(Errors, 'Название пимпочки, Русский?');
+      AddErrorToStr(Errors, 'Denumirea butonului, Rusa?');
     if fMasterDataSet.FieldByName('BUTTON_TITLE_ROM').IsNull or (fMasterDataSet.FieldByName('BUTTON_TITLE_ROM').AsString = '') then
-      AddErrorToStr(Errors, 'Название пимпочки, Româna?');
+      AddErrorToStr(Errors, 'Denumirea butonului, Romana?');
   end;
 
   if Errors = '' then
@@ -167,7 +167,7 @@ procedure TfrmWebActiuniEditorDlg.Prepare;
 begin
   if fCreateNewActiune then
   begin
-    dtDialogTitle.Text := 'Создание новой акции';
+    dtDialogTitle.Text := 'Creare actiune noua';
     fMasterDataSet.Insert;
     fMasterDataSet.FieldByName('DT').AsInteger := fDT;
     fMasterDataSet.FieldByName('START_DATE').AsDateTime := NOW;
@@ -175,7 +175,7 @@ begin
   end
   else
   begin
-    dtDialogTitle.Text := 'Изменение записи';
+    dtDialogTitle.Text := 'Modificare inregistrare';
     fMasterDataSet.Edit;
   end;
   ReadImages(fMasterDataSet.FieldByName('ACTIUNEID').AsInteger);

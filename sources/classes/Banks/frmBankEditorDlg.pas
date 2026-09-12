@@ -57,10 +57,10 @@ begin
   begin
     if FieldByName('BANKACCOUNT').IsNull or
       (Trim(FieldByName('BANKACCOUNT').AsString) = '') then
-      AddErrorToStr(ErrorStr, 'МФО?');
+      AddErrorToStr(ErrorStr, 'MFO?');
     if FieldByName('BANKNAME').IsNull or
       (Trim(FieldByName('BANKNAME').AsString) = '') then
-      AddErrorToStr(ErrorStr, 'Название банка?');
+      AddErrorToStr(ErrorStr, 'Denumirea bancii?');
   end;
 
   if ErrorStr = '' then

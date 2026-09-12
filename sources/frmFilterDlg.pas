@@ -308,12 +308,12 @@ begin
   end
   else if rbQuarter.Checked then
   begin
-    // Квартал
+    // Trimestru
     y1 := seQuarterYear.Value;
     m2 := (cmbQuarter.ItemIndex + 1) * 3;
     if cbQuarterYearStart.Checked then
     begin
-      // С начала года
+      // De la inceputul anului
       fLocalDataFilteringInfo.DateStart := EncodeDate(y1, 1, 1);
       fLocalDataFilteringInfo.DateEnd := EncodeDate(y1, m2, DaysInAMonth(y1, m2));
     end
@@ -326,12 +326,12 @@ begin
   end
   else if rbMonth.Checked then
   begin
-    // Месяц
+    // Luna
     y1 := seMonthYear.Value;
     m1 := cmbMonth.ItemIndex + 1;
     if cbMonthQuarterStart.Checked then
     begin
-      // С начало квартала
+      // De la inceputul trimestrului
       fLocalDataFilteringInfo.DateEnd := EncodeDate(y1, m1, DaysInAMonth(y1, m1));
       m2 := m1 div 3;
       if (m1 mod 3) > 0 then
@@ -347,10 +347,10 @@ begin
   end
   else if rbDay.Checked then
   begin
-    // День
+    // Zi
     if cbDayMonthStart.Checked then
     begin
-      // С начала месяца
+      // De la inceputul lunii
       fLocalDataFilteringInfo.DateEnd := deDateByDay.Date;
       fLocalDataFilteringInfo.DateStart := IncDay(fLocalDataFilteringInfo.DateEnd, -DayOfTheMonth(fLocalDataFilteringInfo.DateEnd) + 1);
     end
@@ -362,7 +362,7 @@ begin
   end
   else if rbDateRange.Checked then
   begin
-    // Интервал
+    // Interval
     fLocalDataFilteringInfo.DateStart := deDateStart.Date;
     fLocalDataFilteringInfo.DateEnd := deDateEnd.Date;
   end;
@@ -553,7 +553,7 @@ var
 begin
   fieldsWithValues := fLocalDataFilteringInfo.FrameFilters;
 
-  // Период
+  // Perioada
   rbQuarterClick(nil);
   if (ffDate in fFrameFilterFields) then
   begin
@@ -567,14 +567,14 @@ begin
   else
     tbsDate.Visible := False;
 
-  // Контрагент
+  // Contraagent
   if (([ffCustomer, ffCustomerType] * fFrameFilterFields) <> []) then
   begin
-    // Контрагент
+    // Contraagent
     cxLabel4.Visible := ffCustomer in fFrameFilterFields;
     lcbCustomer.Visible := ffCustomer in fFrameFilterFields;
 
-    // Тип контрагента
+    // Tipul contraagentului
     cxLabel7.Visible := ffCustomerType in fFrameFilterFields;
     lcbCustomerType.Visible := ffCustomerType in fFrameFilterFields;
     IBCQueryCustTypes.Active := ffCustomerType in fFrameFilterFields;
@@ -591,16 +591,16 @@ begin
   else
     tbsClient.Visible := False;
 
-  // Товар
+  // Produs
   if (([ffGoods, ffGoodsFolders, ffAcntGoods, ffGoodsSN] * fFrameFilterFields) <> []) then
   begin
-    // Товар
+    // Produs
     cxLabel5.Visible := ffGoods in fFrameFilterFields;
     lcbGoods.Visible := ffGoods in fFrameFilterFields;
-    // Серийный номер товара
+    // Numar serial marfa
     cxLabel3.Visible := ffGoodsSN in fFrameFilterFields;
     txtGoodsSN.Visible := ffGoodsSN in fFrameFilterFields;
-    // Группа товаров
+    // Grup de marfuri
     cxLabel2.Visible := ([ffGoodsFolders, ffAcntGoods] * fFrameFilterFields) <> [];
     tbsGoodsFolders.Visible := ffGoodsFolders in fFrameFilterFields;
     tbsGoodsByAcnt.Visible := ffAcntGoods in fFrameFilterFields;
@@ -630,7 +630,7 @@ begin
   else
     tbsGoods.Visible := False;
 
-  // Склад
+  // Depozit
   if (ffStock in fFrameFilterFields) then
   begin
     dmDB.IBCQueryStocks.Active := True;
@@ -804,21 +804,21 @@ begin
   fd := False;
   fi := False;
   // enable only needed
-  if Sender = rbQuarter then // Квартал
+  if Sender = rbQuarter then // Trimestru
   begin
     fq := True;
   end
-  else if Sender = rbMonth then // Месяц
+  else if Sender = rbMonth then // Luna
   begin
     fm := True;
   end
-  else if Sender = rbDay then // День
+  else if Sender = rbDay then // Zi
   begin
     fd := True;
     if deDateByDay.Date <= 0 then
       deDateByDay.Date := NOW;
   end
-  else if Sender = rbDateRange then // Интервал
+  else if Sender = rbDateRange then // Interval
   begin
     fi := True;
     if deDateStart.Date <= 0 then
@@ -827,19 +827,19 @@ begin
       deDateEnd.Date := NOW;
   end;
 
-  // Квартал
+  // Trimestru
   cmbQuarter.Enabled := fq;
   seQuarterYear.Enabled := fq;
   cbQuarterYearStart.Enabled := fq;
-  // Месяц
+  // Luna
   cmbMonth.Enabled := fm;
   seMonthYear.Enabled := fm;
   cbMonthQuarterStart.Enabled := fm;
-  // День
+  // Zi
   deDateByDay.Enabled := fd;
   cbDayMonthStart.Enabled := fd;
   cbDayMonthStart.Enabled := fd;
-  // Интервал
+  // Interval
   deDateStart.Enabled := fi;
   deDateEnd.Enabled := fi;
 end;
@@ -895,7 +895,7 @@ begin
 
   if IsDateRangeDay(StartDate, EndDate, Flag_StartingFrom) then
   begin
-    // День
+    // Zi
     deDateByDay.Date := EndDate;
     cbDayMonthStart.Checked := Flag_StartingFrom;
     selDay := True;
@@ -917,19 +917,19 @@ begin
     selQuarter := True;
   end;
 
-  // Интервал
+  // Interval
   deDateStart.Date := StartDate;
   deDateEnd.Date := EndDate;
 
   // select by priority
   if selQuarter then
-    rbQuarter.Checked := True // Квартал
+    rbQuarter.Checked := True // Trimestru
   else if selMonth then
-    rbMonth.Checked := True // Месяц
+    rbMonth.Checked := True // Luna
   else if selDay then
-    rbDay.Checked := True // День
+    rbDay.Checked := True // Zi
   else
-    rbDateRange.Checked := True; // Интервал
+    rbDateRange.Checked := True; // Interval
 end;
 
 procedure TfrmFilterDialog.SelectGoods;

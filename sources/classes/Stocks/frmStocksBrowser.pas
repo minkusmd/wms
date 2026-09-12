@@ -217,13 +217,13 @@ var
 begin
   if IBCQueryStock.FieldByName('FLG_FOLDER').AsInteger = 1 then
   begin
-    S1 := 'Удаление группы';
-    S2 := 'Вы хотите удалить группу складов "%s"?';
+    S1 := 'Stergere grup';
+    S2 := 'Doriti sa stergeti grupul de depozite "%s"?';
   end
   else
   begin
-    S1 := 'Удаление склада';
-    S2 := 'Вы хотите удалить склад "%s"?';
+    S1 := 'Stergere depozit';
+    S2 := 'Doriti sa stergeti depozitul "%s"?';
   end;
   S2 := Format(S2, [IBCQueryStock.FieldByName('TITLE').asString]);
   if ShowAskDialog(S1, S2) = mrYes then
@@ -380,7 +380,7 @@ begin
   if not FSelectMode then
   begin
     btnOk.Visible := False;
-    btnCancel.Caption := 'Закрыть';
+    btnCancel.Caption := 'Inchide';
   end;
 
   if FStockID > 0 then

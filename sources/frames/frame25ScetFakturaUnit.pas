@@ -1,6 +1,6 @@
 unit frame25ScetFakturaUnit;
 {
-  СЧЕТ ФАКТУРЫ. Счет фактуры
+  FACTURA FISCALA. Factura fiscala
   DocTypeID = 112
   Frame Index = 25
 }
@@ -212,12 +212,16 @@ type
     frameScanFile1: TframeScanFile;
     cxDBVerticalGrid1DBEditorRow1: TcxDBEditorRow;
     bbExport2eFactura: TdxBarButton;
-    IBCQueryeFactura: TIBCQuery;
-    IBCQueryDetail: TIBCQuery;
     cxGridInvoiceTableColumn1: TcxGridDBColumn;
     cxGridInvoiceTableColumn2: TcxGridDBColumn;
     bbDublicateDocument: TdxBarButton;
     bbAccountName: TdxBarButton;
+    bbEFacturaSend: TdxBarButton;
+    bbEFacturaSync: TdxBarButton;
+    bbEFacturaPdf: TdxBarButton;
+    bbEFacturaCancel: TdxBarButton;
+    cxGridInvoiceTable_EF_STATUS: TcxGridDBColumn;
+    cxGridInvoiceTable_EF_STATUS_DATE: TcxGridDBColumn;
     procedure bbAddGoodsClick(Sender: TObject);
     procedure bbModifyGoodsClick(Sender: TObject);
     procedure bbModifyInvoiceClick(Sender: TObject);
@@ -301,6 +305,12 @@ type
     procedure bbExport2eFacturaClick(Sender: TObject);
     procedure bbDublicateDocumentClick(Sender: TObject);
     procedure bbAccountNameClick(Sender: TObject);
+    procedure bbEFacturaSendClick(Sender: TObject);
+    procedure bbEFacturaSyncClick(Sender: TObject);
+    procedure bbEFacturaPdfClick(Sender: TObject);
+    procedure bbEFacturaCancelClick(Sender: TObject);
+    procedure cxGridInvoiceTable_EF_STATUSGetDisplayText(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord;
+      var AText: string);
   private
 //    fLastFilePath: string;
     { Private declarations }
@@ -355,6 +365,9 @@ type
     procedure ShowSborkaComplectDeleteGoods;
     procedure EditCecDlg;
     procedure SelectGoodsAcnt;
+    // e-Factura prin API (sources\classes\EFactura)
+    function EFacturaStatus: Integer;
+    procedure EFacturaSync(const AProposeClose: Boolean);
 // TODO: SaveFileFromDB
 //  procedure SaveFileFromDB(const AttID: integer; const FilePath: string);
   protected
@@ -394,9 +407,21 @@ uses
   frmScetFacturaNomerDialog, SWNSecurity, SWNSecurityFlags,
   frmDocumentDeleteDialog, frmDocumentImportBrowserDialog, SWNTypes,
   SWNCommonDialogs, uEditCecDlg, frmCustomersDlg, frmMoneyIncomeDialog,
-  frmReceiptPrintDialogV2, frmReceiptPrintDialogV1, frmGoodsACNTBrowser;
+  frmReceiptPrintDialogV2, frmReceiptPrintDialogV1, frmGoodsACNTBrowser, EFacturaXmlBuilder, EFacturaApiClient, EFacturaManager,
+  Winapi.ShellAPI, System.IOUtils;
 
 {$R *.dfm}
+
+const
+  cTipFacturaEFactura = 7588; // TIP_FACTURA (TS_SYSS): e-Factura
+  cEFacturaNotSent = -2;      // factura netrimisa prin API (fara rand in TDB_EFACTURA)
+
+procedure ShowEFacturaError(E: Exception);
+begin
+  // erorile de API/XML au deja mesaj pentru operator; restul trec prin tratarea obisnuita
+  if (E is EEFacturaApiError) or (E is EEFacturaXmlError) or not ProcessSWNError(E) then
+    ShowErrorDialog('e-Factura', E.Message);
+end;
 
 { Tframe25ScetFaktura }
 
@@ -472,7 +497,7 @@ begin
   FLG_CLOSED := dmDB.IBCQueryDocs.FieldByName('FLG_CLOSED').AsInteger = 1;
 
 //  ReportOk := False;
-     // 1. imprimam "счет фактуры"
+     // 1. imprimam "facturi fiscale"
   ReportParams := TReportParamsList.Create;
   PrintEngine := TfrmPrintEngine.Create(Self);
   try
@@ -490,7 +515,7 @@ begin
         // give param to printer
     PrintEngine.ReportParams := ReportParams;
 
-//    PrintEngine.AddReport(133); // Счет фактура
+//    PrintEngine.AddReport(133); // Factura fiscala
     if IBCQueryINVOICES.FieldByName('TIP_FACTURA').AsInteger = 8556 then
     begin
       PrintEngine.AddReport(477);
@@ -600,14 +625,14 @@ procedure Tframe25ScetFaktura.bbBankOutClick(Sender: TObject);
 var
   dialog: TfrmMoneyIncomeDlg;
 begin
-     // Приход денег на счет
+     // Incasare bani in cont
   dialog := TfrmMoneyIncomeDlg.Create(Self, dmDB.IBCQueryDocs, dmDB.IBCDataSourceDocs);
   try
     dialog.SetCustomTitle('Dispozitie de plata bancara', 'Dispozitie de plata bancara');
 
     if dialog.ShowModal = mrOk then
     begin
-             // Приход денег на счет
+             // Incasare bani in cont
       if dmDB.CreateBPP(dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger, dialog.SUMA) then
       begin
         dmDB.IBCQueryDocs.Refresh;
@@ -827,14 +852,14 @@ procedure Tframe25ScetFaktura.bbPdncRambursClick(Sender: TObject);
 var
   dialog: TfrmMoneyIncomeDlg;
 begin
-     // Приход денег на счет
+     // Incasare bani in cont
   dialog := TfrmMoneyIncomeDlg.Create(Self, dmDB.IBCQueryDocs, dmDB.IBCDataSourceDocs);
   try
     dialog.SetCustomTitle('Dispozitie de incasare bancara', 'Dispozitie de incasare bancara');
 
     if dialog.ShowModal = mrOk then
     begin
-             // Приход денег на счет
+             // Incasare bani in cont
       if dmDB.CreateProhodDenegNaSciot(dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger, dialog.CurrencyID, dmDB.IBCQueryDocs.FieldByName
         ('FLG_ACNT').AsInteger, dialog.Rate, dialog.SUMA, 135) then
       begin
@@ -1178,10 +1203,10 @@ begin
 
      {
      S:='';
-     if FLG_CLOSED then S:='Внимание! Счет фактура уже выдана.';
+     if FLG_CLOSED then S:='Atentie! Factura fiscala a fost deja emisa.';
 
 
-     if ShowAskDialog(cMSG_DELETERECORD_DeleteDocument,Format('Удалить запись номер %d?',[dmDB.IBCQueryDocs.FieldByName('DOCID').asInteger]),S)=mrYes then
+     if ShowAskDialog(cMSG_DELETERECORD_DeleteDocument,Format('Stergeti inregistrarea numarul %d?',[dmDB.IBCQueryDocs.FieldByName('DOCID').asInteger]),S)=mrYes then
      begin
           dmDB.IBCQueryDocs.UpdateTransaction.StartTransaction;
           try
@@ -1347,14 +1372,14 @@ procedure Tframe25ScetFaktura.bbPKOClick(Sender: TObject);
 var
   dialog: TfrmMoneyIncomeDlg;
 begin
-     // Приход денег на счет
+     // Incasare bani in cont
   dialog := TfrmMoneyIncomeDlg.Create(Self, dmDB.IBCQueryDocs, dmDB.IBCDataSourceDocs);
   try
     dialog.SetCustomTitle('Dispozitie de incasare bancara', 'Dispozitie de incasare bancara');
 
     if dialog.ShowModal = mrOk then
     begin
-             // Приход денег на счет
+             // Incasare bani in cont
       if dmDB.CreateProhodDenegNaSciot(dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger, dialog.CurrencyID, dmDB.IBCQueryDocs.FieldByName
         ('FLG_ACNT').AsInteger, dialog.Rate, dialog.SUMA) then
       begin
@@ -1404,7 +1429,7 @@ var
 //  dialog: TfrmScetFacturaNomerDlg;
 begin
 //  ReportOk := False;
-     // 1. imprimam "счет фактуры"
+     // 1. imprimam "facturi fiscale"
   ReportParams := TReportParamsList.Create;
   PrintEngine := TfrmPrintEngine.Create(Self);
   try
@@ -1484,20 +1509,20 @@ begin
           // context from Docs
     if cxGridSFT_CT_NAME.Focused then
     begin
-               // Контрагент
+               // Contraagent
       Result.Context := ffCustomer;
       Result.ValueInt := dmDB.IBCQueryDocs.FieldByName('CT').AsInteger;
       Result.ValueStr := dmDB.IBCQueryDocs.FieldByName('CT_NAME').AsString;
     end
     else if cxGridSFT_DATA.Focused then
     begin
-               // Дата
+               // Data
       Result.Context := ffDate;
       Result.ValueDateTime := dmDB.IBCQueryDocs.FieldByName('DATA').AsDateTime;
     end
     else if cxGridSFT_DTDEP_NAME.Focused then
     begin
-               // Склад
+               // Depozit
       Result.Context := ffStock;
       Result.ValueInt := dmDB.IBCQueryDocs.FieldByName('DTDEP').AsInteger;
       Result.ValueStr := dmDB.IBCQueryDocs.FieldByName('DTDEP_NAME').AsString;
@@ -1561,14 +1586,14 @@ begin
   begin
     FLG_CLOSED := dmDB.IBCQueryDocs.FieldByName('FLG_CLOSED').AsInteger = 1;
 
-    fGoodsNew := fSYS_Edit and not FLG_CLOSED; // Добавить товар
-    fBringGoods := fSYS_Edit and not FLG_CLOSED; // Привести товары
+    fGoodsNew := fSYS_Edit and not FLG_CLOSED; // Adauga produs
+    fBringGoods := fSYS_Edit and not FLG_CLOSED; // Adu marfa
     if (cxGridComponentsTable.DataController.RecNo > 0) then
     begin
       GoodsTypeID := dmDB.IBCQueryJurnal.FieldByName('GOODS_TYPE_ID').AsInteger;
 
-      fGoodsEdit := fSYS_Edit and not FLG_CLOSED;   // Изменить товар
-      fGoodsDelete := fSYS_Edit and not FLG_CLOSED; // Удалить товар
+      fGoodsEdit := fSYS_Edit and not FLG_CLOSED;   // Modifica marfa
+      fGoodsDelete := fSYS_Edit and not FLG_CLOSED; // Sterge marfa
                // 11.12.2013
       fSborkaTab := dmDB.IsKit(GoodsTypeID);
       fGoodsSelected := True;
@@ -1612,7 +1637,7 @@ end;
 
 function Tframe25ScetFaktura.InitFrameID: integer;
 begin
-     // СЧЕТ ФАКТУРЫ. Счет фактуры
+     // FACTURI FISCALE. Facturi fiscale
   Result := 25;
 
   dmDB.CreateGridImageColumnItems(cxGridDBCol_IMG);
@@ -1623,6 +1648,8 @@ procedure Tframe25ScetFaktura.InvoiceSelectionChanged;
 var
   fCreateNewInvoice, fModifyInvoice, fDelete: Boolean;
   fPrintInvoice, FLG_CLOSED: Boolean;
+  EFStatus: Integer;
+  IsEFactura, HasEFNumber: Boolean;
 begin
   fCreateNewInvoice := False;
   fModifyInvoice := False;
@@ -1650,7 +1677,27 @@ begin
   bbNewInvoice.Enabled := fCreateNewInvoice;
   bbModifyInvoice.Enabled := (fModifyInvoice) and (not FLG_CLOSED);
   bbPrintInvoice.Enabled := fPrintInvoice;
-  bbDeleteInvoice.Enabled := fDelete and (not FLG_CLOSED);
+
+  // e-Factura prin API
+  EFStatus := cEFacturaNotSent;
+  IsEFactura := False;
+  HasEFNumber := False;
+  if fPrintInvoice then
+  begin
+    EFStatus := EFacturaStatus;
+    IsEFactura := IBCQueryINVOICES.FieldByName('TIP_FACTURA').AsInteger = cTipFacturaEFactura;
+    HasEFNumber := Trim(IBCQueryINVOICES.FieldByName('EF_SERIA_NUMBER').AsString) <> '';
+  end;
+  bbEFacturaSend.Enabled := IsEFactura and fSYS_Edit and (not FLG_CLOSED) and
+    ((EFStatus = cEFacturaNotSent) or (EFStatus = cEFInvPending) or (EFStatus = cEFInvCanceledBySupplier));
+  bbEFacturaSync.Enabled := fPrintInvoice and (EFStatus <> cEFacturaNotSent);
+  bbEFacturaPdf.Enabled := HasEFNumber;
+  // anularea e posibila doar pana semneaza cumparatorul
+  bbEFacturaCancel.Enabled := HasEFNumber and fSYS_Edit and ((EFStatus = cEFInvDraft) or
+    (EFStatus = cEFInvSignedBySupplier) or (EFStatus = cEFInvRejectedByBuyer) or (EFStatus = cEFInvSentToBuyer));
+  // o factura aflata in e-Factura se sterge din WMS doar dupa anularea ei acolo
+  bbDeleteInvoice.Enabled := fDelete and (not FLG_CLOSED) and
+    ((EFStatus = cEFacturaNotSent) or (EFStatus = cEFInvCanceledBySupplier));
 end;
 
 procedure Tframe25ScetFaktura.ModifyRecord;
@@ -1761,11 +1808,11 @@ end;
 
 procedure Tframe25ScetFaktura.SetupQtyFields;
 begin
-     // Кол-во
+     // Cantitate
   TcxCalcEditProperties(cxGridDBCol_QTY.Properties).DisplayFormat := QtyDisplayFormat;
   cxGridDBCol_QTY.Summary.FooterFormat := QtyDisplayFormat;
   TcxCalcEditProperties(cxGridComponents_ACNT_QTY.Properties).DisplayFormat := QtyDisplayFormat;
-     // Комплектация из сборки: Кол-во
+     // Configurare set din asamblare: Cantitate
   TcxCalcEditProperties(cxGridComplect_QTY.Properties).DisplayFormat := QtyDisplayFormat;
   cxGridComplect_QTY.Summary.FooterFormat := QtyDisplayFormat;
   TcxCalcEditProperties(cxGridComplect_ACNT_QTY.Properties).DisplayFormat := QtyDisplayFormat;
@@ -1777,7 +1824,7 @@ begin
   fSYS_Edit := SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_СФ_СФ_Изменить);
   fSYS_View := SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_СФ_СФ_Просмотр);
   fSYS_Delete := SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_СФ_СФ_Удалить);
-     // Комплектация из сборки
+     // Configurare set din asamblare
   fSYS_VIEW_COMPLECT := SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_СФ_СФ_Комплектация_из_сборки);
 
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_СФ_СФ_Корректровка_кассы) then
@@ -1786,7 +1833,7 @@ begin
 
   end;
 
-     // Колонка цен
+     // Coloana preturi
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Справочники_Товары_Колонка_цен_0) then
   begin
     bbPriceCol0.Visible := ivNever;
@@ -1811,7 +1858,7 @@ begin
   if (bbSubItemsPriceColumnsComplect.ItemLinks.VisibleItemCount = 0) then
     bbSubItemsPriceColumnsComplect.Visible := ivNever;
 
-     // Принести товары из других документов
+     // Adu marfa din alte documente
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_СФ_СФ_Принести_товары_из_других_документов) then
   begin
     bbBringGoodsFromRashod.Visible := ivNever;
@@ -1819,7 +1866,7 @@ begin
     bbBringGoodsFromDocs.Visible := ivNever;
   end;
 
-     // Привести товары из мульти-Сборки
+     // Adu marfa din multi-Asamblare
 //     if Not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_СФ_СФ_Принести_товары_из_расхода_мультиСборка)
 //       then bbBringGoodsFromMultiSborka.Visible:=ivNever;
      // Doc popup menu
@@ -1846,7 +1893,7 @@ begin
     cxGridComponents_PRICE_COLUMN.VisibleForCustomization := False;
   end;
 
-     // Счет фактура
+     // Factura fiscala
   if not fSYS_Edit then
   begin
     bbNewInvoice.Visible := ivNever;
@@ -1864,19 +1911,19 @@ begin
     dxBarDockControlInvoices.Visible := False;
   end;
 
-     // Карточка товара
+     // Fisa produsului
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Справочники_Товары_Карточка_товара) or SWNSecurityManager.IsPartialAccessMode
     then
     bbGoodsInfoCard.Visible := ivNever;
-     // Изменить цены товара
+     // Modifica preturile marfii
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Справочники_Товары_Изменение_валюты_и_цены_товара) or
     SWNSecurityManager.IsPartialAccessMode then
     bbGoodsPrice.Visible := ivNever;
-     // Соответствие товара в других фирмах
+     // Corespondenta produsului in alte firme
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Справочники_Товары_Товары_из_других_фирм) then
     bbGoodsForeignCode.Visible := ivNever;
 
-     // Кассовые чеки
+     // Bonuri de casa
   if (not fSYS_Edit) and (not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_FACTURI_FF_E_Создание_чеков)) then
     bbActionPrintReceipt.Visible := ivNever;
 
@@ -2274,187 +2321,21 @@ end;
 
 procedure Tframe25ScetFaktura.GenerateInvoiceXml(FileName: string);
 var
-  XML: TXMLDocument;
-//  Node: IXMLNode;
-//  NodeSupplierInfo: IXMLNode;
-  ErrorStr: string;
+  Builder: TEFacturaXmlBuilder;
 begin
-  XML := TXMLDocument.Create(self);
+  // acelasi generator e folosit si la trimiterea prin API (EFacturaManager)
+  Builder := TEFacturaXmlBuilder.Create(dmDB.IBCConnection);
   try
-    XML.Active := True;
-    XML.Options := [doNodeAutoCreate, doNodeAutoIndent];
-    XML.Version := '1.0';
-    XML.Encoding := 'UTF-8';
-
-    with IBCQueryeFactura do
-    begin
-      Close;
-      ParamByName('DOCID').AsInteger := dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger;
-      Open;
-    end;
-
-    ErrorStr := '';
-    with XML, IBCQueryeFactura do
-    begin
-      with AddChild('Documents') do
-      begin
-        with AddChild('Document') do
-        begin
-          // child elements
-          with AddChild('SupplierInfo') do
-          begin
-            with AddChild('DeliveryDate') do
-              NodeValue := DateToISO8601(FieldByName('DATA').AsDateTime);
-            {$REGION 'SUPPLIER'}
-            with AddChild('Supplier') do
-            begin
-              Attributes['IDNO'] := FieldByName('DT_IDEN_NUMBER').AsString;
-              Attributes['CodTVA'] := FieldByName('DT_VAT_NUMBER').AsString;
-              Attributes['Title'] := FieldbyName('DT_NAME').AsString;
-              Attributes['Address'] := FieldByName('DT_ADDRESS2').AsString;
-
-              with AddChild('BankAccount') do
-              begin
-                Attributes['BranchTitle'] := FieldByName('DT_BANKNAME').AsString;
-                Attributes['BranchCode'] := FieldByName('DT_BANKACCOUNT').AsString;
-                Attributes['Account'] := FieldByName('DT_ACCOUNT').AsString;
-              end;
-            end;
-            {$ENDREGION}
-        // Buyer
-            {$REGION 'CUMPARATOR'}
-            with AddChild('Buyer') do
-            begin
-              Attributes['TaxpayerType'] := 1;
-              Attributes['IDNO'] := FieldByName('CT_IDEN_NUMBER').AsString;
-              Attributes['CodTVA'] := FieldByName('CT_VAT_NUMBER').AsString;
-              Attributes['Title'] := FieldbyName('CT_NAME').AsString;
-              if FieldByName('CT_ADDRESS2').AsString = '' then
-                raise Exception.Create('Adresa juridica nu este setata!');
-
-              Attributes['Address'] := FieldByName('CT_ADDRESS2').AsString;
-              with AddChild('BankAccount') do
-              begin
-                Attributes['BranchTitle'] := FieldByName('CT_BANKNAME').AsString;
-                Attributes['BranchCode'] := FieldByName('CT_BANKACCOUNT').AsString;
-                Attributes['Account'] := FieldByName('CT_ACCOUNT').AsString;
-//                if FieldByName('CT_ACCOUNT').AsString = '' then
-//                  ErrorStr := ErrorStr + 'Eroare! Nu sunt indicate conturile bancare a cumparatorului!'#13#10;
-              end;
-            end;
-            {$ENDREGION}
-        // Transporter
-          {$REGION 'Transportator'}
-            with AddChild('Transporter') do
-            begin
-              Attributes['IDNO'] := FieldByName('Transportator_IDNO').Asstring;
-              Attributes['CodTVA'] := FieldByName('Transportator_VAT_NUMBER').Asstring;
-              Attributes['Title'] := FieldByName('TRANSPORTATOR_NUME').AsString;
-              Attributes['Address'] := FieldByName('TRANS_ADDRESS').AsString;
-              Attributes['TaxpayerType'] := 1;
-              with AddChild('BankAccount') do
-              begin
-                Attributes['BranchTitle'] := FieldByName('TRANS_BANKNAME').AsString;
-                Attributes['BranchCode'] := FieldByName('TRANS_BANKACCOUNT').AsString;
-                Attributes['Account'] := FieldByName('TRANS_ACCOUNT').AsString;
-              end;
-            end;
-           {$ENDREGION}
-
-            with AddChild('AttachedDocuments') do
-              NodeValue := 'Documente anexate';
-            with AddChild('Notes') do
-              NodeValue := 'Comentarii';
-//            with AddChild('DelegateSeria') do
-//              NodeValue := '';
-//            with AddChild('DelegateNumber') do
-//              NodeValue := '';
-//            with AddChild('DelegateName') do
-//              NodeValue := '';
-//            with AddChild('DelegateDate') do
-//              NodeValue := '';
-//            with AddChild('VehicleLogBook') do
-//            begin
-////              with AddChild('IssuedDate') do
-////              begin
-////                // In cazul in care data lipseste, nodul dat nu trebuie sa fie prezent in XML
-////                Attributes['IssuedDate'] := '';
-////                Attributes['Seria'] := '';
-////                Attributes['Number'] := '';
-////              end;
-//            end;
-            with AddChild('LoadingPoint') do
-              NodeValue := FieldByName('DT_ADDRESS').AsString;
-            if FieldByName('CT_ADDRESS').AsString = '' then
-              raise Exception.Create('Nu este indicat punctul de descarcare.');
-            with AddChild('UnloadingPoint') do
-              NodeValue := FieldByName('CT_ADDRESS').AsString;
-            with AddChild('Redirections') do
-              NodeValue := FieldByName('Redirijari_NAME').AsString;
-            with AddChild('Merchandises') do
-            begin
-              // for each jurnalRecord do
-               {$REGION 'PRODUSE'}
-              IBCQueryDetail.Close;
-              IBCQueryDetail.ParamByName('DOCID').AsInteger := dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger;
-              IBCQueryDetail.Open;
-              while not IBCQueryDetail.Eof do
-              begin
-                with AddChild('Row') do
-                begin
-                // In cazul in care data lipse?te, nodul dat nu trebuie sa fie prezent in XML
-                  if IBCQueryDetail.FieldByName('goods_acnt_id').AsInteger <= 0 then
-                    raise exception.Create('Sunt produse fara nume in factura');
-
-                  Attributes['Code'] := IBCQueryDetail.FieldByName('goods_acnt_id').AsString;
-                  Attributes['Name'] := IBCQueryDetail.FieldByName('NAMEACNT').AsString;
-                  Attributes['UnitOfMeasure'] := IBCQueryDetail.FieldByName('um_name').AsString;
-                  Attributes['Quantity'] := IBCQueryDetail.FieldByName('qty').AsString;
-                  Attributes['UnitPriceWithoutTVA'] := IBCQueryDetail.FieldByName('PRICE_WVAT').AsString;
-                  Attributes['TotalPriceWithoutTVA'] := IBCQueryDetail.FieldByName('SUMA').AsFloat - IBCQueryDetail.FieldByName
-                    ('SUMAVAT').AsFloat;
-                  if IBCQueryDetail.FieldByName('VAT_RATE').AsInteger = 0 then
-                    Attributes['TVA'] := '-'
-                  else
-                    Attributes['TVA'] := Round(100 * IBCQueryDetail.FieldByName('SUMAVAT').AsFloat / (IBCQueryDetail.FieldByName
-                      ('SUMA').AsFloat - IBCQueryDetail.FieldByName('SUMAVAT').AsFloat));
-                  Attributes['TotalTVA'] := IBCQueryDetail.FieldByName('SUMAVAT').AsFloat;
-                  Attributes['TotalPrice'] := IBCQueryDetail.FieldByName('SUMA').AsFloat;
-                  Attributes['OtherInfo'] := '';
-                  Attributes['PackageType'] := '';
-                  Attributes['NumberOfPlaces'] := '';
-                  Attributes['GrossWeight'] := '';
-                end;
-                IBCQueryDetail.Next;
-              end;
-            {$ENDREGION}
-            end;
-            with AddChild('CreationMotiv') do
-            begin
-              if (FieldByName('Redirijari_NAME').AsString = '<Non livrare>') then
-                NodeValue := '5'
-              else
-                NodeValue := '4';
-            end;
-          end;
-          // supplierinfo
-          with AddChild('AdditionalInformation') do
-            with AddChild('field') do
-              NodeValue := 'FEAWDADA22';
-        end;
-      end;
-    end;
-    if ErrorStr = '' then
-      XML.SaveToFile(FileName)
-    else
-    begin
-      ShowMessage(ErrorStr + 'Documentul XML nu a fost generat!');
+    try
+      Builder.SaveToFile(dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger, FileName);
+    except
+      on E: EEFacturaXmlError do
+        ShowErrorDialog('e-Factura', E.Message);
     end;
   finally
-    XML.Free;
+    Builder.Free;
   end;
 end;
-
 procedure Tframe25ScetFaktura.IBCQueryINVOICESAfterInsert(DataSet: TDataSet);
 begin
   DataSet.FieldByName('fftypeid').AsInteger := 7692; // Factura vanzare
@@ -2487,9 +2368,9 @@ begin
     dialog.DefaultFirmaID := dmDB.CurrentFirma;
     dialog.DefaultUserID := dmDB.CurrentUserID;
 
-    dialog.DocTypeList.Add(cDBID_DocType_НАКЛАДНЫЕ_ПТПН); // Приход товара по накладным
-    dialog.DocTypeList.Add(cDBID_DocType_НАКЛАДНЫЕ_РН); // Расходная накладная (Оперативный учет)
-    dialog.DocTypeList.Add(cDBID_DocType_НАКЛАДНЫЕ_ВТОК); // Возврат товара от клиента
+    dialog.DocTypeList.Add(cDBID_DocType_НАКЛАДНЫЕ_ПТПН); // Intrare marfa pe nakladnie
+    dialog.DocTypeList.Add(cDBID_DocType_НАКЛАДНЫЕ_РН); // Nakladnaia de iesire (Evidenta operativa)
+    dialog.DocTypeList.Add(cDBID_DocType_НАКЛАДНЫЕ_ВТОК); // Retur marfa de la client
 
     if dialog.SelectDoc then
     begin
@@ -2610,7 +2491,7 @@ begin
     dialog.DefaultDocTypeID := dmDB.CurrentDocTypeID;
     dialog.DefaultFirmaID := dmDB.CurrentFirma;
     dialog.DefaultUserID := dmDB.CurrentUserID;
-    dialog.DocTypeList.Add(cDBID_DocType_НАКЛАДНЫЕ_РН); // Расходная накладная (Оперативный учет)
+    dialog.DocTypeList.Add(cDBID_DocType_НАКЛАДНЫЕ_РН); // Nakladnaia de iesire (Evidenta operativa)
     if dialog.SelectDoc then
     begin
       if DoActionImportGoodsFromDocMultiSborka(dialog.DocID) then
@@ -2769,11 +2650,11 @@ begin
   begin
     if cxGridSFTable.DataController.DataSource <> nil then
     begin
-      bbActionPrintReceipt.Enabled := (cxGridSFTable.DataController.RecNo > 0) and fSYS_Edit; // Печать фискального чека
+      bbActionPrintReceipt.Enabled := (cxGridSFTable.DataController.RecNo > 0) and fSYS_Edit; // Printare bon fiscal
       bbGotoParentDoc.Enabled := (cxGridSFTable.DataController.RecNo > 0) and not dmDB.IBCQueryDocs.FieldByName('PARENTDOCID').IsNull;
     end;
   end;
-  bbDocComments.Enabled := fSYS_Edit; // Комментарии
+  bbDocComments.Enabled := fSYS_Edit; // Comentarii
 end;
 
 procedure Tframe25ScetFaktura.WhenGoodsFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord,
@@ -2898,6 +2779,184 @@ begin
   finally
     Query.Free;
   end;
+end;
+
+{ e-Factura prin API }
+
+function Tframe25ScetFaktura.EFacturaStatus: Integer;
+begin
+  if IBCQueryINVOICES.FieldByName('EF_STATUS').IsNull then
+    Result := cEFacturaNotSent
+  else
+    Result := IBCQueryINVOICES.FieldByName('EF_STATUS').AsInteger;
+end;
+
+procedure Tframe25ScetFaktura.cxGridInvoiceTable_EF_STATUSGetDisplayText(Sender: TcxCustomGridTableItem;
+  ARecord: TcxCustomGridRecord; var AText: string);
+begin
+  if VarIsNull(ARecord.Values[Sender.Index]) then
+    AText := ''
+  else
+    AText := EFacturaStatusName(ARecord.Values[Sender.Index]);
+end;
+
+procedure Tframe25ScetFaktura.bbEFacturaSendClick(Sender: TObject);
+var
+  Manager: TEFacturaManager;
+  R: TEFacturaSendResult;
+  Force, Sent: Boolean;
+begin
+  R := Default(TEFacturaSendResult);
+  Force := False;
+  if EFacturaStatus = cEFInvPending then
+  begin
+    // trimisa, dar inca negasita: verificam intai, ca sa nu apara o dublura
+    EFacturaSync(False);
+    if EFacturaStatus <> cEFInvPending then
+      Exit;
+    if ShowAskDialog('e-Factura', 'Factura a fost trimisa, dar nu apare inca in e-Factura. Retrimiteti?',
+      'Daca e-Factura doar intarzie procesarea, factura va aparea de doua ori.') <> mrYes then
+      Exit;
+    Force := True;
+  end
+  else if ShowAskDialog('e-Factura', 'Trimiteti factura in e-Factura?',
+    'Factura apare nesemnata la "Facturi noi"; semnarea se face in e-Factura.') <> mrYes then
+    Exit;
+
+  Sent := False;
+  Manager := TEFacturaManager.Create(dmDB.IBCConnection);
+  try
+    try
+      Screen.Cursor := crHourGlass;
+      try
+        R := Manager.SendInvoice(dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger, dmDB.CurrentUserID, Force);
+        Sent := True;
+      finally
+        Screen.Cursor := crDefault;
+      end;
+    except
+      on E: Exception do
+        ShowEFacturaError(E);
+    end;
+  finally
+    Manager.Free;
+  end;
+
+  if IBCQueryINVOICES.Active then
+    IBCQueryINVOICES.Refresh;
+  InvoiceSelectionChanged;
+  if Sent then
+    ShowInfoDialog('e-Factura', 'Factura a fost trimisa in e-Factura (' + R.ApiId + ').' + #13#10 +
+      'Semnati-o in e-Factura la "Facturi noi", apoi apasati "Actualizeaza status".');
+end;
+
+procedure Tframe25ScetFaktura.bbEFacturaSyncClick(Sender: TObject);
+begin
+  EFacturaSync(True);
+end;
+
+procedure Tframe25ScetFaktura.EFacturaSync(const AProposeClose: Boolean);
+var
+  Manager: TEFacturaManager;
+  R: TEFacturaSyncResult;
+  Msg: string;
+  ProposeClose: Boolean;
+begin
+  ProposeClose := False;
+  Manager := TEFacturaManager.Create(dmDB.IBCConnection);
+  try
+    try
+      Screen.Cursor := crHourGlass;
+      try
+        R := Manager.SyncInvoice(IBCQueryINVOICES.FieldByName('INVOICEID').AsInteger);
+      finally
+        Screen.Cursor := crDefault;
+      end;
+      if not R.Found then
+        Msg := 'Factura nu apare inca in e-Factura (se proceseaza). Reincercati peste cateva minute.'
+      else
+      begin
+        Msg := 'Factura ' + R.Seria + ' ' + R.Number + ': ' + EFacturaStatusName(R.InvoiceStatus) + '.';
+        if R.NumberAssigned then
+          Msg := Msg + #13#10 + 'Seria si numarul au fost completate in factura WMS.';
+        // dupa semnarea de catre furnizor documentul poate fi inchis, ca dupa tiparirea facturii
+        ProposeClose := AProposeClose and ((R.InvoiceStatus = cEFInvSignedBySupplier) or
+          (R.InvoiceStatus = cEFInvAcceptedByBuyer) or (R.InvoiceStatus = cEFInvSentToBuyer) or
+          (R.InvoiceStatus = cEFInvSignedByBuyer) or (R.InvoiceStatus = cEFInvTransported));
+      end;
+      ShowInfoDialog('e-Factura', Msg);
+    except
+      on E: Exception do
+        ShowEFacturaError(E);
+    end;
+  finally
+    Manager.Free;
+  end;
+
+  if IBCQueryINVOICES.Active then
+    IBCQueryINVOICES.Refresh;
+  InvoiceSelectionChanged;
+  if ProposeClose and (dmDB.IBCQueryDocs.FieldByName('FLG_CLOSED').AsInteger = 0) then
+    DoCloseInvoice;
+end;
+
+procedure Tframe25ScetFaktura.bbEFacturaPdfClick(Sender: TObject);
+var
+  Manager: TEFacturaManager;
+  FileName: string;
+begin
+  FileName := TPath.Combine(TPath.GetTempPath, 'e-Factura ' + StringReplace(Trim(IBCQueryINVOICES.FieldByName
+    ('EF_SERIA_NUMBER').AsString), ' ', '', [rfReplaceAll]) + '.pdf');
+  Manager := TEFacturaManager.Create(dmDB.IBCConnection);
+  try
+    try
+      Screen.Cursor := crHourGlass;
+      try
+        TFile.WriteAllBytes(FileName, Manager.GetInvoicePdf(IBCQueryINVOICES.FieldByName('INVOICEID').AsInteger));
+      finally
+        Screen.Cursor := crDefault;
+      end;
+      ShellExecute(Handle, 'open', PChar(FileName), nil, nil, SW_SHOWNORMAL);
+    except
+      on E: Exception do
+        ShowEFacturaError(E);
+    end;
+  finally
+    Manager.Free;
+  end;
+end;
+
+procedure Tframe25ScetFaktura.bbEFacturaCancelClick(Sender: TObject);
+var
+  Manager: TEFacturaManager;
+  Comment: string;
+begin
+  Comment := '';
+  if not InputQuery('Anulare in e-Factura', 'Motivul anularii facturii ' + IBCQueryINVOICES.FieldByName
+    ('EF_SERIA_NUMBER').AsString + ':', Comment) or (Trim(Comment) = '') then
+    Exit;
+
+  Manager := TEFacturaManager.Create(dmDB.IBCConnection);
+  try
+    try
+      Screen.Cursor := crHourGlass;
+      try
+        Manager.CancelInvoice(IBCQueryINVOICES.FieldByName('INVOICEID').AsInteger, Trim(Comment));
+      finally
+        Screen.Cursor := crDefault;
+      end;
+      ShowInfoDialog('e-Factura', 'Factura a fost anulata in e-Factura.');
+    except
+      on E: Exception do
+        ShowEFacturaError(E);
+    end;
+  finally
+    Manager.Free;
+  end;
+
+  if IBCQueryINVOICES.Active then
+    IBCQueryINVOICES.Refresh;
+  InvoiceSelectionChanged;
 end;
 
 end.

@@ -1,8 +1,8 @@
 object frameDelivery: TframeDelivery
   Left = 0
   Top = 0
-  Width = 881
-  Height = 298
+  Width = 1002
+  Height = 280
   Margins.Left = 4
   Margins.Top = 4
   Margins.Right = 4
@@ -15,8 +15,8 @@ object frameDelivery: TframeDelivery
   ParentFont = False
   TabOrder = 0
   object cxGroupBox1: TcxGroupBox
-    Left = 10
-    Top = 39
+    Left = 14
+    Top = 31
     Margins.Left = 4
     Margins.Top = 4
     Margins.Right = 4
@@ -24,11 +24,11 @@ object frameDelivery: TframeDelivery
     Caption = 'Transportator'
     PanelStyle.CaptionIndent = 3
     TabOrder = 0
-    Height = 75
-    Width = 867
+    Height = 242
+    Width = 471
     object cxLabel1: TcxLabel
       Left = 20
-      Top = 46
+      Top = 50
       Margins.Left = 4
       Margins.Top = 4
       Margins.Right = 4
@@ -46,7 +46,7 @@ object frameDelivery: TframeDelivery
     end
     object beCurier: TcxDBButtonEdit
       Left = 90
-      Top = 45
+      Top = 49
       Margins.Left = 4
       Margins.Top = 4
       Margins.Right = 4
@@ -64,7 +64,7 @@ object frameDelivery: TframeDelivery
     end
     object cxLabel2: TcxLabel
       Left = 20
-      Top = 27
+      Top = 23
       Margins.Left = 4
       Margins.Top = 4
       Margins.Right = 4
@@ -93,8 +93,8 @@ object frameDelivery: TframeDelivery
       Width = 361
     end
     object cxDBCheckBox1: TcxDBCheckBox
-      Left = 490
-      Top = 25
+      Left = 90
+      Top = 81
       Margins.Left = 4
       Margins.Top = 4
       Margins.Right = 4
@@ -112,8 +112,8 @@ object frameDelivery: TframeDelivery
       Transparent = True
     end
     object cxDBCheckBox2: TcxDBCheckBox
-      Left = 710
-      Top = 46
+      Left = 310
+      Top = 102
       Margins.Left = 4
       Margins.Top = 4
       Margins.Right = 4
@@ -131,8 +131,8 @@ object frameDelivery: TframeDelivery
       Transparent = True
     end
     object cxDBCheckBox3: TcxDBCheckBox
-      Left = 490
-      Top = 46
+      Left = 90
+      Top = 102
       Margins.Left = 4
       Margins.Top = 4
       Margins.Right = 4
@@ -150,8 +150,8 @@ object frameDelivery: TframeDelivery
       Transparent = True
     end
     object cxDBCheckBox4: TcxDBCheckBox
-      Left = 600
-      Top = 25
+      Left = 200
+      Top = 81
       Margins.Left = 4
       Margins.Top = 4
       Margins.Right = 4
@@ -169,8 +169,8 @@ object frameDelivery: TframeDelivery
       Transparent = True
     end
     object cxDBCheckBox5: TcxDBCheckBox
-      Left = 600
-      Top = 46
+      Left = 200
+      Top = 102
       Margins.Left = 4
       Margins.Top = 4
       Margins.Right = 4
@@ -189,8 +189,8 @@ object frameDelivery: TframeDelivery
     end
   end
   object cxGroupBox2: TcxGroupBox
-    Left = 4
-    Top = 103
+    Left = 488
+    Top = 32
     Margins.Left = 4
     Margins.Top = 4
     Margins.Right = 4
@@ -198,8 +198,8 @@ object frameDelivery: TframeDelivery
     Caption = 'Informtie despre destinatar'
     PanelStyle.CaptionIndent = 3
     TabOrder = 5
-    Height = 190
-    Width = 867
+    Height = 241
+    Width = 509
     object cxDBLookupComboBox1: TcxDBLookupComboBox
       Left = 139
       Top = 19
@@ -220,7 +220,7 @@ object frameDelivery: TframeDelivery
       Properties.ListOptions.SyncMode = True
       Properties.ListSource = IBCDataSourceStatutLivrari
       TabOrder = 0
-      Width = 211
+      Width = 354
     end
     object cxLabel3: TcxLabel
       Left = 20
@@ -284,7 +284,7 @@ object frameDelivery: TframeDelivery
       Properties.ListOptions.SyncMode = True
       Properties.ListSource = IBCDataSourceCities
       TabOrder = 4
-      Width = 153
+      Width = 139
     end
     object cxLabel5: TcxLabel
       Left = 315
@@ -297,8 +297,8 @@ object frameDelivery: TframeDelivery
       TabOrder = 5
     end
     object cxDBDateEdit1: TcxDBDateEdit
-      Left = 585
-      Top = 47
+      Left = 137
+      Top = 75
       Margins.Left = 4
       Margins.Top = 4
       Margins.Right = 4
@@ -309,8 +309,8 @@ object frameDelivery: TframeDelivery
       Width = 101
     end
     object cxLabel6: TcxLabel
-      Left = 543
-      Top = 47
+      Left = 19
+      Top = 75
       Margins.Left = 4
       Margins.Top = 4
       Margins.Right = 4
@@ -319,8 +319,8 @@ object frameDelivery: TframeDelivery
       TabOrder = 7
     end
     object cxLabel7: TcxLabel
-      Left = 710
-      Top = 47
+      Left = 262
+      Top = 79
       Margins.Left = 4
       Margins.Top = 4
       Margins.Right = 4
@@ -329,8 +329,8 @@ object frameDelivery: TframeDelivery
       TabOrder = 8
     end
     object cxDBTimeEdit1: TcxDBTimeEdit
-      Left = 746
-      Top = 47
+      Left = 298
+      Top = 75
       Margins.Left = 4
       Margins.Top = 4
       Margins.Right = 4
@@ -344,7 +344,7 @@ object frameDelivery: TframeDelivery
     end
     object cxLabel8: TcxLabel
       Left = 20
-      Top = 69
+      Top = 113
       Margins.Left = 4
       Margins.Top = 4
       Margins.Right = 4
@@ -354,7 +354,7 @@ object frameDelivery: TframeDelivery
     end
     object cxDBMemo1: TcxDBMemo
       Left = 139
-      Top = 74
+      Top = 118
       Margins.Left = 4
       Margins.Top = 4
       Margins.Right = 4
@@ -370,11 +370,11 @@ object frameDelivery: TframeDelivery
       Style.IsFontAssigned = True
       TabOrder = 11
       Height = 41
-      Width = 699
+      Width = 362
     end
     object cxLabel9: TcxLabel
       Left = 20
-      Top = 117
+      Top = 161
       Margins.Left = 4
       Margins.Top = 4
       Margins.Right = 4
@@ -384,7 +384,7 @@ object frameDelivery: TframeDelivery
     end
     object cxDBTextEdit2: TcxDBTextEdit
       Left = 139
-      Top = 120
+      Top = 164
       Margins.Left = 4
       Margins.Top = 4
       Margins.Right = 4
@@ -392,11 +392,11 @@ object frameDelivery: TframeDelivery
       DataBinding.DataField = 'PHONE_NUMBER'
       DataBinding.DataSource = IBCDSDelivery
       TabOrder = 13
-      Width = 272
+      Width = 150
     end
     object cxLabel10: TcxLabel
       Left = 20
-      Top = 140
+      Top = 184
       Margins.Left = 4
       Margins.Top = 4
       Margins.Right = 4
@@ -406,7 +406,7 @@ object frameDelivery: TframeDelivery
     end
     object cxDBMemo2: TcxDBMemo
       Left = 139
-      Top = 145
+      Top = 189
       Margins.Left = 4
       Margins.Top = 4
       Margins.Right = 4
@@ -415,7 +415,7 @@ object frameDelivery: TframeDelivery
       DataBinding.DataSource = IBCDSDelivery
       TabOrder = 15
       Height = 41
-      Width = 699
+      Width = 362
     end
   end
   object IBCQueryCities: TIBCQuery

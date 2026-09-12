@@ -1,6 +1,6 @@
 unit frame50RealizatiaUnit;
 {
-  КОМИСИЯ. Принятие в баланс с комисии
+  COMISION. Primire in bilant din comision
   DocTypeID = 1757
   Frame Index = 50
 }
@@ -184,10 +184,10 @@ begin
      FLG_CLOSED:=dmDB.IBCQueryDocs.FieldByName('FLG_CLOSED').AsInteger=1;
      SerialType:=IBCQueryJurnalR.FieldByName('GOODS_SERIAL_TYPE_ID').asInteger;
 
-     // Серийный учет
+     // Evidenta seriala
      if SerialType = cSYSS_GOODS_SERIAL_TYPE_Серийный_учет then ShowSelectGoodsSerialNumbersDialog(FLG_CLOSED)
      else
-     // Партийный учет
+     // Evidenta pe partizi
      if SerialType = cSYSS_GOODS_SERIAL_TYPE_Партийный_учет then ShowSelectGoodsPartNumbersDialog(FLG_CLOSED);
 end;
 
@@ -307,7 +307,7 @@ end;
 procedure Tframe50Realizatia.DeleteSelectedGoods;
 var S:String;
 begin
-     S:=Format('Удалить "%s"?',[IBCQueryJurnalR.FieldByName('GOODS_TITLE').asString]);
+     S:=Format('Sterge "%s"?',[IBCQueryJurnalR.FieldByName('GOODS_TITLE').asString]);
      if ShowAskDialog(cMSG_DELETERECORD_DeleteGoods,S)<>mrYes then Exit;
 
      IBCQueryJurnalR.UpdateTransaction.StartTransaction;
@@ -325,7 +325,7 @@ end;
 
 procedure Tframe50Realizatia.DoCloseDocument;
 begin
-     if ShowAskDialog('Закрыть документ','Вы хотите закрыть документ?')=mrYes then
+     if ShowAskDialog('Inchide documentul','Doriti sa inchideti documentul?')=mrYes then
      begin
           if DoCloseDocumentDB(dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger) then dmDB.RefreshDocs;
      end;
@@ -426,7 +426,7 @@ end;
 
 procedure Tframe50Realizatia.DoOpenDocument;
 begin
-     if ShowAskDialog('Открыть документ','Вы открыть документ?')=mrYes then
+     if ShowAskDialog('Deschide documentul','Doriti sa deschideti documentul?')=mrYes then
      begin
           if DoOpenDocumentDB(dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger) then dmDB.RefreshDocs;
      end;
@@ -441,7 +441,7 @@ begin
           // context from Docs
           if cxGridRealizatia_CT_NAME.Focused then
           begin
-               // Контрагент
+               // Contraagent
                Result.Context := ffCustomer;
                Result.ValueInt := dmDB.IBCQueryDocs.FieldByName('CT').AsInteger;
                Result.ValueStr := dmDB.IBCQueryDocs.FieldByName('CT_NAME').AsString;
@@ -449,7 +449,7 @@ begin
           else
               if cxGridRealizatia_DATA.Focused then
               begin
-                   // Дата
+                   // Data
                    Result.Context := ffDate;
                    Result.ValueDateTime := dmDB.IBCQueryDocs.FieldByName('DATA').AsDateTime;
               end
@@ -511,7 +511,7 @@ end;
 
 function Tframe50Realizatia.InitFrameID: integer;
 begin
-     // Принятие в баланс с комисии
+     // Primire in bilant din comision
      Result:=50;
      SetupQtyFields;
      dmDB.CreateGridImageColumnItems(cxGridGoods_IMG);
@@ -619,7 +619,7 @@ end;
 
 procedure Tframe50Realizatia.SetupQtyFields;
 begin
-     // Кол-во
+     // Cantitate
      TcxCalcEditProperties(cxGridGoods_QTY.Properties).DisplayFormat:=QtyDisplayFormat;
      cxGridGoods_QTY.Summary.FooterFormat:=QtyDisplayFormat;
 end;

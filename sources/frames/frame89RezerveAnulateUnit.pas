@@ -1,6 +1,6 @@
 ﻿unit frame89RezerveAnulateUnit;
 {
-  НАКЛАДНЫЕ. Расходная накладная
+  NAKLADNIE. Nakladnaia de iesire
   DocTypeID = 3297
   Frame Index = 89
 }
@@ -384,9 +384,9 @@ begin
 
   if (cxGridNPNTable.DataController.RecNo > 0) then
   begin
-    FLG_PROTECTED := dmDB.IBCQueryDocs.FieldByName('FLG_PROTECTED').AsInteger = 1; // Ввод серийников
-    FLG_SHIP := dmDB.IBCQueryDocs.FieldByName('FLG_SHIP').AsInteger = 1; // Отгружен
-    FLG_ACNT := dmDB.IBCQueryDocs.FieldByName('FLG_ACNT').AsInteger = 1; // Бухгалтерия
+    FLG_PROTECTED := dmDB.IBCQueryDocs.FieldByName('FLG_PROTECTED').AsInteger = 1; // Introducere numere seriale
+    FLG_SHIP := dmDB.IBCQueryDocs.FieldByName('FLG_SHIP').AsInteger = 1; // Expediat
+    FLG_ACNT := dmDB.IBCQueryDocs.FieldByName('FLG_ACNT').AsInteger = 1; // Contabilitate
     FLG_CLOSED := dmDB.IBCQueryDocs.FieldByName('FLG_CLOSED').AsInteger = 1;
 
     fDocEdit := fSECURITY_CanEdit and not FLG_SHIP or fSECURITY_CanView;
@@ -481,7 +481,7 @@ begin
 
   if cxGridComponentsTable.Site.Focused then
   begin
-          // context from Jurnal: Код + Наименование
+          // context from Jurnal: Cod + Denumire
     Result.Context := ffGoods;
     Result.ValueInt := dmDB.IBCQueryJurnal.FieldByName('GOODSID').AsInteger;
     Result.ValueStr := dmDB.IBCQueryJurnal.FieldByName('GOODS_NAME').AsString;
@@ -491,20 +491,20 @@ begin
               // context from Docs
     if cxGridNPN_CT_NAME.Focused then
     begin
-                   // Контрагент
+                   // Contraagent
       Result.Context := ffCustomer;
       Result.ValueInt := dmDB.IBCQueryDocs.FieldByName('CT').AsInteger;
       Result.ValueStr := dmDB.IBCQueryDocs.FieldByName('CT_NAME').AsString;
     end
     else if cxGridNPN_DATA.Focused then
     begin
-                       // Дата
+                       // Data
       Result.Context := ffDate;
       Result.ValueDateTime := dmDB.IBCQueryDocs.FieldByName('DATA').AsDateTime;
     end
     else if cxGridNPN_DTDEP_NAME.Focused then
     begin
-                           // Склад
+                           // Depozit
       Result.Context := ffStock;
       Result.ValueInt := dmDB.IBCQueryDocs.FieldByName('DTDEP').AsInteger;
       Result.ValueStr := dmDB.IBCQueryDocs.FieldByName('DTDEP_NAME').AsString;
@@ -724,7 +724,7 @@ begin
   begin
     FLG_SHIP := dmDB.IBCQueryDocs.FieldByName('FLG_SHIP').AsInteger = 1;
 
-    fGoodsAdd := not FLG_SHIP; // New item for "Состав"+ Security
+    fGoodsAdd := not FLG_SHIP; // New item for "Componenta"+ Security
     fChangeColumnPrice := not FLG_SHIP;
 
     if (cxGridComponentsTable.DataController.RecNo > 0) then
@@ -732,8 +732,8 @@ begin
       SerialType := dmDB.IBCQueryJurnal.FieldByName('GOODS_SERIAL_TYPE_ID').AsInteger;
       GoodsTypeID := dmDB.IBCQueryJurnal.FieldByName('GOODS_TYPE_ID').AsInteger;
 
-      fGoodsEdit := False;; // Modify "Состав" + Security
-      fGoodsDelete := False; // Delete "Состав" + Security
+      fGoodsEdit := False;; // Modify "Componenta" + Security
+      fGoodsDelete := False; // Delete "Componenta" + Security
       fSerials := False;
 
       fChangeUser := False;
@@ -759,7 +759,7 @@ end;
 
 procedure Tframe89RezerveAnulate.SetupQtyFields;
 begin
-     // Товарные позиции: Кол-во
+     // Pozitii marfa: Cantitate
   TcxCalcEditProperties(cxGridDBCol_QTY.Properties).DisplayFormat := QtyDisplayFormat;
   cxGridDBCol_QTY.Summary.FooterFormat := QtyDisplayFormat;
 end;

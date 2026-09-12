@@ -1,6 +1,6 @@
 unit frame49ZacetBalansGarantiaUnit;
 {
-  СЕРВИС. Зачет в баланс по гарантии
+  SERVICE. Trecere in bilant pe garantie
   DocTypeID = 1726
   Frame Index = 49
 }
@@ -127,7 +127,7 @@ end;
 
 procedure Tframe49ZacetBalansGarantia.bbCloseDocClick(Sender: TObject);
 begin
-     if ShowAskDialog('Закрыть документ','Вы хотите закрыть документ?')=mrYes then
+     if ShowAskDialog('Inchide documentul','Doriti sa inchideti documentul?')=mrYes then
      begin
           ChangeDocumentCloseFlag(dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger,1);
           dmDB.IBCQueryDocs.Refresh;
@@ -141,7 +141,7 @@ end;
 
 procedure Tframe49ZacetBalansGarantia.bbOpenDocClick(Sender: TObject);
 begin
-     if ShowAskDialog('Открыть документ','Вы хотите открыть документ?')=mrYes then
+     if ShowAskDialog('Deschide documentul','Doriti sa deschideti documentul?')=mrYes then
      begin
           ChangeDocumentCloseFlag(dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger,0);
           dmDB.IBCQueryDocs.Refresh;
@@ -231,7 +231,7 @@ end;
 
 procedure Tframe49ZacetBalansGarantia.DeleteRecord;
 begin
-     if ShowAskDialog(cMSG_DELETERECORD_DeleteDocument,Format('Удалить запись номер %d?',[dmDB.IBCQueryDocs.FieldByName('DOCID').asInteger]))=mrYes then
+     if ShowAskDialog(cMSG_DELETERECORD_DeleteDocument,Format('Stergeti inregistrarea numarul %d?',[dmDB.IBCQueryDocs.FieldByName('DOCID').asInteger]))=mrYes then
      begin
           dmDB.IBCQueryDocs.UpdateTransaction.StartTransaction;
           try
@@ -248,7 +248,7 @@ end;
 
 procedure Tframe49ZacetBalansGarantia.DeleteSelectedFile;
 begin
-     if ShowAskDialog('Удаление файла',Format('Вы хотите удалить файл "%s"?',[IBCQueryFiles.FieldByName('FILENAME').asString]))<>mrYes then Exit;
+     if ShowAskDialog('Stergere fisier',Format('Doriti sa stergeti fisierul "%s"?',[IBCQueryFiles.FieldByName('FILENAME').asString]))<>mrYes then Exit;
 
      IBCQueryFiles.UpdateTransaction.StartTransaction;
      try
@@ -332,7 +332,7 @@ begin
           // context from Docs
           if cxGridSK_CT_NAME.Focused then
           begin
-               // Контрагент
+               // Contraagent
                Result.Context := ffCustomer;
                Result.ValueInt := dmDB.IBCQueryDocs.FieldByName('CT').AsInteger;
                Result.ValueStr := dmDB.IBCQueryDocs.FieldByName('CT_NAME').AsString;
@@ -340,7 +340,7 @@ begin
           else
               if cxGridSK_DATA.Focused then
               begin
-                   // Дата
+                   // Data
                    Result.Context := ffDate;
                    Result.ValueDateTime := dmDB.IBCQueryDocs.FieldByName('DATA').AsDateTime;
               end;
@@ -367,7 +367,7 @@ end;
 
 function Tframe49ZacetBalansGarantia.InitFrameID: integer;
 begin
-     Result:=49; // СЕРВИС. Зачет в баланс по гарантии
+     Result:=49; // SERVICE. Trecere in bilant pe garantie
 end;
 
 procedure Tframe49ZacetBalansGarantia.ModifyRecord;
@@ -415,7 +415,7 @@ procedure Tframe49ZacetBalansGarantia.SaveAsSelectedFile;
 var dir:String;
 begin
      dir:=fLastFilePath;
-     if SelectDirectory('Выберите куда записать файл','',dir) then
+     if SelectDirectory('Alegeti unde sa salvati fisierul','',dir) then
      begin
           SaveFileFromDB(IBCQueryFiles.FieldByName('ATTID').AsInteger,dir);
           fLastFilePath:=dir;

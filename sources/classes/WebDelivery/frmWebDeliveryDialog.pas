@@ -155,7 +155,7 @@ begin
   if Not VarIsNull(ARecord.Values[cxGridCities_CITYID.Index]) then
   begin
     if ARecord.Values[cxGridCities_CITYID.Index] = -1 then
-      AText := '(все населённые пункты)';
+      AText := '(toate localitatile)';
   end;
 end;
 
@@ -175,9 +175,9 @@ begin
   begin
     case ARecord.Values[cxGridCities_TIME_UNIT.Index] of
       1:
-        AText := 'Часы';
+        AText := 'Ore';
       2:
-        AText := 'Дни';
+        AText := 'Zile';
     end;
   end;
 end;
@@ -190,8 +190,8 @@ end;
 
 procedure TfrmWebDeliveryDlg.DeleteFirma;
 begin
-  if ShowAskDialog('Удаление фирмы для доставки', Format('Вы хотите удалить фирму "%s"?',
-    [IBCQueryFirms.FieldByName('DISPLAYNAME').AsString]), 'Все населенные пункты также будут удаленны!') <> mrYes then
+  if ShowAskDialog('Stergere firma pentru livrare', Format('Doriti sa stergeti firma "%s"?',
+    [IBCQueryFirms.FieldByName('DISPLAYNAME').AsString]), 'Toate localitatile vor fi de asemenea sterse!') <> mrYes then
     Exit;
 
   IBCQueryFirms.UpdateTransaction.StartTransaction;
@@ -212,14 +212,14 @@ procedure TfrmWebDeliveryDlg.DeleteLocation;
 var
   S: String;
 begin
-  S := 'Вы хотите удалить следующие пункты доставки' + #13#10 + 'Район: ' + IBCQueryCity.FieldByName('DISTRICT_TITLE').AsString;
-  S := S + #13#10 + 'Город: ';
+  S := 'Doriti sa stergeti urmatoarele puncte de livrare' + #13#10 + 'Raion: ' + IBCQueryCity.FieldByName('DISTRICT_TITLE').AsString;
+  S := S + #13#10 + 'Oras: ';
   if IBCQueryCity.FieldByName('CITYID').AsInteger = -1 then
-    S := S + '(все города из района)'
+    S := S + '(toate orasele din raion)'
   else
     S := S + IBCQueryCity.FieldByName('CITY_TITLE').AsString;
-  S := S + #13#10 + 'из списка?';
-  if ShowAskDialog('Удаление района или города', S) <> mrYes then
+  S := S + #13#10 + 'din lista?';
+  if ShowAskDialog('Stergere raion sau oras', S) <> mrYes then
     Exit;
 
   try
@@ -241,7 +241,7 @@ procedure TfrmWebDeliveryDlg.Prepare;
 begin
   inherited;
 
-  dtDialogTitle.Title := Format('Web Доставка для "%s"', [dmDB.CurrentFirmaName]);
+  dtDialogTitle.Title := Format('Livrare Web pentru "%s"', [dmDB.CurrentFirmaName]);
   Caption := dtDialogTitle.Title;
 
   // open data

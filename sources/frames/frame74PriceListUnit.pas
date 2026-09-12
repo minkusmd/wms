@@ -1,6 +1,6 @@
 ﻿unit frame74PriceListUnit;
 
-// СЧЕТА. Входные Счета
+// FACTURI. Facturi de intrare
 // DocTypeID = 3126
 // Frame Index = 74
 

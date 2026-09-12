@@ -1,7 +1,7 @@
 
 unit frame86SoldClientiContabilUnit;
 {
-  ОСТАТКИ. Сальдо контрагентов
+  STOCURI. Sold contraagenti
   DocTypeID = 123
   Frame Index = 23
 }
@@ -277,7 +277,7 @@ begin
           // context from Docs
           if cxGridSK_CT_NAME.Focused then
           begin
-               // Контрагент
+               // Contraagent
                Result.Context := ffCustomer;
                Result.ValueInt := dmDB.IBCQueryDocs.FieldByName('CT').AsInteger;
                Result.ValueStr := dmDB.IBCQueryDocs.FieldByName('CT_NAME').AsString;
@@ -285,7 +285,7 @@ begin
           else
               if cxGridSK_DATA.Focused then
               begin
-                   // Дата
+                   // Data
                    Result.Context := ffDate;
                    Result.ValueDateTime := dmDB.IBCQueryDocs.FieldByName('DATA').AsDateTime;
               end
@@ -312,7 +312,7 @@ end;
 
 function Tframe86SoldClientiContabil.InitFrameID: integer;
 begin
-     // ОСТАТКИ. Сальдо контрагентов по бухгалтерии
+     // STOCURI. Sold contraagenti dupa contabilitate
      Result:=86;
 end;
 

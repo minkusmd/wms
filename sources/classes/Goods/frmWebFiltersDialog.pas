@@ -272,17 +272,17 @@ begin
   try
     IBCQueryParams.UpdateTransaction.StartTransaction;
     try
-            // Есть
+            // Exista
       IBCQueryParams.Append;
       IBCQueryParams.FieldByName('FILTERID').AsInteger := IBCQueryFilters.FieldByName('FILTERID').AsInteger;
       IBCQueryParams.FieldByName('PARAM_VALUE').AsString := 'este';
-      IBCQueryParams.FieldByName('PARAM_VALUE_RUS').AsString := 'есть';
+      IBCQueryParams.FieldByName('PARAM_VALUE_RUS').AsString := 'da';
       IBCQueryParams.Post;
-            // Нет
+            // Nu
       IBCQueryParams.Append;
       IBCQueryParams.FieldByName('FILTERID').AsInteger := IBCQueryFilters.FieldByName('FILTERID').AsInteger;
       IBCQueryParams.FieldByName('PARAM_VALUE').AsString := 'nu este';
-      IBCQueryParams.FieldByName('PARAM_VALUE_RUS').AsString := 'нет';
+      IBCQueryParams.FieldByName('PARAM_VALUE_RUS').AsString := 'nu';
       IBCQueryParams.Post;
 
       IBCQueryParams.UpdateTransaction.Commit;

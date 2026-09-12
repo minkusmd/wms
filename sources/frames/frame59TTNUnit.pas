@@ -1,6 +1,6 @@
 unit frame59TTNUnit;
 {
-  СЧЕТ ФАКТУРЫ. Товаро транспортные накладные
+  FACTURI FISCALE. Nakladnie de transport marfa
   DocTypeID = 2016
   Frame Index = 59
 }
@@ -257,8 +257,8 @@ var
   S: string;
 begin
   S := IBCQueryINVOICES.FieldByName('FACTURANO').AsString;
-  if ShowAskDialog('Анулирование фактуры', Format('Вы хотите анулировать фактуру номер %s?', [S]),
-    'Будут удаленны все товары из счет-фактуры.') = mrYes then
+  if ShowAskDialog('Anulare factura', Format('Doriti sa anulati factura numarul %s?', [S]),
+    'Vor fi sterse toate marfurile din factura.') = mrYes then
   begin
     if DoCancelInvoiceDB(IBCQueryINVOICES.FieldByName('DOCID').AsInteger, IBCQueryINVOICES.FieldByName('INVOICEID').AsInteger)
       then
@@ -510,10 +510,10 @@ begin
 
      {
      S:='';
-     if FLG_CLOSED then S:='Внимание! Счет фактура уже выдана.';
+     if FLG_CLOSED then S:='Atentie! Factura fiscala a fost deja emisa.';
 
 
-     if ShowAskDialog(cMSG_DELETERECORD_DeleteDocument,Format('Удалить запись номер %d?',[dmDB.IBCQueryDocs.FieldByName('DOCID').asInteger]),S)=mrYes then
+     if ShowAskDialog(cMSG_DELETERECORD_DeleteDocument,Format('Stergeti inregistrarea numarul %d?',[dmDB.IBCQueryDocs.FieldByName('DOCID').asInteger]),S)=mrYes then
      begin
           dmDB.IBCQueryDocs.UpdateTransaction.StartTransaction;
           try
@@ -581,7 +581,7 @@ end;
 
 procedure Tframe59TTN.DoOpenInvoice;
 begin
-  if ShowAskDialog('Открыть товаро транспортную накладную', 'Вы хотите открыть товаро транспортную накладную?') = mrYes then
+  if ShowAskDialog('Deschide nakladna de transport marfa', 'Doriti sa deschideti nakladna de transport marfa?') = mrYes then
   begin
     if DoOpenInvoiceDB(dmDB.IBCQueryDocs.FieldByName('DOCID').asInteger) then
       dmDB.IBCQueryDocs.Refresh;
@@ -661,8 +661,8 @@ var
 begin
   S := #13#10 + Format('[%d] - %s', [IBCQueryJurnalKit.FieldByName('GOODSID').asInteger, IBCQueryJurnalKit.FieldByName('GOODS_NAME').AsString])
     + #13#10;
-  S2 := Format('Комплект: [%d] - %s', [dmDB.IBCQueryJurnal.FieldByName('GOODSID').AsInteger, dmDB.IBCQueryJurnal.FieldByName('GOODS_NAME').AsString]);
-  if ShowAskDialog('Удаление товара из комплектации', 'Вы хотите удалить товар' + S + 'из комплекта?', S2) = mrYes then
+  S2 := Format('Set: [%d] - %s', [dmDB.IBCQueryJurnal.FieldByName('GOODSID').AsInteger, dmDB.IBCQueryJurnal.FieldByName('GOODS_NAME').AsString]);
+  if ShowAskDialog('Stergere marfa din configurarea setului', 'Doriti sa stergeti produsul' + S + 'din set?', S2) = mrYes then
   begin
     IBCQueryJurnalKit.UpdateTransaction.StartTransaction;
     try
@@ -714,9 +714,9 @@ begin
   S := Format(#13#10'"%d - %s"?', [dmDB.IBCQueryJurnal.FieldByName('GOODSID').AsInteger, dmDB.IBCQueryJurnal.FieldByName('GOODS_NAME').AsString]);
   S2 := '';
   if (cxGridComplectTable.DataController.RecordCount > 0) then
-    S2 := 'Все текущие позиции будут удаленны!';
+    S2 := 'Toate pozitiile curente vor fi sterse!';
 
-  if ShowAskDialog('Принести товары из сборки', 'Вы хотите принести товары из комплекта сборки для' + S, S2) <> mrYes then
+  if ShowAskDialog('Adauga marfa din asamblare', 'Doriti sa aduceti marfa din setul de asamblare pentru' + S, S2) <> mrYes then
     Exit;
 
   if BringGoodsFromSborkaComplect(dmDB.IBCQueryJurnal.FieldByName('DOCID').AsInteger, dmDB.IBCQueryJurnal.FieldByName('GOODSID').AsInteger)
@@ -767,7 +767,7 @@ begin
   if cxGridComponentsTable.Site.Focused then
   begin
           // context from Jurnal
-          // Код + Наименование
+          // Cod + Denumire
     Result.Context := ffGoods;
     Result.ValueInt := dmDB.IBCQueryJurnal.FieldByName('GOODSID').AsInteger;
     Result.ValueStr := dmDB.IBCQueryJurnal.FieldByName('GOODS_NAME').AsString;
@@ -777,20 +777,20 @@ begin
           // context from Docs
     if cxGridSFT_CT_NAME.Focused then
     begin
-               // Контрагент
+               // Contraagent
       Result.Context := ffCustomer;
       Result.ValueInt := dmDB.IBCQueryDocs.FieldByName('CT').AsInteger;
       Result.ValueStr := dmDB.IBCQueryDocs.FieldByName('CT_NAME').AsString;
     end
     else if cxGridSFT_DATA.Focused then
     begin
-               // Дата
+               // Data
       Result.Context := ffDate;
       Result.ValueDateTime := dmDB.IBCQueryDocs.FieldByName('DATA').AsDateTime;
     end
     else if cxGridSFT_DTDEP_NAME.Focused then
     begin
-               // Склад
+               // Depozit
       Result.Context := ffStock;
       Result.ValueInt := dmDB.IBCQueryDocs.FieldByName('DTDEP').AsInteger;
       Result.ValueStr := dmDB.IBCQueryDocs.FieldByName('DTDEP_NAME').AsString;
@@ -850,12 +850,12 @@ begin
 
     if (not FLG_CLOSED) then
     begin
-      fGoodsNew := True; // Добавить товар
+      fGoodsNew := True; // Adauga produs
 
       if (cxGridComponentsTable.DataController.RecNo > 0) then
       begin
-        fGoodsEdit := True;   // Изменить товар
-        fGoodsDelete := True; // Удалить товар
+        fGoodsEdit := True;   // Modifica marfa
+        fGoodsDelete := True; // Sterge marfa
       end;
     end;
   end;
@@ -867,7 +867,7 @@ end;
 
 function Tframe59TTN.InitFrameID: integer;
 begin
-     // СЧЕТ ФАКТУРЫ. Товаро транспортные накладные
+     // FACTURI FISCALE. Nakladnie de transport marfa
   Result := 59;
   SetupQtyFields;
 end;
@@ -978,7 +978,7 @@ begin
      // verificam daca factura are numar
   if IBCQueryINVOICES.FieldByName('FACTURANO').IsNull or (IBCQueryINVOICES.FieldByName('FACTURANO').AsString = '') then
   begin
-    if ShowAskDialog('Номер фактуры', 'Вы хотите ввести номер фактуры?') = mrYes then
+    if ShowAskDialog('Numarul facturii', 'Doriti sa introduceti numarul facturii?') = mrYes then
     begin
       dialog := TfrmScetFacturaNomerDlg.Create(Self, IBCQueryINVOICES, IBCDataSourceINVOICES);
       try
@@ -1048,7 +1048,7 @@ end;
 
 procedure Tframe59TTN.SetupQtyFields;
 begin
-     // Кол-во
+     // Cantitate
   TcxCalcEditProperties(cxGridDBCol_QTY.Properties).DisplayFormat := QtyDisplayFormat;
   cxGridDBCol_QTY.Summary.FooterFormat := QtyDisplayFormat;
 end;
@@ -1086,7 +1086,7 @@ begin
   if dxBarPopupMenu.ItemLinks.VisibleItemCount = 0 then
     cxGridPopupMenuDocs.PopupMenus[0].PopupMenu := nil;
 
-     // Счет фактура
+     // Factura fiscala
   if not fSYS_Edit then
   begin
     bbNewInvoice.Visible := ivNever;
@@ -1117,13 +1117,13 @@ var
   clearAll: Boolean;
 begin
   clearAll := True;
-  if ShowAskDialogVerification('Привести товары', 'Вы хотите привести товары из документа родителя?',
-    'Удалить существующие товары?', '', clearAll) = mrYes then
+  if ShowAskDialogVerification('Adauga marfa', 'Doriti sa aduceti marfa din documentul parinte?',
+    'Stergeti marfa existenta?', '', clearAll) = mrYes then
   begin
     if DoBringGoodsFromParentDocDB(dmDB.IBCQueryDocs.FieldByName('DOCID').asInteger, clearAll) then
     begin
       dmDB.FullRefresh;
-      ShowInfoDialog('Привести товары', 'Готово!');
+      ShowInfoDialog('Adauga marfa', 'Gata!');
     end;
   end;
 end;
@@ -1196,7 +1196,7 @@ var
 begin
   S := #13#10 + dmDB.IBCQueryDocs.FieldByName('CT_NAME').asString + ' ?';
 
-  if ShowAskDialog('Закрыть товаро транспортную накладную', 'Вы хотите закрыть товаро транспортную накладную на контрагента'
+  if ShowAskDialog('Inchide nakladna de transport marfa', 'Doriti sa inchideti nakladna de transport marfa pe contragent'
     + S) = mrYes then
   begin
     if DoCloseInvoiceDB(dmDB.IBCQueryDocs.FieldByName('DOCID').asInteger) then
@@ -1284,7 +1284,7 @@ var
   S: string;
 begin
   S := IBCQueryINVOICES.FieldByName('FACTURANO').AsString;
-  if ShowAskDialog('Удаление фактуры', 'Вы хотите удалить фактуру №' + S, 'Внимание!') = mrYes then
+  if ShowAskDialog('Stergere factura', 'Doriti sa stergeti factura nr.' + S, 'Atentie!') = mrYes then
   begin
     IBCQueryINVOICES.UpdateTransaction.StartTransaction;
     try
@@ -1329,9 +1329,9 @@ begin
   GetInvoiceStats(dmDb.IBCQueryDocs.FieldByName('DOCID').AsInteger, StatsPrintedNotCanceled, StatsNotPrintedNotCanceled);
   begin
     if StatsNotPrintedNotCanceled > 0 then
-      ShowErrorDialog(cMSG_GeneralInputError_Title, 'Существует не выданная счет фактура! Измените её для ваших нужд.')
+      ShowErrorDialog(cMSG_GeneralInputError_Title, 'Exista o factura neemisa! Modificati-o pentru necesitatile dvs.')
     else if StatsPrintedNotCanceled > 0 then
-      ShowErrorDialog(cMSG_GeneralInputError_Title, 'Можно выдать только одну фактуру!')
+      ShowErrorDialog(cMSG_GeneralInputError_Title, 'Se poate emite doar o singura factura!')
     else
       CanCreateNewInvoice := True;
   end;
@@ -1354,7 +1354,7 @@ end;
 
 procedure Tframe59TTN.ShowDeleteSelectedGoods;
 begin
-  if ShowAskDialog(cMSG_DELETERECORD_DeleteDocument, 'Вы хотите удалить товар' + #13#10 + dmDB.IBCQueryJurnal.FieldByName('GOODS_NAME').AsString
+  if ShowAskDialog(cMSG_DELETERECORD_DeleteDocument, 'Doriti sa stergeti produsul' + #13#10 + dmDB.IBCQueryJurnal.FieldByName('GOODS_NAME').AsString
     + '?') = mrYes then
   begin
     dmDB.IBCQueryJurnal.UpdateTransaction.StartTransaction;
@@ -1424,7 +1424,7 @@ end;
 procedure Tframe59TTN.WhenDocumentPopupMenuOpen;
 begin
   bbGotoParentDoc.Enabled := not dmDB.IBCQueryDocs.FieldByName('PARENTDOCID').IsNull;
-  bbDocComments.Enabled := fSYS_Edit; // Комментарии
+  bbDocComments.Enabled := fSYS_Edit; // Comentarii
 end;
 
 procedure Tframe59TTN.WhenGoodsFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord:

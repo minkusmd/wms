@@ -107,7 +107,7 @@ end;
 
 procedure TfrmWebBigBannersDlg.DeleteCurrentBanner;
 begin
-  if ShowAskDialog('Удаление баннера', Format('Вы хотите удалить баннер "%s"?', [IBCQueryBanner.FieldByName('TITLE').AsString])) = mrYes
+  if ShowAskDialog('Stergere banner', Format('Doriti sa stergeti bannerul "%s"?', [IBCQueryBanner.FieldByName('TITLE').AsString])) = mrYes
   then
   begin
     IBCQueryBanner.UpdateTransaction.StartTransaction;

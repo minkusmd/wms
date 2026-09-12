@@ -174,7 +174,7 @@ begin
   fChangeRate := False;
   if cxGridCurrencyTable.DataController.RecNo > 0 then
   begin
-    fChangeRate := True; // Изменит курс +Security
+    fChangeRate := True; // Modifica cursul +Security
   end;
   bbChangeRate.Enabled := fChangeRate;
   bbCurrencyHistory.Enabled := fChangeRate;

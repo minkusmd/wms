@@ -193,7 +193,7 @@ end;
 
 procedure TfrmWebCatalogFiltersDlg.DeleteFilter;
 begin
-  if ShowAskDialog('Удаление фильтра', Format('Вы хотите удалить фильтр "%s/%s"', [IBCQueryFilters.FieldByName('FILTERNAME_RUS').AsString,
+  if ShowAskDialog('Stergere filtru', Format('Doriti sa stergeti filtrul "%s/%s"', [IBCQueryFilters.FieldByName('FILTERNAME_RUS').AsString,
     IBCQueryFilters.FieldByName('FILTERNAME_ROM').AsString])) = mrYes then
   begin
     IBCQueryFilters.UpdateTransaction.StartTransaction;

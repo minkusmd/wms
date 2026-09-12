@@ -54,7 +54,6 @@ object frmSetupGoodsPropsSelectionDlg: TfrmSetupGoodsPropsSelectionDlg
     Color = clWindow
     ParentBackground = False
     TabOrder = 1
-    ExplicitLeft = 3
     object lbInfoText: TLabel
       Left = 20
       Top = 16
@@ -68,6 +67,13 @@ object frmSetupGoodsPropsSelectionDlg: TfrmSetupGoodsPropsSelectionDlg
       Width = 6
       Height = 15
       Caption = '0'
+    end
+    object lbFilterValue: TLabel
+      Left = 40
+      Top = 371
+      Width = 38
+      Height = 15
+      Caption = 'Valoare'
     end
     object cbWebGoodsType: TCheckBox
       Left = 20
@@ -293,7 +299,7 @@ object frmSetupGoodsPropsSelectionDlg: TfrmSetupGoodsPropsSelectionDlg
       Top = 342
       Width = 133
       Height = 17
-      Caption = 'Filtre si parametri'
+      Caption = 'Filtru'
       TabOrder = 20
       OnClick = cbWebGoodsTypeClick
     end
@@ -334,44 +340,33 @@ object frmSetupGoodsPropsSelectionDlg: TfrmSetupGoodsPropsSelectionDlg
       TabOrder = 8
       Width = 265
     end
-    object NumberBox1: TNumberBox
+    object beFilterSelect: TcxButtonEdit
       Left = 216
-      Top = 336
-      Width = 49
-      Height = 23
+      Top = 338
+      Enabled = False
+      Properties.Buttons = <
+        item
+          Default = True
+          Kind = bkEllipsis
+        end>
+      Properties.ViewStyle = vsHideCursor
+      Properties.OnButtonClick = beFilterSelectPropertiesButtonClick
       TabOrder = 18
+      Width = 265
     end
-    object Edit1: TEdit
-      Left = 271
-      Top = 336
-      Width = 210
-      Height = 23
+    object beFilterValueSelect: TcxButtonEdit
+      Left = 216
+      Top = 367
+      Enabled = False
+      Properties.Buttons = <
+        item
+          Default = True
+          Kind = bkEllipsis
+        end>
+      Properties.ViewStyle = vsHideCursor
+      Properties.OnButtonClick = beFilterSelectPropertiesButtonClick
       TabOrder = 19
-      Text = 'Edit1'
-    end
-    object cxButtonEdit1: TcxButtonEdit
-      Left = 32
-      Top = 365
-      Properties.Buttons = <
-        item
-          Default = True
-          Kind = bkEllipsis
-        end>
-      TabOrder = 21
-      Text = 'cxButtonEdit1'
-      Width = 266
-    end
-    object cxButtonEdit2: TcxButtonEdit
-      Left = 304
-      Top = 365
-      Properties.Buttons = <
-        item
-          Default = True
-          Kind = bkEllipsis
-        end>
-      TabOrder = 22
-      Text = 'cxButtonEdit1'
-      Width = 177
+      Width = 265
     end
   end
   object btnOk: TcxButton
@@ -470,39 +465,5 @@ object frmSetupGoodsPropsSelectionDlg: TfrmSetupGoodsPropsSelectionDlg
     DataSet = IBCQueryUM
     Left = 256
     Top = 216
-  end
-  object IBCDataSourceFilters: TIBCDataSource
-    DataSet = IBCQueryFilters
-    Left = 168
-    Top = 464
-  end
-  object IBCDataSourceFilterParams: TIBCDataSource
-    DataSet = IBCQueryFilterParams
-    Left = 272
-    Top = 464
-  end
-  object IBCQueryFilters: TIBCQuery
-    KeyFields = 'FilterID'
-    Connection = dmDB.IBCConnection
-    SQL.Strings = (
-      'select * from ts_filters f order by filtername')
-    Left = 168
-    Top = 524
-  end
-  object IBCQueryFilterParams: TIBCQuery
-    Connection = dmDB.IBCConnection
-    SQL.Strings = (
-      'select * From ts_filter_params')
-    MasterFields = 'FILTERID'
-    DetailFields = 'FILTERID'
-    MasterSource = IBCDataSourceFilters
-    Left = 272
-    Top = 524
-    ParamData = <
-      item
-        DataType = ftUnknown
-        Name = 'FILTERID'
-        Value = nil
-      end>
   end
 end

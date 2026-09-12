@@ -125,10 +125,10 @@ begin
      Result:=false;
      ErrorStr:='';
 
-     if fMasterDataSet.FieldByName('NUMAR_INREG').IsNull or (fMasterDataSet.FieldByName('NUMAR_INREG').asString='') then AddErrorToStr(ErrorStr,'Регистрационный номер!');
-     if fMasterDataSet.FieldByName('DENUMIREA').IsNull or (fMasterDataSet.FieldByName('DENUMIREA').asString='') then AddErrorToStr(ErrorStr,'Название!');
-     if fMasterDataSet.FieldByName('SOLICITANT_ID').IsNull then AddErrorToStr(ErrorStr,'Поставщик!');
-     if fMasterDataSet.FieldByName('PERIOADA_START').IsNull or fMasterDataSet.FieldByName('PERIOADA_END').IsNull then AddErrorToStr(ErrorStr,'Период годности!');
+     if fMasterDataSet.FieldByName('NUMAR_INREG').IsNull or (fMasterDataSet.FieldByName('NUMAR_INREG').asString='') then AddErrorToStr(ErrorStr,'Numarul de inregistrare!');
+     if fMasterDataSet.FieldByName('DENUMIREA').IsNull or (fMasterDataSet.FieldByName('DENUMIREA').asString='') then AddErrorToStr(ErrorStr,'Denumire!');
+     if fMasterDataSet.FieldByName('SOLICITANT_ID').IsNull then AddErrorToStr(ErrorStr,'Furnizor!');
+     if fMasterDataSet.FieldByName('PERIOADA_START').IsNull or fMasterDataSet.FieldByName('PERIOADA_END').IsNull then AddErrorToStr(ErrorStr,'Perioada de valabilitate!');
 
      if ErrorStr='' then Result:=True
      else ShowErrorDialog(cMSG_GeneralInputError_Title,cMSG_GeneralInputError_Text,ErrorStr);

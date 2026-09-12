@@ -159,13 +159,13 @@ begin
      FEditMode := Value;
      if FEditMode then
      begin
-          Caption:='Изменение';
-          dtDialogTitle.Text:='Измените значения в нужных полях';
+          Caption:='Modificare';
+          dtDialogTitle.Text:='Modificati valorile in campurile necesare';
      end
      else
      begin
-          Caption:='Новая запись';
-          dtDialogTitle.Text:='Введите новые значения';
+          Caption:='Inregistrare noua';
+          dtDialogTitle.Text:='Introduceti valorile noi';
      end;
 end;
 

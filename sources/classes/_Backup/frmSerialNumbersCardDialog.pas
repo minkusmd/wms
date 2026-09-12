@@ -184,7 +184,7 @@ end;
 
 procedure TfrmSerialNumbersCardDlg.DeleteAllSerials;
 begin
-     if ShowAskDialog('Удаление всех серийных номеров','Удалить все серийные номера?')=mrYes then
+     if ShowAskDialog('Stergere toate numerele seriale','Stergeti toate numerele seriale?')=mrYes then
      begin
           IBCQuerySNCard.DisableControls;
           try
@@ -240,10 +240,10 @@ begin
      if FReadOnly then
      begin
           dtDialogTitle.Color:=cCOLOR_DocReadOnly;
-          dtDialogTitle.Text:='Просмотр серийных номеров товара';
+          dtDialogTitle.Text:='Vizualizare numere seriale marfa';
           btnOk.Visible:=False;
           btnCancel.Default:=True;
-          btnCancel.Caption:='Закрыть';
+          btnCancel.Caption:='Inchide';
 
           IBCQuerySNCard.ReadOnly:=True;
           IBCQuerySNCard.UpdateTransaction:=nil;
@@ -371,7 +371,7 @@ end;
 
 procedure TfrmSerialNumbersCardDlg.ShowRemoveSerialDialog;
 begin
-     if ShowAskDialog('Удаление серийного номера карточки','Удалить серийный номер'+#13#10+IBCQuerySNCard.FieldByName('SN').asString+'?')=mrYes then
+     if ShowAskDialog('Stergere numar serial card','Stergeti numarul serial'+#13#10+IBCQuerySNCard.FieldByName('SN').asString+'?')=mrYes then
      begin
           try
              IBCQuerySNCard.Delete;

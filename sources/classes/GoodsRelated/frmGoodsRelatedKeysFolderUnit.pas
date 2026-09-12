@@ -56,7 +56,7 @@ begin
 
      with fMasterDataSet do
      begin
-          if FieldByName('TITLE').IsNull or (FieldByName('TITLE').AsString='') then AddErrorToStr(ErrorStr,'Название папки!');
+          if FieldByName('TITLE').IsNull or (FieldByName('TITLE').AsString='') then AddErrorToStr(ErrorStr,'Denumirea folderului!');
      end;
      if ErrorStr='' then Result:=True
      else ShowErrorDialog(cMSG_GeneralInputError_Title,cMSG_GeneralInputError_Text,ErrorStr);

@@ -129,7 +129,7 @@ end;
 
 procedure Tframe13PromoGoods.DeleteSelectedGoods;
 begin
-     if ShowAskDialog('Удаление товара','Удалить товар'+#13#10+IBCQueryPromoGoods.FieldByName('GOODS_NAME').AsString+#13#10+'из промо акции?')=mrYes then
+     if ShowAskDialog('Stergere produs','Sterge produsul'+#13#10+IBCQueryPromoGoods.FieldByName('GOODS_NAME').AsString+#13#10+'из промо акции?')=mrYes then
      begin
           IBCQueryPromoGoods.UpdateTransaction.StartTransaction;
           try
@@ -173,7 +173,7 @@ end;
 
 function Tframe13PromoGoods.InitFrameID: integer;
 begin
-     Result:=13; // АКЦИИ - Промо акции по товарам
+     Result:=13; // ACTIUNI - Промо акции по товарам
 end;
 
 procedure Tframe13PromoGoods.SelectionChanged;

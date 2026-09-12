@@ -80,10 +80,10 @@ begin
      Result:=False;
      Error:='';
 
-     if (cxGridSTable.DataController.RecordCount<2) then AddErrorToStr(Error,'В группе должно быть минимум 2 пользователя!');
+     if (cxGridSTable.DataController.RecordCount<2) then AddErrorToStr(Error,'In grup trebuie sa fie minim 2 utilizatori!');
 
      if fMasterDataSet.FieldByName('TITLE').IsNull or (fMasterDataSet.FieldByName('TITLE').asString='')
-      then AddErrorToStr(Error,'Название группы!');
+      then AddErrorToStr(Error,'Denumirea grupului!');
 
      if Error='' then Result:=True
      else ShowErrorDialog(cMSG_GeneralInputError_Title,cMSG_GeneralInputError_Text,Error);
@@ -159,14 +159,14 @@ begin
      try
         if FCreateNewRecord then
         begin
-             dtDialogTitle.Text:='Создание новой группы';
+             dtDialogTitle.Text:='Creare grup nou';
              fMasterDataSet.Append;
              fMasterDataSet.FieldByName('FLG_NO_TITLE').AsInteger:=0;
              fMasterDataSet.FieldByName('FLG_PRIVATE').AsInteger:=1;
         end
         else
         begin
-             dtDialogTitle.Text:='Изменение записи';
+             dtDialogTitle.Text:='Modificare inregistrare';
              fMasterDataSet.Edit;
         end;
         ReadUsers;

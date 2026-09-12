@@ -342,7 +342,7 @@ begin
 
   if (fRequiredCount = 0) then
   begin
-    lbInfo.Caption := 'Не нужно больше серийных номеров!';
+    lbInfo.Caption := 'Nu mai sunt necesare numere de serie!';
     lbInfo.Color := cCOLOR_PARTNO_CountIsBigger;
   end
   else if N = fRequiredCount then

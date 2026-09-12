@@ -47,9 +47,9 @@ end;
 procedure TfrmSchedulerDaemon.CreateParams(var Params: TCreateParams);
 begin
   inherited;
-   // делаем «служебное» окно: без бордюров, не показывается в таскбаре
+   // facem o fereastra "de serviciu": fara borduri, nu apare in taskbar
   Params.ExStyle := Params.ExStyle or WS_EX_TOOLWINDOW;
-  Params.WndParent := Application.Handle;      // привязываем к приложению
+  Params.WndParent := Application.Handle;      // atasam la aplicatie
 end;
 
 end.

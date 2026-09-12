@@ -4,176 +4,176 @@ interface
 
 const
 
-  // КОНФИГУРАЦИИ
-  cDBID_DocType_КОНФИГУРАЦИИ_К = 115; // Конфигуратор
+  // CONFIGURATII
+  cDBID_DocType_КОНФИГУРАЦИИ_К = 115; // Configurator
 
-  // СЧЕТА
-  cDBID_DocType_СЧЕТА_СНО = 101; // Счета на оплату
-  cDBID_DocType_СЧЕТА_ВС = 1455; // Входные счета
-  cDBID_DocType_СЧЕТА_П = 103; // Поставки
-  cDBID_DocType_СЧЕТА_ПЗ = 104; // Предварительные заказы
+  // FACTURI
+  cDBID_DocType_СЧЕТА_СНО = 101; // Facturi de plata
+  cDBID_DocType_СЧЕТА_ВС = 1455; // Facturi de intrare
+  cDBID_DocType_СЧЕТА_П = 103; // Aprovizionari
+  cDBID_DocType_СЧЕТА_ПЗ = 104; // Comenzi preliminare
 
-  // НАКЛАДНЫЕ
-  cDBID_DocType_НАКЛАДНЫЕ_ПН = 106; // Приход товара (Оперативный учет)
-  cDBID_DocType_НАКЛАДНЫЕ_РН = 107; // Расходная накладная (Оперативный учет)
-  cDBID_DocType_НАКЛАДНЫЕ_ПТПН = 109; // Приход товара по накладным
-  cDBID_DocType_НАКЛАДНЫЕ_ВТОК = 110; // Возврат товара от клиента (10дн)
-  cDBID_DocType_НАКЛАДНЫЕ_Р = 108; // Резерв
+  // NAKLADNIE
+  cDBID_DocType_НАКЛАДНЫЕ_ПН = 106; // Intrare marfa (Evidenta operativa)
+  cDBID_DocType_НАКЛАДНЫЕ_РН = 107; // Nakladnaia de iesire (Evidenta operativa)
+  cDBID_DocType_НАКЛАДНЫЕ_ПТПН = 109; // Intrare marfa pe nakladnie
+  cDBID_DocType_НАКЛАДНЫЕ_ВТОК = 110; // Retur marfa de la client (10zile)
+  cDBID_DocType_НАКЛАДНЫЕ_Р = 108; // Rezerva
 
-  // ПЕРЕМЕЩЕНИЕ
-  cDBID_DocType_ПЕРЕМЕЩЕНИЕ_П = 114; // Перемещение
+  // TRANSFER
+  cDBID_DocType_ПЕРЕМЕЩЕНИЕ_П = 114; // Transfer
 
-  // СЧЕТ ФАКТУРЫ
-  cDBID_DocType_СЧЕТ_ФАКТУРЫ_СФ = 112; // Счет фактуры
+  // FACTURI FISCALE
+  cDBID_DocType_СЧЕТ_ФАКТУРЫ_СФ = 112; // Facturi fiscale
 
-  // КАССОВЫЕ ОПЕРАЦИИ
-  cDBID_DocType_КАССОВЫЕ_ОПЕРАЦИИ_ПКО = 116; // Приходный кассовый ордер
-  cDBID_DocType_КАССОВЫЕ_ОПЕРАЦИИ_РКО = 117; // Расходный кассовый ордер
-  cDBID_DocType_КАССОВЫЕ_ОПЕРАЦИИ_НС = 1193; // Начальное сальдо
+  // OPERATIUNI DE CASA
+  cDBID_DocType_КАССОВЫЕ_ОПЕРАЦИИ_ПКО = 116; // Dispozitie de incasare
+  cDBID_DocType_КАССОВЫЕ_ОПЕРАЦИИ_РКО = 117; // Dispozitie de plata
+  cDBID_DocType_КАССОВЫЕ_ОПЕРАЦИИ_НС = 1193; // Sold initial
 
-  // БАНКОВСКИЕ ОПЕРАЦИИ
-  cDBID_DocType_БАНКОВСКИЕ_ОПЕРАЦИИ_ПДНС = 120; // Приход денег на счет
+  // OPERATIUNI BANCARE
+  cDBID_DocType_БАНКОВСКИЕ_ОПЕРАЦИИ_ПДНС = 120; // Incasare bani in cont
   cDBID_DocType_БАНКОВСКИЕ_ОПЕРАЦИИ_ПДНСИК = 121;
-  // Приход денег на счет (из кассы)
+  // Incasare bani in cont (din casa)
   cDBID_DocType_БАНКОВСКИЕ_ОПЕРАЦИИ_БППЛ = 119;
-  // Банковские платежные поручения, Леи
+  // Ordine de plata bancare, Lei
   cDBID_DocType_БАНКОВСКИЕ_ОПЕРАЦИИ_БППВ = 1199;
-  // Банковские платежные поручения, Валюта
-  cDBID_DocType_БАНКОВСКИЕ_ОПЕРАЦИИ_КБП = 1660; // Комисион банковского платежа
+  // Ordine de plata bancare, Valuta
+  cDBID_DocType_БАНКОВСКИЕ_ОПЕРАЦИИ_КБП = 1660; // Comision plata bancara
 
-  // СБОРКА
-  cDBID_DocType_СБОРКА_ННС = 113; // Наряд на сборку
-  cDBID_DocType_СБОРКА_ННР = 1249; // Наряд на разборку
+  // ASAMBLARE
+  cDBID_DocType_СБОРКА_ННС = 113; // Naryad de asamblare
+  cDBID_DocType_СБОРКА_ННР = 1249; // Naryad de dezasamblare
 
-  // КОМИСИЯ
-  cDBID_DocType_КОМИСИЯ_ЗТВК = 1506; // Закрытие товара в комисию
-  cDBID_DocType_КОМИСИЯ_ПВБСК = 1757; // Принятие в баланс с комисии
+  // COMISION
+  cDBID_DocType_КОМИСИЯ_ЗТВК = 1506; // Inchidere marfa in comision
+  cDBID_DocType_КОМИСИЯ_ПВБСК = 1757; // Primire in bilant din comision
 
-  // ЗАРПЛАТА
-  cDBID_DocType_ЗАРПЛАТА_ВЗ = 118; // Выдача зарплата
-  cDBID_DocType_ЗАРПЛАТА_НЗ = 1514; // Начисление зарплаты
+  // SALARIU
+  cDBID_DocType_ЗАРПЛАТА_ВЗ = 118; // Plata salariu
+  cDBID_DocType_ЗАРПЛАТА_НЗ = 1514; // Calcul salariu
 
-  // РЕКЛАМА
-  cDBID_DocType_РЕКЛАМА_РА = 1654; // Рекламные акции
+  // PUBLICITATE
+  cDBID_DocType_РЕКЛАМА_РА = 1654; // Actiuni publicitare
 
-  // ИНВЕНТАРИЗАЦИЯ
-  cDBID_DocType_ИНВЕНТАРИЗАЦИЯ_АСТ = 129; // Акт списания товара
-  cDBID_DocType_ИНВЕНТАРИЗАЦИЯ_АОТ = 130; // Акт оприходования товара
-  cDBID_DocType_ИНВЕНТАРИЗАЦИЯ_ПТ = 1414; // Переоценка товаров
-  cDBID_DocType_ИНВЕНТАРИЗАЦИЯ_АОПН = 1421; // Акт оприходования по накладным
+  // INVENTARIERE
+  cDBID_DocType_ИНВЕНТАРИЗАЦИЯ_АСТ = 129; // Act de casare marfa
+  cDBID_DocType_ИНВЕНТАРИЗАЦИЯ_АОТ = 130; // Act de intrare marfa
+  cDBID_DocType_ИНВЕНТАРИЗАЦИЯ_ПТ = 1414; // Reevaluare marfa
+  cDBID_DocType_ИНВЕНТАРИЗАЦИЯ_АОПН = 1421; // Act de intrare pe nakladnie
   cDBID_DocType_ИНВЕНТАРИЗАЦИЯ_АСТПБ = 131;
-  // Акт списания товара по бухгалтерии
-  cDBID_DocType_ИНВЕНТАРИЗАЦИЯ_И = 1968; // Инвентаризация
+  // Act de casare marfa pe contabilitate
+  cDBID_DocType_ИНВЕНТАРИЗАЦИЯ_И = 1968; // Inventariere
 
-  // Акты
-  cDBID_DocType_Акты_РПД = 1959; // Реестр передачи документов
+  // Acte
+  cDBID_DocType_Акты_РПД = 1959; // Registru transmitere documente
   cDBID_DocType_Акты_ADCAD = 1994; // Act de constatare a deficientelor
 
-  // ТРАНСПОРТНЫЕ УСЛУГИ
-  cDBID_DocType_ТРАНСПОРТНЫЕ_УСЛУГИ_ПЛ = 133; // Путевой лист
-  cDBID_DocType_ТРАНСПОРТНЫЕ_УСЛУГИ_ЗТ = 132; // Заправка транспорта
+  // SERVICII DE TRANSPORT
+  cDBID_DocType_ТРАНСПОРТНЫЕ_УСЛУГИ_ПЛ = 133; // Foaie de parcurs
+  cDBID_DocType_ТРАНСПОРТНЫЕ_УСЛУГИ_ЗТ = 132; // Alimentare transport
 
-  // КАССА
-  cDBID_DocType_КАССА_КП = 1206; // Касса персональная
-  cDBID_DocType_КАССА_КО = 1212; // Касса организации
-  cDBID_DocType_КАССА_КПВО = 1218; // Касса по всем организациям
-  cDBID_DocType_КАССА_ПД = 1427; // Передача денег
+  // CASA
+  cDBID_DocType_КАССА_КП = 1206; // Casa personala
+  cDBID_DocType_КАССА_КО = 1212; // Casa organizatiei
+  cDBID_DocType_КАССА_КПВО = 1218; // Casa pe toate organizatiile
+  cDBID_DocType_КАССА_ПД = 1427; // Transfer bani
 
   // WEB
-  cDBID_DocType_WEB_WЗ = 134; // Web Заказ
-  cDBID_DocType_WEB_ЗНФ = 1791; // Заявка на финансирование
+  cDBID_DocType_WEB_WЗ = 134; // Comanda Web
+  cDBID_DocType_WEB_ЗНФ = 1791; // Cerere de finantare
 
-  // СЕРВИС
-  cDBID_DocType_СЕРВИС_ЗНРS = 124; // Заявки на ремонт (S+)
-  cDBID_DocType_СЕРВИС_ЗНГРN = 125; // Заявки на гарантийный ремонт (N)
-  cDBID_DocType_СЕРВИС_ЗТУП = 1945; // Замена товара у поставщика
-  cDBID_DocType_СЕРВИС_НИ = 1280; // Новые инциденты
-  cDBID_DocType_СЕРВИС_ДС = 1396; // Диспетчер сервиса
-  cDBID_DocType_СЕРВИС_ОИ = 1408; // Обработка инцидента
-  cDBID_DocType_СЕРВИС_РИ = 1402; // Решённые инциденты
-  cDBID_DocType_СЕРВИС_ПВСВ = 126; // Передача в СЦ, ВП
-  cDBID_DocType_СЕРВИС_ВИСП = 127; // Возврат из СЦ, Поставщика
-  cDBID_DocType_СЕРВИС_ВКТ_ИР = 128; // Возврат клиенту товара  из ремонта
-  cDBID_DocType_СЕРВИС_ЗТВГ = 1487; // Замена товара в гарантии
-  cDBID_DocType_СЕРВИС_ЗВБПГ = 1726; // Зачет в баланс по гарантии
-  cDBID_DocType_СЕРВИС_ВыВТ = 1733; // Выдача временого товара
-  cDBID_DocType_СЕРВИС_ВоВТ = 1734; // Возврат временого товара
-  cDBID_DocType_СЕРВИС_ЭР = 1735; // Этапы ремонта
-  cDBID_DocType_СЕРВИС_ПВР = 1736; // Перемещение в ремонте
-  cDBID_DocType_СЕРВИС_ВВ_ПИСЦ = 1978; // Возврат в / Прием из Сервис центра
-  cDBID_DocType_СЕРВИС_П_ВТОК = 1987; // Прием / Возврат товара от клиента
+  // SERVICE
+  cDBID_DocType_СЕРВИС_ЗНРS = 124; // Cereri de reparatie (S+)
+  cDBID_DocType_СЕРВИС_ЗНГРN = 125; // Cereri de reparatie in garantie (N)
+  cDBID_DocType_СЕРВИС_ЗТУП = 1945; // Inlocuire marfa la furnizor
+  cDBID_DocType_СЕРВИС_НИ = 1280; // Incidente noi
+  cDBID_DocType_СЕРВИС_ДС = 1396; // Dispecer service
+  cDBID_DocType_СЕРВИС_ОИ = 1408; // Procesare incident
+  cDBID_DocType_СЕРВИС_РИ = 1402; // Incidente rezolvate
+  cDBID_DocType_СЕРВИС_ПВСВ = 126; // Transfer in CS, VP
+  cDBID_DocType_СЕРВИС_ВИСП = 127; // Retur din CS, Furnizor
+  cDBID_DocType_СЕРВИС_ВКТ_ИР = 128; // Retur client marfa din reparatie
+  cDBID_DocType_СЕРВИС_ЗТВГ = 1487; // Inlocuire produs in garantie
+  cDBID_DocType_СЕРВИС_ЗВБПГ = 1726; // Trecere in bilant pe garantie
+  cDBID_DocType_СЕРВИС_ВыВТ = 1733; // Predare marfa temporara
+  cDBID_DocType_СЕРВИС_ВоВТ = 1734; // Retur marfa temporara
+  cDBID_DocType_СЕРВИС_ЭР = 1735; // Etape reparatie
+  cDBID_DocType_СЕРВИС_ПВР = 1736; // Transfer in reparatie
+  cDBID_DocType_СЕРВИС_ВВ_ПИСЦ = 1978; // Retur in / Primire din Centrul Service
+  cDBID_DocType_СЕРВИС_П_ВТОК = 1987; // Primire / Retur marfa de la client
 
-  // ОСТАТКИ
-  cDBID_DocType_ОСТАТКИ_ОТ = 122; // Остатки товара
-  cDBID_DocType_ОСТАТКИ_СК = 123; // Сальдо контрагентов
+  // STOCURI
+  cDBID_DocType_ОСТАТКИ_ОТ = 122; // Stocuri marfa
+  cDBID_DocType_ОСТАТКИ_СК = 123; // Sold contraagenti
 
-  // ДОГОВОРА
-  cDBID_DocType_ДОГОВОРА_ДНП = 105; // Договор на продажу
+  // CONTRACTE
+  cDBID_DocType_ДОГОВОРА_ДНП = 105; // Contract de vanzare
   cDBID_DocType_ДОГОВОРА_CF = 1470; // Contract franciza
   cDBID_DocType_ДОГОВОРА_CPS = 1464; // Contract prestari servicii
 
-  // [1C Бухгалтерия]
-  cDBID_DocType_1C_Бухгалтерия_ЭД = 1788; // Экспорт документов
+  // [1C Contabilitate]
+  cDBID_DocType_1C_Бухгалтерия_ЭД = 1788; // Export documente
 
-  // !!! Не раставленные группы
-  cDBID_DocType_Не_раставленные_группы_ТБХ = 1247; // Товар без характеристик
-  cDBID_DocType_Не_раставленные_группы_НТ = 1248; // Недостающийся товар
+  // !!! Grupuri nealocate
+  cDBID_DocType_Не_раставленные_группы_ТБХ = 1247; // Produs fara caracteristici
+  cDBID_DocType_Не_раставленные_группы_НТ = 1248; // Produs lipsa
 
   cDBID_DocType_PriceList = 3202; // Lista de preturi
 
-  // [Инструменты]
-  cDBID_DocType_Инструменты_ФП = 1631; // Фискальный принтер
-  cDBID_DocType_Инструменты_ПДДП = 1500; // Передача денег другому пользователю
-  cDBID_DocType_Инструменты_ТДС = 1499; // Трансфер денег себе
-  cDBID_DocType_Инструменты_ОВ = 1498; // Обмен валюты
-  cDBID_DocType_Инструменты_ПО = 1497; // Перерасчет остатков
-  cDBID_DocType_Инструменты_ПКВП = 1770; // Пересчет кол-ва в перемещениях
-  cDBID_DocType_Инструменты_СЦИДФ = 1496; // Синхронизация цен из других фирм
-  cDBID_DocType_Инструменты_ИТИН = 1494; // Импорт товаров из названий
-  cDBID_DocType_Инструменты_БТ = 1632; // Бонусные товары
-  cDBID_DocType_Инструменты_ИОЗ = 1636; // Информация о зарплате
-  cDBID_DocType_Инструменты_ПП = 1643; // Планы продаж
+  // [Instrumente]
+  cDBID_DocType_Инструменты_ФП = 1631; // Imprimanta fiscala
+  cDBID_DocType_Инструменты_ПДДП = 1500; // Transfer bani catre alt utilizator
+  cDBID_DocType_Инструменты_ТДС = 1499; // Transfer bani catre sine
+  cDBID_DocType_Инструменты_ОВ = 1498; // Schimb valutar
+  cDBID_DocType_Инструменты_ПО = 1497; // Recalcul stocuri
+  cDBID_DocType_Инструменты_ПКВП = 1770; // Recalcul cantitate in transferuri
+  cDBID_DocType_Инструменты_СЦИДФ = 1496; // Sincronizare preturi din alte firme
+  cDBID_DocType_Инструменты_ИТИН = 1494; // Import produse din denumiri
+  cDBID_DocType_Инструменты_БТ = 1632; // Marfuri bonus
+  cDBID_DocType_Инструменты_ИОЗ = 1636; // Informatii despre salariu
+  cDBID_DocType_Инструменты_ПП = 1643; // Planuri de vanzari
   cDBID_DocType_Инструменты_ИТИДФВТ = 1737;
-  // Импорт товаров из других фирм в таблицу
+  // Import marfa din alte firme in tabel
   cDBID_DocType_Инструменты_ТДАСН2П = 1767;
-  // Товары для акции "Скидка на 2-ю покупку"
-  cDBID_DocType_Инструменты_ПВЖД = 1769; // Поиск в журнале документов
-  cDBID_DocType_Инструменты_ЖОР = 1773; // Журнал отсутствий работников
-  cDBID_DocType_Инструменты_ЖШИБР = 1915; // Журнал штрафов и бонусов работников
-  cDBID_DocType_Инструменты_УСБСП = 1924; // Узнать свой бонус с продаж
-  cDBID_DocType_Инструменты_МА = 1935; // Монитор активности
-  cDBID_DocType_Инструменты_ДР = 1952; // Дополнительные расходы
-  cDBID_DocType_Инструменты_ПДНС = 1977; // Перенести документы на сегодня
+  // Produse pentru actiunea "Discount la a 2-a achizitie"
+  cDBID_DocType_Инструменты_ПВЖД = 1769; // Cautare in registrul documentelor
+  cDBID_DocType_Инструменты_ЖОР = 1773; // Registru absente angajati
+  cDBID_DocType_Инструменты_ЖШИБР = 1915; // Registru amenzi si bonusuri angajati
+  cDBID_DocType_Инструменты_УСБСП = 1924; // Aflare bonus propriu din vanzari
+  cDBID_DocType_Инструменты_МА = 1935; // Monitor activitate
+  cDBID_DocType_Инструменты_ДР = 1952; // Cheltuieli suplimentare
+  cDBID_DocType_Инструменты_ПДНС = 1977; // Muta documentele pe azi
 
-  // [Справочники]
-  cDBID_DocType_Справочники_Б = 1352; // Банки
-  cDBID_DocType_Справочники_В = 1349; // Валюта
-  cDBID_DocType_Справочники_С = 1344; // Склады
-  cDBID_DocType_Справочники_Т = 1287; // Товары
-  cDBID_DocType_Справочники_К = 1296; // Клиенты
-  cDBID_DocType_Справочники_А = 1357; // Аналитика
-  cDBID_DocType_Справочники_Сертификаты = 1367; // Сертификаты
-  cDBID_DocType_Справочники_Д = 1362; // Доверенности
-  cDBID_DocType_Справочники_ШК = 1390; // Шаблоны конфигураций
-  cDBID_DocType_Справочники_СС = 1339; // Системный справочник
-  cDBID_DocType_Справочники_НДН = 1315; // Наименование для накладных
-  cDBID_DocType_Справочники_ТК = 1938; // Типы контрактов
+  // [Nomenclatoare]
+  cDBID_DocType_Справочники_Б = 1352; // Banci
+  cDBID_DocType_Справочники_В = 1349; // Valuta
+  cDBID_DocType_Справочники_С = 1344; // Depozite
+  cDBID_DocType_Справочники_Т = 1287; // Produse
+  cDBID_DocType_Справочники_К = 1296; // Clienti
+  cDBID_DocType_Справочники_А = 1357; // Analitica
+  cDBID_DocType_Справочники_Сертификаты = 1367; // Certificate
+  cDBID_DocType_Справочники_Д = 1362; // Procuri
+  cDBID_DocType_Справочники_ШК = 1390; // Sabloane configuratii
+  cDBID_DocType_Справочники_СС = 1339; // Nomenclator de sistem
+  cDBID_DocType_Справочники_НДН = 1315; // Denumire pentru nakladnie
+  cDBID_DocType_Справочники_ТК = 1938; // Tipuri de contracte
 
-  // [Администрирование]
-  cDBID_DocType_Администрирование_ТД = 1385; // Типы документов
-  cDBID_DocType_Администрирование_БФ = 1686; // Блокировка фирм
+  // [Administrare]
+  cDBID_DocType_Администрирование_ТД = 1385; // Tipuri de documente
+  cDBID_DocType_Администрирование_БФ = 1686; // Blocare firme
 
   // [Website]
-  cDBID_DocType_Website_WКТ = 1740; // Web Каталог товаров
-  cDBID_DocType_Website_Ф = 1748; // Фильтры
-  cDBID_DocType_Website_ШОТ = 1749; // Шаблоны описания товаров
-  cDBID_DocType_Website_КДФ = 1750; // Кнопки для фильтров
-  cDBID_DocType_Website_М = 1751; // Магазины
-  cDBID_DocType_Website_Д = 1752; // Доставка
-  cDBID_DocType_Website_П = 1753; // Промо-акции
-  cDBID_DocType_Website_EР = 1754; // E-mail рассылки
-  cDBID_DocType_Website_ББ = 1922; // Большие баннера
-  cDBID_DocType_Website_ССНС = 1957; // Статические страницы на сайте
+  cDBID_DocType_Website_WКТ = 1740; // Catalog Web marfa
+  cDBID_DocType_Website_Ф = 1748; // Filtre
+  cDBID_DocType_Website_ШОТ = 1749; // Sabloane descriere marfa
+  cDBID_DocType_Website_КДФ = 1750; // Butoane pentru filtre
+  cDBID_DocType_Website_М = 1751; // Magazine
+  cDBID_DocType_Website_Д = 1752; // Livrare
+  cDBID_DocType_Website_П = 1753; // Actiuni promo
+  cDBID_DocType_Website_EР = 1754; // Trimiteri E-mail
+  cDBID_DocType_Website_ББ = 1922; // Bannere mari
+  cDBID_DocType_Website_ССНС = 1957; // Pagini statice pe site
 
 
   // ------------------------------------------------------------------------------------------------

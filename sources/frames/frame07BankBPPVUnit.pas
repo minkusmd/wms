@@ -1,6 +1,6 @@
 unit frame07BankBPPVUnit;
 
-// БАНКОВСКИЕ ОПЕРАЦИИ. Банковские платежные поручения, Валюта
+// OPERATIUNI BANCARE. Ordine de plata bancare, Valuta
 // DocTypeID = 1199
 // Frame Index = 7
 
@@ -259,7 +259,7 @@ begin
           // context from Docs
           if cxGridBankBPPVDBTableCtName.Focused then
           begin
-               // Получатель
+               // Beneficiar
                Result.Context:=ffCustomer;
                Result.ValueInt:=dmDB.IBCQueryDocs.FieldByName('CT').AsInteger;
                Result.ValueStr:=dmDB.IBCQueryDocs.FieldByName('CT_NAME').AsString;
@@ -267,7 +267,7 @@ begin
           else
           if cxGridBankBPPV_DATA.Focused then
           begin
-               // Дата
+               // Data
                Result.Context:=ffDate;
                Result.ValueDateTime:=dmDB.IBCQueryDocs.FieldByName('DATA').AsDateTime;
           end
@@ -294,7 +294,7 @@ end;
 
 function Tframe07BankBPPV.InitFrameID: integer;
 begin
-     // БАНКОВСКИЕ ОПЕРАЦИИ. Банковские платежные поручения, Валюта
+     // OPERATIUNI BANCARE. Ordine de plata bancare, Valuta
      Result:=7;
 end;
 

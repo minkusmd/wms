@@ -81,17 +81,17 @@ begin
      if edDOCID.Text<>'' then
      begin
           N:=StrToIntDef(edDOCID.Text,0);
-          if (N<=0) then AddErrorToStr(ErrorStr,'Код документа!');
+          if (N<=0) then AddErrorToStr(ErrorStr,'Codul documentului!');
      end;
      if edUSERID.Text<>'' then
      begin
           N:=StrToIntDef(edUSERID.Text,0);
-          if (N<=0) then AddErrorToStr(ErrorStr,'Код пользователя!');
+          if (N<=0) then AddErrorToStr(ErrorStr,'Codul utilizatorului!');
      end;
      if edGOODSID.Text<>'' then
      begin
           N:=StrToIntDef(edGOODSID.Text,0);
-          if (N<=0) then AddErrorToStr(ErrorStr,'Код товара!');
+          if (N<=0) then AddErrorToStr(ErrorStr,'Codul marfii!');
      end;
 
 
@@ -148,7 +148,7 @@ begin
         // UI
         btnSearch.Enabled:=True;
         lbWaitInfo.Visible:=False;
-        lbRecordCount.Caption:=Format('Всего записей: %d',[cxGridTable.DataController.RecordCount]);
+        lbRecordCount.Caption:=Format('Total inregistrari: %d',[cxGridTable.DataController.RecordCount]);
      end;
 end;
 

@@ -83,23 +83,23 @@ begin
   ErrorStr := '';
 
   if fMasterDataSet.FieldByName('DISTRICTID').IsNull then
-    AddErrorToStr(ErrorStr, 'Район!');
+    AddErrorToStr(ErrorStr, 'Raionul!');
   if fMasterDataSet.FieldByName('GOODSID').IsNull then
-    AddErrorToStr(ErrorStr, 'Услуга!');
+    AddErrorToStr(ErrorStr, 'Serviciul!');
   if fMasterDataSet.FieldByName('TIME_MIN').IsNull then
-    AddErrorToStr(ErrorStr, 'Время, мин!');
+    AddErrorToStr(ErrorStr, 'Timp, min!');
   if fMasterDataSet.FieldByName('TIME_MAX').IsNull then
-    AddErrorToStr(ErrorStr, 'Время, макс!');
+    AddErrorToStr(ErrorStr, 'Timp, max!');
   fMasterDataSet.FieldByName('TIME_UNIT').AsInteger := cmbTimeUnit.ItemIndex + 1;
 
   if fMasterDataSet.FieldByName('TITLE_ROM').IsNull or (fMasterDataSet.FieldByName('TITLE_ROM').AsString = '') then
     AddErrorToStr(ErrorStr, 'Denumirea!');
   if fMasterDataSet.FieldByName('TITLE_RUS').IsNull or (fMasterDataSet.FieldByName('TITLE_RUS').AsString = '') then
-    AddErrorToStr(ErrorStr, 'Название!');
+    AddErrorToStr(ErrorStr, 'Denumire!');
   if fMasterDataSet.FieldByName('COMMENTS_ROM').IsNull or (fMasterDataSet.FieldByName('COMMENTS_ROM').AsString = '') then
     AddErrorToStr(ErrorStr, 'Timpul de livrare!');
   if fMasterDataSet.FieldByName('COMMENTS_RUS').IsNull or (fMasterDataSet.FieldByName('COMMENTS_RUS').AsString = '') then
-    AddErrorToStr(ErrorStr, 'Время доставки!');
+    AddErrorToStr(ErrorStr, 'Timp de livrare!');
 
   if ErrorStr = '' then
     Result := True
@@ -150,7 +150,7 @@ begin
 
     if fCreateNewLocation then
     begin
-      dtDialogTitle.Text := 'Добавление нового района или населенного пункта';
+      dtDialogTitle.Text := 'Adaugare raion sau localitate noua';
       fMasterDataSet.Insert;
       fMasterDataSet.FieldByName('FIRMAID').AsInteger := FirmaID;
       fMasterDataSet.FieldByName('CITYID').AsInteger := -1;
@@ -159,7 +159,7 @@ begin
     end
     else
     begin
-      dtDialogTitle.Text := 'Изменение записи';
+      dtDialogTitle.Text := 'Modificare inregistrare';
       fMasterDataSet.Edit;
 
       cmbTimeUnit.ItemIndex := fMasterDataSet.FieldByName('TIME_UNIT').AsInteger - 1;
@@ -184,7 +184,7 @@ begin
   dialog := TfrmGoodsBrowser.Create(Self);
   try
     dialog.SetCompactMode;
-    if dialog.SelectGoods(fMasterDataSet.FieldByName('GOODSID').AsInteger, False, 0, 'Выберите услугу доставки') then
+    if dialog.SelectGoods(fMasterDataSet.FieldByName('GOODSID').AsInteger, False, 0, 'Selectati serviciul de livrare') then
     begin
       fMasterDataSet.FieldByName('GOODSID').AsInteger := dialog.GoodsID;
       beGOODS.Text := dialog.GoodsTitle;

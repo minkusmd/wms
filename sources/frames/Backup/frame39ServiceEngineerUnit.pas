@@ -121,7 +121,7 @@ end;
 
 function Tframe39ServiceEngineer.InitFrameID: integer;
 begin
-  Result := 39; // СЕРВИС - Инжинер сервиса
+  Result := 39; // SERVICE - Inginer service
 end;
 
 end.

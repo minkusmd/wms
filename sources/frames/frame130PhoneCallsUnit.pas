@@ -1,6 +1,6 @@
 unit frame130PhoneCallsUnit;
 {
-  СЕРВИС. Новые инциденты
+  SERVICIU. Incidente noi
   DocTypeID = 1280
   Frame Index = 36
 }

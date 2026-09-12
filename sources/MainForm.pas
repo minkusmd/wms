@@ -789,7 +789,6 @@ uses
   frame77OportunitatiUnit,
   frame78PriceListUnit,
   frame80InventariereUnit,
-  frame81SalaryUnit,
   frame82Livrari,
   frame83PromoCoduriUnit,
   frame84RegistruCashbackUnit,
@@ -1389,12 +1388,12 @@ end;
 
 procedure TfrmMainForm.bbPrint_PriceLabelsClick(Sender: TObject);
 begin
-  ShowPrintDocumentsDialog(-1, 1); // 1 - Ценники
+  ShowPrintDocumentsDialog(-1, 1); // 1 - Etichete de pret
 end;
 
 procedure TfrmMainForm.bbPrint_PriceListClick(Sender: TObject);
 begin
-  ShowPrintDocumentsDialog(-1, 2); // 2 - Прайс-лист
+  ShowPrintDocumentsDialog(-1, 2); // 2 - Pricelist
 end;
 
 procedure TfrmMainForm.bbProcuriClick(Sender: TObject);
@@ -1405,15 +1404,15 @@ end;
 procedure TfrmMainForm.bbQuickLinksPopup(Sender: TObject);
 begin
   // check if items from popum menu are in current doc structure
-  // 1. Быстрый расчет конфигурации
+  // 1. Calcul rapid configuratie
   bbShortcut_QuickSetupKit.Enabled := DocTypeExistsInTree(cDBID_DocType_КОНФИГУРАЦИИ_К);
-  // 2. Расходная накладная
+  // 2. Nakladnaia de iesire
   bbShortcut_RashodNaklad.Enabled := DocTypeExistsInTree(cDBID_DocType_НАКЛАДНЫЕ_РН);
-  // 4. Счет фактуры
+  // 4. Facturi fiscale
   bbShortcut_ScetFactura.Enabled := DocTypeExistsInTree(cDBID_DocType_СЧЕТ_ФАКТУРЫ_СФ);
-  // 5. Приходный кассовый ордер
+  // 5. Dispozitie de incasare
   bbShortcut_PrihodCasaOrder.Enabled := DocTypeExistsInTree(cDBID_DocType_КАССОВЫЕ_ОПЕРАЦИИ_ПКО);
-  // 6. Расходный кассовый ордер
+  // 6. Dispozitie de plata
   bbShortcut_RashCasaOrder.Enabled := DocTypeExistsInTree(cDBID_DocType_КАССОВЫЕ_ОПЕРАЦИИ_РКО);
   // 7. Web Zakaz
   bbShortcut_WebZakaz.Enabled := DocTypeExistsInTree(cDBID_DocType_WEB_WЗ);
@@ -1483,14 +1482,14 @@ procedure TfrmMainForm.bbShortcutQuickSetupClick(Sender: TObject);
 begin
   case TdxBarButton(Sender).Tag of
     1:
-      SwitchToDocType(cDBID_DocType_КОНФИГУРАЦИИ_К); // Конфигуратор
+      SwitchToDocType(cDBID_DocType_КОНФИГУРАЦИИ_К); // Configurator
     2:
-      SwitchToDocType(cDBID_DocType_НАКЛАДНЫЕ_РН); // Расходная накладная
+      SwitchToDocType(cDBID_DocType_НАКЛАДНЫЕ_РН); // Nakladnaia de iesire
     4:
-      SwitchToDocType(cDBID_DocType_СЧЕТ_ФАКТУРЫ_СФ); // Счет фактуры
-    5:      // Приходный кассовый ордер
+      SwitchToDocType(cDBID_DocType_СЧЕТ_ФАКТУРЫ_СФ); // Facturi fiscale
+    5:      // Dispozitie de incasare
       SwitchToDocType(cDBID_DocType_КАССОВЫЕ_ОПЕРАЦИИ_ПКО);
-    6:      // Расходный кассовый ордер
+    6:      // Dispozitie de plata
       SwitchToDocType(cDBID_DocType_КАССОВЫЕ_ОПЕРАЦИИ_РКО);
     7:
       SwitchToDocType(cDBID_DocType_WEB_WЗ); // Web Zakaz
@@ -1758,7 +1757,7 @@ end;
 
 procedure TfrmMainForm.bntSerialSearchClick(Sender: TObject);
 begin
-  ShowPrintDocumentsDialog(-1, 16); // 16 - поиск по серийному/партийному номеру
+  ShowPrintDocumentsDialog(-1, 16); // 16 - cautare dupa numar serial/de partida
 end;
 
 procedure TfrmMainForm.BuildStructureList;
@@ -2158,7 +2157,7 @@ begin
     link.Free;
   end;
 
-  // In "PartialAccessMode" meniul "Быстрые отчеты" nu se vede!
+  // In "PartialAccessMode" meniul "Rapoarte rapide" nu se vede!
   if SWNSecurityManager.IsPartialAccessMode then
     exit;
 
@@ -2798,25 +2797,25 @@ begin
   fEventManager.OnNewEvent := WhenNewEventArrive;
   fEventManager.Firma := dmDB.CurrentFirma;
 
-  // Event "Расходная накладная"
+  // Event "Nakladnaia de iesire"
   if SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_SE_Event_Расходная_накладная) then
     fEventManager.EventTypes := fEventManager.EventTypes + [dbetRashod];
-  // Event "Наряд на сборку"
+  // Event "Naryad de asamblare"
   if SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_SE_Event_Наряд_на_сборку) then
     fEventManager.EventTypes := fEventManager.EventTypes + [dbetSborka];
-  // Event "Изменение комментариев"
+  // Event "Modificare comentarii"
   if SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_SE_Event_Изменение_комментариев) then
     fEventManager.EventTypes := fEventManager.EventTypes + cEventsComments;
-  // Event "Web Заказ"
+  // Event "Comanda Web"
   if SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_SE_Event_Web_Заказ) then
     fEventManager.EventTypes := fEventManager.EventTypes + [dbetWebZakaz];
-  // Event "Заявка на финансирование"
+  // Event "Cerere de finantare"
   if SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_SE_Event_Заявка_на_финансирование) then
     fEventManager.EventTypes := fEventManager.EventTypes + [dbetWebCerereFinantare];
-  // Event "График доставки"
+  // Event "Grafic de livrare"
   if SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_SE_Event_График_доставки) then
     fEventManager.EventTypes := fEventManager.EventTypes + [dbetSchedulerDelivery];
-  // Event "Предварительные заказы"
+  // Event "Comenzi preliminare"
   if SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_SE_Event_Предварительные_заказы) then
     fEventManager.EventTypes := fEventManager.EventTypes + [dbetGoodsPreOrder];
 
@@ -2855,7 +2854,7 @@ begin
 
   dmDB.LoadSipColors;
 
- // Создаём один раз при старте приложения
+ // Cream o singura data la pornirea aplicatiei
   frmSchedulerDaemon := TfrmSchedulerDaemon.Create(nil);
   frmSchedulerDaemon.BindStorage;
   frmSchedulerDaemon.Hide;
@@ -3026,7 +3025,7 @@ end;
 procedure TfrmMainForm.WebSecuritySetup;
 begin
   // Web site
-  // 1. Web Каталог товаров
+  // 1. Catalog Web marfa
 
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Website_Web_Каталог_товаров) or SWNSecurityManager.IsPartialAccessMode
     then
@@ -3035,24 +3034,24 @@ begin
     bbWebSiteRefreshGoods.Visible := ivNever;
     bbWebSearch.Visible := ivNever;
   end;
-  // 2. Фильтры
+  // 2. Filtre
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Website_Фильтры) or SWNSecurityManager.IsPartialAccessMode then
     bbWebFilters.Visible := ivNever;
-  // 3. Шаблоны описания товаров
+  // 3. Sabloane descriere marfa
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Website_Шаблоны_описания_товаров) or SWNSecurityManager.IsPartialAccessMode
     then
     bbWebDescriptionTemplates.Visible := ivNever;
-  // 4. Кнопки для фильтров
+  // 4. Butoane pentru filtre
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Website_Кнопки_для_фильтров) or SWNSecurityManager.IsPartialAccessMode
     then
     bbFilterButtons.Visible := ivNever;
-  // 5. Магазины
+  // 5. Magazine
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Website_Магазины) or SWNSecurityManager.IsPartialAccessMode then
     bbWebShops.Visible := ivNever;
-  // 6. Доставка
+  // 6. Livrare
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Website_Доставка) or SWNSecurityManager.IsPartialAccessMode then
     bbWebDelivery.Visible := ivNever;
-  // 7. Промо-акции
+  // 7. Actiuni promo
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Website_Промо_акции) or SWNSecurityManager.IsPartialAccessMode then
   begin
     bbWebActiuni.Visible := ivNever;
@@ -3060,21 +3059,21 @@ begin
     bbWebGoodsGroups.Visible := ivNever;
     bbWebUrlManager.Visible := ivNever;
   end;
-  // 8. E-mail рассылки
+  // 8. Trimiteri E-mail
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Website_Email_рассылки) or SWNSecurityManager.IsPartialAccessMode
     then
     bbWebMailingLists.Visible := ivNever;
-  // Статические страницы на сайте
+  // Pagini statice pe site
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Website_Статические_страницы_на_сайте) or
     SWNSecurityManager.IsPartialAccessMode then
     bbWebStaticPages.Visible := ivNever;
   // Pachete de produse
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Website_Pachete_de_produse) then
     bbWebPacheteProduse.Visible := ivNever;
-  // >> Web-сайт : daca nu se mai vede nici un element, ascunde meniul principal
+  // >> Web-site : daca nu se mai vede nici un element, ascunde meniul principal
   if (bbMainWebSiteMenu.ItemLinks.VisibleItemCount = 0) then
     bbMainWebSiteMenu.Visible := ivNever;
-  // Блокировка фирм
+  // Blocare firme
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Администрирование_Блокировка_фирм) or (SWNSecurityManager.IsPartialAccessMode
     and not SWNSecurityManager.HasPartialAccessModeSecurityConfirmed) then
   begin
@@ -3275,7 +3274,7 @@ begin
 //  begin
 //    if GetKeyState(Ord('o')) < 0 then
 //    begin
-//      ShowMessage('Ctrl + O + O нажаты!');
+//      ShowMessage('Ctrl + O + O apasate!');
 //      Key := 0;
 //    end;
 //  end;
@@ -3560,37 +3559,37 @@ end;
 
 procedure TfrmMainForm.SecurityInstrumente;
 begin
-    // Фискальный принтер
+    // Imprimanta fiscala
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Инструменты_Фискальный_принтер) then
     bbService_FiscalPrinter.Visible := ivNever;
-    // Импорт товаров из названий
+    // Import produse din denumiri
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Инструменты_Импорт_товаров_из_названий) or
     SWNSecurityManager.IsPartialAccessMode then
     bbImportGoodsByTitles.Visible := ivNever;
-    // Передача денег другому пользователю
+    // Transfer bani catre alt utilizator
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Инструменты_Передача_денег_другому_пользователю) or
     SWNSecurityManager.IsPartialAccessMode then
     miTransferMoneyToUser.Visible := ivNever;
-    // Трансфер денег себе
+    // Transfer bani catre sine
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Инструменты_Трансфер_денег_себе) or SWNSecurityManager.IsPartialAccessMode
     then
     bbMoneyTransfer.Visible := ivNever;
-    // Обмен валюты
+    // Schimb valutar
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Инструменты_Обмен_валюты) or SWNSecurityManager.IsPartialAccessMode
     then
     bbExchangeCurrency.Visible := ivNever;
-    // Перерасчет остатков
+    // Recalcul stocuri
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Инструменты_Перерасчет_остатков) or SWNSecurityManager.IsPartialAccessMode
     then
   begin
     bbStockRecalc.Visible := ivNever;
     bbToolsRecalcQtyAcnt.Visible := ivNever;
   end;
-    // Синхронизация цен из других фирм
+    // Sincronizare preturi din alte firme
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Инструменты_Синхронизация_цен_из_других_фирм) or
     SWNSecurityManager.IsPartialAccessMode then
     bbGoodsPriceSynchronize.Visible := ivNever;
-    // Бонусные товары
+    // Marfuri bonus
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Инструменты_Бонусные_товары) or SWNSecurityManager.IsPartialAccessMode
     then
   begin
@@ -3599,71 +3598,71 @@ begin
     bbCalcSalesBonus.Visible := ivNever;
   end;
 
-    // Зарплата
-    // Начисление зарплаты - инструменты
+    // Salariu
+    // Calcul salariu - instrumente
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Инструменты_ИОЗ_Начисление_зарплаты_инструменты) or
     SWNSecurityManager.IsPartialAccessMode then
     bbNacislenieZarplatiTools.Visible := ivNever;
 
-    // Информация о зарплате
+    // Informatii despre salariu
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Инструменты_ИОЗ_Информация_о_зарплате) or not
     SWNSecurityManager.isAdmin then
     bbSalaryInfo.Visible := ivNever;
 
-    // Планы продаж
+    // Planuri de vanzari
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Инструменты_ИОЗ_Планы_продаж) or SWNSecurityManager.IsPartialAccessMode
     then
     bbSalePlans.Visible := ivNever;
 
-    // Реализация...
+    // Realizare...
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Инструменты_Импорт_товаров_из_других_фирм_в_таблицу) or
     SWNSecurityManager.IsPartialAccessMode then
     bbRealizatia.Visible := ivNever;
-    // Товары для акции "Скидка на 2-ю покупку"
+    // Produse pentru actiunea "Discount la a 2-a achizitie"
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Инструменты_Товары_для_акции_Скидка_на_2ю_покупку) or
     SWNSecurityManager.IsPartialAccessMode then
     bbDiscountGoods.Visible := ivNever;
-    // Поиск в журнале документов
+    // Cautare in registrul documentelor
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Инструменты_Поиск_в_журнале_документов) or
     SWNSecurityManager.IsPartialAccessMode then
     bbSearchDocsLog.Visible := ivNever;
-    // Пересчет кол-ва в перемещениях
+    // Recalcul cantitate in transferuri
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Инструменты_Пересчет_колва_в_перемещениях) or
     SWNSecurityManager.IsPartialAccessMode then
     bbToolsRecalcQtyInTransfer.Visible := ivNever;
-    // Журнал опозданий работников
+    // Registru intarzieri angajati
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Инструменты_Журнал_опозданий_работников) or
     SWNSecurityManager.IsPartialAccessMode then
     bbUserMissedHours.Visible := ivNever;
-    // Журнал штрафов и бонусов работников
+    // Registru amenzi si bonusuri angajati
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Инструменты_Журнал_штрафов_и_бонусов_работников) or
     SWNSecurityManager.IsPartialAccessMode then
     bbUserWorkBonus.Visible := ivNever;
-    // Узнать свой бонус с продаж
+    // Aflare bonus propriu din vanzari
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Инструменты_Узнать_свой_бонус_с_продаж) or
     SWNSecurityManager.IsPartialAccessMode then
     bbCalcSalesBonus.Visible := ivNever;
-    // Монитор активности
+    // Monitor activitate
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Инструменты_Монитор_активности) or SWNSecurityManager.IsPartialAccessMode
     then
     bbActivityMonitor.Visible := ivNever;
-    // Дополнительные расходы
+    // Cheltuieli suplimentare
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Инструменты_Дополнительные_расходы) or SWNSecurityManager.IsPartialAccessMode
     then
     bbAddExpenses.Visible := ivNever;
-    // Перенести расходы на сегодня
+    // Muta iesirile pe azi
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Инструменты_Перенести_документы_на_сегодня) or
     SWNSecurityManager.IsPartialAccessMode then
     bbBringDocsByToday.Visible := ivNever;
-    // Анализ цен
+    // Analiza preturilor
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Инструменты_Анализ_цен) or SWNSecurityManager.IsPartialAccessMode
     then
     bbCostAnalyze.Visible := ivNever;
-    // Анализ прайсов
+    // Analiza preturilor
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Инструменты_Анализ_прайсов) or SWNSecurityManager.IsPartialAccessMode
     then
     bbPriceListAnalyze.Visible := ivNever;
-    // Закрытие business дня
+    // Inchidere zi business
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Инструменты_Закрытие_business_дня) or SWNSecurityManager.IsPartialAccessMode
     then
     bbCloseBusinessDay.Visible := ivNever;
@@ -3806,11 +3805,11 @@ begin
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Analiza) then
     bbAnaliza.Visible := ivNever;
 
-  // Товары
+  // Produse
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Справочники_Товары) then
     bbMainMenuRef_Goods.Visible := ivNever;
 
-  // Контрагенты
+  // Contraagenti
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Справочники_Клиенты) then
   begin
     bbMainMenuRef_Customers.Visible := ivNever;
@@ -3822,7 +3821,7 @@ begin
     bbMainMenuRef_Enterprises.Visible := ivNever;
   end;
 
-  // Наименования для накладных
+  // Denumiri pentru nakladnie
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Справочники_Наименование_для_накладных) or
     SWNSecurityManager.IsPartialAccessMode then
     bbMainMenuRef_GoodsACNT.Visible := ivNever;
@@ -3835,37 +3834,37 @@ begin
     bbMainMenuRef_GoodsType.Visible := ivNever;
   end;
 
-  // Типы контрактов
+  // Tipuri de contracte
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Справочники_Типы_контрактов) or SWNSecurityManager.IsPartialAccessMode
     then
     bbDocContractTypes.Visible := ivNever;
 
-  // Склады
+  // Depozite
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Справочники_Склады) or SWNSecurityManager.IsPartialAccessMode then
     bbMainMenuRef_Stocks.Visible := ivNever;
 
-  // Валюта
+  // Valuta
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Справочники_Валюта) or SWNSecurityManager.IsPartialAccessMode then
     bbMainMenuRef_Currency.Visible := ivNever;
 
-  // БАНКИ
+  // BANCI
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Справочники_Банки) or SWNSecurityManager.IsPartialAccessMode then
     bbMainMenuRef_Banks.Visible := ivNever;
 
-  // Аналитика
+  // Analitica
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Справочники_Аналитика) or SWNSecurityManager.IsPartialAccessMode
     then
     bbMainMenuAcs_Analytics.Visible := ivNever;
 
-  // Доверенности
+  // Procuri
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Справочники_Доверенности) then
     bbProcuri.Visible := ivNever;
 
-  // Сертификаты
+  // Certificate
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Справочники_Сертификаты) then
     bbRefCertifications.Visible := ivNever;
 
-  // Шаблоны конфигураций
+  // Sabloane configuratii
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Справочники_Шаблоны_конфигураций) or SWNSecurityManager.IsPartialAccessMode
     then
     bbKitTemplates.Visible := ivNever;
@@ -3887,7 +3886,7 @@ begin
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_1C_Бухгалтерия) then
     bbMainMenu1C.Visible := ivNever;
 
-  // Пользователи
+  // Utilizatori
   if not SWNSecurityManager.IsSuperUser then
   begin
     bbActiveUsers.Visible := ivNever;
@@ -3895,13 +3894,13 @@ begin
     bbApiConfig.Visible := ivNever;
     // >> SQL Repository
     bbSQLRepository.Visible := ivNever;
-    // >> Справочники - Service+
+    // >> Nomenclatoare - Service+
     bbServicePlusRefs.Visible := ivNever;
-    // >> Инструменты - Новые товары
+    // >> Instrumente - Marfa noua
 //        bbNewGoods.Visible := ivNever;
   end;
 
-  // >> Инструменты - Перерасчет остатков
+  // >> Instrumente - Recalcul stocuri
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Инструменты_Перерасчет_остатков) then
   begin
     bbStockRecalc.Visible := ivNever;
@@ -3909,7 +3908,7 @@ begin
     bbToolsRecalcQtyAcnt.Visible := ivNever;
   end;
 
-  // >> Настройки, daca nu mai sint elemente visibile, ascunde meniul principal
+  // >> Setari, daca nu mai sint elemente visibile, ascunde meniul principal
   if bbAdminAccess.ItemLinks.VisibleItemCount = 0 then
     bbAdminAccess.Visible := ivNever;
 
@@ -3917,24 +3916,24 @@ begin
 
   if not SWNSecurityManager.isAdmin then
   begin
-    // Создать новую версию программы...
+    // Creare versiune noua a programului...
     bbCreateAppNewVersion.Visible := ivNever;
-    // >> список активных пользователей
+    // >> lista utilizatorilor activi
     bbMainMenuAcs_Users.Visible := ivNever;
-    // Группы пользователей
+    // Grupuri de utilizatori
     bbMainMenuAcs_UserGroups.Visible := ivNever;
-    // Типы документов
+    // Tipuri de documente
     bbMainMenuAcs_DocTypes.Visible := ivNever;
-    // >> Настройки - Остановка базы через 20 секунд
+    // >> Setari - Oprirea bazei in 20 secunde
     bbStopDatabase1Min.Visible := ivNever;
   end;
 
   SetupNomenclatoareRights;
-  // >> Настройки : daca nu se mai vede nici un element, ascundem meniul principal
+  // >> Setari : daca nu se mai vede nici un element, ascundem meniul principal
   if bbAdminAccess.ItemLinks.VisibleItemCount = 0 then
     bbAdminAccess.Visible := ivNever;
 
-  // >> Инструменты : daca nu se mai vede nici un element, ascundem meniul principal
+  // >> Instrumente : daca nu se mai vede nici un element, ascundem meniul principal
   if bbToolsMainMenu.ItemLinks.VisibleItemCount = 0 then
     bbToolsMainMenu.Visible := ivNever;
 
@@ -3944,13 +3943,13 @@ begin
   begin
     bbRegistrulBancar.Visible := ivNever;
   end;
-  // Поиск
+  // Cautare
   Allow := SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_СФ_Счет_фактуры) or SWNSecurityManager.UserHasSecurityFlag
     (cSecurityFlag_СЧЕТА_Счета_на_оплату);
-  // Поиск Счет на Оплату
+  // Cautare Factura de plata
   if not Allow then
     bbSearchScetOplata.Visible := ivNever;
-  // Поиск Фискальной Накладной
+  // Cautare Nakladnaia Fiscala
   if not Allow then
     bbSearchSciotFactura.Visible := ivNever;
 
@@ -3960,7 +3959,7 @@ begin
   if bbBonusTools.ItemLinks.VisibleItemCount = 0 then
     bbBonusTools.Visible := ivNever;
 
-  // 1C Бухгалтерия
+  // 1C Contabilitate
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_1C_Экспорт_документов) or SWNSecurityManager.IsPartialAccessMode
     then
     bbExportTo1C.Visible := ivNever;
@@ -3968,7 +3967,7 @@ begin
   if bbMainMenu1C.ItemLinks.VisibleItemCount <= 0 then
     bbMainMenu1C.Visible := ivNever;
 
-  // 1C Бухгалтерия
+  // 1C Contabilitate
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_INSTRUMENTE_Sip_Log) or SWNSecurityManager.IsPartialAccessMode then
     bbSipLog.Visible := ivNever;
 
@@ -4323,7 +4322,7 @@ begin
           end;
         mrAbort:
           begin
-            // button: "Без фильтра"
+            // button: "Fara filtru"
             ResetMainFilter;
           end;
       end;
@@ -4747,7 +4746,7 @@ begin
         end;
       mrAbort:
         begin
-          // button: "Без фильтра"
+          // button: "Fara filtru"
           ResetMainFilter;
         end;
     end;
@@ -4776,7 +4775,7 @@ begin
   try
     if dialog.ShowModal = mrOk then
     begin
-      // update frame "КАССА - Касса персональная (12)", if visible
+      // update frame "CASA - Casa personala (12)", if visible
       if SWNFrameManager.CurrentFrame is Tframe12CassaPersonal then
       begin
         Tframe12CassaPersonal(SWNFrameManager.CurrentFrame).RefreshInfo;
@@ -5565,7 +5564,7 @@ begin
       dbetWebCerereFinantare:
         begin
           PlayAudio_CerereDeFinantare;
-          // refresh Заявка на финансирование, only if frame is visible and no other dialogs opened
+          // refresh Cerere de finantare, only if frame is visible and no other dialogs opened
           if Assigned(SWNFrameManager.CurrentFrame) and (SWNFrameManager.CurrentFrame.FrameID = 51) and (SWNFormsMonitor.Count
             = 0) then
             dmDB.FullRefresh;
@@ -5616,184 +5615,184 @@ begin
       NewCustomFrame := TframeScheduler.Create(Self); // Scheduler
     1:
       NewCustomFrame := Tframe01CasaPKO.Create(Self);
-    // КАССА. Приходный кассовый ордер
+    // CASA. Dispozitie de incasare
     2:
       NewCustomFrame := Tframe02CasaRKO.Create(Self);
-    // КАССА. Расходный кассовый ордер
+    // CASA. Dispozitie de plata
     3:
-      NewCustomFrame := Tframe03CasaNS.Create(Self); // КАССА. Начальное сальдо
+      NewCustomFrame := Tframe03CasaNS.Create(Self); // CASA. Sold initial
     4:
       NewCustomFrame := Tframe04BankPDNS.Create(Self);
-    // БАНК. Приход денег на счет
+    // BANCA. Incasare bani in cont
     5:
       NewCustomFrame := Tframe05BankPDNSIC.Create(Self);
-    // БАНК. Приход денег на счет (из кассы)
+    // BANCA. Incasare bani in cont (din casa)
     6:
       NewCustomFrame := Tframe06BankBPPL.Create(Self);
-    // БАНК. Банковские платежные поручения, Леи
+    // BANCA. Ordine de plata bancare, Lei
     7:
       NewCustomFrame := Tframe07BankBPPV.Create(Self);
-    // БАНК. Банковские платежные поручения, Валюта
+    // BANCA. Ordine de plata bancare, Valuta
     8:
       NewCustomFrame := Tframe08ConfigurationBRK.Create(Self);
-    // КОНФИГУРАЦИИ. Конфигуратор (Быстрый расчет конфигурации)
+    // CONFIGURATII. Configurator (Calcul rapid configuratie)
     9:
       NewCustomFrame := Tframe09NakladniePN.Create(Self);
-    // НАКЛАДНЫЕ. Приход товара (Оперативный учет)
+    // NAKLADNIE. Intrare marfa (Evidenta operativa)
     10:
       NewCustomFrame := Tframe10NakladnieRN.Create(Self);
-    // НАКЛАДНЫЕ. Расходная накладная
+    // NAKLADNIE. Nakladnaia de iesire
     11:
       NewCustomFrame := Tframe11PeremeshenieP.Create(Self);
-    // ПЕРЕМЕЩЕНИЕ. Перемещение
+    // TRANSFER. Transfer
     12:
       NewCustomFrame := Tframe12CassaPersonal.Create(Self);
-    // КАССА. Касса персональная
+    // CASA. Casa personala
     14:
       NewCustomFrame := Tframe14NareadSborka.Create(Self);
-    // СБОРКА - Наряд на сборку
+    // ASAMBLARE - Naryad de asamblare
     15:
       NewCustomFrame := Tframe15TovarBezHaracteristic.Create(Self);
-    // Товар без характеристик
+    // Produs fara caracteristici
     16:
       NewCustomFrame := Tframe16NedostaiushiiTovar.Create(Self);
-    // Недостающийся товар
+    // Produs lipsa
     17:
       NewCustomFrame := Tframe17NareadRazborka.Create(Self);
-    // СБОРКА - Наряд на разборку
+    // ASAMBLARE - Naryad de dezasamblare
     18:
       NewCustomFrame := Tframe18SciotNaOplatu.Create(Self);
-    // СЧЕТА - Счета на оплату
+    // FACTURI - Facturi de plata
     19:
       NewCustomFrame := Tframe19ScetaVhodnieSceta.Create(Self);
-    // СЧЕТА - Входные Счета
+    // FACTURI - Facturi de intrare
     20:
       NewCustomFrame := Tframe20PrihotTovaraPoNakladnim.Create(Self);
-    // НАКЛАДНЫЕ. Приход Товара По Накладным
+    // NAKLADNIE. Intrare Marfa pe Nakladnie
     21:
       begin
         if dmdb.CurrentUserID <> 204 then
           sleep(5000);
         NewCustomFrame := Tframe21Zarplata.Create(Self);
       end;
-    // КАССОВЫЕ ОПЕРАЦИИ. Зарплата
+    // OPERATIUNI DE CASA. Salariu
     22:
       NewCustomFrame := Tframe22OstatkiTovara.Create(Self);
-    // ОСТАТКИ. Остатки товара
+    // STOCURI. Stocuri marfa
     23:
       NewCustomFrame := Tframe23SalidoKontragentov.Create(Self);
-    // ОСТАТКИ. Сальдо контрагентов
+    // STOCURI. Sold contraagenti
     24:
-      NewCustomFrame := Tframe24WebZakaz.Create(Self); // WEB. Web Заказ
+      NewCustomFrame := Tframe24WebZakaz.Create(Self); // WEB. Comanda Web
     25:
       NewCustomFrame := Tframe25ScetFaktura.Create(Self);
-    // СЧЕТ ФАКТУРЫ. Счет фактуры
+    // FACTURI FISCALE. Facturi fiscale
     26:
       NewCustomFrame := Tframe26AktSpisania.Create(Self);
-    // ИНВЕНТАРИЗАЦИЯ. Акт списания
+    // INVENTARIERE. Act de casare
     27:
       NewCustomFrame := Tframe27AktOprihodovania.Create(Self);
-    // ИНВЕНТАРИЗАЦИЯ. Акт оприходования
+    // INVENTARIERE. Act de intrare
     28:
       NewCustomFrame := Tframe28NakladnieRNS.Create(Self);
-    // НАКЛАДНЫЕ. Расходная накладная (Сервис)
+    // NAKLADNIE. Nakladnaia de iesire (Service)
     29:
-      NewCustomFrame := Tframe29Rezerv.Create(Self); // НАКЛАДНЫЕ. Резерв
+      NewCustomFrame := Tframe29Rezerv.Create(Self); // NAKLADNIE. Rezerva
     30:
       NewCustomFrame := Tframe30CassaFirma.Create(Self);
-    // КАССА - Касса организации
+    // CASA - Casa organizatiei
     31:
       NewCustomFrame := Tframe31ServiceRequests.Create(Self);
-    // СЕРВИС - Заявки на ремонт
+    // SERVICE - Cereri de reparatie
     32:
       NewCustomFrame := Tframe32ServiceRequestsWarranty.Create(Self);
-    // СЕРВИС - Заявки на гарантийный ремонт
+    // SERVICE - Cereri de reparatie in garantie
     33:
       NewCustomFrame := Tframe33ServiceReturnToVendor.Create(Self);
-    // СЕРВИС - Возврат товара поставщику
+    // SERVICE - Retur marfa furnizor
     34:
       NewCustomFrame := Tframe34ServiceReturnFromVendor.Create(Self);
-    // СЕРВИС - Возврат от поставщика
+    // SERVICE - Retur de la furnizor
     35:
       NewCustomFrame := Tframe35ServiceReturnToClient.Create(Self);
-    // СЕРВИС - Возврат товара клиенту
+    // SERVICE - Retur marfa client
     36:
       NewCustomFrame := Tframe36ServiceNewIncidents.Create(Self);
-    // СЕРВИС - Новые инциденты
+    // SERVICE - Incidente noi
     37:
       NewCustomFrame := Tframe37ServiceDispatcher.Create(Self);
-    // СЕРВИС - Диспетчер сервиса
+    // SERVICE - Dispecer service
     38:
       NewCustomFrame := Tframe38ServiceFinishedIncidents.Create(Self);
-    // СЕРВИС - Решённые инциденты
+    // SERVICE - Incidente rezolvate
     39:
       NewCustomFrame := Tframe39ServiceEngineer.Create(Self);
-    // СЕРВИС - Инжинер сервиса
+    // SERVICE - Inginer service
     40:
       NewCustomFrame := Tframe40InventarizatiaPereotencaTovara.Create(Self);
-    // ИНВЕНТАРИЗАЦИЯ - Переоценка товаров
+    // INVENTARIERE - Reevaluare marfa
     41:
       NewCustomFrame := Tframe41AktOprihodPoNakladnim.Create(Self);
-    // НАКЛАДНЫЕ. Акт оприходования по накладным
+    // NAKLADNIE. Act de intrare pe nakladnie
     42:
       NewCustomFrame := Tframe42CassaGlobalFirme.Create(Self);
-    // КАССА - Касса по всем организациям
+    // CASA - Casa pe toate organizatiile
     43:
       NewCustomFrame := Tframe43CashTransfer.Create(Self);
-    // КАССА - Передача денег
+    // CASA - Transfer bani
     44:
       NewCustomFrame := Tframe44ZamenaPoBraku.Create(Self);
-    // СЕРВИС - Замена по браку
+    // SERVICE - Inlocuire pe rebut
     45:
       NewCustomFrame := Tframe45ZakritiTovarKomisia.Create(Self);
-    // КОМИСИЯ - Закрытие товара в комисию
+    // COMISION - Inchidere marfa in comision
     46:
       NewCustomFrame := Tframe46RascetZarplati.Create(Self);
-    // ЗАРПЛАТА - Расчет Зарплаты
+    // SALARIU - Calcul Salariu
     47:
       NewCustomFrame := Tframe47ActiuniMarketing.Create(Self);
-    // РЕКЛАМА - Маркетинговые акции
+    // PUBLICITATE - Actiuni de marketing
     48:
       NewCustomFrame := Tframe48KBP.Create(Self);
-    // БАНКОВСКИЕ ОПЕРАЦИИ - Комисион банковского платежа
+    // OPERATIUNI BANCARE - Comision plata bancara
     49:
       NewCustomFrame := Tframe49ZacetBalansGarantia.Create(Self);
-    // СЕРВИС. Зачет в баланс по гарантии
+    // SERVICE. Trecere in bilant pe garantie
     50:
       NewCustomFrame := Tframe50Realizatia.Create(Self);
-    // Принятие в баланс с комисии
+    // Primire in bilant din comision
     51:
       NewCustomFrame := Tframe51ZaiavkaCredit.Create(Self);
-    // WEB. Заявка на финансирование
+    // WEB. Cerere de finantare
     52:
       NewCustomFrame := Tframe52ZamenaTovara.Create(Self);
-    // СЕРВИС. Замена товара
+    // SERVICE. Inlocuire marfa
     53:
       NewCustomFrame := Tframe53ARPP.Create(Self);
-    // Акты: Реестр передачи документов
+    // Acte: Registru transmitere documente
     54:
       NewCustomFrame := Tframe54Inventarizatia.Create(Self);
-    // ИНВЕНТАРИЗАЦИЯ. Инвентаризация
+    // INVENTARIERE. Inventariere
     55:
       NewCustomFrame := Tframe55VozvratPriemService.Create(Self);
-    // СЕРВИС. Возврат в / Прием из Сервис центра
-    // 56: NewCustomFrame:=Tframe56PVfromCustomerService.Create(Self);       // СЕРВИС. Возврат в / Прием от клиента
+    // SERVICE. Retur in / Primire din Centrul Service
+    // 56: NewCustomFrame:=Tframe56PVfromCustomerService.Create(Self);       // SERVICE. Retur in / Primire de la client
     57:
       NewCustomFrame := Tframe57ActDeficiente.Create(Self);
     // Act de constatare a deficientelor
     58:
-      NewCustomFrame := Tframe58.Create(Self); // Корректировка кассы!
+      NewCustomFrame := Tframe58.Create(Self); // Corectare casa!
     59:
       NewCustomFrame := Tframe59TTN.Create(Self);
-    // СЧЕТ ФАКТУРЫ - Товаро транспортные накладные
+    // FACTURI FISCALE - Nakladnie marfa transport
     60:
       NewCustomFrame := Tframe60PredvaritelnieZakazi.Create(Self);
-    // СЧЕТА - Предварительные заказы
+    // FACTURI - Comenzi preliminare
     61:
       NewCustomFrame := Tframe61OstatkiDenegNaScetu.Create(Self);
-    // БАНКОВСКИЕ ОПЕРАЦИИ - Остаток денег на счету
+    // OPERATIUNI BANCARE - Sold bani in cont
     62:
-      NewCustomFrame := Tframe62Contracte.Create(Self); // ДОГОВОРА - Договора
+      NewCustomFrame := Tframe62Contracte.Create(Self); // CONTRACTE - Contracte
     63:
       NewCustomFrame := Tframe63AktSpisaniaPoNakladnim.Create(Self);
     64:
@@ -5822,8 +5821,8 @@ begin
 //      NewCustomFrame := Tframe79AnalizePriceList.Create(Self);
     80:
       NewCustomFrame := Tframe80Inventariere.Create(Self);
-    81:
-      NewCustomFrame := Tframe81Salary.Create(Self);
+//    81:
+//      NewCustomFrame := Tframe81Salary.Create(Self);
     82: // Registrul livrarilor
       NewCustomFrame := Tframe82Livrari.Create(Self);
     83: // Promo Coduri

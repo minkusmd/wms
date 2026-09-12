@@ -72,7 +72,7 @@ procedure Tfrm57ActEditorDlg.Prepare;
 begin
      fMasterDataSet.UpdateTransaction.StartTransaction;
      try
-             dtDialogTitle.Text:='Изменение акта';
+             dtDialogTitle.Text:='Modificare act';
              fMasterDataSet.Edit;
              fFileChanged:=False;
      except

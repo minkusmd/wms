@@ -116,17 +116,17 @@ begin
   ErrorStr := '';
 
   if IBCQueryInfo.FieldByName('TITLE_RUS').IsNull or (IBCQueryInfo.FieldByName('TITLE_RUS').AsString = '') then
-    AddErrorToStr(ErrorStr, 'Denumire (рус)!');
+    AddErrorToStr(ErrorStr, 'Denumire (rus)!');
   if IBCQueryInfo.FieldByName('TITLE_ROM').IsNull or (IBCQueryInfo.FieldByName('TITLE_ROM').AsString = '') then
     AddErrorToStr(ErrorStr, 'Denumire (rom)!');
   if IBCQueryInfo.FieldByName('TEXT_RUS').IsNull or (IBCQueryInfo.FieldByName('TEXT_RUS').AsString = '') then
-    AddErrorToStr(ErrorStr, 'Denumire (русс)!');
+    AddErrorToStr(ErrorStr, 'Denumire (rus)!');
   if IBCQueryInfo.FieldByName('TEXT_ROM').IsNull or (IBCQueryInfo.FieldByName('TEXT_ROM').AsString = '') then
     AddErrorToStr(ErrorStr, 'Denumire (rom)!');
 
   if IBCQueryInfo.FieldByName('FLG_HIDE_CATALOG_BUTTON').asInteger = 0 then begin
     if IBCQueryInfo.FieldByName('CATALOG_BTN_RUS').IsNull or (IBCQueryInfo.FieldByName('CATALOG_BTN_RUS').AsString = '') then
-      AddErrorToStr(ErrorStr, 'Denumire button in catalog (рус)!');
+      AddErrorToStr(ErrorStr, 'Denumire button in catalog (rus)!');
     if IBCQueryInfo.FieldByName('CATALOG_BTN_ROM').IsNull or (IBCQueryInfo.FieldByName('CATALOG_BTN_ROM').AsString = '') then
       AddErrorToStr(ErrorStr, 'Denumire button in catalog (rom)!');
   end;
@@ -200,7 +200,7 @@ begin
   IBCQueryInfo.FieldByName('TEXT_ROM').AsString := DescriptionRo;
   IBCQueryInfo.FieldByName('TEXT_RUS').AsString := DescriptionRu;
   IBCQueryInfo.FieldByName('CATALOG_BTN_ROM').AsString := 'Promo';
-  IBCQueryInfo.FieldByName('CATALOG_BTN_RUS').AsString := 'Акция';
+  IBCQueryInfo.FieldByName('CATALOG_BTN_RUS').AsString := 'Promotie';
 end;
 
 procedure TfrmWebPromoIssueGoodsDlg.cgColorGalleryChange(Sender: TObject);

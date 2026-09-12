@@ -81,14 +81,14 @@ begin
      ErrorStr:='';
 
      if fMasterDataSet.FieldByName('PAGEID').IsNull or (fMasterDataSet.FieldByName('PAGEID').AsString='') or (Not IsPageIDValid(fMasterDataSet.FieldByName('PAGEID').AsString))
-       then AddErrorToStr(ErrorStr,'Идентификатор страницы!');
+       then AddErrorToStr(ErrorStr,'Identificatorul paginii!');
 
      if fMasterDataSet.FieldByName('TITLE_RUS').IsNull or (fMasterDataSet.FieldByName('TITLE_RUS').AsString='')
-       then AddErrorToStr(ErrorStr,'Название страницы!');
+       then AddErrorToStr(ErrorStr,'Denumirea paginii!');
      if fMasterDataSet.FieldByName('TITLE_ROM').IsNull or (fMasterDataSet.FieldByName('TITLE_ROM').AsString='')
        then AddErrorToStr(ErrorStr,'Denumirea paginei!');
      if fMasterDataSet.FieldByName('BODY_RUS').IsNull or (fMasterDataSet.FieldByName('BODY_RUS').AsString='')
-       then AddErrorToStr(ErrorStr,'Содержание страницы!');
+       then AddErrorToStr(ErrorStr,'Continutul paginii!');
      if fMasterDataSet.FieldByName('BODY_ROM').IsNull or (fMasterDataSet.FieldByName('BODY_ROM').AsString='')
        then AddErrorToStr(ErrorStr,'Conținutul paginei!');
 

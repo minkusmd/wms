@@ -142,7 +142,7 @@ begin
      if Not VarIsNull(ARecord.Values[cxGridD_DATA.Index]) then
      begin
           if DateOf(Now) = DateOf(ARecord.Values[cxGridD_DATA.Index])
-            then AText := FormatDateTime('Сегодня, HH:NN', ARecord.Values[cxGridD_DATA.Index])
+            then AText := FormatDateTime('Astazi, HH:NN', ARecord.Values[cxGridD_DATA.Index])
             else AText := FormatDateTime('dd.mm.yyyy HH:NN', ARecord.Values[cxGridD_DATA.Index]);
      end;
 end;

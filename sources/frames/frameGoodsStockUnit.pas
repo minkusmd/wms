@@ -65,7 +65,7 @@ begin
 
      // Numarul de zecimale in QTY :
   qtyDigitsMode := AppUserTempConfigStorage.IntValues.GetValue(cSETTINGS_AppQtyDigits, cAppDefault_QtyDigits);
-     // Остаток
+     // Stoc
   TcxCalcEditProperties(cxTree_QTY.Properties).DisplayFormat := cQTY_DigitsMask[qtyDigitsMode];
 end;
 
@@ -161,7 +161,7 @@ begin
     begin
              // no record, show info
       Node := cxTree.Add;
-      Node.Values[0] := 'Нет в наличие';
+      Node.Values[0] := 'Nu este in stoc';
       Node.ImageIndex := -1;
       Node.SelectedIndex := -1;
       cxTree.OptionsView.ShowRoot := False;

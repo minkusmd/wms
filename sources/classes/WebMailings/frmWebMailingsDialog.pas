@@ -198,7 +198,7 @@ end;
 
 procedure TfrmWebMailingsDlg.DeleteMailing;
 begin
-  if ShowAskDialog('Удаление рассылки', Format('Вы хотите удалить рассылку "%s"?', [IBCQueryMailing.FieldByName('TITLE').AsString])) = mrYes
+  if ShowAskDialog('Stergere trimitere', Format('Doriti sa stergeti trimiterea "%s"?', [IBCQueryMailing.FieldByName('TITLE').AsString])) = mrYes
   then
   begin
     IBCQueryMailing.UpdateTransaction.StartTransaction;
@@ -220,7 +220,7 @@ procedure TfrmWebMailingsDlg.MarkForModify;
 var
   Query: TIBCQuery;
 begin
-  if ShowAskDialog('Назад в режим редактирования', 'Вы хотите вернуть рассылку в режим редактирования?') <> mrYes then
+  if ShowAskDialog('Inapoi in modul de editare', 'Doriti sa readuceti trimiterea in modul de editare?') <> mrYes then
     Exit;
 
   Query := TIBCQuery.Create(Self);
@@ -299,7 +299,7 @@ end;
 
 procedure TfrmWebMailingsDlg.RunMailing;
 begin
-  if ShowAskDialog('Запуск рассылки', 'Вы хотите запустить отправку рассылки?') <> mrYes then
+  if ShowAskDialog('Lansare trimitere', 'Doriti sa lansati expedierea trimiterii?') <> mrYes then
     Exit;
   SendAllMessages;
 end;
@@ -376,8 +376,8 @@ begin
 //        begin
 //          Sender.Start;
 //          Sender.WaitFor;
-//          ShowInfoDialog('Тестовая рассылка', 'Тестовая рассылка завершенна.'#13#10 + Format('Отправленно писем: %d из %d.',
-//            [Sender.GetTotalSent, Sender.GetTotalRecipients]) + #13#10 + 'Ошибка:' + Sender.Error);
+//          ShowInfoDialog('Trimitere de test', 'Trimiterea de test s-a finalizat.'#13#10 + Format('Scrisori trimise: %d din %d.',
+//            [Sender.GetTotalSent, Sender.GetTotalRecipients]) + #13#10 + 'Eroare:' + Sender.Error);
 //        end;
 //      finally
 //        Sender.Free;

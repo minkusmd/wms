@@ -387,8 +387,8 @@ begin
     if asCopy = 0 then
     begin
       // move user
-      if ShowAskDialog('Перемещение пользователя',
-        Format('Вы хотите переместить пользователя %s из группы "%s" в группу "%s" ?',
+      if ShowAskDialog('Transfer utilizator',
+        Format('Doriti sa mutati utilizatorul %s din grupul "%s" in grupul "%s" ?',
         [s1, s0, s2])) = mrYes then
       begin
         if MoveUserToUserGroupDB(UserID, OldGroupID, NewGroupID) then
@@ -398,8 +398,8 @@ begin
     else
     begin
       // copy user
-      if ShowAskDialog('Копирование пользователя',
-        Format('Вы хотите добавить пользователя %s в группу "%s" ?', [s1, s2]))
+      if ShowAskDialog('Copiere utilizator',
+        Format('Doriti sa adaugati utilizatorul %s in grupul "%s" ?', [s1, s2]))
         = mrYes then
       begin
         if MoveUserToUserGroupDB(UserID, OldGroupID, NewGroupID, 1) then
@@ -453,9 +453,9 @@ begin
   begin
     if cxGridGroupsTable.DataController.Values[ARecordIndex,
       cxGridGroups_FLG_SERVICE_TITLE.Index] = 1 then
-      AText := 'Группы Б'
+      AText := 'Grupuri B'
     else
-      AText := 'Группы A';
+      AText := 'Grupuri A';
   end;
 end;
 

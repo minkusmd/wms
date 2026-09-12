@@ -209,31 +209,31 @@ begin
     with dmDB.IBCQueryDocs do
     begin
         if FieldByName('DATA').IsNull then
-            AddErrorToStr(ErrorStr, 'Дата документа!')
+            AddErrorToStr(ErrorStr, 'Data documentului!')
         else
         begin
             if (DateOf(FieldByName('DATA').AsDateTime) < DateOf(NOW)) then
-                AddErrorToStr(ErrorStr, 'Дата документа слишком стара!');
+                AddErrorToStr(ErrorStr, 'Data documentului este prea veche!');
         end;
 
 //        if FieldByName('SC2').IsNull then
-//            AddErrorToStr(ErrorStr, 'Аналитика документа!');
+//            AddErrorToStr(ErrorStr, 'Analitica documentului!');
 
         if FieldByName('DT').IsNull or (FieldByName('DT').AsInteger = -1) then
-            AddErrorToStr(ErrorStr, 'Организация!');
+            AddErrorToStr(ErrorStr, 'Organizatia!');
 //        if FieldByName('DTSC').IsNull then
-//            AddErrorToStr(ErrorStr, 'Аналитика организации!');
+//            AddErrorToStr(ErrorStr, 'Analitica organizatiei!');
 
         if FieldByName('CT').IsNull or (FieldByName('CT').AsInteger = -1) then
-            AddErrorToStr(ErrorStr, 'Поставщик!');
+            AddErrorToStr(ErrorStr, 'Furnizor!');
 //
 //        if FieldByName('DTDEP').IsNull or (FieldByName('DTDEP').AsInteger = -1) then
-//            AddErrorToStr(ErrorStr, 'Склад организации!');
+//            AddErrorToStr(ErrorStr, 'Depozitul organizatiei!');
         if FieldByName('CURRENCYID').IsNull then
-            AddErrorToStr(ErrorStr, 'Валюта!');
+            AddErrorToStr(ErrorStr, 'Valuta!');
 
 //        if FieldByName('RATEUSD').IsNull or (FieldByName('RATEUSD').AsFloat < 1) then
-//            AddErrorToStr(ErrorStr, 'Курс USD документа!')
+//            AddErrorToStr(ErrorStr, 'Cursul USD al documentului!')
     end;
 
     if ErrorStr = '' then

@@ -162,9 +162,9 @@ end;
 
 procedure TfrmWebShopsDlg.DeleteCity;
 begin
-     if ShowAskDialog('Удаление города',
-                      Format('Вы хотите удалить город "%s"?',[IBCQueryCity.FieldByName('CITY_TITLE').AsString]),
-                      'Внимание! Все магазины из этого города будут удалены.')<>mrYes then Exit;
+     if ShowAskDialog('Stergere oras',
+                      Format('Doriti sa stergeti orasul "%s"?',[IBCQueryCity.FieldByName('CITY_TITLE').AsString]),
+                      'Atentie! Toate magazinele din acest oras vor fi sterse.')<>mrYes then Exit;
 
      IBCQueryCity.UpdateTransaction.StartTransaction;
      try
@@ -181,8 +181,8 @@ end;
 procedure TfrmWebShopsDlg.DeleteShop;
 var S:String;
 begin
-     S:=Format('Вы хотите удалить магазин "%s" по адресу "%s"?',[IBCQueryShop.FieldByName('CUSTOMER_NAME').AsString,IBCQueryShop.FieldByName('ADRESA').AsString]);
-     if ShowAskDialog('Удаление магазина',S)<>mrYes then Exit;
+     S:=Format('Doriti sa stergeti magazinul "%s" pe adresa "%s"?',[IBCQueryShop.FieldByName('CUSTOMER_NAME').AsString,IBCQueryShop.FieldByName('ADRESA').AsString]);
+     if ShowAskDialog('Stergere magazin',S)<>mrYes then Exit;
 
      try
         IBCQueryShop.UpdateTransaction.StartTransaction;
@@ -200,7 +200,7 @@ procedure TfrmWebShopsDlg.Prepare;
 begin
      inherited;
 
-     dtDialogTitle.Title:=Format('Города и магазины продаж для %s',[dmDB.CurrentFirmaName]);
+     dtDialogTitle.Title:=Format('Orase si magazine de vanzare pentru %s',[dmDB.CurrentFirmaName]);
      Caption:=dtDialogTitle.Title;
 
      IBCQueryCity.ParamByName('firma').AsInteger:=dmDB.CurrentFirma;

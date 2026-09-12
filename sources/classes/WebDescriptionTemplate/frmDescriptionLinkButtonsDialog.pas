@@ -82,7 +82,7 @@ end;
 
 procedure TfrmDescriptionLinkButtonsDlg.DoDeleteButton;
 begin
-  if ShowAskDialog('Удаление кнопки', Format('Вы хотите удалить кнопку "%s" из списка?',
+  if ShowAskDialog('Stergere buton', Format('Doriti sa stergeti butonul "%s" din lista?',
     [IBCQueryButtons.FieldByName('FILTER_BUTTON_TITLE').AsString])) = mrYes then
   begin
     IBCQueryButtons.Delete;

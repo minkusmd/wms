@@ -268,9 +268,11 @@ TfrmGoodsForeignCodeDlg = class(TSWNCustomForm)
     procedure SetGoodsID(const Value: Integer);
     procedure SetQty(const Value: Double);
     procedure AddGoodsToCreditRetail(ACid: Integer);
+    procedure GetATehnoProductStock(AGoodsCode: string);
     procedure GetDMLinkProductStock(GoodsCode: string);
+    procedure GetEuroTermProductStock(AGoodsCode: string);
     procedure GetGoodsBalance_198;
-    procedure GetGoodsBalance_261523;
+    procedure GetTechnodomProductStock(AGoodsCode: string);
     procedure GetMuncitorulProductStock(GoodsCode: string);
     procedure GetScopProductStock(GoodsCode: string);
     procedure GetUltraProductStock(GoodsCode: string);
@@ -280,7 +282,6 @@ TfrmGoodsForeignCodeDlg = class(TSWNCustomForm)
     procedure LoadUltraApiConfig;
     function UltraApiLogin: Boolean;
     function UltraApiGetJson(const APath: string; out AJson: TJSONValue; out AStatusCode: Integer): Boolean;
-    procedure ParseBallanceQty(url: string);
 
   protected { protected declarations }
     procedure Prepare; override;
@@ -313,6 +314,7 @@ uses
   dxSpreadSheetCore,
   frmGoodsForeignCodeEditorDialog,
   frmGoodsInfoCardDialog,
+  frmATehnoStockResultDialog,
   frmHistoryGoodsPriceForeignUnit,
   frmSelectPhoneNumberUnit,
   System.UITypes,
@@ -328,6 +330,7 @@ uses
   System.Net.URLClient,
   System.NetConsts,
   System.NetEncoding,
+  System.RegularExpressions,
   System.DateUtils,
   AccentGuidRepo,
   AccentAuthService;
@@ -573,23 +576,37 @@ procedure TfrmGoodsForeignCodeDlg.bbSupllierApiClick(Sender: TObject);
 begin
     // accent
   if (ibcqueryforeign.fieldbyname('customerid').AsInteger = 198) then // accent
-    GetGoodsBalance_198;
-    // dehome
-  if (ibcqueryforeign.fieldbyname('customerid').AsInteger = 261523) then  // dehome
-    GetGoodsBalance_261523;
+    GetGoodsBalance_198
+    else
+    // technodom.md
+  if (ibcqueryforeign.fieldbyname('customerid').AsInteger = 261523) then
+    GetTechnodomProductStock(IBCQueryForeign.FieldByName('GOODS_CODE').AsString)
+  else
     // 229466 DMLink
   if (ibcqueryforeign.fieldbyname('customerid').AsInteger = 229466) then
-    GetDMLinkProductStock(IBCQueryForeign.FieldByName('GOODS_CODE').AsString);
+    GetDMLinkProductStock(IBCQueryForeign.FieldByName('GOODS_CODE').AsString)
+  else
     // triomac
   if (ibcqueryforeign.fieldbyname('customerid').AsInteger = 209280) then
-    GetScopProductStock(IBCQueryForeign.FieldByName('GOODS_CODE').AsString);
+    GetScopProductStock(IBCQueryForeign.FieldByName('GOODS_CODE').AsString)
+    else
     // ultra
   if (ibcqueryforeign.fieldbyname('customerid').AsInteger = 202294) then
-    GetUltraProductStock(IBCQueryForeign.FieldByName('GOODS_CODE').AsString);
+    GetUltraProductStock(IBCQueryForeign.FieldByName('GOODS_CODE').AsString)
+  else
     // muncitorul.md
   if (ibcqueryforeign.fieldbyname('customerid').AsInteger = 251465) then
-    GetMuncitorulProductStock(IBCQueryForeign.FieldByName('GOODS_CODE').AsString);
-
+    GetMuncitorulProductStock(IBCQueryForeign.FieldByName('GOODS_CODE').AsString)
+  else
+    // atehno.md
+  if (ibcqueryforeign.fieldbyname('customerid').AsInteger = 292109) then
+    GetATehnoProductStock(IBCQueryForeign.FieldByName('GOODS_CODE').AsString)
+  else
+    // euroterm.md
+  if (ibcqueryforeign.fieldbyname('customerid').AsInteger = 162399) then
+    GetEuroTermProductStock(IBCQueryForeign.FieldByName('GOODS_CODE').AsString)
+  else
+    MessageDlg('nu este implimentata procedura!', TMsgDlgType.mtInformation, [TMsgDlgBtn.mbOK],0);
 end;
 
 procedure TfrmGoodsForeignCodeDlg.btnRefreshClick(Sender: TObject);
@@ -707,6 +724,143 @@ begin
       AError := Client.LastError;
   finally
     Client.Free;
+  end;
+end;
+
+// -- atehno.md (scraping, fara API) ------------------------------------------
+// Nu exista cont B2B/API pentru atehno.md: incarcam direct pagina de cautare
+// (search/catalog?keywords=<cod>&mode=simple) - randata server-side, contine
+// deja rezultatele in HTML, fara JSON/AJAX - si cautam link-ul de produs care
+// contine efectiv GOODS_CODE (fiecare URL de produs se termina cu codul/EAN-ul,
+// ex. https://atehno.md/products/<slug>-<GOODS_CODE>). Apoi citim pagina
+// produsului si extragem lista de magazine cu stoc din blocul
+// "Самовывоз из магазина" (ul.product-taking-block--list > li.available).
+procedure TfrmGoodsForeignCodeDlg.GetATehnoProductStock(AGoodsCode: string);
+var
+  HttpClient: THTTPClient;
+  Response: IHTTPResponse;
+  ResponseContent: string;
+  LinkMatch: TMatch;
+  Doc: IHTMLDocument2;
+  DocBody: OleVariant;
+  VarArr: OleVariant;
+  AllSpans: OleVariant;
+  AllULs: OleVariant;
+  ListItems: OleVariant;
+  I, J: Integer;
+  ProductURL: string;
+  ProductTitle: string;
+  StatusText: string;
+  ElemClass: string;
+  Locations: TStringList;
+  Dialog: TfrmATehnoStockResultDlg;
+begin
+  AGoodsCode := Trim(AGoodsCode);
+  if AGoodsCode = '' then
+    Exit;
+
+  Screen.Cursor := crHourGlass;
+  Locations := TStringList.Create;
+  try
+    try
+      HttpClient := THTTPClient.Create;
+      try
+        HttpClient.CustomHeaders['User-Agent'] := 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)';
+
+        // Pagina de cautare (HTML complet, randat server-side)
+        Response := HttpClient.Get(Format('https://atehno.md/search/catalog?keywords=%s&mode=simple',
+          [TNetEncoding.URL.Encode(AGoodsCode)]));
+        if Response.StatusCode <> 200 then
+        begin
+          MessageDlg(Format('atehno.md: cautarea a esuat (HTTP %d).', [Response.StatusCode]), mtError, [mbOK], 0);
+          Exit;
+        end;
+        ResponseContent := Response.ContentAsString(TEncoding.UTF8);
+
+        // Cautam link-ul de produs care contine efectiv codul cautat, nu doar
+        // primul rezultat - cautarea poate intoarce si alte produse apropiate.
+        ProductURL := '';
+        LinkMatch := TRegEx.Match(ResponseContent,
+          'href="(https://atehno\.md/products/[^"]*' + TRegEx.Escape(AGoodsCode) + ')"', [roIgnoreCase]);
+        if LinkMatch.Success then
+          ProductURL := LinkMatch.Groups[1].Value;
+
+        if ProductURL = '' then
+        begin
+          MessageDlg(Format('Codul "%s" nu a fost gasit pe atehno.md.', [AGoodsCode]), mtWarning, [mbOK], 0);
+          Exit;
+        end;
+
+        // Pagina produsului
+        Response := HttpClient.Get(ProductURL);
+        if Response.StatusCode <> 200 then
+        begin
+          MessageDlg(Format('atehno.md: nu s-a putut deschide pagina produsului (HTTP %d).',
+            [Response.StatusCode]), mtError, [mbOK], 0);
+          Exit;
+        end;
+        ResponseContent := Response.ContentAsString(TEncoding.UTF8);
+      finally
+        HttpClient.Free;
+      end;
+
+      Doc := CoHTMLDocument.Create as IHTMLDocument2;
+      VarArr := VarArrayCreate([0, 0], varVariant);
+      VarArr[0] := ResponseContent;
+      Doc.Write(PSafeArray(TVarData(VarArr).VArray));
+      DocBody := Doc.Body;
+
+      // Denumirea produsului: <span class="product-name">
+      ProductTitle := '';
+      AllSpans := DocBody.All.Tags('span');
+      for I := 0 to Integer(AllSpans.Length) - 1 do
+        if string(AllSpans.item(I).ClassName) = 'product-name' then
+        begin
+          ProductTitle := Trim(string(AllSpans.item(I).innerText));
+          Break;
+        end;
+
+      // Statutul general: <span class="product-available|product-only-order|product-not-available">
+      StatusText := '';
+      for I := 0 to Integer(AllSpans.Length) - 1 do
+      begin
+        ElemClass := string(AllSpans.item(I).ClassName);
+        if (ElemClass = 'product-available') or (ElemClass = 'product-only-order') or
+          (ElemClass = 'product-not-available') then
+        begin
+          StatusText := Trim(string(AllSpans.item(I).innerText));
+          Break;
+        end;
+      end;
+      if StatusText = '' then
+        ElemClass := ''; // fara potrivire in bucla de mai sus - clasa retinuta e a ultimului span, nu una relevanta
+
+      // Magazinele/depozitele cu stoc: <ul class="product-taking-block--list"><li class="available">
+      AllULs := DocBody.All.Tags('ul');
+      for I := 0 to Integer(AllULs.Length) - 1 do
+        if string(AllULs.item(I).ClassName) = 'product-taking-block--list' then
+        begin
+          ListItems := AllULs.item(I).All.Tags('li');
+          for J := 0 to Integer(ListItems.Length) - 1 do
+            if string(ListItems.item(J).ClassName) = 'available' then
+              Locations.Add(Trim(string(ListItems.item(J).innerText)));
+          Break;
+        end;
+
+      Dialog := TfrmATehnoStockResultDlg.Create(Self);
+      try
+        Dialog.ShowStockInfo(AGoodsCode, ProductTitle, StatusText, ElemClass, ProductURL, Locations);
+        Dialog.ShowModal;
+      finally
+        Dialog.Free;
+      end;
+    except
+      on E: Exception do
+        MessageDlg('atehno.md: ' + E.Message, mtError, [mbOK], 0);
+    end;
+  finally
+    Locations.Free;
+    Screen.Cursor := crDefault;
   end;
 end;
 
@@ -969,62 +1123,388 @@ begin
   end;
 end;
 
-procedure TfrmGoodsForeignCodeDlg.GetGoodsBalance_261523;
+// -- technodom.md (catalog JSON, fara autentificare) --------------------------
+// Pagina noua Technodom incarca produsele prin GET /products?query=<cod>.
+// Raspunsul JSON contine denumirea, slug-ul, cantitatea si statutul de stoc.
+procedure TfrmGoodsForeignCodeDlg.GetTechnodomProductStock(AGoodsCode: string);
 var
-  allDivs: OleVariant;
-  atags: OleVariant;
-  Body: OleVariant;
-  Doc: IHTMLDocument2;
-  href: string;
   HttpClient: THTTPClient;
-  url: string;
-  HTMLBody: TSTringlist;
-  Response: TMemoryStream;
-  v: OleVariant;
-  I: Integer;
+  Response: IHTTPResponse;
+  ResponseContent: string;
+  SearchURL: string;
+  ProductURL: string;
+  ProductTitle: string;
+  StatusText: string;
+  StatusClass: string;
+  StockAvailability: string;
+  Json: TJSONValue;
+  ProductsValue: TJSONValue;
+  DataValue: TJSONValue;
+  RootObject: TJSONObject;
+  ProductsObject: TJSONObject;
+  ProductObject: TJSONObject;
+  ProductsArray: TJSONArray;
+  Quantity: Double;
+  ManagesStock: Boolean;
+  InStock: Boolean;
+  OutOfStock: Boolean;
+  AvailableForPurchase: Boolean;
+  Locations: TStringList;
+  Dialog: TfrmATehnoStockResultDlg;
+
+  function ReadJsonBoolean(AObject: TJSONObject; const AName: string;
+    const ADefault: Boolean): Boolean;
+  var
+    Value: TJSONValue;
+  begin
+    Result := ADefault;
+    if not Assigned(AObject) then
+      Exit;
+
+    Value := AObject.GetValue(AName);
+    if not Assigned(Value) then
+      Exit;
+
+    if SameText(Value.Value, 'true') or (Value.Value = '1') then
+      Result := True
+    else if SameText(Value.Value, 'false') or (Value.Value = '0') then
+      Result := False;
+  end;
+
+  function ReadJsonNumber(AObject: TJSONObject; const AName: string;
+    const ADefault: Double): Double;
+  var
+    Value: TJSONValue;
+  begin
+    Result := ADefault;
+    if not Assigned(AObject) then
+      Exit;
+
+    Value := AObject.GetValue(AName);
+    if Assigned(Value) then
+      Result := StrToFloatDef(Value.Value, ADefault, TFormatSettings.Invariant);
+  end;
+
 begin
-  HttpClient := Thttpclient.Create;
-  HTMLBody := TSTringlist.Create;
+  AGoodsCode := Trim(AGoodsCode);
+  if AGoodsCode = '' then
+    Exit;
+
+  Screen.Cursor := crHourGlass;
+  Json := nil;
+  Locations := TStringList.Create;
   try
-    HttpClient.UserAgent :=
-      'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36';
-    HttpClient.Accept := 'application/json, text/javascript, */*';
-    HttpClient.ContentType := 'application/json; charset=UTF-8';
-    HttpClient.AcceptCharSet := 'utf-8';
-    url := format('https://www.technodom.md/index.php?route=product/search&search=%s', [IBCQueryForeign.FieldByName('goods_code').AsString]);
-    Response := TMemoryStream.Create;
     try
-      HttpClient.AcceptCharSet := 'utf-8';
-      HttpClient.Get(url, Response);
-      HTMLBody.LoadFromStream(Response);
+      SearchURL := Format('https://www.technodom.md/products?query=%s',
+        [TNetEncoding.URL.Encode(AGoodsCode)]);
 
-      Doc := CoHTMLDocument.Create as IHTMLDocument2; // create IHTMLDocument2 instance
-      Doc.designMode := 'on';
-      v := VarArrayCreate([0, 0], varVariant);
-      v[0] := HTMLBody.Text;
-      Doc.Write(PSafeArray(TVarData(v).VArray)); // write data from IdHTTP
-      Body := Doc.body;
-    finally
-      Response.Free;
-    end;
+      HttpClient := THTTPClient.Create;
+      try
+        HttpClient.ConnectionTimeout := 15000;
+        HttpClient.ResponseTimeout := 30000;
+        HttpClient.CustomHeaders['User-Agent'] :=
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64)';
+        HttpClient.CustomHeaders['Accept'] := 'application/json, text/plain, */*';
+        HttpClient.CustomHeaders['X-Requested-With'] := 'XMLHttpRequest';
+        HttpClient.CustomHeaders['Referer'] := Format(
+          'https://www.technodom.md/ro/products?query=%s',
+          [TNetEncoding.URL.Encode(AGoodsCode)]);
 
-    allDivs := Body.All.Tags('div');
-    for I := 0 to allDivs.Length - 1 do
-    begin
-      if (allDivs.item(I).ClassName = 'caption text-center') then
-      begin
-        atags := allDivs.item(I).getelementsByTagName('a');
-        if atags.Length > 0 then
-          href := atags.item(0).href;
-
-        ParseBallanceQty(href);
-        Continue;
+        Response := HttpClient.Get(SearchURL);
+        if Response.StatusCode <> 200 then
+        begin
+          MessageDlg(Format('technodom.md: cautarea a esuat (HTTP %d).',
+            [Response.StatusCode]), mtError, [mbOK], 0);
+          Exit;
+        end;
+        ResponseContent := Response.ContentAsString(TEncoding.UTF8);
+      finally
+        HttpClient.Free;
       end;
 
+      Json := TJSONObject.ParseJSONValue(ResponseContent);
+      if not (Json is TJSONObject) then
+        raise Exception.Create('Raspuns JSON invalid.');
+
+      RootObject := TJSONObject(Json);
+      ProductsValue := RootObject.GetValue('products');
+      if not (ProductsValue is TJSONObject) then
+        raise Exception.Create('Lista de produse lipseste din raspuns.');
+
+      ProductsObject := TJSONObject(ProductsValue);
+      DataValue := ProductsObject.GetValue('data');
+      if not (DataValue is TJSONArray) then
+        raise Exception.Create('Datele produselor lipsesc din raspuns.');
+
+      ProductsArray := TJSONArray(DataValue);
+      if ProductsArray.Count = 0 then
+      begin
+        MessageDlg(Format('Codul "%s" nu a fost gasit pe technodom.md.',
+          [AGoodsCode]), mtWarning, [mbOK], 0);
+        Exit;
+      end;
+
+      if not (ProductsArray.Items[0] is TJSONObject) then
+        raise Exception.Create('Formatul produsului este invalid.');
+      ProductObject := TJSONObject(ProductsArray.Items[0]);
+
+      ProductTitle := ProductObject.GetValue<string>('name', '');
+      StockAvailability := ProductObject.GetValue<string>('stock_availability', '');
+      Quantity := ReadJsonNumber(ProductObject, 'qty', 0);
+      ManagesStock := ReadJsonBoolean(ProductObject, 'does_manage_stock',
+        ReadJsonBoolean(ProductObject, 'manage_stock', False));
+      InStock := ReadJsonBoolean(ProductObject, 'is_in_stock',
+        SameText(StockAvailability, 'in_stock'));
+      OutOfStock := ReadJsonBoolean(ProductObject, 'is_out_of_stock',
+        SameText(StockAvailability, 'out_of_stock'));
+      AvailableForPurchase := ReadJsonBoolean(ProductObject,
+        'is_available_for_purchase', InStock);
+
+      if SameText(StockAvailability, 'backorder') then
+      begin
+        StatusText := 'Disponibil la comanda';
+        StatusClass := 'product-only-order';
+      end
+      else if SameText(StockAvailability, 'special_order') then
+      begin
+        StatusText := 'Comanda speciala';
+        StatusClass := 'product-only-order';
+      end
+      else if InStock and not OutOfStock then
+      begin
+        StatusText := 'In stoc';
+        StatusClass := 'product-available';
+      end
+      else if OutOfStock or not AvailableForPurchase then
+      begin
+        StatusText := 'Epuizat';
+        StatusClass := 'product-not-available';
+      end
+      else
+      begin
+        StatusText := StockAvailability;
+        StatusClass := '';
+      end;
+
+      if ManagesStock and InStock then
+        Locations.Add(Format('Cantitate disponibila: %s buc.',
+          [FormatFloat('0.##', Quantity)]))
+      else if AvailableForPurchase then
+        Locations.Add('Cantitatea exacta nu este publicata.')
+      else
+        Locations.Add('Produs indisponibil.');
+
+      ProductURL := ProductObject.GetValue<string>('url', '');
+      if ProductURL = '' then
+      begin
+        ProductURL := ProductObject.GetValue<string>('slug', '');
+        if ProductURL <> '' then
+          ProductURL := 'https://www.technodom.md/ro/products/' + ProductURL;
+      end;
+      if ProductURL = '' then
+        ProductURL := Format('https://www.technodom.md/ro/products?query=%s',
+          [TNetEncoding.URL.Encode(AGoodsCode)]);
+
+      Dialog := TfrmATehnoStockResultDlg.Create(Self);
+      try
+        Dialog.ShowStockInfo(AGoodsCode, ProductTitle, StatusText, StatusClass,
+          ProductURL, Locations);
+        Dialog.Caption := 'Stoc technodom.md';
+        Dialog.lbLocationsCaption.Caption := 'Detalii stoc:';
+        Dialog.ShowModal;
+      finally
+        Dialog.Free;
+      end;
+    except
+      on E: Exception do
+        MessageDlg('technodom.md: ' + E.Message, mtError, [mbOK], 0);
     end;
   finally
-    HttpClient.Free;
-    HTMLBody.Free;
+    Json.Free;
+    Locations.Free;
+    Screen.Cursor := crDefault;
+  end;
+end;
+
+// -- euroterm.md (pagina de cautare, fara autentificare) ----------------------
+// Site-ul nu are API public: cautarea /ro/search-products?search=<cod> este
+// randata pe server. Fiecare produs e un bloc "main-catalog__item" care
+// contine "Cod: <cod>" (acelasi cod ca GOODS_CODE din TS_GOODS_FOREIGN pentru
+// furnizorul 162399). Cantitatea nu se publica: produsul din stoc are pret si
+// butonul "add_to_cart", cel adus la comanda are eticheta "for_order".
+procedure TfrmGoodsForeignCodeDlg.GetEuroTermProductStock(AGoodsCode: string);
+const
+  C_EuroTermHost = 'https://www.euroterm.md';
+  C_CardMarker = '<div class="main-catalog__item';
+var
+  HttpClient: THTTPClient;
+  Response: IHTTPResponse;
+  ResponseContent: string;
+  SearchURL: string;
+  Cards: TArray<string>;
+  Card: string;
+  ProductCard: string;
+  ProductCode: string;
+  ProductTitle: string;
+  ProductURL: string;
+  PriceText: string;
+  OldPriceText: string;
+  OrderText: string;
+  StatusText: string;
+  StatusClass: string;
+  CardCount: Integer;
+  FooterPos: Integer;
+  i: Integer;
+  Locations: TStringList;
+  Dialog: TfrmATehnoStockResultDlg;
+
+  // Primul grup din APattern, fara taguri HTML si cu entitatile decodate.
+  function CardValue(const ACard, APattern: string): string;
+  var
+    Match: TMatch;
+  begin
+    Result := '';
+    Match := TRegEx.Match(ACard, APattern, [roIgnoreCase, roSingleLine]);
+    if Match.Success then
+    begin
+      Result := TRegEx.Replace(Match.Groups[1].Value, '<[^>]*>', ' ');
+      Result := TRegEx.Replace(Result, '\s+', ' ');
+      Result := Trim(TNetEncoding.HTML.Decode(Result));
+    end;
+  end;
+
+begin
+  AGoodsCode := Trim(AGoodsCode);
+  if AGoodsCode = '' then
+    Exit;
+
+  Screen.Cursor := crHourGlass;
+  Locations := TStringList.Create;
+  try
+    try
+      SearchURL := Format(C_EuroTermHost + '/ro/search-products?search=%s',
+        [TNetEncoding.URL.Encode(AGoodsCode)]);
+
+      HttpClient := THTTPClient.Create;
+      try
+        HttpClient.ConnectionTimeout := 15000;
+        HttpClient.ResponseTimeout := 30000;
+        HttpClient.CustomHeaders['User-Agent'] :=
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64)';
+        HttpClient.CustomHeaders['Accept'] := 'text/html,application/xhtml+xml,*/*';
+
+        Response := HttpClient.Get(SearchURL);
+        if Response.StatusCode <> 200 then
+        begin
+          MessageDlg(Format('euroterm.md: cautarea a esuat (HTTP %d).',
+            [Response.StatusCode]), mtError, [mbOK], 0);
+          Exit;
+        end;
+        ResponseContent := Response.ContentAsString(TEncoding.UTF8);
+      finally
+        HttpClient.Free;
+      end;
+
+      // Cards[0] este antetul paginii; fiecare element urmator e un produs.
+      Cards := ResponseContent.Split([C_CardMarker], TStringSplitOptions.None);
+      CardCount := Length(Cards) - 1;
+      if CardCount <= 0 then
+      begin
+        MessageDlg(Format('Codul "%s" nu a fost gasit pe euroterm.md.',
+          [AGoodsCode]), mtWarning, [mbOK], 0);
+        Exit;
+      end;
+
+      // Ultimul card continua cu subsolul paginii - il taiem.
+      FooterPos := Pos('main-catalog__footer', Cards[CardCount]);
+      if FooterPos > 0 then
+        Cards[CardCount] := Copy(Cards[CardCount], 1, FooterPos - 1);
+
+      ProductCard := '';
+      for i := 1 to CardCount do
+      begin
+        Card := Cards[i];
+        if SameText(CardValue(Card, 'product-card__code[^>]*>\s*Cod:\s*([^<]*)</'), AGoodsCode) then
+        begin
+          ProductCard := Card;
+          Break;
+        end;
+      end;
+
+      // Cautarea e dupa text: daca nu exista potrivire exacta dar a venit un
+      // singur produs, il aratam cu avertisment (codul de pe site difera).
+      if (ProductCard = '') and (CardCount = 1) then
+        ProductCard := Cards[1];
+
+      if ProductCard = '' then
+      begin
+        MessageDlg(Format('Codul "%s" nu a fost gasit pe euroterm.md ' +
+          '(cautarea a intors %d produse, niciunul cu acest cod).',
+          [AGoodsCode, CardCount]), mtWarning, [mbOK], 0);
+        Exit;
+      end;
+
+      ProductCode := CardValue(ProductCard, 'product-card__code[^>]*>\s*Cod:\s*([^<]*)</');
+      ProductTitle := CardValue(ProductCard, 'class="product__name"[^>]*>(.*?)</a>');
+      ProductURL := CardValue(ProductCard, '<a\s+href="([^"]+)"\s+class="product__name"');
+      // Pret redus: price-product__now (+ price-product__old); altfel span.price
+      PriceText := CardValue(ProductCard, 'class="price-product__now[^"]*"[^>]*>(.*?)</span>');
+      if PriceText = '' then
+        PriceText := CardValue(ProductCard, 'class="price\s*"[^>]*>(.*?)</span>');
+      OldPriceText := CardValue(ProductCard, 'class="price-product__old[^"]*"[^>]*>(.*?)</span>');
+      OrderText := CardValue(ProductCard, 'class="for_order[^"]*"[^>]*>(.*?)</span>');
+
+      if OrderText <> '' then
+      begin
+        StatusText := OrderText;
+        StatusClass := 'product-only-order';
+      end
+      else if ProductCard.Contains('add_to_cart') then
+      begin
+        StatusText := 'In stoc';
+        StatusClass := 'product-available';
+      end
+      else
+      begin
+        StatusText := 'Indisponibil';
+        StatusClass := 'product-not-available';
+      end;
+
+      // Pretul se afiseaza langa statutul de stoc
+      if PriceText <> '' then
+        StatusText := StatusText + ' - ' + PriceText;
+      if OldPriceText <> '' then
+        Locations.Add(Format('Pret redus de la %s la %s', [OldPriceText, PriceText]));
+      if StatusClass = 'product-available' then
+        Locations.Add('Produsul poate fi comandat online.')
+      else if StatusClass = 'product-only-order' then
+        Locations.Add('Produsul se aduce doar la comanda.');
+      Locations.Add('Cantitatea exacta nu este publicata pe euroterm.md.');
+      if (ProductCode <> '') and not SameText(ProductCode, AGoodsCode) then
+        Locations.Add(Format('Atentie: pe site produsul are codul %s.', [ProductCode]));
+
+      if ProductURL = '' then
+        ProductURL := SearchURL
+      else if ProductURL.StartsWith('/') then
+        ProductURL := C_EuroTermHost + ProductURL;
+
+      Dialog := TfrmATehnoStockResultDlg.Create(Self);
+      try
+        Dialog.ShowStockInfo(AGoodsCode, ProductTitle, StatusText, StatusClass,
+          ProductURL, Locations);
+        Dialog.Caption := 'Stoc euroterm.md';
+        Dialog.lbLocationsCaption.Caption := 'Detalii stoc:';
+        Dialog.ShowModal;
+      finally
+        Dialog.Free;
+      end;
+    except
+      on E: Exception do
+        MessageDlg('euroterm.md: ' + E.Message, mtError, [mbOK], 0);
+    end;
+  finally
+    Locations.Free;
+    Screen.Cursor := crDefault;
   end;
 end;
 
@@ -1477,56 +1957,6 @@ begin
   MessageDlg(Msg, mtInformation, [mbOK], 0);
 end;
 
-procedure TfrmGoodsForeignCodeDlg.ParseBallanceQty(url: string);
-var
-  allSpan: OleVariant;
-  Body: OleVariant;
-  Doc: IHTMLDocument2;
-  HTMLBody: TSTringlist;
-  HttpClient: Thttpclient;
-  Response: TMemoryStream;
-  v: OleVariant;
-  i: integer;
-begin
-
-  HttpClient := Thttpclient.Create;
-  HTMLBody := TSTringlist.Create;
-  try
-    HttpClient.UserAgent :=
-      'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36';
-    HttpClient.Accept := 'application/json, text/javascript, */*';
-    HttpClient.ContentType := 'application/json; charset=UTF-8';
-    HttpClient.AcceptCharSet := 'utf-8';
-
-    Response := TMemoryStream.Create;
-    try
-      HttpClient.AcceptCharSet := 'utf-8';
-      HttpClient.Get(url, Response);
-      HTMLBody.LoadFromStream(Response);
-
-      Doc := CoHTMLDocument.Create as IHTMLDocument2; // create IHTMLDocument2 instance
-      Doc.designMode := 'on';
-      v := VarArrayCreate([0, 0], varVariant);
-      v[0] := HTMLBody.Text;
-      Doc.Write(PSafeArray(TVarData(v).VArray)); // write data from IdHTTP
-      Body := Doc.body;
-    finally
-      Response.Free;
-    end;
-
-    allSpan := Body.All.Tags('div');
-    for i := 0 to allSpan.Length - 1 do
-    begin
-      if (allSpan.item(i).ClassName = 'availability in-stock') then
-      begin
-        MessageDlg(Format('%s', [allSpan.item(i).innertext]), mtInformation, [mbOK], 0);
-      end;
-    end;
-  finally
-    HttpClient.Free;
-    HTMLBody.Free;
-  end;
-end;
 
 procedure TfrmGoodsForeignCodeDlg.Prepare;
 var

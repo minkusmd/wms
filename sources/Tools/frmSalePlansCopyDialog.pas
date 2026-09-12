@@ -88,7 +88,7 @@ begin
   end
   else
   begin
-    ShowErrorDialog(cMSG_GeneralInputError_Title, 'Выберите соответствующие даты!');
+    ShowErrorDialog(cMSG_GeneralInputError_Title, 'Selectati datele corespunzatoare!');
     Result := False;
   end;
 end;

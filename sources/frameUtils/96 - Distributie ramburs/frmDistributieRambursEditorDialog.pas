@@ -102,7 +102,7 @@ begin
     fMasterDataSet.FieldByName('CONTRACTID').AsInteger);
   if Assigned(contractInfo) then
   begin
-    beContract.Text := Format('%s (№%s от %s)', [contractInfo.ContractTypeTitle, contractInfo.Code,
+    beContract.Text := Format('%s (nr.%s din %s)', [contractInfo.ContractTypeTitle, contractInfo.Code,
       FormatDateTime('dd MMMM yyyy', contractInfo.SignDate)]);
     fMasterDataSet.FieldByName('CONTRACTID').AsInteger := contractInfo.ContractID;
     lbContractInfo.Visible := True;

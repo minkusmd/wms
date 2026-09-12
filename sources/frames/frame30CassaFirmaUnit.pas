@@ -1,6 +1,6 @@
 unit frame30CassaFirmaUnit;
 {
-  КАССА - Касса организации
+  CASA - Casa organizatiei
   DocTypeID = 1212
   Frame Index = 30
 }
@@ -325,7 +325,7 @@ end;
 
 function Tframe30CassaFirma.InitFrameID: integer;
 begin
-     Result:=30; // КАССА - Касса организации
+     Result:=30; // CASA - Casa organizatiei
 end;
 
 procedure Tframe30CassaFirma.OpenData(const FrameDataFilterInfo: TFrameDataFilteringInfo);
@@ -335,13 +335,13 @@ begin
      // users
      IBCQueryUsers.ParamByName('DT').AsInteger:=FrameDataFilterInfo.FirmaID;
      IBCQueryUsers.Active:=True;
-     // Персональная касса
+     // Casa personala
      IBCQueryPersonalCash.Active:=True;
-     // Непринятые передачи
+     // Transferuri neacceptate
      IBCQueryNonConfirmedTransfers.Active:=True;
-     // Незакрытые клиенты
+     // Clienti neinchisi
      IBCQueryOI.Active:=True;
-     // История передач денег
+     // Istoric transferuri de bani
      IBCQueryHist.Active:=True;
 
      cxGridUsersDBTable.DataController.Groups.FullExpand;

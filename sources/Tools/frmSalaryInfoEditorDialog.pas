@@ -72,16 +72,16 @@ begin
      Result:=False;
      Error:='';
 
-     if (cmbMonth.ItemIndex=-1) or (cmbYear.ItemIndex=-1) then AddErrorToStr(Error,'Месяц!');
+     if (cmbMonth.ItemIndex=-1) or (cmbYear.ItemIndex=-1) then AddErrorToStr(Error,'Luna!');
 
      if fMasterDataSet.FieldByName('CUSTOMERID').IsNull or (fMasterDataSet.FieldByName('CUSTOMERID').AsInteger=-1)
-       then AddErrorToStr(Error,'Контрагент!');
+       then AddErrorToStr(Error,'Contraagent!');
 
      if fMasterDataSet.FieldByName('BASE_SALARY').IsNull or (fMasterDataSet.FieldByName('BASE_SALARY').AsInteger<0)
-       then AddErrorToStr(Error,'Ставка!');
+       then AddErrorToStr(Error,'Tariful!');
 
      if fMasterDataSet.FieldByName('QTY_WORK_HOURS').IsNull or (fMasterDataSet.FieldByName('QTY_WORK_HOURS').AsInteger<0)
-       then AddErrorToStr(Error,'Рабочие часы!');
+       then AddErrorToStr(Error,'Ore de lucru!');
 
 
      if Error='' then Result:=True
@@ -125,7 +125,7 @@ begin
      try
         if fCreateNewRecord then
         begin
-             dtDialogTitle.Text:='Создание новой записи';
+             dtDialogTitle.Text:='Creare inregistrare noua';
              fMasterDataSet.Insert;
              fMasterDataSet.FieldByName('BASE_SALARY').AsInteger:=0;
              fMasterDataSet.FieldByName('QTY_WORK_HOURS').AsInteger:=0;
@@ -133,7 +133,7 @@ begin
         end
         else
         begin
-             dtDialogTitle.Text:='Изменение записи';
+             dtDialogTitle.Text:='Modificare inregistrare';
              fMasterDataSet.Edit;
         end;
         IBCQueryCust.Active:=True;

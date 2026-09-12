@@ -1,6 +1,6 @@
 unit frame05BankPDNSICUnit;
 
-// БАНКОВСКИЕ ОПЕРАЦИИ. Приход денег на счет (из кассы)
+// OPERATIUNI BANCARE. Incasare bani in cont (din casa)
 // DocTypeID = 121
 // Frame Index = 5
 
@@ -122,14 +122,14 @@ end;
 procedure Tframe05BankPDNSIC.bbPDCClick(Sender: TObject);
 var dialog:TfrmMoneyIncomeDlg;
 begin
-     // Приход денег на счет
+     // Incasare bani in cont
      dialog:=TfrmMoneyIncomeDlg.Create(Self,dmDB.IBCQueryDocs,dmDB.IBCDataSourceDocs);
      try
         dialog.SetCustomTitle('Cont bancar','Ordin de incasare');
 
         if dialog.ShowModal=mrOk then
         begin
-             // Приход денег на счет
+             // Incasare bani in cont
              if dmDB.CreateProhodDenegNaSciotMAIN(dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger,dialog.CurrencyID,dmDB.IBCQueryDocs.FieldByName('FLG_ACNT').AsInteger,dialog.Rate,dialog.SUMA) then
              begin
                   dmDB.IBCQueryDocs.Refresh;
@@ -236,7 +236,7 @@ end;
 
 procedure Tframe05BankPDNSIC.DoAction_CancelProvodca;
 begin
-     if ShowAskDialog('Ordin de incasare','Вы хотите отменить проводку?')=mrYes then
+     if ShowAskDialog('Ordin de incasare','Doriti sa anulati inregistrarea?')=mrYes then
      begin
           if dmDB.CancelDocumentProvodka(dmDB.IBCQueryDocs.FieldByName('DOCID').asInteger)
             then dmDB.IBCQueryDocs.Refresh;
@@ -245,7 +245,7 @@ end;
 
 procedure Tframe05BankPDNSIC.DoAction_Provesti;
 begin
-     if ShowAskDialog('Провести','Вы хотите провести?')=mrYes then
+     if ShowAskDialog('Confirmare','Doriti sa confirmati?')=mrYes then
      begin
           if dmDB.CreateDocumentProvodka(dmDB.IBCQueryDocs.FieldByName('DOCID').asInteger)
             then dmDB.IBCQueryDocs.Refresh;
@@ -307,7 +307,7 @@ begin
           // context from Docs
           if cxGridBankPDNSICDBTableCtName.Focused then
           begin
-               // Принято от
+               // Primit de la
                Result.Context:=ffCustomer;
                Result.ValueInt:=dmDB.IBCQueryDocs.FieldByName('CT').AsInteger;
                Result.ValueStr:=dmDB.IBCQueryDocs.FieldByName('CT_NAME').AsString;
@@ -315,7 +315,7 @@ begin
           else
           if cxGridBankPDNSIC_DATA.Focused then
           begin
-               // Дата
+               // Data
                Result.Context:=ffDate;
                Result.ValueDateTime:=dmDB.IBCQueryDocs.FieldByName('DATA').AsDateTime;
           end
@@ -342,7 +342,7 @@ end;
 
 function Tframe05BankPDNSIC.InitFrameID: integer;
 begin
-     // БАНК. Приход денег на счет (из кассы)
+     // BANCA. Incasare bani in cont (din casa)
      Result := 5;
 end;
 
@@ -411,7 +411,7 @@ begin
           fDocEdit:=fSECURITY_CanEdit and Not FLG_CLOSED or fSECURITY_CanView;
           fDocDelete:=fSECURITY_CanDelete and Not FLG_CLOSED;
 
-          fCloseDoc:=Not FLG_CLOSED;  // Провести
+          fCloseDoc:=Not FLG_CLOSED;  // Confirma
           fOpenDoc:=FLG_CLOSED;
      end;
 

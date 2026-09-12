@@ -1,6 +1,6 @@
 unit frame04BankPDNSUnit;
 
-// БАНКОВСКИЕ ОПЕРАЦИИ. Приход денег на счет
+// OPERATIUNI BANCARE. Incasare bani in cont
 // DocTypeID = 120
 // Frame Index = 4
 
@@ -352,7 +352,7 @@ begin
           // context from Docs
           if cxGridBankPDNSTableCtName.Focused then
           begin
-               // Принято от
+               // Primit de la
                Result.Context:=ffCustomer;
                Result.ValueInt:=dmDB.IBCQueryDocs.FieldByName('CT').AsInteger;
                Result.ValueStr:=dmDB.IBCQueryDocs.FieldByName('CT_NAME').AsString;
@@ -360,7 +360,7 @@ begin
           else
           if cxGridBankPDNS_DATA.Focused then
           begin
-               // Дата
+               // Data
                Result.Context:=ffDate;
                Result.ValueDateTime:=dmDB.IBCQueryDocs.FieldByName('DATA').AsDateTime;
           end
@@ -387,7 +387,7 @@ end;
 
 function Tframe04BankPDNS.InitFrameID: integer;
 begin
-     // БАНК. Приход денег на счет
+     // BANCA. Incasare bani in cont
      Result:=4;
 end;
 

@@ -32,6 +32,7 @@ type
         IBCQueryAccounts: TIBCQuery;
         IBCDataSourceAccounts: TIBCDataSource;
         btnOk: TcxButton;
+    cxGridAccounts_FLG_CONT_CURENT: TcxGridDBColumn;
         procedure DataSourceAccountsDataChange(Sender: TObject; Field: TField);
         procedure bbNewClick(Sender: TObject);
         procedure bbRemoveClick(Sender: TObject);

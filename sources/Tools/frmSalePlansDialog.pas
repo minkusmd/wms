@@ -113,7 +113,7 @@ begin
           DecodeDate(ARecord.Values[cxGrid_DATA.Index],y,m,d);
           DecodeDate(Now,y2,m2,d2);
 
-          if (y2=y) and (m2=m) then AText:=Format('Текущий месяц (%s)',[FormatDateTime('mmmm yyyy',ARecord.Values[cxGrid_DATA.Index])])
+          if (y2=y) and (m2=m) then AText:=Format('Luna curenta (%s)',[FormatDateTime('mmmm yyyy',ARecord.Values[cxGrid_DATA.Index])])
             else AText:=FormatDateTime('mmmm yyyy',ARecord.Values[cxGrid_DATA.Index]);
      end;
 end;
@@ -147,7 +147,7 @@ end;
 
 procedure TfrmSalePlansDlg.DoDeleteRecord;
 begin
-     if ShowAskDialog('Удаление плана',Format('Вы хотите удалить планы для фирмы %s ?',[IBCQuerySal.FieldByName('DT_NAME').AsString]))=mrYes then
+     if ShowAskDialog('Stergere plan',Format('Doriti sa stergeti planurile pentru firma %s ?',[IBCQuerySal.FieldByName('DT_NAME').AsString]))=mrYes then
      begin
           IBCQuerySal.UpdateTransaction.StartTransaction;
           try
@@ -215,8 +215,8 @@ begin
         begin
              d1:=dialog.SourceData;
              d2:=dialog.TargetData;
-             S:=Format('Вы хотите скопировать из %s в %s ?',[FormatDateTime('mmmm yyyy',d1),FormatDateTime('mmmm yyyy',d2)]);
-             if ShowAskDialog('Копирование данных',S)=mrYes then
+             S:=Format('Doriti sa copiati din %s in %s ?',[FormatDateTime('mmmm yyyy',d1),FormatDateTime('mmmm yyyy',d2)]);
+             if ShowAskDialog('Copiere date',S)=mrYes then
              begin
                   if DoCopyDataDB(d1,d2) then IBCQuerySal.Refresh;
              end;

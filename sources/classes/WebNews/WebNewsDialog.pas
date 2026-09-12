@@ -89,8 +89,8 @@ end;
 procedure TfrmWebNewsDlg.DeleteSelectedNews;
 var S:String;
 begin
-     S:=Format('Вы хотите удалить новость "%s"?',[IBCQueryNews.FieldByName('TITLE').AsString]);
-     if ShowAskDialog('Удаление новости',S)=mrYes then
+     S:=Format('Doriti sa stergeti stirea "%s"?',[IBCQueryNews.FieldByName('TITLE').AsString]);
+     if ShowAskDialog('Stergere stire',S)=mrYes then
      begin
           IBCQueryNews.UpdateTransaction.StartTransaction;
           try

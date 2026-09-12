@@ -67,13 +67,13 @@ begin
      try
         if FCreateNewRecord then
         begin
-             dtDialogTitle.Text:='Создание нового SQL-я';
+             dtDialogTitle.Text:='Creare SQL nou';
              fMasterDataSet.Insert;
              fMasterDataSet.FieldByName('SQL_TEXT').AsString:='SELECT * FROM <table>';
         end
         else
         begin
-             dtDialogTitle.Text:='Изменение записи';
+             dtDialogTitle.Text:='Modificare inregistrare';
              fMasterDataSet.Edit;
         end;
      except
@@ -93,9 +93,9 @@ var Errors:String;
 begin
      Result:=False;
      if (fMasterDataSet.FieldByName('TITLE').IsNull) or (fMasterDataSet.FieldByName('TITLE').AsString='')
-       then AddErrorToStr(Errors,'Название!');
+       then AddErrorToStr(Errors,'Denumire!');
      if (fMasterDataSet.FieldByName('SQL_TEXT').IsNull) or (fMasterDataSet.FieldByName('SQL_TEXT').AsString='')
-       then AddErrorToStr(Errors,'SQL текст!');
+       then AddErrorToStr(Errors,'Textul SQL!');
 
      if (Errors='') then Result:=True
      else ShowErrorDialog(cMSG_GeneralInputError_Title,cMSG_GeneralInputError_Text,Errors);

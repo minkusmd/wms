@@ -111,14 +111,14 @@ type
 const
     cSYSS_Filter:array[TSyssSelectMode] of TSyssFilterParam =
     (
-     (SType:'V'; SNO:1; Caption:'Производители';Description:'Производители товаров'), // Vendor
-     (SType:'C'; SNO:1; Caption:'Города';Description:'Торода и населенные пункты'), // City
-     (SType:'D'; SNO:1; Caption:'Районы';Description:''), // Districts
-     (SType:'C'; SNO:2; Caption:'Тип контрагента';Description:''), // Customer type
-     (SType:'C'; SNO:3; Caption:'Статус контрагента';Description:''), // Customer Status
-     (SType:'G'; SNO:1; Caption:'Тип товара';Description:''), // Goods Type
-     (SType:'S'; SNO:1; Caption:'Тип склада';Description:''), // Stock Type
-     (SType:'G'; SNO:2; Caption:'Тип серийного учета';Description:'') // Goods Serial Type
+     (SType:'V'; SNO:1; Caption:'Producatori';Description:'Producatorii marfurilor'), // Vendor
+     (SType:'C'; SNO:1; Caption:'Orase';Description:'Orasele si localitatile'), // City
+     (SType:'D'; SNO:1; Caption:'Raioane';Description:''), // Districts
+     (SType:'C'; SNO:2; Caption:'Tipul contraagentului';Description:''), // Customer type
+     (SType:'C'; SNO:3; Caption:'Statutul contraagentului';Description:''), // Customer Status
+     (SType:'G'; SNO:1; Caption:'Tipul marfii';Description:''), // Goods Type
+     (SType:'S'; SNO:1; Caption:'Tipul depozitului';Description:''), // Stock Type
+     (SType:'G'; SNO:2; Caption:'Tipul evidentei seriale';Description:'') // Goods Serial Type
     );
 
 
@@ -160,7 +160,7 @@ begin
      if Not FBrowseMode then
      begin
           btnOk.Visible:=False;
-          btnCancel.Caption:='Закрыть';
+          btnCancel.Caption:='Inchide';
      end;
 
      // select required view
@@ -265,14 +265,14 @@ procedure TfrmSelectSyssDialog.DeleteCurrentRecord;
 var S,S2:WideString;
 begin
      case FSelectMode of
-       ssmVendor:         begin S:='Удаление производителя'; S2:='Удалить производителя "%s"?'; end;
-       ssmCity:           begin S:='Удаление города'; S2:='Удалить город '; end;
-       ssmDistrict:       begin S:='Удаление района'; S2:='Удалить район "%s"?'; end;
-       ssmCustomerType:   begin S:='Удаление типа контрагента'; S2:='Удалить типа контрагента "%s"?'; end;
-       ssmCustomerStatus: begin S:='Удаление статуса контрагента'; S2:='Удалить статуса контрагента "%s"?'; end;
-       ssmGoodsType:      begin S:='Удаление типа товара'; S2:='Удалить типа товара "%s"?'; end;
-       ssmStockType:      begin S:='Удаление типа склада'; S2:='Удалить типа склада "%s"?'; end;
-       ssmGoodsSerialType:begin S:='Удаление типа серийного учета'; S2:='Удалить тип серийного учета "%s"?'; end;
+       ssmVendor:         begin S:='Stergere producator'; S2:='Stergeti producatorul "%s"?'; end;
+       ssmCity:           begin S:='Stergere oras'; S2:='Stergeti orasul '; end;
+       ssmDistrict:       begin S:='Stergere raion'; S2:='Stergeti raionul "%s"?'; end;
+       ssmCustomerType:   begin S:='Stergere tip contraagent'; S2:='Stergeti tipul de contraagent "%s"?'; end;
+       ssmCustomerStatus: begin S:='Stergere statut contraagent'; S2:='Stergeti statutul contraagentului "%s"?'; end;
+       ssmGoodsType:      begin S:='Stergere tip marfa'; S2:='Stergeti tipul de marfa "%s"?'; end;
+       ssmStockType:      begin S:='Stergere tip depozit'; S2:='Stergeti tipul de depozit "%s"?'; end;
+       ssmGoodsSerialType:begin S:='Stergere tip evidenta seriala'; S2:='Stergeti tipul de evidenta seriala "%s"?'; end;
      end;
      if ShowAskDialog(S,Format(S2,[IBCQuerySYSS.FieldByName('TITLE').asString]))=mrYes then
      begin
@@ -309,14 +309,14 @@ procedure TfrmSelectSyssDialog.GetEditorTitles(const vSelectMode: TSyssSelectMod
 begin
      ValueText:='';
      case vSelectMode of
-     ssmVendor:         begin TitleText:='Производитель'; ValueText:='Интернет адресс';  end;
-     ssmCity:           begin TitleText:='Город'; ValueText:='Район'; end;
-     ssmDistrict:       begin TitleText:='Район'; end;
-     ssmCustomerType:   begin TitleText:='Тип производителя'; end;
-     ssmCustomerStatus: begin TitleText:='Статус производителя'; end;
-     ssmGoodsType:      begin TitleText:='Тип товара'; end;
-     ssmStockType:      begin TitleText:='Тип склада'; end;
-     ssmGoodsSerialType:begin TitleText:='Тип серийного учета'; end;
+     ssmVendor:         begin TitleText:='Producator'; ValueText:='Adresa internet';  end;
+     ssmCity:           begin TitleText:='Oras'; ValueText:='Raion'; end;
+     ssmDistrict:       begin TitleText:='Raion'; end;
+     ssmCustomerType:   begin TitleText:='Tipul producatorului'; end;
+     ssmCustomerStatus: begin TitleText:='Statutul producatorului'; end;
+     ssmGoodsType:      begin TitleText:='Tipul marfii'; end;
+     ssmStockType:      begin TitleText:='Tipul depozitului'; end;
+     ssmGoodsSerialType:begin TitleText:='Tipul evidentei seriale'; end;
      end;
 end;
 

@@ -219,17 +219,17 @@ begin
         NetHttpClient1.CustomHeaders['Origin'] := 'https://atehno.md';
 
         Response := NetHTTPClient1.Get(format('https://atehno.md/search/catalog?keywords=%s&mode=simple', [GoodsCode]));
-    // Обработка ответа
+    // Procesare raspuns
         if Response.StatusCode = 200 then
         begin
         // DecodeEscapedUnicode
             ResponseContent := (Response.ContentAsString(TEncoding.UTF8));
-          // Здесь можно обработать JSON-ответ
+          // Aici se poate procesa raspunsul JSON
 //          ShowMessage(ResponseContent);
         end
         else
         begin
-            ShowMessage('Ошибка: ' + Response.StatusCode.ToString);
+            ShowMessage('Eroare: ' + Response.StatusCode.ToString);
         end;
 
         JsonObject := TJSONObject.ParseJSONValue(ResponseContent) as TJSONObject;
@@ -273,14 +273,14 @@ begin
     begin
 
         Response := NetHTTPClient1.Get(productURL);
-    // Обработка ответа
+    // Procesare raspuns
         if Response.StatusCode = 200 then
         begin
             ResponseContent := (Response.ContentAsString(TEncoding.UTF8));
         end
         else
         begin
-            ShowMessage('Ошибка: ' + Response.StatusCode.ToString);
+            ShowMessage('Eroare: ' + Response.StatusCode.ToString);
         end;
 
         FDocumentProductPage := CoHTMLDocument.Create as IHTMLDocument2; // create IHTMLDocument2 instance

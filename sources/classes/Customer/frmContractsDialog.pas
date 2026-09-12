@@ -89,7 +89,7 @@ end;
 
 procedure TfrmContractsDlg.DeleteContract;
 begin
-     if ShowAskDialog('Удаление контракта',Format('Вы хотите удалить контракт №%d ?',[IBCQueryC.FieldByName('CODE').AsInteger]))<>mrYes then Exit;
+     if ShowAskDialog('Stergere contract',Format('Doriti sa stergeti contractul nr.%d ?',[IBCQueryC.FieldByName('CODE').AsInteger]))<>mrYes then Exit;
 
      IBCQueryC.UpdateTransaction.StartTransaction;
      try

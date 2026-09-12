@@ -16,15 +16,15 @@ type
     constructor Create;
     destructor Destroy; override;
 
-    // Базовый метод для загрузки страницы
+    // Metoda de baza pentru incarcarea paginii
     function LoadPage(const URL: string): string; virtual;
 
-    // Сохраняет изображение в формате PNG
+    // Salveaza imaginea in format PNG
     procedure SaveImageToPNG(const ImageURL: string; const SavePath: string);
 
-    // Переопределяемая процедура парсинга
+    // Procedura de parsare suprascrisa
     procedure ParsePage(const PageContent: string); virtual; abstract;
-    // идентификация изображения
+    // identificarea imaginii
     function IdentifyImageFormat(const Stream: TStream): string;
   end;
 

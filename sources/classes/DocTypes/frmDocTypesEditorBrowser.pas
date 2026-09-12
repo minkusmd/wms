@@ -921,7 +921,7 @@ begin
     if ANode.Level <= 1 then
     begin
         if Data^.TabSheetIndex = -1 then
-            Value := '' // Value:='нету'
+            Value := '' // Value:='nu exista'
         else
             Value := IntToStr(Data^.TabSheetIndex);
     end
@@ -1026,9 +1026,9 @@ var
 begin
     Data0 := TcxTreeListNode(Nodes[0]).Data;
     Data := AttachNode.Data;
-    S := 'Вы хотите переместить документ' + #13#10 + '"' + Data0^.Title + '"' + #13#10 + 'в область "' + Data^.Title
+    S := 'Doriti sa mutati documentul' + #13#10 + '"' + Data0^.Title + '"' + #13#10 + 'in zona "' + Data^.Title
         + '"?';
-    if ShowAskDialog('Перемещение документа', S) <> mrYes then
+    if ShowAskDialog('Transfer document', S) <> mrYes then
         Done := True;
 
 end;

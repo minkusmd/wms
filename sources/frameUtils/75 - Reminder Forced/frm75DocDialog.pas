@@ -1,6 +1,6 @@
 unit frm75DocDialog;
 {
-  Ñ×ÅÒÀ - Âõîäíûå Ñ÷åòà
+  FACTURI - Facturi de intrare
   > Forma de editare a documentului
 }
 

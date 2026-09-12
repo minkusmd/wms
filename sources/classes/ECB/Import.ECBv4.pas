@@ -8,14 +8,14 @@ uses
 type
     TStruct60 = record
     {
-         F1    Не используется                             X
-         F2    Дата начало периода (в формате YYYYMMDD)    20000218
-         F3    Код валюты счета                            USD
-         F4    Остаток на начало периода в валюте          1000.00
-         F5    Код лея                                     MDL
-         F6    Остаток на начало периода в леях            12474.00
-         F7    Курс валюты                                 12.47400000
-         F8    Метка закрытый или открытый опердень        С (или О)
+         F1    Nu se utilizeaza                             X
+         F2    Data inceput perioada (in formatul YYYYMMDD)    20000218
+         F3    Codul valutei contului                            USD
+         F4    Sold la inceputul perioadei in valuta          1000.00
+         F5    Codul leului                                     MDL
+         F6    Sold la inceputul perioadei in lei            12474.00
+         F7    Cursul valutei                                 12.47400000
+         F8    Marcaj zi operationala inchisa sau deschisa        С (sau О)
     }
         F1: string;
         F2: string;
@@ -29,51 +29,51 @@ type
 
     TStruct61 = record
 {
-Формат поля :61:
+Format camp :61:
 :61:F1*F2*F3*F4*F5*F6*F7*F8*F9*F10*F11*F12*F13*F14*F15*F16*F17*F18*F19*F20*F21*F22*F23*F24*F25*F26*F27*F28*F29*F30*F31*F32*F33
-Пример поля :61:
+Exemplu camp :61:
 :61: 12345*20000218*12.47400000*0**D*300.00*0.00*3742.20*0.00*C*2*07*1*20000215*
 USD*USD*300.00*300.00*EXAMPLE SRL*882000*225179991004** B.C.'EuroCreditBank'S.A.* ECBMMD2X *BENEFICIAR SAI*104976*0724997015**BC'MOLDOVA-AGROINDBANK'SA f.11 Chisin.* AGRNMD2X433*PLATA PENTRU MARFA*Suma comisiei: 85.54 USD
 
- Поле  Описание                                    Пример
- F1    Ссылка на документ                          12345
- F2    Дата проводки (в формате YYYYMMDD)          20000218
- F3    Курс валюты                                 12.47400000
- F4    Не используется                             0
- F5    Внутрений счет
- F6    Метка дебет или кредит                      D (или C)
- F7    Сумма дебета (в валюте)                     300.00
- F8    Сумма кредита (в валюте)                    0.00
- F9    Сумма дебета (в леях)                       3742.20
- F10   Сумма кредита (в леях)                      0.00
- F11   Метка закрытый или открытый опердень        С (или О)
- F12   Вид документа                               2
- F13   Номер документа                             07
- F14   Тип и вид документа                         1
- F15   Дата документа                              20000215
- F16   Валюта документа                            USD
- F17   Строка валюты                               USD
- F18   Сумма платежа                               300.00
- F19   Строка суммы                                300.00
- F20   Сумма платежа в леях                300.00
- F21   Строка суммы в леях      300.00
- F22   Наименование плательщика                    Example SRL
- F23   Ф.к. плательщика                            882000
- F24   Счет плательщика                            225179991004 (IBAN)
- F25   2-й счет плательщика
- F26   Наименование банка плательщика              B.C.'EuroCreditBank'S.A.
- F27   Код банка плательщика                       ECBMMD2X
+ Camp  Descriere                                    Exemplu
+ F1    Referinta la document                          12345
+ F2    Data inregistrarii (in formatul YYYYMMDD)          20000218
+ F3    Cursul valutei                                 12.47400000
+ F4    Nu se utilizeaza                             0
+ F5    Cont intern
+ F6    Marcaj debit sau credit                      D (sau C)
+ F7    Suma debitului (in valuta)                     300.00
+ F8    Suma creditului (in valuta)                    0.00
+ F9    Suma debitului (in lei)                       3742.20
+ F10   Suma creditului (in lei)                      0.00
+ F11   Marcaj zi operationala inchisa sau deschisa        С (sau О)
+ F12   Tipul documentului                               2
+ F13   Numarul documentului                             07
+ F14   Tipul si felul documentului                         1
+ F15   Data documentului                              20000215
+ F16   Valuta documentului                            USD
+ F17   Linia valutei                               USD
+ F18   Suma platii                               300.00
+ F19   Linia sumei                                300.00
+ F20   Suma platii in lei                300.00
+ F21   Linia sumei in lei      300.00
+ F22   Denumirea platitorului                    Example SRL
+ F23   C.f. platitorului                            882000
+ F24   Contul platitorului                            225179991004 (IBAN)
+ F25   Contul 2 al platitorului
+ F26   Denumirea bancii platitorului              B.C.'EuroCreditBank'S.A.
+ F27   Codul bancii platitorului                       ECBMMD2X
 
- F28   Наименование бенефициара                    BENEFICIAR SA
- F29   Ф.к. бенефициара                            104976
- F30   Счет бенефициара                            0724997015 (IBAN)
- F31   2-й счет бенефициара
- F32   Наименование банка бенефициара	BC'MOLDOVA-AGROINDBANK'SA f.11 Chisin.
- F33   Код банка бенефициара 		AGRNMD2X433
- F34   Назначение платежа                          PLATA PENTRU MARFA
- F35   Доп. метки банка                            Suma comisionului: 85.54 USD
+ F28   Denumirea beneficiarului                    BENEFICIAR SA
+ F29   C.f. beneficiarului                            104976
+ F30   Contul beneficiarului                            0724997015 (IBAN)
+ F31   Contul 2 al beneficiarului
+ F32   Denumirea bancii beneficiarului	BC'MOLDOVA-AGROINDBANK'SA f.11 Chisin.
+ F33   Codul bancii beneficiarului 		AGRNMD2X433
+ F34   Destinatia platii                          PLATA PENTRU MARFA
+ F35   Marcaje suplim. banca                            Suma comisionului: 85.54 USD
 }
-        F1: string; /// Ссылка на документ
+        F1: string; /// Legatura catre document
         F2: string;
         F3: string;
         F4: string;
@@ -112,14 +112,14 @@ USD*USD*300.00*300.00*EXAMPLE SRL*882000*225179991004** B.C.'EuroCreditBank'S.A.
 
     TStruct62 = record
         {
-         F1    Не используется                             X
-         F2    Дата конца периода (в формате YYYYMMDD)     20000218
-         F3    Код валюты счета                            USD
-         F4    Остаток на конец периода в валюте           1000.00
-         F5    Код лея                                     MDL
-         F6    Остаток на конец периода в леях             12474.00
-         F7    Курс валюты                                 12.47400000
-         F8    Метка закрытый или открытый опердень        С (или О)
+         F1    Nu se utilizeaza                             X
+         F2    Data sfarsit perioada (in formatul YYYYMMDD)     20000218
+         F3    Codul valutei contului                            USD
+         F4    Sold la sfarsitul perioadei in valuta           1000.00
+         F5    Codul leului                                     MDL
+         F6    Sold la sfarsitul perioadei in lei             12474.00
+         F7    Cursul valutei                                 12.47400000
+         F8    Marcaj zi operationala inchisa sau deschisa        С (sau О)
         }
         F1: string;
         F2: string;

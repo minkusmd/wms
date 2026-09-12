@@ -987,7 +987,7 @@ var
 begin
   printWizard := TfrmPrintWizardDlg.Create(Self, dmDB.CurrentFirma, -1);
   try
-    printWizard.ShowReportsFromGroupOnly(9); // 9 - Контрагенты
+    printWizard.ShowReportsFromGroupOnly(9); // 9 - Contraagenti
     printWizard.OnPrintWizardSetupReportParams := SetupReportParams;
     printWizard.ShowModal;
   finally
@@ -1122,13 +1122,13 @@ var
 begin
   fForward := False;
   fNewCustomer := (not fInSearch) and (fCurrentParentID > 1);
-  // Новый контрагент
-  fNewFolder := not fInSearch; // Новая папка
+  // Contraagent nou
+  fNewFolder := not fInSearch; // Folder nou
   // NEURON Special - vedem daca utilizatorul poate face inregistrari noi in mapele speciale
   if fNewCustomer and not cSecurityFlag_IsAdmin then
   begin
-    fNewCustomer := (fCurrentParentID <> 5215) and // Склады
-      (fCurrentParentID <> 5209) and // Фирмы
+    fNewCustomer := (fCurrentParentID <> 5215) and // Depozite
+      (fCurrentParentID <> 5209) and // Firme
       (fCurrentParentID <> 8) and // COLABORATORI
       (fCurrentParentID <> 3); // CLIENTI
   end;
@@ -1158,26 +1158,26 @@ begin
       if fAngajat then
       begin
         fModify := cSecurityFlag_CanModify_Folder and cSecurityFlag_IsAdmin;
-        // Изменить + Security
+        // Modifica + Security
         fDelete := cSecurityFlag_CanDelete_Folder and cSecurityFlag_IsAdmin;
-        // Удалить + Security
+        // Sterge + Security
         fChangeParent := cSecurityFlag_IsAdmin;
         fChangeFolderOrder := cSecurityFlag_IsAdmin;
       end
       else
       begin
-        fModify := cSecurityFlag_CanModify_Folder; // Изменить + Security
-        fDelete := cSecurityFlag_CanDelete_Folder; // Удалить + Security
+        fModify := cSecurityFlag_CanModify_Folder; // Modifica + Security
+        fDelete := cSecurityFlag_CanDelete_Folder; // Sterge + Security
         fChangeParent := True;
         fChangeFolderOrder := True;
         fSetupFirmsFor1C := IBCQueryCustomer.FieldByName('CUSTOMER_TYPE_ID').AsInteger = 4009;
-        // Тип контрагента = "Структура фирмы"
+        // Tipul contraagentului = "Structura firmei"
       end;
     end
     else
     begin
-      fModify := cSecurityFlag_CanModify_Customer; // Изменить + Security
-      fDelete := cSecurityFlag_CanDelete_Customer; // Удалить + Security
+      fModify := cSecurityFlag_CanModify_Customer; // Modifica + Security
+      fDelete := cSecurityFlag_CanDelete_Customer; // Sterge + Security
       fChangeParent := True;
       fChangeFolderOrder := True;
 
@@ -1189,7 +1189,7 @@ begin
       begin
         fAddtional := True;
       end;
-      fStamp := True; // IBCQueryCustomer.FieldByName('CUSTOMER_TYPE_ID').AsInteger = 4002; // only for "Фирмы"
+      fStamp := True; // IBCQueryCustomer.FieldByName('CUSTOMER_TYPE_ID').AsInteger = 4002; // only for "Firme"
 
       fGotoCustomer := fInSearch;
       fContracts := True;
@@ -1221,21 +1221,21 @@ begin
   bbEditCustomer.Enabled := fModify;
   bbDeleteCustomer.Enabled := fDelete;
 
-  bbAccounts.Enabled := fAddtional; // Банковские реквизиты
-  bbDiscounts.Enabled := fAddtional; // Карточки
+  bbAccounts.Enabled := fAddtional; // Detalii bancare
+  bbDiscounts.Enabled := fAddtional; // Fise
 
-  bbCredits.Enabled := SecurityFlagEnabled(cSecurityFlag_Справочники_Клиенты_Кредиты_просмотр); // Кредиты
+  bbCredits.Enabled := SecurityFlagEnabled(cSecurityFlag_Справочники_Клиенты_Кредиты_просмотр); // Credite
 
-  bbWEB.Enabled := fAddtional; // Интернет доступ
-  bbComments.Enabled := fAddtional; // Коментарии
-  bbStamp.Enabled := fStamp; // Печать
-  bbCustomerCurrentDebts.Enabled := fAddtional; // Текущие долги контрагента
-  bbCustomerContracts.Enabled := fContracts; // Контракты
+  bbWEB.Enabled := fAddtional; // Acces internet
+  bbComments.Enabled := fAddtional; // Comentarii
+  bbStamp.Enabled := fStamp; // Printare
+  bbCustomerCurrentDebts.Enabled := fAddtional; // Datorii curente contraagent
+  bbCustomerContracts.Enabled := fContracts; // Contracte
 
-  bbChangeParent.Enabled := fChangeParent; // Изменение предка
-  bbChangeFolderOrder.Enabled := fChangeFolderOrder; // Упорядочить папки
+  bbChangeParent.Enabled := fChangeParent; // Modificare parinte
+  bbChangeFolderOrder.Enabled := fChangeFolderOrder; // Ordoneaza folderele
 
-  bbSetupFirmsFor1C.Enabled := fSetupFirmsFor1C; // Настройка фирм для 1С
+  bbSetupFirmsFor1C.Enabled := fSetupFirmsFor1C; // Configurare firme pentru 1C
 
 end;
 
@@ -1264,17 +1264,17 @@ begin
       case i of
         cfCustomers:
           S := S + '4001,4010,4011,';
-        // Клиенты, Клиенты Физические, Клиенты Юридические
+        // Clienti, Clienti Persoane Fizice, Clienti Persoane Juridice
         cfFirms:
-          S := S + '4002,4009,'; // Фирмы, Структура фирмы
+          S := S + '4002,4009,'; // Firme, Structura firmei
         cfDiler:
-          S := S + '4003,'; // Дилеры
+          S := S + '4003,'; // Dealeri
         cfFranchises:
-          S := S + '4004,'; // Франшизы
+          S := S + '4004,'; // Francize
         cfVendors:
-          S := S + '4005,'; // Поставщики
+          S := S + '4005,'; // Furnizori
         cfColaboratori:
-          S := S + '4006,'; // Сотрудники
+          S := S + '4006,'; // Angajati
       end;
 
   if (S <> '') then
@@ -1304,7 +1304,7 @@ begin
       case i of
         cfCustomers:
           S := S + '4001,4010,4011,';
-        // Клиенты, Клиенты Физические, Клиенты Юридические
+        // Clienti, Clienti Persoane Fizice, Clienti Persoane Juridice
         cfFirms:
           S := S + '4002,';
         cfDiler:
@@ -1368,7 +1368,7 @@ procedure TfrmCustomersDlg.SetupSecurityItems;
 begin
 
   cSecurityFlag_IsAdmin := SWNSecurityManager.LoggedUser.IsInAdminGroup;
-  // Контрагент
+  // Contraagent
   if not SecurityFlagEnabled(cSecurityFlag_Справочники_Клиенты_Создание_папки) then
     bbNewFolder.Visible := ivNever;
   if not SecurityFlagEnabled(cSecurityFlag_Справочники_Клиенты_Создание_клиента) then
@@ -1390,7 +1390,7 @@ begin
   if not SecurityFlagEnabled(cSecurityFlag_Справочники_Клиенты_Conditiile_de_lucru_cu_furnizorii) then
      bbConditiiDeLucru.Visible := ivNever;
 
-  // Дополнительно
+  // Suplimentar
   if not SecurityFlagEnabled(cSecurityFlag_Справочники_Клиенты_Банковские_реквизиты) then
     bbAccounts.Visible := ivNever;
   if not SecurityFlagEnabled(cSecurityFlag_Справочники_Клиенты_Дисконтные_карточки) then
@@ -1417,11 +1417,11 @@ begin
     then
     bbCustomerContracts.Visible := ivNever;
 
-  // Group: Дополнительно
+  // Group: Suplimentar
   if bbAdditionalTools.ItemLinks.VisibleItemCount = 0 then
     bbAdditionalTools.Visible := ivNever;
 
-  // Обьединение контрагентов
+  // Unificare contraagenti
   if not SecurityFlagEnabled(cSecurityFlag_Справочники_Клиенты_Создание_клиента) then
     bbJoinCustomers.Visible := ivNever;
 
@@ -1433,7 +1433,7 @@ begin
     bbConditiiDeLucru.Visible := ivNever;
   end;
 
-  // Group: Инструменты
+  // Group: Instrumente
   if bbTools.ItemLinks.VisibleItemCount = 0 then
     bbTools.Visible := ivNever;
 

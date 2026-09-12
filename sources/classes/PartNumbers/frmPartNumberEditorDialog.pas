@@ -115,27 +115,27 @@ begin
   ErrorStr := '';
 
   if fMasterDataSet.FieldByName('PARTNO').IsNull or (fMasterDataSet.FieldByName('PARTNO').AsString = '') or (not ValidateTextForPartNo(fMasterDataSet.FieldByName('PARTNO').AsString)) then
-    AddErrorToStr(ErrorStr, 'Номер партии!')
+    AddErrorToStr(ErrorStr, 'Numarul partidei!')
   else
   begin
     exists := False;
     if Assigned(FOnCheckPartNoExists) then
       exists := FOnCheckPartNoExists(fMasterDataSet.FieldByName('PARTNO').AsString);
     if exists then
-      AddErrorToStr(ErrorStr, 'Номер партии уже существует!')
+      AddErrorToStr(ErrorStr, 'Numarul partidei exista deja!')
   end;
   if fMasterDataSet.FieldByName('VENDORWARRANTY').IsNull or (fMasterDataSet.FieldByName('VENDORWARRANTY').AsInteger < 0) then
-    AddErrorToStr(ErrorStr, 'Гарантия производителя!');
+    AddErrorToStr(ErrorStr, 'Garantia producatorului!');
   if fMasterDataSet.FieldByName('OWNWARRANTY').IsNull or (fMasterDataSet.FieldByName('OWNWARRANTY').AsInteger < 0) then
-    AddErrorToStr(ErrorStr, 'Гарантия продавца!');
+    AddErrorToStr(ErrorStr, 'Garantia vanzatorului!');
 
   if fMasterDataSet.FieldByName('QTY').IsNull or (fMasterDataSet.FieldByName('QTY').AsFloat <= 0) then
-    AddErrorToStr(ErrorStr, 'Количество!');
+    AddErrorToStr(ErrorStr, 'Cantitate!');
 
   if fMasterDataSet.FieldByName('COUNTRYID').IsNull or (fMasterDataSet.FieldByName('COUNTRYID').AsInteger < 0) then
-    AddErrorToStr(ErrorStr, 'Страна производитель!');
+    AddErrorToStr(ErrorStr, 'Tara producatoare!');
   if fMasterDataSet.FieldByName('VENDORID').IsNull or (fMasterDataSet.FieldByName('VENDORID').AsInteger < 0) then
-    AddErrorToStr(ErrorStr, 'Производитель!');
+    AddErrorToStr(ErrorStr, 'Producator!');
 
   if ErrorStr = '' then
     Result := True
@@ -169,7 +169,7 @@ begin
 
      // Numarul de zecimale in QTY :
   qtyDigitsMode := AppUserTempConfigStorage.IntValues.GetValue(cSETTINGS_AppQtyDigits, cAppDefault_QtyDigits);
-     // Товарные позиции: Кол-во
+     // Pozitii marfa: Cantitate
   TcxCalcEditProperties(edQTY.Properties).DisplayFormat := cQTY_DigitsMask[qtyDigitsMode];
 end;
 
@@ -196,7 +196,7 @@ begin
   try
     if fCreateNewPartNo then
     begin
-      dtDialogTitle.Text := 'Новый партийный номер';
+      dtDialogTitle.Text := 'Numar de partida nou';
 
       fMasterDataSet.Append;
       if fDefaultPartNo <> '' then
@@ -235,7 +235,7 @@ begin
     end
     else
     begin
-      dtDialogTitle.Text := 'Изменение партийного номера';
+      dtDialogTitle.Text := 'Modificare numar de partida';
 
       fMasterDataSet.Edit;
       edSUMA_ACCIZE.Enabled := False;
@@ -261,7 +261,7 @@ begin
   begin
     N := fMasterDataSet.FieldByName('OWNWARRANTY').AsInteger;
     fMasterDataSet.FieldByName('VALID_UNTIL_DATE').AsDateTime := IncMonth(Now, N);
-    lbValidUntilInfo.Caption := Format('Добавленно месяцев: %d', [N]);
+    lbValidUntilInfo.Caption := Format('Adaugate luni: %d', [N]);
   end;
 end;
 

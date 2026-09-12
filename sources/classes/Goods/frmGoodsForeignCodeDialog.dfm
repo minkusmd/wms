@@ -558,7 +558,7 @@ object frmGoodsForeignCodeDlg: TfrmGoodsForeignCodeDlg
           Options.HorzSizing = False
           Width = 64
           Position.BandIndex = 1
-          Position.ColIndex = 12
+          Position.ColIndex = 9
           Position.RowIndex = 0
         end
       end

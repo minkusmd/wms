@@ -1,6 +1,6 @@
 unit frame61OstatkiDenegNaScetuUnit;
 {
-  БАНКОВСКИЕ ОПЕРАЦИИ. Остаток денег на счету
+  OPERATIUNI BANCARE. Sold bani in cont
   DocTypeID = 3036
   Frame Index = 61
 }
@@ -283,7 +283,7 @@ begin
           // context from Docs
           if cxGridDocs_DATA.Focused then
           begin
-               // Дата
+               // Data
                Result.Context := ffDate;
                Result.ValueDateTime := dmDB.IBCQueryDocs.FieldByName('DATA').AsDateTime;
           end;
@@ -310,7 +310,7 @@ end;
 
 function Tframe61OstatkiDenegNaScetu.InitFrameID: integer;
 begin
-     Result:=61; // Остатки денег на счету
+     Result:=61; // Solduri bani in cont
 end;
 
 procedure Tframe61OstatkiDenegNaScetu.ModifyRecord;
@@ -361,7 +361,7 @@ end;
 
 procedure Tframe61OstatkiDenegNaScetu.SetupSecurityItems;
 begin
-     // Остатки денег на счету
+     // Solduri bani in cont
      fSECURITY_CanView:=SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_БО_ОДНС_Просмотр);
      fSECURITY_CanNew:=SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_БО_ОДНС_Создать);
      fSECURITY_CanEdit:=SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_БО_ОДНС_Редактировать);

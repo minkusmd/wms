@@ -74,7 +74,7 @@ begin
                // copy value
                fMasterDataSet.FieldByName('PARAM_VALUE_RUS').AsString := fMasterDataSet.FieldByName('PARAM_VALUE').AsString;
           end
-          else AddErrorToStr(ErrorStr,'Значение!');
+          else AddErrorToStr(ErrorStr,'Valoare!');
      end;
 
      if ErrorStr='' then Result:=True
@@ -135,7 +135,7 @@ begin
         if FCreateNewValue then
         begin
              // create new record
-             dtDialogTitle.Text:='Создание нового значения';
+             dtDialogTitle.Text:='Creare valoare noua';
 
              fMasterDataSet.Insert;
              fMasterDataSet.FieldByName('ORDERNO').AsInteger:=-1;
@@ -147,7 +147,7 @@ begin
         else
         begin
              // modify record
-             dtDialogTitle.Text:='Изменение значения';
+             dtDialogTitle.Text:='Modificare valoare';
              fMasterDataSet.Edit;
              StatusBar1.Panels[0].Text := fMasterDataSet.FieldByName('CREATED_BY_NAME').AsString;
         end;

@@ -72,36 +72,36 @@ begin
   ErrorStr := '';
 
   if fMasterDataSet.FieldByName('DATA').IsNull then
-    AddErrorToStr(ErrorStr, 'Начало периода кредитования!');
+    AddErrorToStr(ErrorStr, 'Inceputul perioadei de creditare!');
   if fMasterDataSet.FieldByName('DATE_END').IsNull then
-    AddErrorToStr(ErrorStr, 'Конец периода кредитования!');
+    AddErrorToStr(ErrorStr, 'Sfarsitul perioadei de creditare!');
   if fMasterDataSet.FieldByName('DATE_END').AsDateTime <
     fMasterDataSet.FieldByName('DATA').AsDateTime then
     AddErrorToStr(ErrorStr,
-      'Конец периода кредитования < Начало периода кредитования!');
+      'Sfarsitul perioadei de creditare < Inceputul perioadei de creditare!');
 
   if Assigned(FOnVerifyDateRange) then
   begin
     if Not FOnVerifyDateRange(fMasterDataSet.FieldByName('DATA').AsDateTime,
       fMasterDataSet.FieldByName('DATE_END').AsDateTime) then
       AddErrorToStr(ErrorStr,
-        'Период кредитования пересекается с другими кредитами!');
+        'Perioada de creditare se suprapune cu alte credite!');
   end;
 
   f1 := 1;
   f2 := 1;
   if fMasterDataSet.FieldByName('SUMA_CASH').IsNull or
     (fMasterDataSet.FieldByName('SUMA_CASH').AsCurrency < 0) then
-    AddErrorToStr(ErrorStr, 'Сумма наличного кредита!')
+    AddErrorToStr(ErrorStr, 'Suma creditului in numerar!')
   else
     f1 := fMasterDataSet.FieldByName('SUMA_CASH').AsCurrency;
   if fMasterDataSet.FieldByName('SUMA_TRANSFER').IsNull or
     (fMasterDataSet.FieldByName('SUMA_TRANSFER').AsCurrency < 0) then
-    AddErrorToStr(ErrorStr, 'Сумма безналичного кредита!')
+    AddErrorToStr(ErrorStr, 'Suma creditului fara numerar!')
   else
     f2 := fMasterDataSet.FieldByName('SUMA_TRANSFER').AsCurrency;
   if (f1 = 0) and (f2 = 0) then
-    AddErrorToStr(ErrorStr, 'Сумма кредитования!');
+    AddErrorToStr(ErrorStr, 'Suma creditarii!');
 
   if ErrorStr = '' then
     Result := True
@@ -141,7 +141,7 @@ begin
   try
     if FCreateNewCredit then
     begin
-      dtDialogTitle.Text := 'Создание нового кредита';
+      dtDialogTitle.Text := 'Creare credit nou';
 
       fMasterDataSet.Append;
 
@@ -156,7 +156,7 @@ begin
     end
     else
     begin
-      dtDialogTitle.Text := 'Изменение кредита';
+      dtDialogTitle.Text := 'Modificare credit';
 
       fMasterDataSet.Edit;
     end;

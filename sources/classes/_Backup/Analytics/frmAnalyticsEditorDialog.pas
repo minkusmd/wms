@@ -54,7 +54,7 @@ var Errors:String;
 begin
      Result:=False;
 
-     if fMasterDataSet.FieldByName('TITLE').IsNull or (fMasterDataSet.FieldByName('TITLE').AsString='') then AddErrorToStr(Errors,'Название аналитики!');
+     if fMasterDataSet.FieldByName('TITLE').IsNull or (fMasterDataSet.FieldByName('TITLE').AsString='') then AddErrorToStr(Errors,'Denumirea analiticii!');
 
      if Errors='' then Result:=true
      else
@@ -91,7 +91,7 @@ begin
      fMasterDataSet.UpdateTransaction.StartTransaction;
      if fCreateNewAnalytics then
      begin
-          dtDialogTitle.Text:='Создание новой аналитики';
+          dtDialogTitle.Text:='Creare analitica noua';
           fMasterDataSet.Insert;
           fMasterDataSet.FieldByName('PARENTID').AsInteger:=fParentID;
           fMasterDataSet.FieldByName('FLG_FOLDER').AsInteger:=0;
@@ -102,7 +102,7 @@ begin
      end
      else
      begin
-          dtDialogTitle.Text:='Изменение аналитики';
+          dtDialogTitle.Text:='Modificare analitica';
           fMasterDataSet.Edit;
      end;
 end;

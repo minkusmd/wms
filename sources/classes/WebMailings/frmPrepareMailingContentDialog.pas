@@ -84,18 +84,18 @@ var
   dirName: String;
 begin
   Result := False;
-  mmLog.Lines.Add('Проверка путей...');
+  mmLog.Lines.Add('Verificare cai...');
   Application.ProcessMessages;
   fServerPath := IncludeTrailingPathDelimiter(edServerPath.Text);
   fContentPath := IncludeTrailingPathDelimiter(edFolderPath.Text);
   if Not DirectoryExists(fServerPath, true) then
   begin
-    mmLog.Lines.Add('Нет доступа или неправильный путь "' + fServerPath + '"!');
+    mmLog.Lines.Add('Nu exista acces sau calea este incorecta "' + fServerPath + '"!');
     Exit;
   end;
   if Not DirectoryExists(fServerPath + fContentPath, true) then
   begin
-    mmLog.Lines.Add('Неправильный путь "' + fContentPath + '"!');
+    mmLog.Lines.Add('Cale incorecta "' + fContentPath + '"!');
     Exit;
   end;
 
@@ -104,15 +104,15 @@ begin
 
   if DirectoryExists(fServerPath + fContentPath + dirName, true) then
   begin
-    mmLog.Lines.Add('Удаляем старый контент...');
+    mmLog.Lines.Add('Stergem continutul vechi...');
     EmptyDirectory(fServerPath + fContentPath + dirName);
   end
   else
   begin
-    mmLog.Lines.Add('Создаем новую папку: "' + dirName + '"...');
+    mmLog.Lines.Add('Cream folderul nou: "' + dirName + '"...');
     if Not CreateDir(fServerPath + fContentPath + dirName) then
     begin
-      mmLog.Lines.Add('Невозможно создать папку!');
+      mmLog.Lines.Add('Nu se poate crea folderul!');
       Exit;
     end;
   end;
@@ -122,7 +122,7 @@ begin
 
   fContentPath := StringReplace(fContentPath, '\', '/', [rfReplaceAll]);
 
-  mmLog.Lines.Add('Все Ок!');
+  mmLog.Lines.Add('Totul OK!');
   Result := true;
 end;
 
@@ -147,7 +147,7 @@ function TfrmPrepareMailingContentDlg.GenerateContent: Boolean;
 var
   content: TStringList;
 begin
-  mmLog.Lines.Add('Генерируем контент...');
+  mmLog.Lines.Add('Generam continutul...');
   Application.ProcessMessages;
 
   content := TStringList.Create;
@@ -171,9 +171,9 @@ begin
   end;
 
   if Result then
-    mmLog.Lines.Add('Все Ок!')
+    mmLog.Lines.Add('Totul OK!')
   else
-    mmLog.Lines.Add('Ошибка! Невозможно сгенерировать контент.');
+    mmLog.Lines.Add('Eroare! Nu se poate genera continutul.');
 end;
 
 procedure TfrmPrepareMailingContentDlg.GenerateHTMLContent(const content: TStringList);
@@ -274,7 +274,7 @@ var
   Query: TIBCQuery;
 begin
   Result := 0;
-  mmLog.Lines.Add('Строим список клиентов...');
+  mmLog.Lines.Add('Construim lista clientilor...');
   Application.ProcessMessages;
 
   Query := TIBCQuery.Create(Self);
@@ -301,9 +301,9 @@ begin
     Query.Free;
   end;
   if (Result > 0) then
-    mmLog.Lines.Add(Format('Всего получателей: %d!', [Result]))
+    mmLog.Lines.Add(Format('Total destinatari: %d!', [Result]))
   else
-    mmLog.Lines.Add('Нет получателей!');
+    mmLog.Lines.Add('Nu sunt destinatari!');
 end;
 
 procedure TfrmPrepareMailingContentDlg.GetImageLinks(const PAImageBrickID: integer; const Links: TStringList);
@@ -331,7 +331,7 @@ procedure TfrmPrepareMailingContentDlg.MarkAsReadyToSend;
 var
   Query: TIBCQuery;
 begin
-  if ShowAskDialog('Рассылка готова', 'Вы хотите пометить эту рассылку как готовую для отссылки?') <> mrYes then
+  if ShowAskDialog('Trimiterea este gata', 'Doriti sa marcati aceasta trimitere ca gata pentru expediere?') <> mrYes then
     Exit;
 
   Query := TIBCQuery.Create(Self);
@@ -384,7 +384,7 @@ var
   Query: TIBCQuery;
 begin
   Result := False;
-  mmLog.Lines.Add('Проверка рассылки...');
+  mmLog.Lines.Add('Verificare trimitere...');
   Application.ProcessMessages;
 
   Query := TIBCQuery.Create(Self);
@@ -399,7 +399,7 @@ begin
       fMailing_HeaderText := Query.FieldByName('HEADER_TEXT').AsString;
       fMailing_FooterText := Query.FieldByName('FOOTER_TEXT').AsString;
       fGoogleTag := Query.FieldByName('GOOGLETAG').AsString;
-      mmLog.Lines.Add('Рассылка: "' + fMailing_Title + '"');
+      mmLog.Lines.Add('Trimitere: "' + fMailing_Title + '"');
 
       fMailing_HeaderImage := False;
       if Not Query.FieldByName('HEADER_IMAGE').IsNull then
@@ -416,7 +416,7 @@ begin
         mmLog.Lines.Add('"footer.png" - exported.');
       end;
 
-      mmLog.Lines.Add('Все Ок!');
+      mmLog.Lines.Add('Totul OK!');
       Result := true;
     end;
     Query.Close;
@@ -482,7 +482,7 @@ begin
     if GenerateTargets = 0 then
       Exit;
 
-    mmLog.Lines.Add('Готово!');
+    mmLog.Lines.Add('Gata!');
 
     btnStart.Enabled := False;
     btnOk.Enabled := true;
@@ -491,7 +491,7 @@ begin
   except
     on E: Exception do
     begin
-      mmLog.Lines.Add('Ошибка!');
+      mmLog.Lines.Add('Eroare!');
       mmLog.Lines.Add(E.Message);
     end;
   end;

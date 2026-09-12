@@ -71,7 +71,7 @@ begin
      Errors:='';
 
      N:=StrToIntDef(cmbVALUE_INT.Text,-1);
-     if (N<=0) or (N>=100) then AddErrorToStr(Errors,'Скидка, %!');
+     if (N<=0) or (N>=100) then AddErrorToStr(Errors,'Discount, %!');
 
      if VarIsNullDate(deSTART_DATE.EditValue) then AddErrorToStr(Errors,'Inceputul perioadei!');
      if VarIsNullDate(deEND_DATE.EditValue) then AddErrorToStr(Errors,'Sfirsitul perioadei!');

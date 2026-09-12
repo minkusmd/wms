@@ -21,6 +21,8 @@ type
     cxGrid1DBTableView1GOODSID: TcxGridDBColumn;
     cxGrid1DBTableView1TITLE: TcxGridDBColumn;
     cxGrid1DBTableView1_FLG_FORCED: TcxGridDBColumn;
+    cxButton2: TcxButton;
+    procedure FormCreate(Sender: TObject);
     procedure cxGrid1DBTableView1KeyDown(Sender: TObject; var Key: Word; Shift:
         TShiftState);
     procedure bbEditContentClick(Sender: TObject);
@@ -45,6 +47,11 @@ uses
    frmGoods, DataModuleAdditions, SWNUtils, frmContentGoodsEditorDialog;
 
 {$R *.dfm}
+
+procedure TfrmGoodsByType.FormCreate(Sender: TObject);
+begin
+
+end;
 
 { TfrmGoodsByType }
 

@@ -115,7 +115,7 @@ var qtyDigitsMode:Integer;
 begin
      // Numarul de zecimale in QTY :
      qtyDigitsMode:=AppUserTempConfigStorage.IntValues.GetValue(cSETTINGS_AppQtyDigits,cAppDefault_QtyDigits);
-     // Остаток
+     // Stoc
      TcxCalcEditProperties(cxGridTable_QTY.Properties).DisplayFormat:=cQTY_DigitsMask[qtyDigitsMode];
      TcxCalcEditProperties(cxGridTable_TRANSIT_QTY.Properties).DisplayFormat:=cQTY_DigitsMask[qtyDigitsMode];
 

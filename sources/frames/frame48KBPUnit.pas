@@ -1,6 +1,6 @@
 unit frame48KBPUnit;
 {
-  БАНКОВСКИЕ ОПЕРАЦИИ. Комисион банковского платежа
+  OPERATIUNI BANCARE. Comision plata bancara
   DocTypeID = 1660
   Frame Index = 48
 }
@@ -201,7 +201,7 @@ end;
 
 procedure Tframe48KBP.DoCloseDocument;
 begin
-     if ShowAskDialog('Закрыть документ','Вы хотите закрыть документ?')=mrYes then
+     if ShowAskDialog('Inchide documentul','Doriti sa inchideti documentul?')=mrYes then
      begin
           if DoCloseDocumentDB(dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger) then dmDB.IBCQueryDocs.Refresh;
      end;
@@ -266,7 +266,7 @@ end;
 
 procedure Tframe48KBP.DoOpenDocument;
 begin
-     if ShowAskDialog('Открыть документ','Вы хотите открыть документ?')=mrYes then
+     if ShowAskDialog('Deschide documentul','Doriti sa deschideti documentul?')=mrYes then
      begin
           if DoOpenDocumentDB(dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger) then dmDB.IBCQueryDocs.Refresh;
      end;
@@ -340,7 +340,7 @@ end;
 
 function Tframe48KBP.InitFrameID: integer;
 begin
-     // БАНКОВСКИЕ ОПЕРАЦИИ - Комисион банковского платежа
+     // OPERATIUNI BANCARE - Comision plata bancara
      Result:=48;
 end;
 

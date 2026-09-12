@@ -1,6 +1,6 @@
 unit frame83PromoCoduriUnit;
 
-// ÐÅÊËÀÌÀ - ןנמלמ ךמהû
+// PUBLICITATE - coduri promo
 
 interface
 

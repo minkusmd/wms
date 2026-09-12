@@ -1,6 +1,6 @@
 unit frame38ServiceFinishedIncidentsUnit;
 {
-  СЕРВИС. Решённые инциденты
+  SERVICE. Incidente rezolvate
   DocTypeID = 1402
   Frame Index = 38
 }
@@ -267,7 +267,7 @@ begin
           // context from Incidente
           if cxGridIncidente_DOC_CUSTOMER.Focused then
           begin
-               // Контрагент
+               // Contraagent
                Result.Context := ffCustomer;
                Result.ValueInt := dmDB.IBCQueryIncidente.FieldByName('CT').AsInteger;
                Result.ValueStr := dmDB.IBCQueryIncidente.FieldByName('DOC_CUSTOMER').AsString;
@@ -275,7 +275,7 @@ begin
           else
               if cxGridIncidente_GOODS_MODEL.Focused then
               begin
-                   // Товар
+                   // Produs
                    Result.Context := ffGoods;
                    Result.ValueInt := dmDB.IBCQueryIncidente.FieldByName('GOODS_DOCID').AsInteger;
                    Result.ValueStr := dmDB.IBCQueryIncidente.FieldByName('GOODS_TITLE').AsString;
@@ -283,7 +283,7 @@ begin
               else
                   if cxGridIncidente_GOODS_SN.Focused then
                   begin
-                       // Серийный номер
+                       // Numar serial
                        Result.Context := ffGoodsSN;
                        Result.ValueStr := dmDB.IBCQueryIncidente.FieldByName('GOODS_SN').AsString;
                   end;
@@ -341,7 +341,7 @@ end;
 
 function Tframe38ServiceFinishedIncidents.InitFrameID: integer;
 begin
-     Result:=38; // СЕРВИС - Решённые инциденты
+     Result:=38; // SERVICE - Incidente rezolvate
 end;
 
 procedure Tframe38ServiceFinishedIncidents.ReadFrameStates;

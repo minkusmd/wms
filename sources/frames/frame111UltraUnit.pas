@@ -23,6 +23,25 @@ type
         Model: string;
     end;
 
+     // descarca o singura imagine intr-un thread separat. Octetii bruti raman in FData pana cand
+     // thread-ul principal ii preia prin ExtractData; la eroare FData devine nil si mesajul
+     // ajunge in ErrorMessage. Fiecare thread are propriul THTTPClient, pentru ca o instanta
+     // nu suporta cereri concurente.
+    TImageDownloadThread = class(TThread)
+    private
+        FUrl: string;
+        FData: TMemoryStream;
+        FErrorMessage: string;
+    protected
+        procedure Execute; override;
+    public
+        constructor Create(const AUrl: string);
+        destructor Destroy; override;
+        function ExtractData: TMemoryStream;
+        property Url: string read FUrl;
+        property ErrorMessage: string read FErrorMessage;
+    end;
+
     Tframe111UltraMD = class(TSWNBaseFrame)
         IBCDataSourceAPI: TIBCDataSource;
         NetHTTPClient1: TNetHTTPClient;
@@ -59,7 +78,8 @@ type
 // TODO: WhenDocGrid_FocusedRecordChanged
 //  procedure WhenDocGrid_FocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
         procedure SelectionChanged;
-        procedure SaveImagesToDB(var ImagesUrl: TStringList);
+        procedure DownloadImages(AImagesUrl: TStrings; var AImages: TArray<TMemoryStream>);
+        function SaveImagesToDB(AImagesUrl: TStrings): Integer;
 // TODO: SaveDescriptionToDB
 //  procedure SaveDescriptionToDB(Parser: TVoltaParser; ProductDetailUrl: string);
         procedure DeleteCurrentImageFromDB(ImagesUrl: TStringList);
@@ -85,7 +105,7 @@ uses
     DataModuleDB, SWNUtils, SWNConst, DataModuleAdditions, SWNDBErrors, SWNValueStorageUnit, SWNSecurity, SWNSecurityFlags,
     frmCustomerCurrentDebtsDialog, frmCerereDePlataDialog, frmCerereDePlataDBDialog, Vcl.Imaging.jpeg, Vcl.Imaging.pngimage,
     System.IOUtils, System.Variants, Winapi.ActiveX, frmVoltaParserUnit, Vcl.WebpImage, Winapi.GDIPOBJ, WebpHelpers, libwebp,
-    uLoadProductImages;
+    uLoadProductImages, System.Generics.Collections;
 
 {$R *.dfm}
 
@@ -99,6 +119,12 @@ const
     cMaxGalleryImageIndex = 200;
      // cheia de sortare: 5 cifre (nr. imaginii) + '|' + 1 cifra (preferinta de format) + '|' + URL
     cImageSortKeyPrefixLen = 8;
+     // cate imagini ale aceluiasi produs se descarca simultan (un thread per imagine)
+    cMaxParallelImageDownloads = 8;
+     // pauza dintre doua verificari ale thread-urilor de descarcare, in thread-ul principal
+    cDownloadPollIntervalMs = 20;
+    cHttpConnectionTimeoutMs = 15000;
+    cHttpResponseTimeoutMs = 60000;
 
 // Ultra.md nu trimite un numar de ordine separat pentru imagini, dar numele fisierului are
 // forma "<cod>_<nr>.<ext>", unde <nr> este pozitia imaginii in galeria furnizorului
@@ -140,6 +166,16 @@ begin
         Result := 3;
 end;
 
+// format necunoscut: nu se descarca deloc - fara acest test in baza ar putea ajunge
+// o imagine straina de produs
+function IsSupportedImageUrl(const AUrl: string): Boolean;
+var
+    Ext: string;
+begin
+    Ext := LowerCase(TPath.GetExtension(AUrl));
+    Result := (Ext = '.jpeg') or (Ext = '.jpg') or (Ext = '.png') or (Ext = '.webp');
+end;
+
 // AIsMain = randul indicat de TAPI_ULTRA_NOMENCLATURE.MAINIMAGE; are prioritate absoluta,
 // pentru ca numele fisierului nu este intotdeauna un numar de ordine ("download (1).jpg")
 function BuildImageSortKey(const AName, AUrl: string; AIsMain: Boolean): string;
@@ -163,18 +199,131 @@ begin
     Result := Copy(AKey, cImageSortKeyPrefixLen + 1, MaxInt);
 end;
 
+// converteste octetii descarcati (png/jpg/webp) in PNG, in memorie. False = format
+// neacceptat sau imagine corupta - o imagine stricata nu trebuie sa opreasca tot importul.
+// Ruleaza in thread-ul principal: TBitmap/TJPEGImage nu sunt sigure in thread-uri secundare
+// fara blocarea canvas-ului.
+function ConvertImageToPng(ASource: TMemoryStream; const AExt: string; ADest: TMemoryStream): Boolean;
+var
+    PngImage: TPngImage;
+    JpegImage: TJPEGImage;
+    BmpImage: TBitmap;
+    GpBitmap: TGPBitmap;
+    Dat: PByte;
+begin
+    Result := False;
+    ADest.Clear;
+    ASource.Position := 0;
+    try
+        if AExt = '.png' then
+        begin
+             // doar validare - un PNG valid se salveaza asa cum a venit, fara reconversie
+            PngImage := TPngImage.Create;
+            try
+                PngImage.LoadFromStream(ASource);
+            finally
+                PngImage.Free;
+            end;
+            ASource.Position := 0;
+            ADest.CopyFrom(ASource, 0);
+        end
+        else if (AExt = '.jpg') or (AExt = '.jpeg') then
+        begin
+            JpegImage := TJPEGImage.Create;
+            BmpImage := TBitmap.Create;
+            PngImage := TPngImage.Create;
+            try
+                JpegImage.LoadFromStream(ASource);
+                BmpImage.Assign(JpegImage);
+                PngImage.Assign(BmpImage);
+                PngImage.SaveToStream(ADest);
+            finally
+                PngImage.Free;
+                BmpImage.Free;
+                JpegImage.Free;
+            end;
+        end
+        else if AExt = '.webp' then
+        begin
+            WebpDecode(ASource, Dat, GpBitmap);
+            try
+                GpBitmap.Save(TStreamAdapter.Create(ADest, soReference) as IStream, gPNG);
+            finally
+                GpBitmap.Free;
+                WebPFree(Dat);
+            end;
+        end
+        else
+            Exit;
+        Result := ADest.Size > 0;
+    except
+        on E: Exception do
+            Result := False;
+    end;
+    ADest.Position := 0;
+end;
+
+{ TImageDownloadThread }
+
+constructor TImageDownloadThread.Create(const AUrl: string);
+begin
+    inherited Create(True);
+    FUrl := AUrl;
+    FData := TMemoryStream.Create;
+end;
+
+destructor TImageDownloadThread.Destroy;
+begin
+    FData.Free;
+    inherited;
+end;
+
+function TImageDownloadThread.ExtractData: TMemoryStream;
+begin
+    Result := FData;
+    FData := nil;
+end;
+
+procedure TImageDownloadThread.Execute;
+var
+    Http: THTTPClient;
+    Response: IHTTPResponse;
+begin
+    Http := THTTPClient.Create;
+    try
+        Http.ConnectionTimeout := cHttpConnectionTimeoutMs;
+        Http.ResponseTimeout := cHttpResponseTimeoutMs;
+        try
+            Response := Http.Get(FUrl, FData);
+            if Response.StatusCode <> 200 then
+                FErrorMessage := Format('HTTP %d %s', [Response.StatusCode, Response.StatusText])
+            else if FData.Size = 0 then
+                FErrorMessage := 'raspuns gol';
+        except
+            on E: Exception do
+                FErrorMessage := E.Message;
+        end;
+        if FErrorMessage <> '' then
+            FreeAndNil(FData)
+        else
+            FData.Position := 0;
+    finally
+        Http.Free;
+    end;
+end;
+
+{ Tframe111UltraMD }
+
 procedure Tframe111UltraMD.Button1Click(Sender: TObject);
 var
-    fs: TFileStream;
-    ms: TMemoryStream;
-    bmp: TGPBitMap;
-    dat: PByte;
-    bmpImage: TbitMap;
     ImageURLs: TStringlist;
     SortedImages: TStringList;
     I, ImageIndex, LastImageIndex: Integer;
     ImageUrl, MainImageUuid: string;
 begin
+     // importul pompeaza mesajele cat asteapta thread-urile - un al doilea click ar porni
+     // un import paralel peste primul
+    Button1.Enabled := False;
     IBCQueryAPI.Open;
     Application.ProcessMessages;
     ImageURLs := TStringlist.Create;
@@ -194,8 +343,6 @@ begin
             ibcqueryImages.ParamByName('uuid').AsString := IBCQueryAPI.FieldByName('uuid').AsString;
             ibcqueryImages.Open;
             ProgressBar1.Position := ibcqueryapi.RecNo;
-            var foundImage : Boolean := false;
-//            foundImage := false;
             if ibcqueryimages.recordcount>0 then
                 deletecurrentimages(ibcqueryapi.FieldByName('goodsid').AsInteger);
 
@@ -214,6 +361,7 @@ begin
                 IBCQueryImages.Next;
             end;
 
+            ImageURLs.Clear;
             LastImageIndex := -1;
             for I := 0 to SortedImages.Count - 1 do
             begin
@@ -226,16 +374,15 @@ begin
 
                 ImageUrl := GetImageUrlFromSortKey(SortedImages[I]);
                 Memo1.Lines.Add(ibcqueryapi.FieldByName('goodsid').AsString + ' ' + ImageUrl);
-                ImageURLs.Text := ImageUrl;
-                SaveImagesToDB(ImageURLs);
-                FoundImage := True;
+                if IsSupportedImageUrl(ImageUrl) then
+                    ImageURLs.Add(ImageUrl);
             end;
 
-            if foundimage then
+             // toate imaginile produsului se descarca in paralel, apoi se salveaza in ordine
+            if SaveImagesToDB(ImageURLs) > 0 then
             begin
-              inc(GoodsCount);
-              sbGoodsImages.SimpleText := format('produse noi cu imagini: %d', [GoodsCount]);
-              application.ProcessMessages;
+                inc(GoodsCount);
+                sbGoodsImages.SimpleText := format('produse noi cu imagini: %d', [GoodsCount]);
             end;
 
             Application.ProcessMessages;
@@ -244,6 +391,7 @@ begin
     finally
         SortedImages.Free;
         ImageURLs.Free;
+        Button1.Enabled := True;
     end;
 end;
 
@@ -346,114 +494,104 @@ end;
 //  Memo1.Lines.Add('Product: ' + IBCQuery1.FieldByName('GOODS_CODE').AsString + ' not found on www.volta.md...');
 //end;
 
-procedure Tframe111UltraMD.SaveImagesToDB(var ImagesUrl: TStringList);
+// descarca in paralel toate imaginile din AImagesUrl - un TImageDownloadThread per imagine,
+// cel mult cMaxParallelImageDownloads active simultan. AImages[I] corespunde lui AImagesUrl[I];
+// nil = descarcarea a esuat (motivul ajunge in Memo1). Apelantul elibereaza stream-urile.
+// Thread-ul principal nu se blocheaza in WaitFor, ci pompeaza mesajele cat timp asteapta,
+// ca progresul si memo-ul sa se actualizeze.
+procedure Tframe111UltraMD.DownloadImages(AImagesUrl: TStrings; var AImages: TArray<TMemoryStream>);
+var
+    Threads: TObjectList<TImageDownloadThread>;
+    I, NextToStart, Running: Integer;
+begin
+    SetLength(AImages, AImagesUrl.Count);
+    Threads := TObjectList<TImageDownloadThread>.Create(True);
+    try
+        for I := 0 to AImagesUrl.Count - 1 do
+            Threads.Add(TImageDownloadThread.Create(AImagesUrl[I]));
+
+        NextToStart := 0;
+        repeat
+            Running := 0;
+            for I := 0 to NextToStart - 1 do
+                if not Threads[I].Finished then
+                    Inc(Running);
+            while (Running < cMaxParallelImageDownloads) and (NextToStart < Threads.Count) do
+            begin
+                Threads[NextToStart].Start;
+                Inc(NextToStart);
+                Inc(Running);
+            end;
+            if (NextToStart = Threads.Count) and (Running = 0) then
+                Break;
+            Application.ProcessMessages;
+            Sleep(cDownloadPollIntervalMs);
+        until False;
+
+        for I := 0 to Threads.Count - 1 do
+        begin
+             // Finished se seteaza inainte ca thread-ul sa se incheie de tot; WaitFor garanteaza
+             // ca nu mai atinge FData cand il preluam
+            Threads[I].WaitFor;
+            AImages[I] := Threads[I].ExtractData;
+            if Threads[I].ErrorMessage <> '' then
+                Memo1.Lines.Add(Format('  eroare descarcare %s: %s', [Threads[I].Url, Threads[I].ErrorMessage]));
+        end;
+    finally
+        Threads.Free;
+    end;
+end;
+
+// descarca toate imaginile produsului curent in paralel, apoi le converteste in PNG si le
+// insereaza secvential, in ordinea din AImagesUrl - ordinea conteaza, pentru ca trigger-ul
+// TRG_TS_GOODS_IMAGE_BI0 atribuie ORDERNO = MAX+1 la fiecare insert. Conversia si insert-ul
+// raman in thread-ul principal: conexiunea IBDAC nu se imparte intre thread-uri.
+// Returneaza numarul de imagini salvate.
+function Tframe111UltraMD.SaveImagesToDB(AImagesUrl: TStrings): Integer;
 var
     I: Integer;
-    pngImage: TPngImage;
-    jpegImage: TJPEGImage;
-//  webpImage: TWebpImage;
-    imgExt: string;
-    dat: PByte;
-    bmp: TGPBitmap;
-    bmpImage: TBitmap;
-    ImageStream: TMemoryStream;
+    Images: TArray<TMemoryStream>;
+    PngStream: TMemoryStream;
+    ImgExt: string;
 begin
-    for I := 0 to ImagesUrl.Count - 1 do
-    begin
-    // convert image to png
-        ImageStream := TMemoryStream.Create;
-        pngImage := TPngImage.Create;
-        jpegImage := TJPEGImage.Create;
-//    webpImage := TWebpImage.Create(Panel2);
-    //
-        try
-            if ImagesUrl[I] <> '' then
-            begin
-                NetHTTPClient1.Get(ImagesUrl[I], ImageStream);
-                Application.ProcessMessages;
-                ImageStream.Position := 0;
-                imgExt := TPath.GetExtension(ImagesUrl[I]).tolower;
-                 // format necunoscut: fara acest test s-ar insera "tmp.png" ramas de la imaginea
-                 // precedenta, adica o imagine complet straina de produs
-                if (imgExt <> '.jpeg') and (imgExt <> '.jpg') and (imgExt <> '.png') and (imgExt <> '.webp') then
-                    Continue;
-                 // pornim de la zero, ca un tmp.png vechi sa nu ajunga in baza daca conversia esueaza
-                DeleteFile('tmp.png');
+    Result := 0;
+    if AImagesUrl.Count = 0 then
+        Exit;
 
-                if (imgExt = '.jpeg') or (imgExt = '.jpg') then
+    DownloadImages(AImagesUrl, Images);
+    PngStream := TMemoryStream.Create;
+    try
+        for I := 0 to AImagesUrl.Count - 1 do
+        begin
+            if Images[I] = nil then
+                Continue;
+            ImgExt := LowerCase(TPath.GetExtension(AImagesUrl[I]));
+            if not ConvertImageToPng(Images[I], ImgExt, PngStream) then
+            begin
+                Memo1.Lines.Add(Format('  imagine ignorata (corupta sau format necunoscut): %s', [AImagesUrl[I]]));
+                Continue;
+            end;
+
+            if not IBCtrLocalUpdate.Active then
+                IBCtrLocalUpdate.StartTransaction;
+            try
+                IBCSQL1.ParamByName('GOODSID').AsInteger := IBCQueryApi.FieldByName('GOODSID').ASInteger;
+                IBCSQL1.ParamByName('IMAGE').LoadFromStream(PngStream, ftBlob);
+                IBCSQL1.Execute;
+                IBCtrLocalUpdate.Commit;
+                Inc(Result);
+            except
+                on E: Exception do
                 begin
-                    try
-                        ImageStream.SaveToFile('tmp.jpeg');
-                        jpegImage.loadfromFile('tmp.jpeg');
-                    except
-                        on e: Exception do
-                        begin
-                            Continue;
-                        end;
-                    end;
-                end;
-                if imgExt = '.png' then
-                begin
-                     // o imagine corupta nu trebuie sa opreasca tot importul
-                    try
-                        ImageStream.SaveToFile('tmp.png');
-                        pngImage.loadfromFile('tmp.png');
-                    except
-                        on e: Exception do
-                        begin
-                            Continue;
-                        end;
-                    end;
-                end;
-                if imgExt = '.webp' then
-                begin
-                    try
-                        ImageStream.SaveToFile('tmp.webp');
-                        WebpDecode(ImageStream, dat, bmp);
-                        try
-                            bmp.Save('tmp.png', gPNG);
-                        finally
-                            bmp.Free;
-                            WebPFree(dat);
-                        end;
-                    except
-                        on e: Exception do
-                        begin
-                            Continue;
-                        end;
-                    end;
-                end;
-                bmpImage := TBitMap.Create;
-                try
-                    bmpImage.Assign(jpegImage);
-                    try
-                        if (imgExt = '.jpeg') or (imgExt = '.jpg') then
-                        begin
-                            pngImage.Assign(bmpImage);
-                            pngImage.SaveToFile('tmp.png');
-                        end;
-                    except
-                    end;
-                finally
-                    bmpImage.Free;
-                end;
-                if not IBCtrLocalUpdate.Active then
-                    IBCtrLocalUpdate.StartTransaction;
-                try
-                    IBCSQL1.ParamByName('GOODSID').AsInteger := IBCQueryApi.FieldByName('GOODSID').ASInteger;
-                    IBCSQL1.ParamByName('IMAGE').LoadFromFile('tmp.png', ftBlob);
-                    IBCSQL1.Execute;
-                    IBCtrLocalUpdate.Commit;
-                    DeleteFile('tmp.png');
-                except
                     IBCtrLocalUpdate.Rollback;
+                    Memo1.Lines.Add(Format('  eroare la salvare %s: %s', [AImagesUrl[I], E.Message]));
                 end;
             end;
-        finally
-            ImageStream.Free;
-            FreeAndNil(jpegImage);
-            FreeAndNil(pngImage);
         end;
+    finally
+        PngStream.Free;
+        for I := 0 to High(Images) do
+            Images[I].Free;
     end;
 end;
 
@@ -473,4 +611,3 @@ begin
 end;
 
 end.
-

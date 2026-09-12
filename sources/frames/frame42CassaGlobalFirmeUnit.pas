@@ -1,6 +1,6 @@
 unit frame42CassaGlobalFirmeUnit;
 {
-  КАССА - Касса по всем организациям
+  CASA - Casa pentru toate organizatiile
   FrameInde = 42
 }
 
@@ -343,11 +343,11 @@ begin
 
   // users
   IBCQueryUsers.Active := True;
-  // Персональная касса
+  // Casa personala
   IBCQueryPersonalCash.Active := True;
-  // Непринятые передачи
+  // Transferuri neacceptate
   IBCQueryNonConfirmedTransfers.Active := True;
-  // История
+  // Istoric
 //  edDateEditHistory1.Properties.
   IBCQueryHist.Active := True;
 
@@ -372,7 +372,7 @@ end;
 
 function Tframe42CassaGlobalFirme.InitFrameID: Integer;
 begin
-  Result := 42; // КАССА - Касса по всем организациям
+  Result := 42; // CASA - Casa pe toate organizatiile
 end;
 
 procedure Tframe42CassaGlobalFirme.pmNonConfirmedTransfersPopup(Sender: TObject);

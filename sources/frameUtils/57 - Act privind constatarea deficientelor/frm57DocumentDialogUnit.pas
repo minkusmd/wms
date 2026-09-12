@@ -81,15 +81,15 @@ begin
   with dmDB.IBCQueryDocs do
   begin
     if FieldByName('DATA').IsNull then
-      AddErrorToStr(ErrorStr, 'Дата документа!');
+      AddErrorToStr(ErrorStr, 'Data documentului!');
 
-//          if FieldByName('SC2').IsNull then AddErrorToStr(ErrorStr,'Аналитика документа!');
+//          if FieldByName('SC2').IsNull then AddErrorToStr(ErrorStr,'Analitica documentului!');
 
     if FieldByName('DT').IsNull or (FieldByName('DT').AsInteger = -1) then
-      AddErrorToStr(ErrorStr, 'Организация!');
-//          if FieldByName('DTSC').IsNull then AddErrorToStr(ErrorStr,'Аналитика организации!');
+      AddErrorToStr(ErrorStr, 'Organizatia!');
+//          if FieldByName('DTSC').IsNull then AddErrorToStr(ErrorStr,'Analitica organizatiei!');
     if FieldByName('CT').IsNull or (FieldByName('CT').AsInteger = -1) then
-      AddErrorToStr(ErrorStr, 'Контрагент!');
+      AddErrorToStr(ErrorStr, 'Contraagent!');
   end;
 
   if ErrorStr = '' then
@@ -206,7 +206,7 @@ begin
   dialog := TfrmCustomersDlg.Create(Self);
   try
         //dialog.CustomFilter:=dialog.CustomFilter-[cfCustomers];
-    if dialog.SelectCustomer(dmDB.IBCQueryDocs.FieldByName('CT').asInteger, False, 0, 'Выбор контрагента для WEB заказа') then
+    if dialog.SelectCustomer(dmDB.IBCQueryDocs.FieldByName('CT').asInteger, False, 0, 'Selectare contraagent pentru comanda WEB') then
     begin
       dmDB.IBCQueryDocs.FieldByName('CT').asInteger := dialog.CustomerID;
       beCT_NAME.Text := dialog.CustomerTitle;
@@ -223,7 +223,7 @@ begin
   dialog := TfrmCustomersDlg.Create(Self);
   try
     dialog.CustomFilter := [cfFirms, cfFranchises];
-    if dialog.SelectCustomer(dmDB.IBCQueryDocs.FieldByName('DT').asInteger, False, 0, 'Выбор организации для WEB заказа') then
+    if dialog.SelectCustomer(dmDB.IBCQueryDocs.FieldByName('DT').asInteger, False, 0, 'Selectare organizatie pentru comanda WEB') then
     begin
       dmDB.IBCQueryDocs.FieldByName('DT').asInteger := dialog.CustomerID;
       beDT_NAME.Text := dialog.CustomerTitle;

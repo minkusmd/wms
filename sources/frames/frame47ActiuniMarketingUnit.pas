@@ -1,6 +1,6 @@
 unit frame47ActiuniMarketingUnit;
 
-// РЕКЛАМА - Маркетинговые акции
+// PUBLICITATE - Actiuni de marketing
 
 interface
 
@@ -98,8 +98,8 @@ end;
 
 procedure Tframe47ActiuniMarketing.DeleteRecord;
 begin
-     if ShowAskDialog('Удаление акции',
-                      Format('Вы хотите удалить акцию "%s"?',[IBCQueryActiuni.FieldByName('TITLE').AsString]))<>mrYes then Exit;
+     if ShowAskDialog('Stergere actiune',
+                      Format('Doriti sa stergeti actiunea "%s"?',[IBCQueryActiuni.FieldByName('TITLE').AsString]))<>mrYes then Exit;
 
      IBCQueryActiuni.UpdateTransaction.StartTransaction;
      try

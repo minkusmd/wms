@@ -1328,7 +1328,7 @@ end;
 procedure TframeSipClient.SelectNextAction;
 begin
     // create reminder
-//    if MessageDlg('Добавить напоминание перезвонить через 5 мин?', mtConfirmation, [mbYes, mbNo],0)=mrYes then
+//    if MessageDlg('Adaugati reamintire de sunat inapoi peste 5 min?', mtConfirmation, [mbYes, mbNo],0)=mrYes then
 //    begin
 //        dmDB.AddCallReminder(dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger, dmDB.IBCQueryDocs.FieldByName('CT_NAME').AsString, PhoneEdit.Text);
 //    end;

@@ -65,12 +65,12 @@ begin
   ErrorStr := '';
 
   if fMasterDataSet.FieldByName('TITLE').IsNull or (Trim(fMasterDataSet.FieldByName('TITLE').AsString) = '') then
-    AddErrorToStr(ErrorStr, 'Название!');
+    AddErrorToStr(ErrorStr, 'Denumire!');
 
   if Not fMasterDataSet.FieldByName('FLG_OTHER_EXECUTANT').IsNull and (fMasterDataSet.FieldByName('FLG_OTHER_EXECUTANT').AsInteger = 1) then
   begin
     if fMasterDataSet.FieldByName('USER_GROUP_ID').IsNull then
-      AddErrorToStr(ErrorStr, 'Исполнитель задачи!');
+      AddErrorToStr(ErrorStr, 'Executorul sarcinii!');
   end;
 
   if (ErrorStr = '') then
@@ -111,7 +111,7 @@ begin
   try
     if fCreateNewTaskType then
     begin
-      dtDialogTitle.Text := 'Создание нового типа';
+      dtDialogTitle.Text := 'Creare tip nou';
       fMasterDataSet.Insert;
       fMasterDataSet.FieldByName('FLG_ENABLED').AsInteger := 1;
       fMasterDataSet.FieldByName('FLG_START_STATE').AsInteger := 0;
@@ -123,7 +123,7 @@ begin
     end
     else
     begin
-      dtDialogTitle.Text := 'Изменение записи';
+      dtDialogTitle.Text := 'Modificare inregistrare';
       fMasterDataSet.Edit;
     end;
 

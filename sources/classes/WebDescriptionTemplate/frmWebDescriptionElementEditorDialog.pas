@@ -111,9 +111,9 @@ begin
   ErrorStr := '';
 
   if fMasterDataSet.FieldByName('FILTERID').IsNull then
-    AddErrorToStr(ErrorStr, 'Filtru/Фильтр!');
+    AddErrorToStr(ErrorStr, 'Filtru!');
   if fMasterDataSet.FieldByName('FILTERPARAMID').IsNull then
-    AddErrorToStr(ErrorStr, 'Valoarea implicită/Значение по умолчанию!');
+    AddErrorToStr(ErrorStr, 'Valoarea implicita!');
 
   if ErrorStr = '' then
     Result := true
@@ -238,7 +238,7 @@ var
 begin
   if fCreateNewDescription then
   begin
-    dtDialogTitle.Text := 'Создание новой характеристики';
+    dtDialogTitle.Text := 'Creare caracteristica noua';
 
     fMasterDataSet.Insert;
     if (FIsCloning) then
@@ -268,7 +268,7 @@ begin
   end
   else
   begin
-    dtDialogTitle.Text := 'Изменение характеристики';
+    dtDialogTitle.Text := 'Modificare caracteristica';
     fMasterDataSet.Edit;
     edFILTER_NAME_ROM.Text := fMasterDataSet.FieldByName('FILTERNAME_ROM').AsString;
     edFILTER_NAME_RUS.Text := fMasterDataSet.FieldByName('FILTERNAME_RUS').AsString;

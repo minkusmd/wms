@@ -48,19 +48,15 @@ type
     IBCQueryUM: TIBCQuery;
     IBCDataSourceUM: TIBCDataSource;
     cbFilterParams: TCheckBox;
-    IBCDataSourceFilters: TIBCDataSource;
-    IBCDataSourceFilterParams: TIBCDataSource;
-    IBCQueryFilters: TIBCQuery;
-    IBCQueryFilterParams: TIBCQuery;
-    NumberBox1: TNumberBox;
-    Edit1: TEdit;
-    cxButtonEdit1: TcxButtonEdit;
-    cxButtonEdit2: TcxButtonEdit;
+    beFilterSelect: TcxButtonEdit;
+    beFilterValueSelect: TcxButtonEdit;
     procedure cbWebGoodsTypeClick(Sender: TObject);
     procedure beGoodsACNTPropertiesButtonClick(Sender: TObject;
       AButtonIndex: Integer);
     procedure FormCreate(Sender: TObject);
     procedure cxLookupComboBox2PropertiesInitPopup(Sender: TObject);
+    procedure beFilterSelectPropertiesButtonClick(Sender: TObject;
+      AButtonIndex: Integer);
   private
     { Private declarations }
     fSelectionResult: TGoodsPropertySelectionData;
@@ -69,6 +65,10 @@ type
     function CheckValues: Boolean;
 
     procedure SelectGoodsAcnt;
+    procedure SelectFilterParam;
+    procedure SetFilterParam(const FilterID, FilterParamID: Integer; const FilterName, FilterParamValue: string);
+    procedure RestoreLastFilterParam;
+    procedure StoreLastFilterParam;
   protected
     { protected declarations }
     procedure Prepare; override;
@@ -82,14 +82,26 @@ type
 
 implementation
 
-uses DataModuleDB, SWNConst, frmGoodsACNTBrowser;
+uses DataModuleDB, SWNConst, frmGoodsACNTBrowser, frmWebFiltersDialog, SWNValueStorageUnit;
 
 {$R *.dfm}
+
+const
+  // ultimul filtru / ultima valoare aleasa - se pastreaza in setarile utilizatorului
+  cStorageSection = 'frmSetupGoodsPropsSelectionDlg';
+  cStorageKey_FilterID = 'LAST_FILTERID';
+  cStorageKey_FilterParamID = 'LAST_FILTERPARAMID';
 
 procedure TfrmSetupGoodsPropsSelectionDlg.beGoodsACNTPropertiesButtonClick
   (Sender: TObject; AButtonIndex: Integer);
 begin
   SelectGoodsAcnt;
+end;
+
+procedure TfrmSetupGoodsPropsSelectionDlg.beFilterSelectPropertiesButtonClick
+  (Sender: TObject; AButtonIndex: Integer);
+begin
+  SelectFilterParam;
 end;
 
 procedure TfrmSetupGoodsPropsSelectionDlg.cbWebGoodsTypeClick(Sender: TObject);
@@ -103,15 +115,8 @@ begin
   lcbTipEvidenta.Enabled := cbTipEvidenta.Checked;
   edPrefixName.Enabled := cbPrefix.Checked;
   lcbUM.Enabled := cbUM.Checked;
-//  lcbFilters.Enabled := cbFilterParams.Checked;
-//  lcbFilterParams.Enabled := cbFilterParams.Checked;
-//  if (TCheckBox(Sender).Name = 'cbFilterParams') and (cbFilterParams.Checked) then
-//  begin
-////    IBCQueryFilters.ParamByName('goodsid').AsInteger := GoodsID;
-//    IBCQueryFilters.Open;
-//    IBCQueryFilterParams.Open;
-//  end;
-
+  beFilterSelect.Enabled := cbFilterParams.Checked;
+  beFilterValueSelect.Enabled := cbFilterParams.Checked;
 end;
 
 function TfrmSetupGoodsPropsSelectionDlg.CheckValues: Boolean;
@@ -137,6 +142,11 @@ begin
   if (cbPrefix.Checked) and (edPrefixName.Text = '') then
       AddErrorToStr(ErrorStr, 'Prefixul in denumirea produsului!');
 
+  if cbFilterParams.Checked and (beFilterSelect.Tag <= 0) then
+    AddErrorToStr(ErrorStr, 'Filtru!');
+  if cbFilterParams.Checked and (beFilterValueSelect.Tag <= 0) then
+    AddErrorToStr(ErrorStr, 'Valoarea filtrului!');
+
   if (ErrorStr = '') then
     Result := True
   else
@@ -155,6 +165,8 @@ end;
 procedure TfrmSetupGoodsPropsSelectionDlg.FormCreate(Sender: TObject);
 begin
   fGoodsACNT := -1;
+  beFilterSelect.Tag := -1;
+  beFilterValueSelect.Tag := -1;
 end;
 
 function TfrmSetupGoodsPropsSelectionDlg.IsFormDataPosted: Boolean;
@@ -174,7 +186,6 @@ begin
     fSelectionResult.Change_UM := cbUM.Checked;
     fSelectionResult.Change_FilterID := cbFilterParams.Checked;
 
-
     fSelectionResult.Value_WebGoodsTypeID := lcbWebGoodsType.EditValue;
     fSelectionResult.Value_VendorID := lcbVendorID.EditValue;
     fSelectionResult.Value_BaseParam := Trim(edBaseParam.Text);
@@ -184,12 +195,8 @@ begin
     fSelectionResult.Value_PrefixName := trim(edPrefixName.Text);
     fSelectionResult.Value_TipEvidenta := lcbTipEvidenta.EditValue;
     fSelectionResult.Value_UM := lcbUM.EditValue;
-
-    if (IBCQueryFilters.Active) then
-    begin
-      fSelectionResult.Value_FilterID := IBCQueryFilters.FieldByName('FILTERID').AsInteger;
-      fSelectionResult.Value_FilterParamID := IBCQueryFilterParams.FieldByName('FILTERPARAMID').AsInteger;
-    end;
+    fSelectionResult.Value_FilterID := beFilterSelect.Tag;
+    fSelectionResult.Value_FilterParamID := beFilterValueSelect.Tag;
 
     // ok?
     Result := fSelectionResult.Change_WebGoodsTypeID or
@@ -223,6 +230,8 @@ begin
   IBCQueryUM.Open;
   IBCQueryTipEvidenta.Open;
   IBCQuerySysS.Open;
+
+  RestoreLastFilterParam;
 end;
 
 procedure TfrmSetupGoodsPropsSelectionDlg.SelectGoodsAcnt;
@@ -241,6 +250,100 @@ begin
   end;
 end;
 
+procedure TfrmSetupGoodsPropsSelectionDlg.SelectFilterParam;
+var
+  dialog: TfrmWebFiltersDlg;
+  defaultFilterID, defaultFilterParamID: Integer;
+begin
+  dialog := TfrmWebFiltersDlg.Create(Self, dmDB.IBCConnection);
+  try
+    defaultFilterID := beFilterSelect.Tag;
+    defaultFilterParamID := beFilterValueSelect.Tag;
+
+    if dialog.SelectFilterParam(defaultFilterID, defaultFilterParamID) then
+    begin
+      SetFilterParam(dialog.FilterID, dialog.FilterParamID, dialog.FilterNameRom, dialog.FilterParamValueRom);
+      StoreLastFilterParam;
+    end;
+  finally
+    dialog.Free;
+  end;
+end;
+
+// ID-urile se tin in Tag, textul afisat e denumirea (RO) a filtrului / valorii
+procedure TfrmSetupGoodsPropsSelectionDlg.SetFilterParam(const FilterID, FilterParamID: Integer;
+  const FilterName, FilterParamValue: string);
+begin
+  beFilterSelect.Tag := FilterID;
+  beFilterSelect.Text := FilterName;
+  beFilterValueSelect.Tag := FilterParamID;
+  beFilterValueSelect.Text := FilterParamValue;
+end;
+
+procedure TfrmSetupGoodsPropsSelectionDlg.RestoreLastFilterParam;
+var
+  LastFilterID, LastFilterParamID: Integer;
+  Query: TIBCQuery;
+begin
+  AppUserConfigStorage.OpenSection(cStorageSection);
+  try
+    LastFilterID := AppUserConfigStorage.IntValues.GetValue(cStorageKey_FilterID, -1);
+    LastFilterParamID := AppUserConfigStorage.IntValues.GetValue(cStorageKey_FilterParamID, -1);
+  finally
+    AppUserConfigStorage.CloseSection;
+  end;
+
+  if (LastFilterID <= 0) and (LastFilterParamID <= 0) then
+    Exit;
+
+  // denumirile se citesc din baza (pot fi redenumite intre timp)
+  Query := TIBCQuery.Create(nil);
+  try
+    Query.Connection := dmDB.IBCConnection;
+
+    // 1. valoarea salvata; filtrul se ia din ea, ca perechea sa ramana consistenta
+    if LastFilterParamID > 0 then
+    begin
+      Query.SQL.Text :=
+        'SELECT P.FILTERID, P.FILTERPARAMID, F.FILTERNAME, P.PARAM_VALUE ' +
+        'FROM TS_FILTER_PARAMS P ' +
+        'JOIN TS_FILTERS F ON F.FILTERID = P.FILTERID ' +
+        'WHERE P.FILTERPARAMID = :FILTERPARAMID';
+      Query.ParamByName('FILTERPARAMID').AsInteger := LastFilterParamID;
+      Query.Open;
+      if not Query.IsEmpty then
+      begin
+        SetFilterParam(Query.FieldByName('FILTERID').AsInteger, Query.FieldByName('FILTERPARAMID').AsInteger,
+          Query.FieldByName('FILTERNAME').AsString, Query.FieldByName('PARAM_VALUE').AsString);
+        Exit;
+      end;
+      Query.Close;
+    end;
+
+    // 2. valoarea nu mai exista - pastram macar filtrul, ca selectorul sa se deschida pe el
+    if LastFilterID > 0 then
+    begin
+      Query.SQL.Text := 'SELECT FILTERNAME FROM TS_FILTERS WHERE FILTERID = :FILTERID';
+      Query.ParamByName('FILTERID').AsInteger := LastFilterID;
+      Query.Open;
+      if not Query.IsEmpty then
+        SetFilterParam(LastFilterID, -1, Query.FieldByName('FILTERNAME').AsString, '');
+    end;
+  finally
+    Query.Free;
+  end;
+end;
+
+procedure TfrmSetupGoodsPropsSelectionDlg.StoreLastFilterParam;
+begin
+  AppUserConfigStorage.OpenSection(cStorageSection);
+  try
+    AppUserConfigStorage.IntValues.SetValue(cStorageKey_FilterID, beFilterSelect.Tag);
+    AppUserConfigStorage.IntValues.SetValue(cStorageKey_FilterParamID, beFilterValueSelect.Tag);
+  finally
+    AppUserConfigStorage.CloseSection;
+  end;
+end;
 procedure TfrmSetupGoodsPropsSelectionDlg.SetGoodsCount(const Count: Integer);
 begin
   lbGoodsCount.Caption := IntToStr(Count);

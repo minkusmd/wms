@@ -243,7 +243,7 @@ begin
       end
       {
         else
-        if dialog.SelectGoods(data.GoodsID,false,0,'Найдите соответствующий товар') then
+        if dialog.SelectGoods(data.GoodsID,false,0,'Gasiti marfa corespunzatoare') then
         begin
         data.GoodsID:=dialog.GoodsID;
         data.ByNeuronCode:=true;
@@ -292,13 +292,13 @@ var
 begin
   Count := GetCheckGoodsCount;
   if Count = 0 then
-    ShowErrorDialog('Ошибка', 'Нету проверенных товаров.')
-  else if ShowAskDialog('Импорт цен товаров', Format('Вы хотите импортировать цены для %d товаров ?', [Count]),
-    Format('Всего записей: %d.', [fGoodsList.Count])) = mrYes then
+    ShowErrorDialog('Eroare', 'Nu sunt produse verificate.')
+  else if ShowAskDialog('Import preturi produse', Format('Doriti sa importati preturile pentru %d produse ?', [Count]),
+    Format('Total inregistrari: %d.', [fGoodsList.Count])) = mrYes then
   begin
     if DoImportGoodsDB then
     begin
-      ShowInfoDialog('Импорт цен товаров', 'Цены товаров импортированны.');
+      ShowInfoDialog('Import preturi produse', 'Preturile marfurilor au fost importate.');
       ModalResult := mrOk;
     end;
   end;
@@ -361,11 +361,11 @@ begin
   Result := false;
 
   if VarIsNullDate(deSTART.EditValue) or VarIsNullDate(deEND.EditValue) then
-    AddErrorToStr(ErrorStr, 'Период рассчета!');
+    AddErrorToStr(ErrorStr, 'Perioada de calcul!');
   if fCT = -1 then
-    AddErrorToStr(ErrorStr, 'Фирма!');
+    AddErrorToStr(ErrorStr, 'Firma!');
   if fSupplierID = -1 then
-    AddErrorToStr(ErrorStr, 'Поставщик!');
+    AddErrorToStr(ErrorStr, 'Furnizor!');
 
   if ErrorStr = '' then
     Result := True
@@ -379,7 +379,7 @@ begin
   if GetCheckGoodsCount = 0 then
   begin
     Result := false;
-    ShowErrorDialog('Ошибка', 'Нету проверенных товаров.')
+    ShowErrorDialog('Eroare', 'Nu sunt produse verificate.')
   end;
 end;
 
@@ -463,62 +463,62 @@ begin
     cxSpreadSheet.ActiveSheetAsTable.Options.ShowFormulas := bTrue;
 
   Sheet := cxSpreadSheet.ActiveSheetAsTable;
-  Sheet.Caption := 'Товары';
+  Sheet.Caption := 'Marfuri';
 
   cell := Sheet.CreateCell(0, 0);
   cell.column.Size := 120; // foreign code
-  cell.SetText('Код поставщика');
+  cell.SetText('Codul furnizorului');
 
   cell := Sheet.CreateCell(0, 1);
-  cell.column.Size := 350; // наименование
-  cell.SetText('Название товара');
+  cell.column.Size := 350; // denumire
+  cell.SetText('Denumirea produsului');
 
   cell := Sheet.CreateCell(0, 2);
-  cell.column.Size := 60; // кол-во
-  cell.SetText('кол-во');
+  cell.column.Size := 60; // cantitate
+  cell.SetText('cantitate');
 
   cell := Sheet.CreateCell(0, 3);
-  cell.column.Size := 60; // цена
-  cell.SetText('Цена');
+  cell.column.Size := 60; // pret
+  cell.SetText('Pret');
 
   cell := Sheet.CreateCell(0, 4);
-  cell.column.Size := 60; // кол-во реализацией
-  cell.SetText('кол-во реализации');
+  cell.column.Size := 60; // cantitate realizata
+  cell.SetText('cantitate realizata');
 
   cell := Sheet.CreateCell(0, 5);
-  cell.column.Size := 60; // остаток
-  cell.SetText('Остаток');
+  cell.column.Size := 60; // stoc
+  cell.SetText('Stoc');
 
-  // Sheet.Cols.Size[0]:=120;  // Код поставщика
-  // Sheet.Cols.Size[1]:=350;  // Наименование
-  // Sheet.Cols.Size[2]:=60;  // Кол-во
-  // Sheet.Cols.Size[3]:=60;  // Цена
-  // Sheet.Cols.Size[4]:=60;  // кол-во реализации
-  // Sheet.Cols.Size[5]:=60;  // остаток
+  // Sheet.Cols.Size[0]:=120;  // Codul furnizorului
+  // Sheet.Cols.Size[1]:=350;  // Denumire
+  // Sheet.Cols.Size[2]:=60;  // Cantitate
+  // Sheet.Cols.Size[3]:=60;  // Pret
+  // Sheet.Cols.Size[4]:=60;  // cantitate realizata
+  // Sheet.Cols.Size[5]:=60;  // stoc
 
-//  // Код поставщика
+//  // Codul furnizorului
 //  cell := Sheet.Cells[0, 0];
-//  cell.SetText('Код поставщика');
-//  // Наименование
+//  cell.SetText('Codul furnizorului');
+//  // Denumire
 //
 //  cell := Sheet.Cells[0, 1];
-//  cell.SetText('Наименование');
-//  // Кол-во
+//  cell.SetText('Denumire');
+//  // Cantitate
 //
 //  cell := Sheet.Cells[0, 2];
-//  cell.SetText('Кол-во');
-//  // Цена
+//  cell.SetText('Cantitate');
+//  // Pret
 //
 //  cell := Sheet.Cells[0, 3];
-//  cell.SetText('Цена');
-//  // кол-во реализации
+//  cell.SetText('Pret');
+//  // cantitate realizata
 //
 //  cell := Sheet.Cells[0, 4];
-//  cell.SetText('кол-во реализации');
+//  cell.SetText('cantitate realizata');
 //
-//  // остаток
+//  // stoc
 //  cell := Sheet.Cells[0, 5];
-//  cell.SetText('остаток');
+//  cell.SetText('stoc');
 
   cxSpreadSheet.ActiveSheetAsTable.Selection.SelectCell(1, 0);
 end;
@@ -554,7 +554,7 @@ end;
 
 procedure TfrmImportForeignGoodsIntoTableDlg.DoCheckGoods;
 begin
-  if ShowAskDialog('Проверка товара', 'Вы хотите проверить товар по коду товара от Поставщика?') = mrYes then
+  if ShowAskDialog('Verificare marfa', 'Doriti sa verificati marfa dupa codul de la Furnizor?') = mrYes then
     DoScanGoods;
 end;
 
@@ -752,8 +752,8 @@ begin
       end;
   end;
   // show summary
-  lbCodeRepeated.Caption := Format('код FANTASTIC повторяется - %d', [counter_Repeated]);
-  lbNotFound.Caption := Format('не найден - %d', [counter_NotFound]);
+  lbCodeRepeated.Caption := Format('codul FANTASTIC se repeta - %d', [counter_Repeated]);
+  lbNotFound.Caption := Format('nu a fost gasit - %d', [counter_NotFound]);
 end;
 
 procedure TfrmImportForeignGoodsIntoTableDlg.FormCreate(Sender: TObject);
@@ -865,7 +865,7 @@ var
 begin
   dialog := TfrmCustomersDlg.Create(Self);
   try
-    if dialog.SelectCustomer(fCT, false, 0, 'Выберите фирму') then
+    if dialog.SelectCustomer(fCT, false, 0, 'Selectati firma') then
     begin
       beCT.Text := dialog.CustomerTitle;
       fCT := dialog.CustomerID;
@@ -889,7 +889,7 @@ var
 begin
   dialog := TfrmCustomersDlg.Create(Self);
   try
-    if dialog.SelectCustomer(fSupplierID, false, 0, 'Выберите поставщика') then
+    if dialog.SelectCustomer(fSupplierID, false, 0, 'Selectati furnizorul') then
     begin
       beSUPPLIER.Text := dialog.CustomerTitle;
       fSupplierID := dialog.CustomerID;

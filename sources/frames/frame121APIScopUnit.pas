@@ -1,6 +1,6 @@
 unit frame121APIScopUnit;
 {
-  ИНВЕНТАРИЗАЦИЯ. Инвентаризация
+  INVENTARIERE. Inventariere
   DocTypeID = 1968
   Frame Index = 80
 }
@@ -345,7 +345,7 @@ begin
         begin
             Item := ItemsArray.Items[i] as TJSONObject;
 
-              // Извлечение имени товара
+              // Extragerea numelui produsului
             Name := Item.GetValue<string>('name');
             try
                 sku := Item.GetValue<string>('sku');
@@ -361,7 +361,7 @@ begin
 
             Description := Item.GetValue<string>('description');
 
-              // Извлечение цены
+              // Extragerea pretului
             Price := Item.GetValue<TJSONObject>('calculatedProductPrice').GetValue<string>('priceUsd');
             Currency := 'USD';
             try
@@ -377,7 +377,7 @@ begin
 
             brand := Item.GetValue<TJSONObject>('brand').GetValue<string>('name');
 
-              // Извлечение URL изображения
+              // Extragerea URL-ului imaginii
             try
                 ImageURL := Item.GetValue<TJSONArray>('images').Items[0].Value;
             except

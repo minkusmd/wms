@@ -1,6 +1,6 @@
 unit frame119PernaMeaUnit;
 {
-  ИНВЕНТАРИЗАЦИЯ. Инвентаризация
+  INVENTARIERE. Inventariere
   DocTypeID = 1968
   Frame Index = 118
 }

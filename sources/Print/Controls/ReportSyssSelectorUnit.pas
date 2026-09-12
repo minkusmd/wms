@@ -95,7 +95,7 @@ end;
 
 class function TfrxSyssSelector.GetDescription: String;
 begin
-     Result:='Выбор элементов из справочника SYSS';
+     Result:='Selectare elemente din nomenclatorul SYSS';
 end;
 
 function TfrxSyssSelector.GetListOfID: string;
@@ -136,7 +136,7 @@ begin
      // button: Add
      fBtnAdd:=TSpeedButton.Create(panel);
      fBtnAdd.Align:=alLeft;
-     fBtnAdd.Caption:='Добавить...';
+     fBtnAdd.Caption:='Adauga...';
      fBtnAdd.Width:=90;
      fBtnAdd.OnClick:=nil;
      fBtnAdd.Parent:=panel;
@@ -145,7 +145,7 @@ begin
      // button: Delete
      fBtnDelete:=TSpeedButton.Create(panel);
      fBtnDelete.Align:=alLeft;
-     fBtnDelete.Caption:='Удалить...';
+     fBtnDelete.Caption:='Sterge...';
      fBtnDelete.AlignWithMargins:=True;
      fBtnDelete.Margins.Left:=8;
      fBtnDelete.Margins.Top:=0;
@@ -161,7 +161,7 @@ begin
      // button: Clear
      fBtnClear:=TSpeedButton.Create(panel);
      fBtnClear.Align:=alRight;
-     fBtnClear.Caption:='Очистить...';
+     fBtnClear.Caption:='Curata...';
      fBtnClear.Width:=90;
      fBtnClear.OnClick:=nil;
      fBtnClear.Parent:=panel;
@@ -181,7 +181,7 @@ begin
      cxGridTableView.OptionsView.ColumnAutoWidth:=true;
      cxGridTableView.OptionsView.GridLineColor:=$00D1D1D1;
      cxGridTableView.OptionsView.GroupByBox:=false;
-     cxGridTableView.OptionsView.NoDataToDisplayInfoText:='<Нет записей>';
+     cxGridTableView.OptionsView.NoDataToDisplayInfoText:='<Fara inregistrari>';
 
      cxGridTableView.OptionsSelection.CellSelect:=false;
      cxGridTableView.OptionsSelection.MultiSelect:=true;
@@ -202,14 +202,14 @@ begin
      // add columns
 
      cxGridCol_ID:=cxGridTableView.CreateColumn;
-     cxGridCol_ID.Caption:='Код';
+     cxGridCol_ID.Caption:='Cod';
      cxGridCol_ID.DataBinding.ValueType:='Integer';
      cxGridCol_ID.Width:=50;
      cxGridCol_ID.Options.HorzSizing:=false;
      cxGridCol_ID.HeaderAlignmentHorz:=taCenter;
 
      cxGridCol_TITLE:=cxGridTableView.CreateColumn;
-     cxGridCol_TITLE.Caption:='Название';
+     cxGridCol_TITLE.Caption:='Denumire';
      cxGridCol_TITLE.Width:=100;
 end;
 
@@ -241,7 +241,7 @@ end;
 
 procedure TfrxSyssSelector.sbClearClick(Sender: TObject);
 begin
-     if ShowAskDialog('Удаление всех записей','Удалить все записи?')=mrYes then
+     if ShowAskDialog('Stergerea tuturor inregistrarilor','Stergeti toate inregistrarile?')=mrYes then
      begin
           cxGridTableView.BeginUpdate;
           try
@@ -261,13 +261,13 @@ begin
      begin
           if (cxGridTableView.Controller.SelectedRecordCount>1) then
           begin
-               s1:='Удаление записей';
-               s2:='Удалить выбранные записи?';
+               s1:='Stergere inregistrari';
+               s2:='Stergeti inregistrarile selectate?';
           end
           else
           begin
-               s1:='Удаление записи';
-               s2:=Format('Удалить запись "%s"?',[cxGridTableView.Controller.SelectedRecords[0].Values[1]]);
+               s1:='Stergere inregistrare';
+               s2:=Format('Stergeti inregistrarea "%s"?',[cxGridTableView.Controller.SelectedRecords[0].Values[1]]);
           end;
           if ShowAskDialog(s1, s2)=mrYes then
           begin

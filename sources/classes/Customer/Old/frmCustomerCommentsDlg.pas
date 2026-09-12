@@ -63,12 +63,12 @@ begin
      try
         if IBCQueryComments.Eof then
         begin
-             dtDialogTitle.Text:='Создание нового коментария';
+             dtDialogTitle.Text:='Creare comentariu nou';
              IBCQueryComments.Append;
         end
         else
         begin
-             dtDialogTitle.Text:='Изменение коментария';
+             dtDialogTitle.Text:='Modificare comentariu';
              IBCQueryComments.Edit;
         end;
      except

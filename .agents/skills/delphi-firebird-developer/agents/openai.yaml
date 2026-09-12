@@ -1,0 +1,4 @@
+interface:
+  display_name: "Delphi Firebird Developer"
+  short_description: "Delphi VCL, IBDAC, Firebird, UI and reports"
+  default_prompt: "Use $delphi-firebird-developer to implement this Delphi WMS change safely across database, UI, and reporting layers."

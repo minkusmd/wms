@@ -1,6 +1,6 @@
 unit frame22OstatkiTovaraUnit;
 {
-  ОСТАТКИ. Остатки товара
+  STOCURI. Stoc marfa
   DocTypeID = 122
   Frame Index = 22
 }
@@ -314,7 +314,7 @@ end;
 
 procedure Tframe22OstatkiTovara.DeleteRecord;
 begin
-     if ShowAskDialog(cMSG_DELETERECORD_DeleteDocument,Format('Удалить запись номер %d?',[dmDB.IBCQueryDocs.FieldByName('DOCID').asInteger]))=mrYes then
+     if ShowAskDialog(cMSG_DELETERECORD_DeleteDocument,Format('Stergeti inregistrarea numarul %d?',[dmDB.IBCQueryDocs.FieldByName('DOCID').asInteger]))=mrYes then
      begin
           dmDB.IBCQueryDocs.UpdateTransaction.StartTransaction;
           try
@@ -332,10 +332,10 @@ end;
 procedure Tframe22OstatkiTovara.DeleteSelectedExpense;
 var S:WideString;
 begin
-     S:=#13#10+Format('%s на сумму %f %s ?',[IBCQueryExpenses.FieldByName('EXPENSE_TITLE').AsString,
+     S:=#13#10+Format('%s in suma de %f %s ?',[IBCQueryExpenses.FieldByName('EXPENSE_TITLE').AsString,
                                             IBCQueryExpenses.FieldByName('EXPENSE_DOC_SUMA').AsCurrency,
                                             IBCQueryExpenses.FieldByName('EXPENSE_DOC_CURRENCY_NAME').AsString]);
-     if ShowAskDialog('Удаление затрат','Удалить дополнительные затраты'+S)=mrYes then
+     if ShowAskDialog('Stergere cheltuieli','Stergeti cheltuielile suplimentare'+S)=mrYes then
      begin
           try
              IBCQueryExpenses.Delete;
@@ -351,7 +351,7 @@ procedure Tframe22OstatkiTovara.DeleteSelectedGoods;
 var S:String;
 begin
      S:=#13#10+dmDB.IBCQueryJurnal.FieldByName('GOODS_NAME').AsString+' ?';
-     if ShowAskDialog('Удаление товара','Удалить товар'+S)=mrYes then
+     if ShowAskDialog('Stergere produs','Sterge produsul'+S)=mrYes then
      begin
           try
              dmDB.IBCQueryJurnal.Delete;
@@ -366,7 +366,7 @@ end;
 
 procedure Tframe22OstatkiTovara.DoActionCloseDocument;
 begin
-     if ShowAskDialog('Закрыть "Остатки товара"','Вы хотите закрыть "Остатки товара"?')=mrYes then
+     if ShowAskDialog('Inchidere "Stoc marfa"','Doriti sa inchideti "Stoc marfa"?')=mrYes then
      begin
           if DoActionDB(1) then
           begin
@@ -391,9 +391,9 @@ begin
         Query.Transaction.StartTransaction;
         try
            case ActionID of
-           // Закрыть "Остатки товара"
+           // Inchide "Stoc marfa"
            1: Query.SQL.Text:='EXECUTE PROCEDURE SP_CLOSE_BALANCE_GOODS(:DOCID)';
-           // Открыть "Остатки товара"
+           // Deschide "Stoc marfa"
            2: Query.SQL.Text:='EXECUTE PROCEDURE SP_OPEN_BALANCE_GOODS(:DOCID)';
            end;
            // set params
@@ -415,7 +415,7 @@ end;
 
 procedure Tframe22OstatkiTovara.DoActionOpenDocument;
 begin
-     if ShowAskDialog('Открыть "Остатки товара"','Вы хотите открыть "Остатки товара"?')=mrYes then
+     if ShowAskDialog('Deschidere "Stoc marfa"','Doriti sa deschideti "Stoc marfa"?')=mrYes then
      begin
           if DoActionDB(2) then
           begin
@@ -526,11 +526,11 @@ begin
 
      if (cxGridOTTable.DataController.RecNo>0) and (dmDB.IBCQueryDocs.FieldByName('FLG_CLOSED').AsInteger=0) then
      begin
-          fExpenseNew:=True;  // Новые затраты + Security
+          fExpenseNew:=True;  // Cheltuieli noi + Security
           if cxGridExpensesTable.DataController.RecNo>0 then
           begin
-               fExpenseEdit:=True; // Изменить затраты + Security
-               fExpenseDelete:=True; // Удалить затраты + Security
+               fExpenseEdit:=True; // Modifica cheltuieli + Security
+               fExpenseDelete:=True; // Sterge cheltuieli + Security
           end;
      end;
      // expenses
@@ -545,7 +545,7 @@ begin
 
      if cxGridGoodsTable.Site.Focused then
      begin
-          // context from Jurnal: Код + Наименование
+          // context from Jurnal: Cod + Denumire
           Result.Context := ffGoods;
           Result.ValueInt := dmDB.IBCQueryJurnal.FieldByName('GOODSID').AsInteger;
           Result.ValueStr := dmDB.IBCQueryJurnal.FieldByName('GOODS_NAME').AsString;
@@ -555,14 +555,14 @@ begin
          begin
               if cxGridOT_DATA.Focused then
               begin
-                   // Дата
+                   // Data
                    Result.Context := ffDate;
                    Result.ValueDateTime := dmDB.IBCQueryDocs.FieldByName('DATA').AsDateTime;
               end
               else
                   if cxGridOT_DTDEP.Focused then
                   begin
-                       // Склад
+                       // Depozit
                        Result.Context := ffStock;
                        Result.ValueInt := dmDB.IBCQueryDocs.FieldByName('DTDEP').AsInteger;
                        Result.ValueStr := dmDB.IBCQueryDocs.FieldByName('DTDEP_NAME').AsString;
@@ -582,7 +582,7 @@ end;
 
 function Tframe22OstatkiTovara.InitFrameID: integer;
 begin
-     Result:=22; // ОСТАТКИ. Остатки товара
+     Result:=22; // STOCURI. Stocuri marfa
      SetuQtyFields;
 end;
 
@@ -639,14 +639,14 @@ begin
      begin
           FLG_CLOSED:=dmDB.IBCQueryDocs.FieldByName('FLG_CLOSED').AsInteger=1;
 
-          fGoodsNew:=Not FLG_CLOSED; // Новый товар + Security
+          fGoodsNew:=Not FLG_CLOSED; // Produs nou + Security
 
           if (cxGridGoodsTable.DataController.RecNo>0) then
           begin
-               fGoodsEdit:=Not FLG_CLOSED;   // Изменить товар + Security
-               fGoodsDelete:=Not FLG_CLOSED; // Удалить товар + Security
+               fGoodsEdit:=Not FLG_CLOSED;   // Modifica marfa + Security
+               fGoodsDelete:=Not FLG_CLOSED; // Sterge marfa + Security
 
-               // Серийный учет, Партийный учет
+               // Evidenta seriala, Evidenta pe partizi
                fSNParts:=(dmDB.IBCQueryJurnal.FieldByName('GOODS_SERIAL_TYPE_ID').AsInteger=cSYSS_GOODS_SERIAL_TYPE_Серийный_учет)
                       or (dmDB.IBCQueryJurnal.FieldByName('GOODS_SERIAL_TYPE_ID').AsInteger=cSYSS_GOODS_SERIAL_TYPE_Партийный_учет);
           end
@@ -682,7 +682,7 @@ end;
 
 procedure Tframe22OstatkiTovara.SetuQtyFields;
 begin
-     // Кол-во
+     // Cantitate
      TcxCalcEditProperties(cxGridDBCol_QTY.Properties).DisplayFormat:=QtyDisplayFormat;
      cxGridDBCol_QTY.Summary.FooterFormat:=QtyDisplayFormat;
 end;
@@ -793,8 +793,8 @@ begin
           FLG_CLOSED:=dmDB.IBCQueryDocs.FieldByName('FLG_CLOSED').AsInteger=1;
           HAS_JURNAL_GOODS:=dmDB.IBCQueryDocs.FieldByName('HAS_JURNAL_GOODS').AsInteger=1;
 
-          fActionCloseDoc:=(Not FLG_CLOSED) and HAS_JURNAL_GOODS; // Закрыть "Остатки товара" + Security
-          fActionOpenDoc:=FLG_CLOSED;        // Открыть "Остатки товара" + Security
+          fActionCloseDoc:=(Not FLG_CLOSED) and HAS_JURNAL_GOODS; // Inchide "Stoc marfa" + Security
+          fActionOpenDoc:=FLG_CLOSED;        // Deschide "Stoc marfa" + Security
      end;
      // popup
      bbActionCloseDocument.Enabled:=fActionCloseDoc;

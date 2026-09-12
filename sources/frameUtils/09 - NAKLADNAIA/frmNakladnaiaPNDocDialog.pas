@@ -399,7 +399,7 @@ procedure TfrmNakladnaiaPNDocDlg.SetupSecurityItems;
 begin
   fSECURITY_CanSetupPastDate := SecurityFlagEnabled(cSecurityFlag_НАКЛАДНЫЕ_ПТОУ_Редактировать_старые);
 
-     // Контракт
+     // Contract
   fSECURITY_ALLOW_CONTRACT := SecurityFlagEnabled(cSecurityFlag_НАКЛАДНЫЕ_РНОУ_Показывать_Контракт);
   if not fSECURITY_ALLOW_CONTRACT then
   begin

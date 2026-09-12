@@ -1,12 +1,12 @@
 //******************************************************************************
-//                                                      (c) корпорация Галактика
+//                                                      (c) corporatia Galaktika
 //                                                       http://www.galaktika.by
-// Галактика 8.10 - Отчетность FastReport 3
-// Модуль импорта из RTF DOC
+// Galaktika 8.10 - Rapoarte FastReport 3
+// Modul de import din RTF DOC
 //******************************************************************************
 
 {
-  Для разбора RTF файлов используется библиотека RichView 1.9.24  http://www.trichview.com
+  Pentru analiza fisierelor RTF se foloseste biblioteca RichView 1.9.24  http://www.trichview.com
 }
 
 unit gfrRTFImportWizard;
@@ -90,7 +90,7 @@ threadvar bmp: Graphics.TBitmap;
     maxWidth, maxHeight : Extended;
     curTopCorrection    : Extended;
 
-const RTFWizardCaption = 'Импорт формы отчета из RTF';
+const RTFWizardCaption = 'Import forma de raport din RTF';
 
 const ScaleKoef = 1;
 
@@ -101,7 +101,7 @@ const ScaleKoef = 1;
 
 function TfrxRTFImportWizard.Execute: Boolean;
 begin
-  { запрещаем любые отрисовки в дизайнере }
+  { interzicem orice desenare in designer }
   Designer.Lock;
 
   RTFImportForm := TRTFImportForm.Create(Report);
@@ -143,7 +143,7 @@ end;
 procedure TRTFImportForm.ButtonImpClick(Sender: TObject);
 begin
   try
-    RichView1.Width := 720; // 720 - точек примерно соответвует ширине листа A4 в FR.
+    RichView1.Width := 720; // 720 - puncte, corespunde aproximativ latimii foii A4 in FR.
 
     if OpenRtfFile then
       Import;
@@ -162,7 +162,7 @@ begin
   if Assigned(frxDesignerComp) then
     OpenDialog.InitialDir := frxDesignerComp.OpenDir;
 
-  OpenDialog.Filter := 'Документ RTF|*.rtf|' + rvc.GetImportFilter;
+  OpenDialog.Filter := 'Document RTF|*.rtf|' + rvc.GetImportFilter;
 
   if not OpenDialog.Execute then
     exit;
@@ -176,7 +176,7 @@ begin
       r:= RVC.ImportRV(OpenDialog.FileName, RichView1, OpenDialog.FilterIndex-2);
 
     if not r then
-      Application.MessageBox('Ошибка открытия файла', 'Error', 0);
+      Application.MessageBox('Eroare la deschiderea fisierului', 'Error', 0);
 
     RichView1.Format;
 
@@ -184,7 +184,7 @@ begin
     //FillItemsList;
     result := true;
   except
-    Application.MessageBox('Ошибка открытия файла', 'Error', 0);
+    Application.MessageBox('Eroare la deschiderea fisierului', 'Error', 0);
   end;
 end; // OpenRtfFile
 
@@ -258,7 +258,7 @@ var
           Skips[high(Skips)].SkipBegin := SkipBegin;
           Skips[high(Skips)].SkipEnd   := SkipEnd;
 
-          // если в файле несколько форм разбить их на разные страницы
+          // daca in fisier sunt mai multe formulare, le separam pe pagini diferite
           Skips[high(Skips)].PageBreak := ManyForms;
           ManyForms := true;
         end
@@ -350,7 +350,7 @@ var
               TableSkips[high(Skips)].SkipBegin := begSkip;
               TableSkips[high(Skips)].SkipEnd   := endSkip;
 
-              // если в файле несколько форм разбить их на разные страницы
+              // daca in fisier sunt mai multe formulare, le separam pe pagini diferite
               TableSkips[high(TableSkips)].PageBreak := ManyForms;
               ManyForms := true;
             end
@@ -383,7 +383,7 @@ var
   begin
   for i := high(Skips) downto low(Skips) do
   begin
-    // добавить разбивку на страницы после удаляемого элемента
+    // adauga separarea pe pagini dupa elementul care se sterge
     if (Skips[i].PageBreak) and ((Skips[i].SkipEnd + 1) < RichView1.RVData.Items.Count) then
       RichView1.RVData.GetItem(Skips[i].SkipEnd + 1).PageBreakBefore := true;
 
@@ -406,7 +406,7 @@ begin
 
     if RichView1.RVData.IsParaStart(CurItem) and (Item is TRVTextItemInfo) then
     begin
-      // определить границы и текст прараграфа
+      // determina limitele si textul paragrafului
       ParaBegin := CurItem;
       ParaEnd   := CurItem;
       ParaText  := RichView1.RVData.GetItemTextW(CurItem);
@@ -438,7 +438,7 @@ begin
   RichView1.Format;
 end; // DropFCOMInTable
 
-  // импорт таблиц
+  // import tabele
 function TRTFImportForm.importOneTable(curFormattedData    : TCustomRVFormattedData;
                                        curItemInfo         : TCustomRVItemInfo;
                                        curPage             : TfrxReportPage;
@@ -474,7 +474,7 @@ function TRTFImportForm.importOneTable(curFormattedData    : TCustomRVFormattedD
           memo := TfrxMemoView.Create(curPage);
           memo.CreateUniqueName;
 
-          // расчет текста и шрифта
+          // calculul textului si fontului
           Wtxt := '';
           FirstNotEmptyItemIsFound := false;
 
@@ -501,7 +501,7 @@ function TRTFImportForm.importOneTable(curFormattedData    : TCustomRVFormattedD
                     memo.Font.Size  := RVStyle1.TextStyles[InCellItemStyleNo].Size;
                     memo.Font.Style := RVStyle1.TextStyles[InCellItemStyleNo].Style;
 
-                    // горизонтальное выравнивание
+                    // aliniere orizontala
                     case RVStyle1.ParaStyles[curCellFormattedData.GetItem(curCellItemIdx).ParaNo].Alignment of
                       rvaLeft     : memo.HAlign := haLeft;
                       rvaRight    : memo.HAlign := haRight;
@@ -517,7 +517,7 @@ function TRTFImportForm.importOneTable(curFormattedData    : TCustomRVFormattedD
               else if ((curCellFormattedData.GetItem(curCellItemIdx) is TRVGraphicItemInfo) and
                        (not CheckBoxNoPicture.Checked)) then
               begin
-              // импорт картинки
+              // import imagine
                 curGraphInfo := TRVGraphicItemInfo(curCellFormattedData.GetItem(curCellItemIdx));
                 pict := TfrxPictureView.Create(curPage);
                 pict.CreateUniqueName;
@@ -557,7 +557,7 @@ function TRTFImportForm.importOneTable(curFormattedData    : TCustomRVFormattedD
           end;
           SetMaxMemoBounds(memo);
 
-          // вертикальное выравнивание
+          // aliniere verticala
           case curCell.VAlign of
             rvcTop    : memo.VAlign := vaTop;
             rvcMiddle : memo.VAlign := vaCenter;
@@ -628,32 +628,32 @@ var
     ProgressBar.Position := curDrawNo;
   end;
 
-  // имопорт одного парграфа
+  // import un singur paragraf
   procedure importOneParagraph;
   var
     curTextItemInfo : TRVTextItemInfo;
     wtxt            : WideString;
     x1,x2,y1,y2     : extended;
   begin
-    // текст параграфа будет склеиватся из Item-ов параграфа
+    // textul paragrafului se va compune din Item-urile paragrafului
     wtxt := curFormattedData.GetItemTextW(CurItemNo);
 
     if trim(wtxt) <> '' then
     begin
-      // параграф уже не пустой - будем импортить
+      // paragraful nu mai este gol - vom importa
       memo := TfrxMemoView.Create(curPage);
       memo.CreateUniqueName;
 
-      curTextItemInfo := TRVTextItemInfo(curItemInfo); // первый Item из первого DrawItem-а
+      curTextItemInfo := TRVTextItemInfo(curItemInfo); // primul Item din primul DrawItem
 
-      memo.Font.Name  :=  RVStyle1.TextStyles[curTextItemInfo.StyleNo].FontName;  // из первого Item-а
-      memo.Font.Color :=  RVStyle1.TextStyles[curTextItemInfo.StyleNo].Color;     // из первого Item-а
-      memo.Font.Size  :=  RVStyle1.TextStyles[curTextItemInfo.StyleNo].Size;      // из первого Item-а
-      memo.Font.Style :=  RVStyle1.TextStyles[curTextItemInfo.StyleNo].Style;     // из первого Item-а
+      memo.Font.Name  :=  RVStyle1.TextStyles[curTextItemInfo.StyleNo].FontName;  // din primul Item
+      memo.Font.Color :=  RVStyle1.TextStyles[curTextItemInfo.StyleNo].Color;     // din primul Item
+      memo.Font.Size  :=  RVStyle1.TextStyles[curTextItemInfo.StyleNo].Size;      // din primul Item
+      memo.Font.Style :=  RVStyle1.TextStyles[curTextItemInfo.StyleNo].Style;     // din primul Item
 
-      memo.Color := RVStyle1.ParaStyles[curTextItemInfo.ParaNo].Background.Color; // из первого Item-а
+      memo.Color := RVStyle1.ParaStyles[curTextItemInfo.ParaNo].Background.Color; // din primul Item
 
-      case RVStyle1.ParaStyles[curTextItemInfo.ParaNo].Alignment of               // из первого Item-а
+      case RVStyle1.ParaStyles[curTextItemInfo.ParaNo].Alignment of               // din primul Item
         rvaLeft     : memo.HAlign := haLeft;
         rvaRight    : memo.HAlign := haRight;
         rvaCenter   : memo.HAlign := haCenter;
@@ -661,16 +661,16 @@ var
       end;
 
       //memo.Frame.Typ := [];
-      //if RVStyle1.ParaStyles[curTextItemInfo.ParaNo].Border.VisibleBorders.Top then         // из первого Item-а
+      //if RVStyle1.ParaStyles[curTextItemInfo.ParaNo].Border.VisibleBorders.Top then         // din primul Item
       //  memo.Frame.Typ := memo.Frame.Typ + [ftTop];
-      //if RVStyle1.ParaStyles[curTextItemInfo.ParaNo].Border.VisibleBorders.Bottom then      // из первого Item-а
+      //if RVStyle1.ParaStyles[curTextItemInfo.ParaNo].Border.VisibleBorders.Bottom then      // din primul Item
       //  memo.Frame.Typ := memo.Frame.Typ + [ftBottom];
-      //if RVStyle1.ParaStyles[curTextItemInfo.ParaNo].Border.VisibleBorders.Left then        // из первого Item-а
+      //if RVStyle1.ParaStyles[curTextItemInfo.ParaNo].Border.VisibleBorders.Left then        // din primul Item
       //  memo.Frame.Typ := memo.Frame.Typ + [ftLeft];
-      //if RVStyle1.ParaStyles[curTextItemInfo.ParaNo].Border.VisibleBorders.Right then       // из первого Item-а
+      //if RVStyle1.ParaStyles[curTextItemInfo.ParaNo].Border.VisibleBorders.Right then       // din primul Item
       //  memo.Frame.Typ := memo.Frame.Typ + [ftRight];
 
-      // координаты из первого DrawItem-а
+      // coordonatele din primul DrawItem
       x1 := curFormattedData.DrawItems[curDrawNo].Left;
       x2 := curFormattedData.DrawItems[curDrawNo].Left + curFormattedData.DrawItems[curDrawNo].Width;
       y1 := curFormattedData.DrawItems[curDrawNo].Top;
@@ -678,7 +678,7 @@ var
 
       NextDrawNo;
 
-      // координаты из других DrawItem-ов текущего Item-а
+      // coordonatele din celelalte DrawItem-uri ale Item-ului curent
       while curDrawNo < curDrawCount do
       begin
         if curItemNo <> curFormattedData.DrawItems[curDrawNo].ItemNo then
@@ -699,29 +699,29 @@ var
         NextDrawNo;
       end;
 
-      // текст и координаты из оставшихся DrawItem-ов и Item-ов до нового абзаца
+      // textul si coordonatele din DrawItem-urile si Item-urile ramase pana la noul paragraf
       while curDrawNo < curDrawCount do
       begin
-        // признак конца параграфа
+        // semn de sfarsit de paragraf
         if curFormattedData.IsParaStart(curFormattedData.DrawItems[curDrawNo].ItemNo) then
           break;
 
         curItemInfo := curFormattedData.GetItem(curFormattedData.DrawItems[curDrawNo].ItemNo);
 
-        // не текст тоже считаем признаком конца параграфа
+        // non-textul il consideram de asemenea semn de sfarsit de paragraf
         if not ( (curItemInfo is TRVTextItemInfo) or (curItemInfo is TRVTabItemInfo) )  then
           break;
 
-        // подклеиваем текст из очередного Item-а параграфа
+        // adaugam textul din urmatorul Item al paragrafului
         if curItemNo <> curFormattedData.DrawItems[curDrawNo].ItemNo then
         begin
           curItemNo := curFormattedData.DrawItems[curDrawNo].ItemNo;
           wtxt := wtxt + curFormattedData.GetItemTextW(curItemNo);
 
-          // to do здесь можно сделть расстановку НТМЛ тегов
+          // to do aici se poate face plasarea tagurilor HTML
         end;
 
-        // расширяем координаты ячейки
+        // extindem coordonatele celulei
         if curFormattedData.DrawItems[curDrawNo].Left < x1 then
           x1 := curFormattedData.DrawItems[curDrawNo].Left;
 
@@ -747,7 +747,7 @@ var
       SetMaxMemoBounds(memo);
     end
     else
-      NextDrawNo; // пустые параграфы просто сразу пропускаем
+      NextDrawNo; // paragrafele goale pur si simplu le omitem imediat
   end;
 
   procedure importOneGraphic;
@@ -801,7 +801,7 @@ var
   end;
 
 begin
-  //вычеркивание FCOM
+  //eliminarea FCOM
   if CheckBoxNoFcom.Checked then
     DropFcom;
 
@@ -836,23 +836,23 @@ begin
     end;
 
     if curItemInfo is TRVTextItemInfo then
-      // имопорт одного парграфа
+      // import un singur paragraf
       importOneParagraph
     else if curItemInfo is TRVTableItemInfo then                          // TRVTableItemInfo
-      // импорт одной таблицы
+      // importul unui tabel
       curDrawNo := curDrawNo + importOneTable(curFormattedData, curItemInfo, curPage, curDrawNo, false, 0,0)
     else if curItemInfo is TRVMarkerItemInfo then
-      // импорт маркеров
+      // importul marcatorilor
       importOneMarker
     else if curItemInfo is TRVGraphicItemInfo then
-      // импорт картинки
+      // import imagine
       importOneGraphic
     else if curItemInfo is TRVTabItemInfo then
-      // табуляцию просто пропускаем
+      // tabularea pur si simplu o omitem
       NextDrawNo
     else if RichView1.Visible then
     begin
-      // отладочный режим импорта других элементов только если RichView видимый
+      // regim de depanare pentru importul altor elemente doar daca RichView este vizibil
       memo := TfrxMemoView.Create(curPage);
       memo.CreateUniqueName;
 

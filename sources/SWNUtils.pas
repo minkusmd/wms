@@ -270,7 +270,7 @@ begin
             end;
         end;
 
-  // daca nu s-a gasit nimic, intoarcem indexul elementului "Все"
+  // daca nu s-a gasit nimic, intoarcem indexul elementului "Toate"
     if (Result = fdfNone) then
         Result := fdfAll;
 end;
@@ -372,85 +372,85 @@ function GetDocumentFrameFilterDateValues(const Filter: TFrameDocumentDateFilter
 begin
     Result := true;
     case Filter of
-    // Сегодня
+    // Astazi
         fdfToday:
             begin
                 DateStart := DateOf(NOW);
                 DateEnd := DateOf(IncYear(NOW, 0));
             end;
-    // За 2 дня
+    // Cu 2 zile inainte
         fdfLast2days:
             begin
                 DateEnd := DateOf(NOW);
                 DateStart := DateOf(DateEnd - 1);
             end;
-    // За 7 дней
+    // Ultimele 7 zile
         fdfLast7days:
             begin
                 DateEnd := DateOf(NOW);
                 DateStart := DateOf(DateEnd - 6);
             end;
-    // Текущая неделя
+    // Saptamana curenta
         fdfCurrentWeek:
             begin
                 DateEnd := DateOf(NOW);
                 DateStart := DateOf(NOW - DayOfTheWeek(NOW) + 1);
             end;
-    // 2 недели
+    // 2 saptamani
         fdfLast2weeks:
             begin
                 DateEnd := DateOf(NOW);
                 DateStart := DateOf(NOW - DayOfTheWeek(NOW) + 1 - 7);
             end;
-    // Текущий месяц
+    // Luna curenta
         fdfCurrentMonth:
             begin
                 DateEnd := DateOf(NOW);
                 DateStart := DateOf(DateEnd - DayOfTheMonth(DateEnd) + 1);
             end;
-    // I Квартал
+    // Trimestrul I
         fdfIQuarter:
             begin
                 DateStart := EncodeDate(YearOf(NOW), 1, 1);
                 DateEnd := EncodeDate(YearOf(NOW), 3, 31);
             end;
-    // II Квартал
+    // Trimestrul II
         fdfIIQuarter:
             begin
                 DateStart := EncodeDate(YearOf(NOW), 4, 1);
                 DateEnd := EncodeDate(YearOf(NOW), 6, 30);
             end;
-    // III Квартал
+    // Trimestrul III
         fdfIIIQuarter:
             begin
                 DateStart := EncodeDate(YearOf(NOW), 7, 1);
                 DateEnd := EncodeDate(YearOf(NOW), 9, 30);
             end;
-    // IV Квартал
+    // Trimestrul IV
         fdfIVQuarter:
             begin
                 DateStart := EncodeDate(YearOf(NOW), 10, 1);
                 DateEnd := EncodeDate(YearOf(NOW), 12, 31);
             end;
-    // I Полугодие
+    // Semestrul I
         fdfFirstHalfYear:
             begin
                 DateStart := EncodeDate(YearOf(NOW), 1, 1);
                 DateEnd := EncodeDate(YearOf(NOW), 6, 30);
             end;
-    // II Полугодие
+    // Semestrul II
         fdfSecondHalfYear:
             begin
                 DateStart := EncodeDate(YearOf(NOW), 7, 1);
                 DateEnd := EncodeDate(YearOf(NOW), 12, 31);
             end;
-    // Год
+    // An
         fdfCurrentYear:
             begin
                 DateStart := EncodeDate(YearOf(NOW), 1, 1);
                 DateEnd := EncodeDate(YearOf(NOW), 12, 31);
             end;
-    // Все
+    // Toate
         fdfAll:
             begin
                 DateStart := 0;
@@ -501,7 +501,7 @@ begin
 
         if not Result then
         begin
-      // С начала года
+      // De la inceputul anului
             if (m1 = 1) and (m2 in [3, 6, 9, 12]) then
             begin
                 QuarterIndex := m2 div 3;
@@ -531,7 +531,7 @@ begin
         end
         else
         begin
-      // С начало квартала
+      // De la inceputul trimestrului
             n := m2 div 3;
             if (m2 mod 3) > 0 then
                 Inc(n);
@@ -564,7 +564,7 @@ begin
     begin
         DecodeDate(DateStart, y1, m1, d1);
         DecodeDate(DateEnd, y2, m2, d2);
-    // С начала месяца
+    // De la inceputul lunii
         if (y1 = y2) and (m1 = m2) and (d1 = 1) and (d2 > d1) then
         begin
             Result := true;
@@ -1011,7 +1011,7 @@ begin
         if p <> 0 then
             Result := Result + arr[d, p]
         else
-            Result := Result + Str[i]; // если не русская буква, то берем исходную
+            Result := Result + Str[i]; // daca nu e litera rusa, o luam pe cea originala
     end;
 end;
 
@@ -1053,7 +1053,7 @@ begin
     Result[ItemIndex] := Copy(s, Start, len - Start + 1);
 end;
 
-// Установка фильтра для полей lookup-а, с разбивкой по словам и полям
+// Setare filtru pentru campurile lookup, cu separare pe cuvinte si campuri
 procedure ApplySearchFilter(Controller: TcxDBDataController; Fields: string; Text: string);
 var
     i, j: integer;
@@ -1094,7 +1094,7 @@ begin
     end;
 end;
 
-// Разбивка строки по словам
+// Separare sir pe cuvinte
 procedure SplitDelimitedString(AStrings: TStrings; AText, ADelimiter: string);
 var
     p, n: integer;

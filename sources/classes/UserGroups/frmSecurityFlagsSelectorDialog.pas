@@ -86,14 +86,14 @@ begin
   Result := False;
   if rbSetValue.Checked then
   begin
-    if ShowAskDialog('Установка флагов для всех групп пользователей', 'Вы хотите установить выбранные флаги для всех групп пользователей?',
-      'Будут затронуты все группы') = mrYes then
+    if ShowAskDialog('Setare flag-uri pentru toate grupurile de utilizatori', 'Doriti sa setati flag-urile selectate pentru toate grupurile de utilizatori?',
+      'Vor fi afectate toate grupurile') = mrYes then
       Result := DoSaveDB;
   end
   else if rbClearValue.Checked then
   begin
-    if ShowAskDialog('Удаление флагов из всех групп пользователей', 'Вы хотите убрать выбранные флаги из всех групп пользователей?',
-      'Будут затронуты все группы') = mrYes then
+    if ShowAskDialog('Stergere flag-uri din toate grupurile de utilizatori', 'Doriti sa eliminati flag-urile selectate din toate grupurile de utilizatori?',
+      'Vor fi afectate toate grupurile') = mrYes then
       Result := DoSaveDB;
   end;
 end;
@@ -199,7 +199,7 @@ begin
   if rbSetValue.Checked or rbClearValue.Checked then
     Result := True
   else
-    ShowErrorDialog('Ошибка', 'Выберите тип операции: установить или очистить флаги.');
+    ShowErrorDialog('Eroare', 'Selectati tipul operatiei: setare sau stergere flag-uri.');
 end;
 
 function TfrmSecurityFlagsSelectorDlg.IsFormDataPosted: Boolean;

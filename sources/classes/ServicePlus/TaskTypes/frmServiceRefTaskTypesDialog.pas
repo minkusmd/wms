@@ -124,7 +124,7 @@ end;
 
 procedure TfrmServiceRefTaskTypesDlg.ShowDeleteTaskTypeDialog;
 begin
-  if ShowAskDialog('Удаление', Format('Вы хотите удалить тип задачи "%s"?', [IBCQueryTT.FieldByName('TITLE').AsString])) <> mrYes then
+  if ShowAskDialog('Stergere', Format('Doriti sa stergeti tipul de sarcina "%s"?', [IBCQueryTT.FieldByName('TITLE').AsString])) <> mrYes then
     Exit;
 
   IBCQueryTT.UpdateTransaction.StartTransaction;

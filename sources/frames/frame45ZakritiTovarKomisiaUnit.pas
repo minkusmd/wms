@@ -1,6 +1,6 @@
 ﻿unit frame45ZakritiTovarKomisiaUnit;
 {
-  КОМИСИЯ. Закрытие товара в комисию
+  COMISION. Inchidere marfa in comision
   DocTypeID = 1506
   Frame Index = 45
 }
@@ -288,7 +288,7 @@ end;
 
 procedure Tframe45ZakritiTovarKomisia.DeleteRecord;
 begin
-     if ShowAskDialog(cMSG_DELETERECORD_DeleteDocument,Format('Удалить запись номер %d?',[dmDB.IBCQueryDocs.FieldByName('DOCID').asInteger]))=mrYes then
+     if ShowAskDialog(cMSG_DELETERECORD_DeleteDocument,Format('Stergeti inregistrarea numarul %d?',[dmDB.IBCQueryDocs.FieldByName('DOCID').asInteger]))=mrYes then
      begin
           dmDB.IBCQueryDocs.UpdateTransaction.StartTransaction;
           try
@@ -305,7 +305,7 @@ end;
 
 procedure Tframe45ZakritiTovarKomisia.DoCloseDocument;
 begin
-     if ShowAskDialog('Закрыть документ','Вы хотите закрыть документ?')=mrYes then
+     if ShowAskDialog('Inchide documentul','Doriti sa inchideti documentul?')=mrYes then
      begin
           if DoCloseDocumentDB(dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger)
             then dmDB.IBCQueryDocs.Refresh;
@@ -415,7 +415,7 @@ end;
 
 procedure Tframe45ZakritiTovarKomisia.DoOpenDocument;
 begin
-     if ShowAskDialog('Открыть документ','Вы хотите открыть документ?')=mrYes then
+     if ShowAskDialog('Deschide documentul','Doriti sa deschideti documentul?')=mrYes then
      begin
           if DoOpenDocumentDB(dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger)
             then dmDB.IBCQueryDocs.Refresh;
@@ -460,7 +460,7 @@ begin
 
      if cxGridComponentsTable.Site.Focused then
      begin
-          // context from Jurnal: Код + Наименование
+          // context from Jurnal: Cod + Denumire
           Result.Context := ffGoods;
           Result.ValueInt := dmDB.IBCQueryJurnal.FieldByName('GOODSID').AsInteger;
           Result.ValueStr := dmDB.IBCQueryJurnal.FieldByName('GOODS_NAME').AsString;
@@ -471,7 +471,7 @@ begin
               // context from Docs
               if cxGridNPN_CT_NAME.Focused then
               begin
-                   // Контрагент
+                   // Contraagent
                    Result.Context := ffCustomer;
                    Result.ValueInt := dmDB.IBCQueryDocs.FieldByName('CT').AsInteger;
                    Result.ValueStr := dmDB.IBCQueryDocs.FieldByName('CT_NAME').AsString;
@@ -479,14 +479,14 @@ begin
               else
                   if cxGridNPN_DATA.Focused then
                   begin
-                       // Дата
+                       // Data
                        Result.Context := ffDate;
                        Result.ValueDateTime := dmDB.IBCQueryDocs.FieldByName('DATA').AsDateTime;
                   end
                   else
                       if cxGridNPN_DTDEP_NAME.Focused then
                       begin
-                           // Склад
+                           // Depozit
                            Result.Context := ffStock;
                            Result.ValueInt := dmDB.IBCQueryDocs.FieldByName('DTDEP').AsInteger;
                            Result.ValueStr := dmDB.IBCQueryDocs.FieldByName('DTDEP_NAME').AsString;
@@ -514,7 +514,7 @@ end;
 
 function Tframe45ZakritiTovarKomisia.InitFrameID: integer;
 begin
-     Result := 45; // КОМИСИЯ. Закрытие товара в комисию
+     Result := 45; // COMISION. Inchidere marfa in comision
      SetupQtyFields;
      dmDB.CreateGridImageColumnItems(cxGridDBCol_IMG);
 end;
@@ -718,7 +718,7 @@ end;
 
 procedure Tframe45ZakritiTovarKomisia.SetupQtyFields;
 begin
-     // Кол-во
+     // Cantitate
      TcxCalcEditProperties(cxGridDBCol_QTY.Properties).DisplayFormat:=QtyDisplayFormat;
      cxGridDBCol_QTY.Summary.FooterFormat:=QtyDisplayFormat;
 end;

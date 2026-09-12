@@ -768,7 +768,7 @@ end;
 
 function Tframe15TovarBezHaracteristic.InitFrameID: integer;
 begin
-    Result := 15;  // Товар без характеристик
+    Result := 15;  // Produs fara caracteristici
     fFirstLoad := true;
     LoadData;
 end;

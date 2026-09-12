@@ -65,13 +65,13 @@ begin
   ErrorStr := '';
 
   if fMasterDataSet.FieldByName('PROCURA_NO').IsNull or (fMasterDataSet.FieldByName('PROCURA_NO').AsString = '') then
-    AddErrorToStr(ErrorStr, 'Номер доверености!');
+    AddErrorToStr(ErrorStr, 'Numarul procurii!');
   if fMasterDataSet.FieldByName('DELEGAT').IsNull or (fMasterDataSet.FieldByName('DELEGAT').AsString = '') then
-    AddErrorToStr(ErrorStr, 'Доверенное лицо!');
+    AddErrorToStr(ErrorStr, 'Persoana imputernicita!');
   if fMasterDataSet.FieldByName('CUSTOMERID').IsNull then
-    AddErrorToStr(ErrorStr, 'Фирма!');
+    AddErrorToStr(ErrorStr, 'Firma!');
   if fMasterDataSet.FieldByName('DATA_START').IsNull or fMasterDataSet.FieldByName('DATA_END').IsNull then
-    AddErrorToStr(ErrorStr, 'Период действия!');
+    AddErrorToStr(ErrorStr, 'Perioada de valabilitate!');
 
   if ErrorStr = '' then
     Result := True
@@ -112,7 +112,7 @@ begin
   try
     if FCreateNewProcura then
     begin
-      dtDialogTitle.Text := 'Создание новой доверенности';
+      dtDialogTitle.Text := 'Creare procura noua';
       fMasterDataSet.Append;
 
       if fRequiredCustomerID <> -1 then
@@ -129,7 +129,7 @@ begin
     end
     else
     begin
-      dtDialogTitle.Text := 'Изменение доверенности';
+      dtDialogTitle.Text := 'Modificare procura';
 
       fMasterDataSet.Edit;
       beCUSTOMER.Text := fMasterDataSet.FieldByName('CUSTOMER_NAME').AsString;
@@ -159,7 +159,7 @@ begin
   dialog := TfrmCustomersDlg.Create(self);
   try
     dialog.CustomFilter := [cfCustomers];
-    if dialog.SelectCustomer(custID, False, 0, 'Выбор фирмы для Доверенности') then
+    if dialog.SelectCustomer(custID, False, 0, 'Selectare firma pentru Procura') then
     begin
       fMasterDataSet.FieldByName('CUSTOMERID').AsInteger := dialog.CustomerID;
       beCUSTOMER.Text := dialog.CustomerTitle;

@@ -72,7 +72,7 @@ var ErrorStr:String;
 begin
      Result:=False;
      ErrorStr:='';
-     if Trim(edTITLE.Text)='' then AddErrorToStr(ErrorStr,'Название!');
+     if Trim(edTITLE.Text)='' then AddErrorToStr(ErrorStr,'Denumire!');
 
      if ErrorStr='' then Result:=True
      else

@@ -168,7 +168,7 @@ type
     procedure ShowCopyReportDialog;
 
     // report params related procs
-    // 1. Ценники
+    // 1. Etichete de pret
     procedure PriceLabel_ShowAddGoodsDialog;
     procedure PriceLable_WhenBurstAddGoods(const GoodsID: integer; const GoodsTitle: string; var Added: Boolean; var Count: integer);
     function PriceLable_WhenCheckIfGoodsExists(const GoodsID: integer): Boolean;
@@ -410,7 +410,7 @@ end;
 procedure TfrmPrintWizardDlg.cxGridReports_TABSHEETINDEXGetDisplayText(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord; var AText: string);
 begin
   if ARecord.Values[cxGridReports_TABSHEETINDEX.Index] > 0 then
-    AText := 'Параметры'
+    AText := 'Parametri'
   else
     AText := '';
 end;
@@ -632,7 +632,7 @@ begin
   end;
   S := S + ' WHERE (BIN_AND(ACC$MASK,:GROUPMASK)>0)';
 
-     // Показывать по типу документа
+     // Afiseaza dupa tipul documentului
   if fShowByDocType then
     S := S + ' AND (DOCTYPEID=:DOCTYPEID)';
 
@@ -641,7 +641,7 @@ begin
     S := S + ' AND (REPORTGROUP=:ReportGroup)';
   end;
 
-     // UPDATE: in "PartialAccessMode" sa se vada "Ценники"
+     // UPDATE: in "PartialAccessMode" sa se vada "Etichete de pret"
   if SWNSecurityManager.IsPartialAccessMode and (fReportGroup <> 1) then
   begin
           // hide ungruped reports
@@ -667,7 +667,7 @@ begin
 
   cxGridReportsTable.DataController.Groups.ClearGrouping;
 
-     // Показывать по типу документа
+     // Afiseaza dupa tipul documentului
   if fShowByDocType then
   begin
           // make group by DOCTYPE
@@ -675,7 +675,7 @@ begin
     Inc(groupIndex);
   end;
 
-     // Группировать отчеты
+     // Grupare rapoarte
   if fShowGroupedReports then
   begin
           // make group by REPORTGROUP
@@ -814,13 +814,13 @@ begin
     dialog.DefaultFirmaID := dmDB.CurrentFirma;
 
     if SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_НАКЛАДНЫЕ_Приход_товара) then
-      dialog.DocTypeList.Add(106); // Приход товара
+      dialog.DocTypeList.Add(106); // Intrare marfa
     if SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_НАКЛАДНЫЕ_Расходная_накладная) then
-      dialog.DocTypeList.Add(107); // Расходная накладная
+      dialog.DocTypeList.Add(107); // Nakladnaia de iesire
     if SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_НАКЛАДНЫЕ_Приход_товара_по_накладным) then
-      dialog.DocTypeList.Add(109); // Приход товара по накладным
+      dialog.DocTypeList.Add(109); // Intrare marfa pe nakladnie
     if SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_ПЕРЕМЕЩЕНИЕ_Перемещение) then
-      dialog.DocTypeList.Add(114); // Перемещение
+      dialog.DocTypeList.Add(114); // Transfer
     if dialog.ShowModal = mrOk then
     begin
       PriceLabel_ActionImportGoodsFromDocumentDB(dialog.DocID);
@@ -966,9 +966,9 @@ begin
     fBack := fViewParamsTab;
     N := IBCQueryReports.FieldByName('TabSheetIndex').asInteger;
     fNext := (not fViewParamsTab) and (N > 0) and (N < cxPageControlParams.TabCount);
-    fPrint := (not FLG_DISABLED) and (not FLG_NO_DIRECT_PRINT); // Печать
-    fClone := True; // Клонировать отчет + Security
-    fChangeOrder := (cxGridReportsTable.DataController.RecordCount > 1) and not fInSearch; // Упорядочить отчеты + Security
+    fPrint := (not FLG_DISABLED) and (not FLG_NO_DIRECT_PRINT); // Printare
+    fClone := True; // Clonare raport + Security
+    fChangeOrder := (cxGridReportsTable.DataController.RecordCount > 1) and not fInSearch; // Ordonare rapoarte + Security
           // display labels
     lbReportTitle.Caption := IBCQueryReports.FieldByName('TITLE').AsString;
   end;
@@ -1052,7 +1052,7 @@ begin
     FOnPrintWizardSetupReportParams(fReportParams);
 
      // setup report specific params
-  case ReportID of     // raport "ПЕРСОНАЛ"
+  case ReportID of     // raport "PERSONAL"
     109:
       begin
                 // Firma selectata

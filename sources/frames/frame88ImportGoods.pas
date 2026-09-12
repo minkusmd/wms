@@ -1,6 +1,6 @@
 unit frame88ImportGoods;
 
-// Доставка
+// Livrare
 // DocTypeID = 3232
 // Frame Index = 1
 

@@ -12,9 +12,7 @@ object frmWorkStationsSetupDlg: TfrmWorkStationsSetupDlg
   Font.Height = -12
   Font.Name = 'Segoe UI'
   Font.Style = []
-  OldCreateOrder = False
   Position = poOwnerFormCenter
-  PixelsPerInch = 96
   TextHeight = 15
   object dtDialogTitle: TDialogTitle
     Left = 0
@@ -78,14 +76,9 @@ object frmWorkStationsSetupDlg: TfrmWorkStationsSetupDlg
       Align = alClient
       TabOrder = 1
       object cxGridWSTable: TcxGridDBTableView
-        Navigator.Buttons.CustomButtons = <>
-        ScrollbarAnnotations.CustomAnnotations = <>
         OnFocusedRecordChanged = cxGridWSTableFocusedRecordChanged
         DataController.DataSource = IBCDataSourceWS
         DataController.KeyFieldNames = 'WS_ID'
-        DataController.Summary.DefaultGroupSummaryItems = <>
-        DataController.Summary.FooterSummaryItems = <>
-        DataController.Summary.SummaryGroups = <>
         OptionsCustomize.ColumnFiltering = False
         OptionsCustomize.ColumnsQuickCustomization = True
         OptionsData.Deleting = False
@@ -242,9 +235,13 @@ object frmWorkStationsSetupDlg: TfrmWorkStationsSetupDlg
     GeneratorMode = gmInsert
     SQLInsert.Strings = (
       'INSERT INTO WS_WORK_STATIONS'
-      '  (WS_ID, FIRMA_ID, COMPUTER_NAME, DESCRIPTION, FLG_ENABLED, CREATED_DATE)'
+      
+        '  (WS_ID, FIRMA_ID, COMPUTER_NAME, DESCRIPTION, FLG_ENABLED, CRE' +
+        'ATED_DATE)'
       'VALUES'
-      '  (:WS_ID, :FIRMA_ID, :COMPUTER_NAME, :DESCRIPTION, :FLG_ENABLED, CURRENT_DATE)')
+      
+        '  (:WS_ID, :FIRMA_ID, :COMPUTER_NAME, :DESCRIPTION, :FLG_ENABLED' +
+        ', CURRENT_DATE)')
     SQLDelete.Strings = (
       'DELETE FROM WS_WORK_STATIONS'
       'WHERE'

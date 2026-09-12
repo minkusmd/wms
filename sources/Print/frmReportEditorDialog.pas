@@ -609,8 +609,8 @@ begin
     if FCreateNewReport then
     begin
       fMasterDataSet.Append;
-      fMasterDataSet.FieldByName('REPORTGROUP').AsInteger := -1; // Без группы
-      fMasterDataSet.FieldByName('TABSHEETINDEX').AsInteger := 0; // Без параметров
+      fMasterDataSet.FieldByName('REPORTGROUP').AsInteger := -1; // Fara grup
+      fMasterDataSet.FieldByName('TABSHEETINDEX').AsInteger := 0; // Fara parametri
       fMasterDataSet.FieldByName('FLG_DISABLED').AsInteger := 0;
       fMasterDataSet.FieldByName('FLG_NO_DIRECT_PRINT').AsInteger := 0;
       fMasterDataSet.FieldByName('FLG_QUICK_ACCESS').AsInteger := 0;

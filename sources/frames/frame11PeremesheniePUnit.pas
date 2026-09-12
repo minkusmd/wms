@@ -1,6 +1,6 @@
 ﻿unit frame11PeremesheniePUnit;
 
-// ПЕРЕМЕЩЕНИЕ. Перемещение
+// TRANSFER. Transfer
 // DocTypeID = 114
 // Frame Index = 11
 
@@ -278,7 +278,7 @@ procedure Tframe11PeremeshenieP.bbCreateScetFacturaClick(Sender: TObject);
 var
     S: string;
 begin
-  // Выдать счет фактуры
+  // Emite factura fiscala
     S := #13#10 + dmDB.IBCQueryDocs.FieldByName('CT_NAME').AsString + '?';
     if ShowAskDialog('Factura fiscala', 'Doriti sa creati o factura fiscala pentru ' + S, Format('Factura va fi creata in "%s".',
         [dmDB.IBCQueryDocs.FieldByName('DT_NAME').AsString])) = mrYes then
@@ -328,8 +328,8 @@ begin
   // nu este nevoie de acest cod. 18.06.2016 Sergiu!
 
 
-  // Начать вводить серийники
-  //  if ShowAskDialog('Начать вводить серийники', 'Вы хотите заблокировать документ для ввода серийных номеров?', 'Только Вы сможеты изменить документ и его состав!') = mrYes then
+  // Incepe introducerea seriilor
+  //  if ShowAskDialog('Incepe introducerea seriilor', 'Doriti sa blocati documentul pentru introducerea numerelor seriale?', 'Doar dumneavoastra veti putea modifica documentul si componenta lui!') = mrYes then
 //  begin
 //    Query := TIBCQuery.Create(self);
 //    try
@@ -425,16 +425,16 @@ begin
     end;
 
   {
-    S:=Format('Отправитель: %s'+#13#10+'Получатель: %s',[dmDB.IBCQueryDocs.FieldByName('DT_NAME').asString,dmDB.IBCQueryDocs.FieldByName('CT_NAME').asString])+#13#10+#13#10;
-    if ShowAskDialog('Принять товар',S+'Вы хотите принять товар?')=mrYes then
+    S:=Format('Expeditor: %s'+#13#10+'Beneficiar: %s',[dmDB.IBCQueryDocs.FieldByName('DT_NAME').asString,dmDB.IBCQueryDocs.FieldByName('CT_NAME').asString])+#13#10+#13#10;
+    if ShowAskDialog('Primeste marfa',S+'Doriti sa primiti marfa?')=mrYes then
     begin
     S:=Format('%s(%s)',[dmDB.IBCQueryDocs.FieldByName('CTDEP_NAME').asString,dmDB.IBCQueryDocs.FieldByName('CT_NAME').asString]);
     if DoReceiveGoodsDB(dmDB.IBCQueryDocs.FieldByName('DOCID').asInteger) then
     begin
     dmDB.IBCQueryDocs.Refresh;
-    ShowInfoDialog('Товар принят','Товар был успешно принят на '+S);
+    ShowInfoDialog('Marfa a fost primita','Marfa a fost primita cu succes pe '+S);
     end
-    else ShowErrorDialog('Ошибка','Невозможно принять товар на '+S);
+    else ShowErrorDialog('Eroare','Nu se poate primi marfa pe '+S);
     end;
   }
 end;
@@ -770,7 +770,7 @@ begin
         [cxGridPPTable_FLG_RECEIVE.Index]) and (not VarIsNull(ARecord.Values[cxGridPPTable_FLG_CLOSED.Index])))
         then
     begin
-        if ARecord.Values[cxGridPPTable_FLG_RECEIVE.Index] = 1 // Перемещение документа
+        if ARecord.Values[cxGridPPTable_FLG_RECEIVE.Index] = 1 // Transfer document
             then
             AStyle := dmAdditions.cxStyle_ПеремешениеДокПринят
         else if ARecord.Values[cxGridPPTable_FLG_CLOSED.Index] = 1 then
@@ -788,19 +788,19 @@ begin
         case ALevel of
             0:
                 begin
-          // Перемещение документа
+          // Transfer document
                     if ARecord.Values[cxGridPPTable_INCOMING_DOC.Index] = 1 then
-                        AStyle := dmAdditions.cxStyle_ПеремешениеДокДА // документ перемещен
+                        AStyle := dmAdditions.cxStyle_ПеремешениеДокДА // documentul a fost transferat
                     else
-                        AStyle := dmAdditions.cxStyle_ПеремешениеДокНЕТ // документ НЕ перемещен
+                        AStyle := dmAdditions.cxStyle_ПеремешениеДокНЕТ // documentul NU a fost transferat
                 end;
             1:
                 begin
-          // Перемешение принято
+          // Transfer acceptat
                     if ARecord.Values[cxGridPPTable_FLG_RECEIVE.Index] = 1 then
-                        AStyle := dmAdditions.cxStyle_ПеремешениеПринято // Перемешение принято
+                        AStyle := dmAdditions.cxStyle_ПеремешениеПринято // Transfer acceptat
                     else
-                        AStyle := dmAdditions.cxStyle_ПеремешениеНЕпринято // Перемешение НЕ принято
+                        AStyle := dmAdditions.cxStyle_ПеремешениеНЕпринято // Transferul NU a fost acceptat
                 end;
         end;
 end;
@@ -948,7 +948,7 @@ begin
     // give param to printer
         PrintEngine.ReportParams := ReportParams;
 
-        PrintEngine.AddReport(0); // Счет фактура
+        PrintEngine.AddReport(0); // Factura fiscala
         PrintEngine.ShowModal;
 
     finally
@@ -964,7 +964,7 @@ begin
     if cxGridJurnalTable.Site.Focused then
     begin
           // context from Jurnal
-          // Код + Наименование
+          // Cod + Denumire
         Result.Context := ffGoods;
         Result.ValueInt := dmDB.IBCQueryJurnal.FieldByName('GOODSID').AsInteger;
         Result.ValueStr := dmDB.IBCQueryJurnal.FieldByName('GOODS_NAME').AsString;
@@ -974,20 +974,20 @@ begin
               // context from Docs
         if cxGridPPTable_CT_NAME.Focused then
         begin
-                   // Получатель
+                   // Beneficiar
             Result.Context := ffCustomer;
             Result.ValueInt := dmDB.IBCQueryDocs.FieldByName('CT').AsInteger;
             Result.ValueStr := dmDB.IBCQueryDocs.FieldByName('CT_NAME').AsString;
         end
         else if cxGridPPTableData.Focused then
         begin
-                       // Дата
+                       // Data
             Result.Context := ffDate;
             Result.ValueDateTime := dmDB.IBCQueryDocs.FieldByName('DATA').AsDateTime;
         end
         else if cxGridPPTable_DTDEP_NAME.Focused then
         begin
-                           // Склад отправитель
+                           // Depozit expeditor
             Result.Context := ffStock;
             Result.ValueInt := dmDB.IBCQueryDocs.FieldByName('DTDEP').AsInteger;
             Result.ValueStr := dmDB.IBCQueryDocs.FieldByName('DTDEP_NAME').AsString;
@@ -1084,7 +1084,7 @@ end;
 
 function Tframe11PeremeshenieP.InitFrameID: Integer;
 begin
-    Result := 11; // ПЕРЕМЕЩЕНИЕ. Перемещение
+    Result := 11; // TRANSFER. Transfer
     SetupQtyFields;
 end;
 
@@ -1232,10 +1232,10 @@ end;
 
 procedure Tframe11PeremeshenieP.SetupQtyFields;
 begin
-     // Товары: Кол-во
+     // Produse: Cantitate
     TcxCalcEditProperties(cxGridDBCol_QTY.Properties).DisplayFormat := QtyDisplayFormat;
     cxGridDBCol_QTY.Summary.FooterFormat := QtyDisplayFormat;
-     // ТТовары: Остаток
+     // Marfa: Stoc
     TcxCalcEditProperties(cxGridJurnal_STOCK_QTY.Properties).DisplayFormat := QtyDisplayFormat;
 end;
 
@@ -1276,7 +1276,7 @@ begin
         cxGridJurnal_PRICE_COLUMN.VisibleForCustomization := False;
     end;
 
-     // Принять товар и провести
+     // Primeste marfa si confirma
     if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_ПЕРЕМЕЩЕНИЕ_Перемещение_Принять_товар) then
         bbReceiveGoods.Visible := ivNever;
 
@@ -1284,7 +1284,7 @@ begin
     if pmPopupMenuDoc.ItemLinks.VisibleItemCount = 0 then
         cxGridPopupMenuPP.PopupMenus.Clear;
 
-     // Доп. расходы
+     // Cheltuieli suplim.
     if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Инструменты_Дополнительные_расходы) then
     begin
         tbsExpenses.TabVisible := False;
@@ -1308,22 +1308,22 @@ begin
         dxBarDockControl2.Visible := False;
     end;
 
-     // Карточка товара
+     // Fisa produsului
     if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Справочники_Товары_Карточка_товара)
         or SWNSecurityManager.IsPartialAccessMode then
         bbGoodsInfoCard.Visible := ivNever;
-     // Изменить цены товара
+     // Modifica preturile marfii
     if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Справочники_Товары_Изменение_валюты_и_цены_товара)
         or SWNSecurityManager.IsPartialAccessMode then
         bbGoodsPrice.Visible := ivNever;
-     // Соответствие товара в других фирмах
+     // Corespondenta produsului in alte firme
     if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Справочники_Товары_Товары_из_других_фирм) then
         bbGoodsForeignCode.Visible := ivNever;
-     // импорт товара из приходной накладной
+     // import marfa din nakladnaia de intrare
     if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_ПЕРЕМЕЩЕНИЕ_Перемещение_Импорт) then
         btnImportPN.Visible := ivNever;
 
-     // импорт товара из приходной накладной
+     // import marfa din nakladnaia de intrare
     if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_ПЕРЕМЕЩЕНИЕ_Перемещение_Импорт_серийных_номеров)
         then
         bbImportSN.Visible := ivNever;
@@ -1564,7 +1564,7 @@ end;
 
 procedure Tframe11PeremeshenieP.WhenCustomDataFilterGetSQL(var FilterSQL: string);
 begin
-     // in Перемещение firma documentului sau contragentul sa coincida cu firma curenta
+     // in Transfer firma documentului sau contragentul sa coincida cu firma curenta
     FilterSQL := StringReplace(FilterSQL, '(DT=:DT)', '(DT=:DT OR CT=:DT)', [rfIgnoreCase]);
 end;
 
@@ -1599,9 +1599,9 @@ begin
                 (cUserGroup_Depozit_Manipulanti_marfa)) or (SWNSecurityManager.UserIsPartOfGroup(cUserGroup_Depozit_Hamali));
 
         fSend := (not FLG_SEND) and (not FLG_RECEIVE) and (not FLG_CLOSED) and fIsOwner;
-    // Передать товар + Security
-        fReceive := FLG_SEND and (not FLG_RECEIVE) and (not FLG_CLOSED); // Принять товар + Security
-        fScetFactura := FLG_SEND; // Создать счет-фактуры
+    // Transfer marfa + Security
+        fReceive := FLG_SEND and (not FLG_RECEIVE) and (not FLG_CLOSED); // Primeste marfa + Security
+        fScetFactura := FLG_SEND; // Creare facturi fiscale
         fTTN := FLG_SEND;
     end;
 

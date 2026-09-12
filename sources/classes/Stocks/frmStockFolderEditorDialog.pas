@@ -56,7 +56,7 @@ begin
   with fMasterDataSet do
   begin
     if FieldByName('TITLE').IsNull or (FieldByName('TITLE').AsWideString = '') then
-      AddErrorToStr(ErrorStr, 'Название папки!');
+      AddErrorToStr(ErrorStr, 'Denumirea folderului!');
   end;
   if ErrorStr = '' then
     Result := True
@@ -95,14 +95,14 @@ begin
   try
     if FCreateNewFolder then
     begin
-      dtDialogTitle.Text := 'Создание новой папки';
+      dtDialogTitle.Text := 'Creare folder nou';
       fMasterDataSet.Append;
       fMasterDataSet.FieldByName('PARENTID').AsInteger := FParentID;
       fMasterDataSet.FieldByName('FLG_FOLDER').AsInteger := 1;
     end
     else
     begin
-      dtDialogTitle.Text := 'Изменение папки';
+      dtDialogTitle.Text := 'Modificare folder';
       fMasterDataSet.Edit;
     end;
   except

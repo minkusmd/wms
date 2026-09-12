@@ -62,15 +62,15 @@ begin
   Result := False;
 
   if fMasterDataSet.FieldByName('CUSTOMERID').IsNull then
-    AddErrorToStr(ErrorStr, 'Фирма перевозчик!');
+    AddErrorToStr(ErrorStr, 'Firma transportator!');
   if fMasterDataSet.FieldByName('TITLE_ROM').IsNull then
     AddErrorToStr(ErrorStr, 'Denumirea Web a firmei!');
   if fMasterDataSet.FieldByName('TITLE_RUS').IsNull then
-    AddErrorToStr(ErrorStr, 'Web название фирмы!');
+    AddErrorToStr(ErrorStr, 'Denumire Web a firmei!');
   if fMasterDataSet.FieldByName('DESCRIPTION_ROM').IsNull then
     AddErrorToStr(ErrorStr, 'Descriere!');
   if fMasterDataSet.FieldByName('DESCRIPTION_RUS').IsNull then
-    AddErrorToStr(ErrorStr, 'Описание!');
+    AddErrorToStr(ErrorStr, 'Descriere!');
 
   if ErrorStr = '' then
     Result := True
@@ -109,13 +109,13 @@ begin
 
     if fCreateNewFirma then
     begin
-      dtDialogTitle.Text := 'Регистрация новой фирмы';
+      dtDialogTitle.Text := 'Inregistrare firma noua';
       fMasterDataSet.Insert;
       fMasterDataSet.FieldByName('FIRMAID').AsInteger := FirmaID;
     end
     else
     begin
-      dtDialogTitle.Text := 'Изменение данных';
+      dtDialogTitle.Text := 'Modificare date';
       beFIRMA.Text := fMasterDataSet.FieldByName('DISPLAYNAME').AsString;
 
       fMasterDataSet.Edit;
@@ -137,7 +137,7 @@ begin
     id := -1;
     if Not fMasterDataSet.FieldByName('CUSTOMERID').IsNull then
       id := fMasterDataSet.FieldByName('CUSTOMERID').AsInteger;
-    if dialog.SelectCustomer(id, False, 0, 'Выбор контрагента для Web-перевозок') then
+    if dialog.SelectCustomer(id, False, 0, 'Selectare contraagent pentru transporturi Web') then
     begin
       fMasterDataSet.FieldByName('CUSTOMERID').AsInteger := dialog.CustomerID;
       beFIRMA.Text := dialog.CustomerTitle;

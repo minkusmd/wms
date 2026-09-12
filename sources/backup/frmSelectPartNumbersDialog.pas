@@ -113,7 +113,7 @@ end;
 
 procedure TfrmSelectPartsDlg.dxBarButton2Click(Sender: TObject);
 begin
-  if ShowAskDialog('Удаление партий', 'Вы уверены что хотите удалить все партии?') = mrYES then
+  if ShowAskDialog('Stergere partizi', 'Sunteti sigur ca doriti sa stergeti toate partizile?') = mrYES then
   begin
     IBCSetParts.DisableControls;
     try

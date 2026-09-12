@@ -73,7 +73,7 @@ begin
   ErrorStr := '';
 
   if fMasterDataSet.FieldByName('FILTERID').IsNull then
-    AddErrorToStr(ErrorStr, 'Фильтр!');
+    AddErrorToStr(ErrorStr, 'Filtru!');
 
   if ErrorStr = '' then
     Result := true

@@ -257,7 +257,7 @@ var
 begin
   dialog := TfrmCustomersDlg.Create(Self);
   try
-    if dialog.SelectCustomer(fMasterDataSet.FieldByName('CT_RESPONSABILE_PERSON').AsInteger, False, 0, '¬ыберите ответственное лицо контрагента') then
+    if dialog.SelectCustomer(fMasterDataSet.FieldByName('CT_RESPONSABILE_PERSON').AsInteger, False, 0, 'Selectati persoana responsabila a contraagentului') then
     begin
       fMasterDataSet.FieldByName('CT_RESPONSABILE_PERSON').AsInteger := dialog.CustomerID;
       beCT_RESP.Text := dialog.CustomerTitle;
@@ -274,7 +274,7 @@ begin
   dialog := TfrmCustomersDlg.Create(Self);
   try
     dialog.CustomFilter := [cfColaboratori];
-    if dialog.SelectCustomer(fMasterDataSet.FieldByName('DT_RESPONSABILE_PERSON').AsInteger, False, 0, '¬ыберите ответственное лицо фирмы') then
+    if dialog.SelectCustomer(fMasterDataSet.FieldByName('DT_RESPONSABILE_PERSON').AsInteger, False, 0, 'Selectati persoana responsabila a firmei') then
     begin
       fMasterDataSet.FieldByName('DT_RESPONSABILE_PERSON').AsInteger := dialog.CustomerID;
       beDT_RESP.Text := dialog.CustomerTitle;

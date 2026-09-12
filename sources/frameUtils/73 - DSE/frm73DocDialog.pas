@@ -1,6 +1,6 @@
 unit frm73DocDialog;
 {
- Ñ×ÅÒÀ - Âõîäíûå Ñ÷åòà
+ FACTURI - Facturi de intrare
  > Forma de editare a documentului
 }
 
@@ -90,7 +90,7 @@ begin
   contractInfo := SelectCustomerContract(dmDB.IBCQueryDocs.FieldByName('CT').AsInteger, dmDB.IBCQueryDocs.FieldByName('CONTRACTID').AsInteger);
   if Assigned(contractInfo) then
   begin
-    beContract.Text := Format('%s (¹%s îò %s)', [contractInfo.ContractTypeTitle, contractInfo.Code, FormatDateTime('dd MMMM yyyy',
+    beContract.Text := Format('%s (nr.%s din %s)', [contractInfo.ContractTypeTitle, contractInfo.Code, FormatDateTime('dd MMMM yyyy',
       contractInfo.SignDate)]);
     dmDB.IBCQueryDocs.FieldByName('CONTRACTID').AsInteger := contractInfo.ContractID;
 //    dmDB.IBCQueryDocs.FieldByName('CURRENCYID').AsInteger := contractInfo.CurrencyID;
@@ -283,7 +283,7 @@ begin
   beContract.Text := '';
   if not dmDB.IBCQueryDocs.FieldByName('CONTRACTID').IsNull then
   begin
-    beContract.Text := Format('%s (¹%s îò %s)', [dmDB.IBCQueryDocs.FieldByName('CONTRACT_TYPE_TITLE').AsString, dmDB.IBCQueryDocs.FieldByName
+    beContract.Text := Format('%s (nr.%s din %s)', [dmDB.IBCQueryDocs.FieldByName('CONTRACT_TYPE_TITLE').AsString, dmDB.IBCQueryDocs.FieldByName
       ('CONTRACT_CODE').AsString, FormatDateTime('dd MMMMM yyyy', dmDB.IBCQueryDocs.FieldByName('CONTRACT_SIGN_DATE').AsDateTime)]);
                   // ??? daca cumva acest document are contract, aratam info fortat
     if not fSECURITY_ALLOW_CONTRACT then

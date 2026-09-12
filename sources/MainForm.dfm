@@ -104,6 +104,7 @@ object frmMainForm: TfrmMainForm
     Align = alLeft
     BevelOuter = bvNone
     TabOrder = 1
+    ExplicitHeight = 361
     object SpeedButton1: TSpeedButton
       Left = 441
       Top = 1111
@@ -194,6 +195,7 @@ object frmMainForm: TfrmMainForm
       Height = 28
       Align = dalBottom
       BarManager = dxBarManagerMain
+      ExplicitTop = 379
     end
     inline frameSipClient1: TframeSipClient
       Left = 0
@@ -215,13 +217,12 @@ object frmMainForm: TfrmMainForm
       ParentColor = False
       ParentFont = False
       TabOrder = 3
-      ExplicitTop = 451
+      ExplicitTop = 51
       ExplicitWidth = 323
       ExplicitHeight = 310
       inherited Panel1: TPanel
         Width = 323
         Height = 181
-        StyleElements = [seFont, seClient, seBorder]
         ExplicitWidth = 323
         ExplicitHeight = 181
         inherited cxPageControl1: TcxPageControl
@@ -253,7 +254,6 @@ object frmMainForm: TfrmMainForm
         Width = 323
         Font.Charset = RUSSIAN_CHARSET
         ParentFont = False
-        StyleElements = [seFont, seClient, seBorder]
         ExplicitWidth = 323
         inherited SBtn1: TSpeedButton
           Font.Charset = RUSSIAN_CHARSET
@@ -265,7 +265,6 @@ object frmMainForm: TfrmMainForm
         end
         inherited LineMemo: TMemo
           Height = 46
-          StyleElements = [seFont, seClient, seBorder]
           ExplicitHeight = 46
         end
         inherited PhoneEdit: TcxTextEdit

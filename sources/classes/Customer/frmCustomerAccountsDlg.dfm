@@ -3,7 +3,7 @@ object frmCustomerAccountDialog: TfrmCustomerAccountDialog
   Top = 0
   ActiveControl = cxGridAccounts
   BorderStyle = bsDialog
-  Caption = 'Rechizitele bancare ale clientului'
+  Caption = 'x'
   ClientHeight = 414
   ClientWidth = 707
   Color = clBtnFace
@@ -123,17 +123,17 @@ object frmCustomerAccountDialog: TfrmCustomerAccountDialog
           Caption = 'Cont'
           DataBinding.FieldName = 'ACCOUNTNUMBER'
           PropertiesClassName = 'TcxMaskEditProperties'
-          Width = 214
+          Width = 200
         end
         object cxGridAccountsDBACCOUNTNAME: TcxGridDBColumn
           Caption = 'Denumire cont'
           DataBinding.FieldName = 'ACCOUNTNAME'
-          Width = 174
+          Width = 162
         end
         object cxGridAccountsDBBANKNAME: TcxGridDBColumn
           Caption = 'Banca'
           DataBinding.FieldName = 'BANKNAME'
-          Width = 240
+          Width = 224
         end
         object cxGridAccountsDBDEFAULT_ACCOUNT: TcxGridDBColumn
           Caption = 'De baza'
@@ -149,6 +149,17 @@ object frmCustomerAccountDialog: TfrmCustomerAccountDialog
           Options.HorzSizing = False
           Options.Sorting = False
           Width = 48
+        end
+        object cxGridAccounts_FLG_CONT_CURENT: TcxGridDBColumn
+          AlternateCaption = 'Cont curent'
+          Caption = 'CCur'
+          DataBinding.FieldName = 'FLG_CONT_CURENT'
+          PropertiesClassName = 'TcxCheckBoxProperties'
+          Properties.NullStyle = nssUnchecked
+          Properties.ValueChecked = '1'
+          Properties.ValueUnchecked = '0'
+          HeaderAlignmentHorz = taCenter
+          Width = 43
         end
       end
       object cxGridAccountsLevel: TcxGridLevel
@@ -268,11 +279,11 @@ object frmCustomerAccountDialog: TfrmCustomerAccountDialog
       'INSERT INTO TS_CUST_ACCOUNTS'
       
         '  (CUSTOMERID, ACCOUNTNUMBER, ACCOUNTNAME, BANKACCOUNT, DEFAULT_' +
-        'ACCOUNT, IBAN)'
+        'ACCOUNT, IBAN, FLG_CONT_CURENT)'
       'VALUES'
       
         '  (:CUSTOMERID, :ACCOUNTNUMBER, :ACCOUNTNAME, :BANKACCOUNT, :DEF' +
-        'AULT_ACCOUNT, :IBAN)')
+        'AULT_ACCOUNT, :IBAN, :FLG_CONT_CURENT)')
     SQLDelete.Strings = (
       'DELETE FROM TS_CUST_ACCOUNTS'
       'WHERE'
@@ -287,7 +298,8 @@ object frmCustomerAccountDialog: TfrmCustomerAccountDialog
       ' ACCOUNTNAME = :ACCOUNTNAME, '
       ' BANKACCOUNT = :BANKACCOUNT, '
       ' DEFAULT_ACCOUNT = :DEFAULT_ACCOUNT,'
-      ' IBAN = :IBAN'
+      ' IBAN = :IBAN,'
+      ' FLG_CONT_CURENT = :FLG_CONT_CURENT'
       'WHERE'
       
         '  CUSTOMERID = :Old_CUSTOMERID AND ACCOUNTNUMBER = :Old_ACCOUNTN' +
@@ -300,7 +312,8 @@ object frmCustomerAccountDialog: TfrmCustomerAccountDialog
       '    DEFAULT_ACCOUNT,'
       '    TS_CUST_ACCOUNTS.BANKACCOUNT,'
       '    BANKNAME,'
-      '    IBAN'
+      '    IBAN,'
+      '    FLG_CONT_CURENT'
       'FROM'
       '    TS_CUST_ACCOUNTS '
       
@@ -323,7 +336,8 @@ object frmCustomerAccountDialog: TfrmCustomerAccountDialog
       '    DEFAULT_ACCOUNT,'
       '    TS_CUST_ACCOUNTS.BANKACCOUNT,'
       '    BANKNAME,'
-      '    IBAN'
+      '    IBAN,'
+      '    FLG_CONT_CURENT'
       'FROM'
       '    TS_CUST_ACCOUNTS '
       

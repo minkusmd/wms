@@ -1,7 +1,7 @@
 unit frame94WebCheckUnit;
 
 {
-  Товары в прайс листах которые не показываются на сайте
+  Marfuri in price listuri care nu se afiseaza pe site
   DocTypeID = ?
   Frame Index = 94
 }

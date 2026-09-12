@@ -108,17 +108,17 @@ begin
     if fMasterDataSet.FieldByName('TITLE').IsNull or (Trim(fMasterDataSet.FieldByName('TITLE').asString) = '') then
         AddErrorToStr(ErrorStr, 'Denumirea mapei');
     if fMasterDataSet.FieldByName('TITLE_RUS').IsNull or (Trim(fMasterDataSet.FieldByName('TITLE_RUS').asString) = '') then
-        AddErrorToStr(ErrorStr, 'Название папки');
+        AddErrorToStr(ErrorStr, 'Denumirea folderului');
 
     if fMasterDataSet.FieldByName('REWRITE_URL_ROM').IsNull or (Trim(fMasterDataSet.FieldByName('REWRITE_URL_ROM').asString) = '') then
         AddErrorToStr(ErrorStr, 'ReWrite URL: În română!')
     else if (Pos(fMasterDataSet.FieldByName('REWRITE_URL_ROM').asString, ' ') > 0) then
-        AddErrorToStr(ErrorStr, 'ReWrite URL: În română - без пробелов!');
+        AddErrorToStr(ErrorStr, 'ReWrite URL: In romana - fara spatii!');
 
     if fMasterDataSet.FieldByName('REWRITE_URL_RUS').IsNull or (Trim(fMasterDataSet.FieldByName('REWRITE_URL_RUS').asString) = '') then
-        AddErrorToStr(ErrorStr, 'ReWrite URL: На русском!')
+        AddErrorToStr(ErrorStr, 'ReWrite URL: In rusa!')
     else if (Pos(fMasterDataSet.FieldByName('REWRITE_URL_RUS').asString, ' ') > 0) then
-        AddErrorToStr(ErrorStr, 'ReWrite URL: На русском - без пробелов!');
+        AddErrorToStr(ErrorStr, 'ReWrite URL: In rusa - fara spatii!');
 
     // nodul-link nu are mape de produse: singura lui valoare este URL-ul tinta
     if (fMasterDataSet.FieldByName('FLG_GROUP_IS_LINK').AsInteger = 1) and

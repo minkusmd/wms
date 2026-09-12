@@ -95,29 +95,29 @@ begin
   ErrorStr := '';
 
   if fMasterDataSet.FieldByName('TITLE').IsNull or (fMasterDataSet.FieldByName('TITLE').asString = '') then
-    AddErrorToStr(ErrorStr, 'Название баннера!');
+    AddErrorToStr(ErrorStr, 'Denumirea bannerului!');
   if fMasterDataSet.FieldByName('START_DATE').IsNull or fMasterDataSet.FieldByName('END_DATE').IsNull or
     (fMasterDataSet.FieldByName('START_DATE').AsDateTime > fMasterDataSet.FieldByName('END_DATE').AsDateTime) then
-    AddErrorToStr(ErrorStr, 'Период показа!');
+    AddErrorToStr(ErrorStr, 'Perioada de afisare!');
 
   if Not Assigned(imgIMAGE_BG.Picture.Graphic) or (imgIMAGE_BG.Picture.Graphic.ClassName <> 'TPngImage') or
     TdxPngImage(imgIMAGE_BG.Picture.Graphic).Empty then
-    AddErrorToStr(ErrorStr, 'Картинка фона!');
+    AddErrorToStr(ErrorStr, 'Imaginea de fundal!');
 
   if (fMasterDataSet.FieldByName('FLG_IMAGES_URL').AsInteger = 0) then
   begin
     if Not Assigned(imgIMAGE_RO.Picture.Graphic) or (imgIMAGE_RO.Picture.Graphic.ClassName <> 'TPngImage') or
       TdxPngImage(imgIMAGE_RO.Picture.Graphic).Empty then
-      AddErrorToStr(ErrorStr, 'Картинка RO!');
+      AddErrorToStr(ErrorStr, 'Imaginea RO!');
 
     if Not Assigned(imgIMAGE_RU.Picture.Graphic) or (imgIMAGE_RU.Picture.Graphic.ClassName <> 'TPngImage') or
       TdxPngImage(imgIMAGE_RU.Picture.Graphic).Empty then
-      AddErrorToStr(ErrorStr, 'Картинка RU!');
+      AddErrorToStr(ErrorStr, 'Imaginea RU!');
   end
   else
   begin
     if fMasterDataSet.FieldByName('IMAGES_URL').IsNull or (fMasterDataSet.FieldByName('IMAGES_URL').asString = '') then
-      AddErrorToStr(ErrorStr, 'Адрес веб-сервиса для картинок!');
+      AddErrorToStr(ErrorStr, 'Adresa serviciului web pentru imagini!');
   end;
 
   if ErrorStr = '' then
@@ -230,13 +230,13 @@ begin
   try
     if fCreateNewBanner then
     begin
-      dtDialogTitle.Text := 'Создание новой записи';
+      dtDialogTitle.Text := 'Creare inregistrare noua';
       fMasterDataSet.Insert;
       fMasterDataSet.FieldByName('FLG_IMAGES_URL').AsInteger := 0;
     end
     else
     begin
-      dtDialogTitle.Text := 'Изменение записи';
+      dtDialogTitle.Text := 'Modificare inregistrare';
       fMasterDataSet.Edit;
       LoadImages(fMasterDataSet.FieldByName('BANNERID').AsInteger);
     end;

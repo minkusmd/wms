@@ -1,6 +1,6 @@
 unit frmPriceListDocUnit;
 {
- —„≈“ј - ¬ходные —чета
+ FACTURI - Facturi de intrare
  Forma de editare a documentului
 }
 

@@ -1,6 +1,6 @@
 unit frame84RegistruCashbackUnit;
 
-// ÐÅÊËÀÌÀ - ןנמלמ ךמהû
+// PUBLICITATE - coduri promo
 
 interface
 

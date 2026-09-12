@@ -193,7 +193,7 @@ procedure TfrmKitTemplateItemsEditorDlg.DeleteSelectedGoods;
 var S:String;
 begin
      S:=#13#10+IBCQueryItems.FieldByName('GOODS_NAME').AsString+' ?';
-     if ShowAskDialog('Удаление товара','Удалить из состава конфигурации товар'+S)=mrYes then
+     if ShowAskDialog('Stergere produs','Stergeti marfa din componenta configuratiei'+S)=mrYes then
      begin
           IBCQueryItems.Delete;
      end;
@@ -278,7 +278,7 @@ var qtyDigitsMode:Integer;
 begin
      // Numarul de zecimale in QTY :
      qtyDigitsMode:=AppUserTempConfigStorage.IntValues.GetValue(cSETTINGS_AppQtyDigits,cAppDefault_QtyDigits);
-     // Товарные позиции: Кол-во
+     // Pozitii marfa: Cantitate
      TcxCalcEditProperties(cxGridTemplateItemCol_QTY.Properties).DisplayFormat:=cQTY_DigitsMask[qtyDigitsMode];
      cxGridTemplateItemCol_QTY.Summary.FooterFormat:=cQTY_DigitsMask[qtyDigitsMode];
 end;

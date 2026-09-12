@@ -1,6 +1,6 @@
 unit frame19СчетаВходныеСчетаUnit;
 
-// СЧЕТА. Входные Счета
+// FACTURI. Facturi de intrare
 // DocTypeID = 1455
 // Frame Index = 19
 
@@ -275,7 +275,7 @@ end;
 
 procedure Tframe19ScetaVhodnieSceta.DeleteRecord;
 begin
-  if ShowAskDialog(cMSG_DELETERECORD_DeleteDocument, Format('Удалить запись №%d?', [dmDB.IBCQueryDocs.FieldByName('DOCID').asInteger])) = mrYes then
+  if ShowAskDialog(cMSG_DELETERECORD_DeleteDocument, Format('Stergeti inregistrarea nr.%d?', [dmDB.IBCQueryDocs.FieldByName('DOCID').asInteger])) = mrYes then
   begin
     dmDB.IBCQueryDocs.UpdateTransaction.StartTransaction;
     try
@@ -297,7 +297,7 @@ var
   S: string;
 begin
   S := #13#10 + dmDB.IBCQueryJurnal.FieldByName('GOODS_NAME').AsString + '?';
-  if ShowAskDialog('Удаление товара', 'Вы хотите удалить товар' + S) = mrYes then
+  if ShowAskDialog('Stergere produs', 'Doriti sa stergeti produsul' + S) = mrYes then
   begin
     dmDB.IBCQueryJurnal.UpdateTransaction.StartTransaction;
     try
@@ -326,7 +326,7 @@ begin
     Query.Transaction := dmDB.IBCTrDefaultUpdate;
     Query.Transaction.StartTransaction;
     try
-           // Создать "Приходную накладную"
+           // Creare "Factura de intrare"
       Query.SQL.Text := 'EXECUTE PROCEDURE SP_CREATE_INCOME_INVOICE(:DOCID)';
       Query.ParamByName('DOCID').AsInteger := dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger;
       Query.ExecSQL;
@@ -427,7 +427,7 @@ begin
 
   if cxGridComponentsTable.Site.Focused then
   begin
-          // context from Jurnal: Код + Наименование
+          // context from Jurnal: Cod + Denumire
     Result.Context := ffGoods;
     Result.ValueInt := dmDB.IBCQueryJurnal.FieldByName('GOODSID').AsInteger;
     Result.ValueStr := dmDB.IBCQueryJurnal.FieldByName('GOODS_NAME').AsString;
@@ -437,20 +437,20 @@ begin
               // context from Docs
     if cxGridPTN_CT_NAME.Focused then
     begin
-                   // Поставщик
+                   // Furnizor
       Result.Context := ffCustomer;
       Result.ValueInt := dmDB.IBCQueryDocs.FieldByName('CT').AsInteger;
       Result.ValueStr := dmDB.IBCQueryDocs.FieldByName('CT_NAME').AsString;
     end
     else if cxGridPTN_DATA.Focused then
     begin
-                       // Дата
+                       // Data
       Result.Context := ffDate;
       Result.ValueDateTime := dmDB.IBCQueryDocs.FieldByName('DATA').AsDateTime;
     end
     else if cxGridPTN_DTDEP_NAME.Focused then
     begin
-                           // Склад
+                           // Depozit
       Result.Context := ffStock;
       Result.ValueInt := dmDB.IBCQueryDocs.FieldByName('DTDEP').AsInteger;
       Result.ValueStr := dmDB.IBCQueryDocs.FieldByName('DTDEP_NAME').AsString;
@@ -521,7 +521,7 @@ end;
 
 function Tframe19ScetaVhodnieSceta.InitFrameID: Integer;
 begin
-     // СЧЕТА - Входные Счета
+     // FACTURI - Facturi de intrare
   Result := 19;
   SetupQtyFields;
 end;
@@ -582,10 +582,10 @@ end;
 
 procedure Tframe19ScetaVhodnieSceta.SetupQtyFields;
 begin
-     // Кол-во
+     // Cantitate
   TcxCalcEditProperties(cxGridDBCol_QTY.Properties).DisplayFormat := QtyDisplayFormat;
   cxGridDBCol_QTY.Summary.FooterFormat := QtyDisplayFormat;
-     // Остаток
+     // Stoc
   TcxCalcEditProperties(cxGridDBCol_STOCK_QTY.Properties).DisplayFormat := QtyDisplayFormat;
 end;
 
@@ -608,13 +608,13 @@ begin
     dxBarDockControl1.Visible := False;
   end;
 
-     // Карточка товара
+     // Fisa produsului
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Справочники_Товары_Карточка_товара) or SWNSecurityManager.IsPartialAccessMode then
     bbGoodsInfoCard.Visible := ivNever;
-     // Изменить цены товара
+     // Modifica preturile marfii
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Справочники_Товары_Изменение_валюты_и_цены_товара) or SWNSecurityManager.IsPartialAccessMode then
     bbGoodsPrice.Visible := ivNever;
-     // Соответствие товара в других фирмах
+     // Corespondenta produsului in alte firme
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Справочники_Товары_Товары_из_других_фирм) then
     bbGoodsForeignCode.Visible := ivNever;
 
@@ -706,10 +706,10 @@ begin
   if (cxGridPTNTable.DataController.RecNo > 0) and (dmDB.IBCQueryDocs.FieldByName('HAS_JURNAL_GOODS').AsInteger = 1) then
   begin
     FLG_CLOSED := dmDB.IBCQueryDocs.FieldByName('FLG_CLOSED').AsInteger = 1;
-    fCreatePrihodRashod := (not FLG_CLOSED);     // Создать Приходную накладную
+    fCreatePrihodRashod := (not FLG_CLOSED);     // Creare Nakladnaia de intrare
   end;
      // popup menu
-  bbCreatePrihodRashod.Enabled := fCreatePrihodRashod;  // Создать Приходную накладную
+  bbCreatePrihodRashod.Enabled := fCreatePrihodRashod;  // Creare Nakladnaia de intrare
   bbDocComments.Enabled := fSECURITY_CanEdit;
 end;
 
@@ -720,12 +720,12 @@ end;
 
 procedure Tframe19ScetaVhodnieSceta.CreatePrihodnaiaNakladnaia;
 begin
-  if ShowAskDialog('Создать "Приходную накладную"', 'Вы хотите создать "Приходную накладную"?') = mrYes then
+  if ShowAskDialog('Creare "Factura de intrare"', 'Doriti sa creati "Factura de intrare"?') = mrYes then
   begin
     if DoAction_PrihodnaiaNakladnaiaDB then
     begin
       dmDB.FullRefresh;
-      ShowInfoDialog('Приходная накладная', 'Приходная накладная созданна!');
+      ShowInfoDialog('Factura de intrare', 'Factura de intrare a fost creata!');
     end;
   end;
 end;

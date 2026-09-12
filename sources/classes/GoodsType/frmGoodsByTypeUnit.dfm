@@ -2,7 +2,7 @@ object frmGoodsByType: TfrmGoodsByType
   Left = 0
   Top = 0
   BorderStyle = bsDialog
-  Caption = 'Tipuri de produse'
+  Caption = 'Produse in categorie'
   ClientHeight = 561
   ClientWidth = 863
   Color = clBtnFace
@@ -11,14 +11,15 @@ object frmGoodsByType: TfrmGoodsByType
   Font.Height = -12
   Font.Name = 'Segoe UI'
   Font.Style = []
+  OnCreate = FormCreate
   TextHeight = 15
   object DialogTitle1: TDialogTitle
     Left = 0
     Top = 0
     Width = 863
     Height = 64
-    Title = 'Tipuri de produse'
-    Text = 'Lista produselor dupa tip'
+    Title = 'Produse in categorie'
+    Text = 'Lista produselor dupa categorie'
     FontTitle.Charset = DEFAULT_CHARSET
     FontTitle.Color = clWindowText
     FontTitle.Height = -13
@@ -40,12 +41,7 @@ object frmGoodsByType: TfrmGoodsByType
     TabOrder = 1
     object cxGrid1DBTableView1: TcxGridDBTableView
       OnKeyDown = cxGrid1DBTableView1KeyDown
-      Navigator.Buttons.CustomButtons = <>
-      ScrollbarAnnotations.CustomAnnotations = <>
       DataController.DataSource = IBCDataSource1
-      DataController.Summary.DefaultGroupSummaryItems = <>
-      DataController.Summary.FooterSummaryItems = <>
-      DataController.Summary.SummaryGroups = <>
       OptionsBehavior.CopyCaptionsToClipboard = False
       OptionsBehavior.IncSearch = True
       OptionsBehavior.CopyPreviewToClipboard = False
@@ -60,21 +56,18 @@ object frmGoodsByType: TfrmGoodsByType
       object cxGrid1DBTableView1GOODSID: TcxGridDBColumn
         Caption = 'Cod'
         DataBinding.FieldName = 'GOODSID'
-        DataBinding.IsNullValueType = True
         HeaderAlignmentHorz = taCenter
-        Width = 32
+        Width = 80
       end
       object cxGrid1DBTableView1TITLE: TcxGridDBColumn
         Caption = 'Produs'
         DataBinding.FieldName = 'TITLE'
-        DataBinding.IsNullValueType = True
         HeaderAlignmentHorz = taCenter
-        Width = 765
+        Width = 717
       end
       object cxGrid1DBTableView1_FLG_FORCED: TcxGridDBColumn
         Caption = 'F'
         DataBinding.FieldName = 'FLG_FORCED'
-        DataBinding.IsNullValueType = True
         PropertiesClassName = 'TcxCheckBoxProperties'
         Properties.ValueChecked = '1'
         Properties.ValueUnchecked = '0'
@@ -97,6 +90,14 @@ object frmGoodsByType: TfrmGoodsByType
     Caption = 'Inchide'
     ModalResult = 1
     TabOrder = 2
+  end
+  object cxButton2: TcxButton
+    Left = 8
+    Top = 526
+    Width = 129
+    Height = 25
+    Caption = 'Modifica produs'
+    TabOrder = 3
   end
   object IBCQuery1: TIBCQuery
     SQL.Strings = (

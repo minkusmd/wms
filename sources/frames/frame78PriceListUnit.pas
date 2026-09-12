@@ -1,6 +1,6 @@
 ﻿unit frame78PriceListUnit;
 {
-  Менеджер Прайс Листов
+  Manager Price Listuri
   DocTypeID = 1280
   Frame Index = 78
 }
@@ -125,7 +125,13 @@ type
     dxBarButton8: TdxBarButton;
     dxBarButton9: TdxBarButton;
     bbSetParentID: TdxBarButton;
-    lcbSupplier: TcxLookupComboBox;
+    cxGridSuppliers: TcxGrid;
+    cxGridSuppliersDBTableView1: TcxGridDBTableView;
+    cxGridSuppliersDBTableView1CUSTOMERID: TcxGridDBColumn;
+    cxGridSuppliersDBTableView1DISPLAYNAME: TcxGridDBColumn;
+    cxGridSuppliersDBTableView1LAST_PRICELIST_DATE: TcxGridDBColumn;
+    cxGridSuppliersLevel1: TcxGridLevel;
+    tmrSupplierRefresh: TTimer;
     IBCQuerySuppliers: TIBCQuery;
     IBCDataSourceSuppliers: TIBCDataSource;
     SpeedButton1: TSpeedButton;
@@ -366,7 +372,11 @@ type
     procedure cxButton1Click(Sender: TObject);
     procedure dxBarButton9Click(Sender: TObject);
     procedure bbSetParentIDClick(Sender: TObject);
-    procedure cxLookupComboBox1PropertiesCloseUp(Sender: TObject);
+    procedure cxGridSuppliersDBTableView1DblClick(Sender: TObject);
+    procedure cxGridSuppliersDBTableView1KeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure cxGridSuppliersDBTableView1FocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord,
+      AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
+    procedure tmrSupplierRefreshTimer(Sender: TObject);
     procedure SpeedButton1Click(Sender: TObject);
     procedure dxBarButton10Click(Sender: TObject);
     procedure dxBarButton11Click(Sender: TObject);
@@ -401,6 +411,7 @@ type
     LastPriceCategoryID: Integer;
     LastSupplierID: Integer;
     procedure ClosePriceAnalizeDataSet;
+    procedure LoadSelectedSupplier;
     function GetSelectionIDList(ATable: TcxGridDBTableView): string;
     function SendSelectedGoodsToPackage(const OperatorID: Integer; const GoodsList: string): Boolean;
     procedure AddRecordToReevaluareVinzare(Transaction: TIBCTransaction; DOCID, goodsid, Supplierid: Integer;
@@ -464,7 +475,7 @@ type
 implementation
 
 uses
-  ApiAccentUnit, DataModuleAdditions, DataModuleDB, SWNConst, SWNDBErrors, SWNSecurity, SWNTypes, SWNUtils,
+  ApiAccentUnit, B2B.DMLinkPriceListImport, DataModuleAdditions, DataModuleDB, SWNConst, SWNDBErrors, SWNSecurity, SWNTypes, SWNUtils,
   SWNValueStorageUnit, dxInputDialogs, frmAddGoodsfromPrices, frmAddNewGoodsUnit, frmAnalizePriceListUnit,
   frmContentGoodsEditorDialog, frmContentPackage, frmCustomersDlg, frmGoods, frmGoodsPriceListDlgUnit, frmGoodsTypeDialog,
   frmMuncitorulProgressUnit, frmPriceManageStringFieldsUnit, frmPriceTypesUnit, frmPricelistImportUnit,
@@ -706,7 +717,7 @@ begin
     Query.ParamByName('GOODSID').Value := goodsid;
     Query.ParamByName('SUPPLIER_GOODS_CODE').Value := SupplierGoodsCode;
     Query.ParamByName('PRICE0').Value := price0;
-    Query.ParamByName('PRICE3').Value := iif(flg_rrp, price3, 0.00);
+    Query.ParamByName('PRICE3').Value := price3; //iif(flg_rrp, price3, 0.00);
     Query.ParamByName('CURRENCYID').Value := currency0id;
     Query.ParamByName('CURRENCY3ID').Value := Currency3ID;
     Query.ParamByName('BARCODE').Value := Barcode;
@@ -736,8 +747,13 @@ begin
     cxGridItemsDBTableView1_CODE.Index];
 end;
 
-procedure Tframe78PriceList.cxLookupComboBox1PropertiesCloseUp(Sender: TObject);
+procedure Tframe78PriceList.LoadSelectedSupplier;
+// Se cheama pentru furnizorul curent focusat in cxGridSuppliers: fie imediat
+// (dublu-click / Enter), fie automat, cu 1 secunda intarziere dupa ultima
+// deplasare in grid (scroll/sageti) - vezi tmrSupplierRefresh.
 begin
+  if IBCQuerySuppliers.IsEmpty then
+    Exit;
 
   IBCQueryPriceCategories.Close;
   IBCQueryPriceCategories.ParamByName('customerid').AsInteger := IBCQuerySuppliers.FieldByName('customerid').AsInteger;
@@ -754,7 +770,39 @@ begin
   ibcqueryCustSuppliers.Close;
   ibcqueryCustSuppliers.ParamByName('Customerid').AsInteger := IBCQuerySuppliers.FieldByName('customerid').AsInteger;
   ibcqueryCustSuppliers.Open;
+end;
 
+procedure Tframe78PriceList.cxGridSuppliersDBTableView1DblClick(Sender: TObject);
+begin
+  tmrSupplierRefresh.Enabled := False;
+  LoadSelectedSupplier;
+end;
+
+procedure Tframe78PriceList.cxGridSuppliersDBTableView1KeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+  if Key = VK_RETURN then
+  begin
+    tmrSupplierRefresh.Enabled := False;
+    LoadSelectedSupplier;
+    Key := 0;
+  end;
+end;
+
+procedure Tframe78PriceList.cxGridSuppliersDBTableView1FocusedRecordChanged(Sender: TcxCustomGridTableView;
+  APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
+begin
+  // Repornim temporizatorul la fiecare deplasare (scroll / sageti): reincarcarea
+  // efectiva (categorii de pret + lista de produse) se face abia dupa 1 secunda
+  // de la ultima miscare, ca sa nu interogam baza de date la fiecare rand parcurs.
+  tmrSupplierRefresh.Enabled := False;
+  if AFocusedRecord <> nil then
+    tmrSupplierRefresh.Enabled := True;
+end;
+
+procedure Tframe78PriceList.tmrSupplierRefreshTimer(Sender: TObject);
+begin
+  tmrSupplierRefresh.Enabled := False;
+  LoadSelectedSupplier;
 end;
 
 procedure Tframe78PriceList.DeleteRecord;
@@ -945,6 +993,20 @@ begin
       IBCQueryPriceData.Refresh;
     finally
       myApiAccent.Free;
+    end;
+  end;
+
+  // DMLink
+  if IBCQuerySuppliers.FieldByName('CustomerID').AsInteger = 229466 then
+  begin
+    var Importer := TDMLinkPriceListImport.Create(dmDB.IBCConnection, 229466, 10);
+    try
+      var ImportResult := Importer.Execute;
+      ShowMessage(Format('Pricelist DMLink #%d creat: %d produse, %d imagini.',
+        [ImportResult.PLID, ImportResult.ProductsImported, ImportResult.ImagesImported]));
+      IBCQueryPriceData.Refresh;
+    finally
+      Importer.Free;
     end;
   end;
 
@@ -1896,7 +1958,7 @@ begin
   dialog := TfrmPriceListImportDlg.Create(Self, dmDB.IBCConnection);
   try
     dialog.Supplierid := IBCQuerySuppliers.FieldByName('CUSTOMERID').AsInteger;
-    dialog.SupplierName := IBCQuerySuppliers.FieldByName('DISPLAYNAME').AsString;
+    dialog.SupplierName := IBCQuerySuppliers.FieldByName('SUPPLIER_NAME').AsString;
     dialog.PriceCategoryID := lcbPriceCategory.EditValue;
     if (dialog.ShowModal = mrOK) then
     begin
@@ -2227,8 +2289,8 @@ begin
       if (Price7 = 0) and (price3 > 0) then
         FLG_UseRRP := True;
 
-      if not FLG_UseRRP then
-        price3 := 0;
+//      if not FLG_UseRRP then
+//        price3 := 0;
 
       if (FLG_UseRRP or not VarIsNull(ATableView.DataController.Values[aRecIndex, Currency3Index])) then
         Currency3ID := ATableView.DataController.Values[aRecIndex, Currency3Index];
@@ -2267,7 +2329,7 @@ begin
       supplier_goods_code := ATableView.DataController.Values[aRecIndex, ATableView.GetColumnByFieldName('SUPPLIER_GOODS_CODE').Index];
 
       if (Currency3ID = '') then
-        Currency3ID := '840';
+        Currency3ID := '498';
 
       if (Price7 > 0) then
       begin
@@ -2307,7 +2369,7 @@ begin
       qq.SQL.Text := 'select rrp_discount from ts_customer where customerid = :customerid';
       qq.ParamByName('customerid').AsInteger := IBCDataSourceSuppliers.DataSet.FieldByName('CUSTOMERID').AsInteger;
       qq.Open;
-      CustomerRrpDiscount := qq.FieldByName('rrp_discount').AsFloat *  - 1;
+      CustomerRrpDiscount := qq.FieldByName('rrp_discount').AsFloat;
     finally
       qq.Free;
     end;
@@ -2897,9 +2959,11 @@ begin
   try
     if d.SelectCustomer(IBCQuerySuppliers.FieldByName('CUSTOMERID').AsInteger, False) then
     begin
-      cxLookupComboBox1PropertiesCloseUp(Self);
-      lcbSupplier.Text := d.CustomerTitle;
+      // Se pozitioneaza intai pe furnizorul ales, abia apoi se incarca datele lui
+      // (inainte reincarcarea se facea pe furnizorul VECHI, inainte de Locate).
       IBCQuerySuppliers.locate('customerid', d.CustomerID, []);
+      tmrSupplierRefresh.Enabled := False; // Locate a declansat FocusedRecordChanged - evitam un refresh dublu peste 1 sec.
+      LoadSelectedSupplier;
     end;
   finally
     d.Free;
@@ -2986,7 +3050,7 @@ end;
 
 procedure Tframe78PriceList.SetupDefaultFocus;
 begin
-  lcbSupplier.SetFocus;
+  cxGridSuppliers.SetFocus;
 end;
 
 procedure Tframe78PriceList.SpeedButton1Click(Sender: TObject);

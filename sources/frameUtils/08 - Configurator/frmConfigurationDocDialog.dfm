@@ -1,0 +1,821 @@
+object frmConfigurationDocDlg: TfrmConfigurationDocDlg
+  Left = 0
+  Top = 0
+  BorderStyle = bsDialog
+  Caption = 'Configurare document'
+  ClientHeight = 559
+  ClientWidth = 1012
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -12
+  Font.Name = 'Segoe UI'
+  Font.Style = []
+  Position = poOwnerFormCenter
+  OnClose = FormClose
+  DesignSize = (
+    1012
+    559)
+  TextHeight = 15
+  object dtDialogTitle: TDialogTitle
+    Left = 0
+    Top = 0
+    Width = 1012
+    Height = 64
+    Title = 'Configurare document'
+    Text = ''
+    FontTitle.Charset = DEFAULT_CHARSET
+    FontTitle.Color = clWindowText
+    FontTitle.Height = -13
+    FontTitle.Name = 'Segoe UI'
+    FontTitle.Style = [fsBold]
+    FontText.Charset = DEFAULT_CHARSET
+    FontText.Color = clWindowText
+    FontText.Height = -12
+    FontText.Name = 'Segoe UI'
+    FontText.Style = []
+    ImageList = dmAdditions.cxImageList_DialogIcons
+    ImageIndex = 16
+    ExplicitWidth = 1000
+  end
+  object pnClient: TPanel
+    AlignWithMargins = True
+    Left = 8
+    Top = 72
+    Width = 996
+    Height = 444
+    Margins.Left = 8
+    Margins.Top = 8
+    Margins.Right = 8
+    Margins.Bottom = 8
+    Align = alTop
+    Anchors = [akLeft, akTop, akRight, akBottom]
+    BevelKind = bkFlat
+    BevelOuter = bvNone
+    Color = clWindow
+    ParentBackground = False
+    TabOrder = 1
+    ExplicitWidth = 984
+    ExplicitHeight = 445
+    object cxScrollBox1: TcxScrollBox
+      Left = 0
+      Top = 0
+      Width = 992
+      Height = 440
+      Align = alClient
+      TabOrder = 0
+      ExplicitWidth = 1007
+      ExplicitHeight = 445
+      object lblSecDocument: TLabel
+        Left = 12
+        Top = 8
+        Width = 87
+        Height = 15
+        Caption = 'Date document'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -12
+        Font.Name = 'Segoe UI'
+        Font.Style = [fsBold]
+        ParentFont = False
+        Transparent = True
+      end
+      object cxLabel5: TLabel
+        Left = 12
+        Top = 41
+        Width = 24
+        Height = 15
+        Caption = 'Data'
+        Transparent = True
+      end
+      object cxLabel1: TLabel
+        Left = 12
+        Top = 77
+        Width = 60
+        Height = 15
+        Caption = 'Organizatie'
+        Transparent = True
+      end
+      object Bevel1: TBevel
+        Left = 12
+        Top = 27
+        Width = 480
+        Height = 4
+        Shape = bsTopLine
+      end
+      object lblAnaliticaOrg: TLabel
+        Left = 12
+        Top = 113
+        Width = 70
+        Height = 15
+        Caption = 'Analitica org.'
+        Transparent = True
+      end
+      object cxLabel2: TLabel
+        Left = 12
+        Top = 221
+        Width = 31
+        Height = 15
+        Caption = 'Client'
+        Transparent = True
+      end
+      object cxLabel6: TLabel
+        Left = 12
+        Top = 185
+        Width = 40
+        Height = 15
+        Caption = 'Depozit'
+        Transparent = True
+      end
+      object lbContractInfo: TLabel
+        Left = 112
+        Top = 281
+        Width = 380
+        Height = 17
+        AutoSize = False
+        Caption = 'Atentie, luam'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clMaroon
+        Font.Height = -12
+        Font.Name = 'Segoe UI'
+        Font.Style = []
+        ParentFont = False
+        Visible = False
+        WordWrap = True
+      end
+      object cxLabel3: TLabel
+        Left = 12
+        Top = 339
+        Width = 32
+        Height = 15
+        Caption = 'Valuta'
+        Transparent = True
+      end
+      object cxLabel8: TLabel
+        Left = 516
+        Top = 326
+        Width = 50
+        Height = 15
+        Caption = 'Mentiuni'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -12
+        Font.Name = 'Segoe UI'
+        Font.Style = [fsBold]
+        ParentFont = False
+        Transparent = True
+      end
+      object Label1: TLabel
+        Left = 248
+        Top = 339
+        Width = 81
+        Height = 15
+        Caption = 'Rata document'
+        Transparent = True
+      end
+      object lbContractTitle: TLabel
+        Left = 12
+        Top = 257
+        Width = 46
+        Height = 15
+        Caption = 'Contract'
+        Transparent = True
+      end
+      object Label2: TLabel
+        Left = 12
+        Top = 375
+        Width = 48
+        Height = 15
+        Caption = 'Rata USD'
+        Transparent = True
+      end
+      object Label3: TLabel
+        Left = 12
+        Top = 149
+        Width = 72
+        Height = 15
+        Caption = 'Analitica doc.'
+        Transparent = True
+      end
+      object Label4: TLabel
+        Left = 282
+        Top = 41
+        Width = 26
+        Height = 15
+        Caption = 'Stare'
+        Transparent = True
+      end
+      object lblSecFinante: TLabel
+        Left = 12
+        Top = 306
+        Width = 87
+        Height = 15
+        Caption = 'Valuta si optiuni'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -12
+        Font.Name = 'Segoe UI'
+        Font.Style = [fsBold]
+        ParentFont = False
+        Transparent = True
+      end
+      object bvFinante: TBevel
+        Left = 12
+        Top = 325
+        Width = 480
+        Height = 4
+        Shape = bsTopLine
+      end
+      object lblSecLivrare: TLabel
+        Left = 516
+        Top = 8
+        Width = 39
+        Height = 15
+        Caption = 'Livrare'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -12
+        Font.Name = 'Segoe UI'
+        Font.Style = [fsBold]
+        ParentFont = False
+        Transparent = True
+      end
+      object bvLivrare: TBevel
+        Left = 516
+        Top = 27
+        Width = 460
+        Height = 4
+        Shape = bsTopLine
+      end
+      object bvMentiuni: TBevel
+        Left = 516
+        Top = 345
+        Width = 460
+        Height = 4
+        Shape = bsTopLine
+      end
+      object deDATA: TcxDBDateEdit
+        Left = 112
+        Top = 38
+        Hint = 'Data documentului'
+        DataBinding.DataField = 'DATA'
+        DataBinding.DataSource = dmDB.IBCDataSourceDocs
+        ParentShowHint = False
+        Properties.DateButtons = [btnNow]
+        Properties.ImmediatePost = True
+        Properties.Kind = ckDateTime
+        Properties.WeekNumbers = True
+        ShowHint = True
+        TabOrder = 0
+        Width = 150
+      end
+      object beDT_NAME: TcxButtonEdit
+        Left = 112
+        Top = 74
+        Hint = 'Organizatia emitenta - F4 pentru alegere'
+        ParentShowHint = False
+        Properties.Buttons = <
+          item
+            Default = True
+            Glyph.SourceDPI = 96
+            Glyph.Data = {
+              424D360400000000000036000000280000001000000010000000010020000000
+              000000000000C40E0000C40E00000000000000000000FF00FF00FF00FF00FF00
+              FF00FF00FF00B8C698FFA6AE7AFF948F55FFFF00FF00FF00FF00FF00FF00FF00
+              FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF0086B558FF8DB4
+              61FF92B266FF99B56DFF9EB975FF91884AFF718043FF757C43FF8F8C4DFF9284
+              49FFA58D5EFFFF00FF00FF00FF00FF00FF00FF00FF00FF00FF0086B558FFA4BD
+              7EFFA4BD7EFFA4C17EFFA4C17EFF91884AFF96A67CFF98AA7FFFB5CD98FFB5CD
+              98FFB1C58DFFA88559FFFF00FF00FF00FF00FF00FF00FF00FF0086B558FFA4B9
+              7DFFA4BD7EFFA4BD7EFFA4BD7EFF928449FF96A67CFF98AA7FFFB5CD98FFB5CD
+              98FFB5CD98FF9C7240FFFF00FF00FF00FF00FF00FF00FF00FF0086B558FFA4B9
+              7DFFA6AE7AFFA4B97DFFA4BD7EFF928449FF96A67CFF98AA7FFFB5CD98FFB5CD
+              98FFB5CD98FF9C7240FFFF00FF00FF00FF00FF00FF00FF00FF0086B558FFA9AA
+              78FFA4B97DFFA6AE7AFFA4B97DFF928449FF96A67CFF98A57DFFB5CD98FFB5CD
+              98FFB5CD98FF9D703FFFFF00FF00FF00FF00FF00FF00FF00FF0086B558FFA9AA
+              78FFA9AA78FFA6AE7AFFA4B97DFF967D46FF96A67CFF98A57DFFB6C596FFB6C5
+              96FFB5CD98FF9D703FFFFF00FF00FF00FF00FF00FF00FF00FF0086B558FFABA5
+              76FFA9AA78FFA9AA78FFA4B97DFF967D46FF979E7AFF98A57DFFB6C596FFB6C5
+              96FFB6C997FF9D703FFFFF00FF00FF00FF00FF00FF00FF00FF0086B558FFADA1
+              74FFABA576FFA9AA78FFB6B188FF967D46FF979E7AFF98A57DFFB6C596FFB6C5
+              96FFB6C596FF9D703FFFFF00FF00FF00FF00FF00FF00FF00FF0086B057FFADA1
+              74FFADA174FFABA576FFBAB991FF967D46FF979E7AFF9A9D7BFFB6C596FFB6C5
+              96FFB6C596FF9D703FFFFF00FF00FF00FF00FF00FF00FF00FF0086B057FFB296
+              6FFFB09A70FFADA174FFBAB991FF9C7240FF979E7AFF9A9D7BFFB8BE94FFB8C0
+              95FFB6C596FF9D703FFFFF00FF00FF00FF00FF00FF00FF00FF0086B057FFB296
+              6FFFB2966FFFB09A70FFC5B395FF967D46FF9A9777FF9A9D7BFFB8BE94FFB8BE
+              94FFB8C095FF9D703FFFFF00FF00FF00FF00FF00FF00FF00FF0086B057FFB78E
+              6BFFB2966FFFB2966FFFC5B395FF9C7240FF9A9D7BFF9A9D7BFFB8BE94FFB8BE
+              94FFB8BE94FF9D703FFFFF00FF00FF00FF00FF00FF00FF00FF0086B057FFB78E
+              6BFFB78E6BFFC1AC8CFFB9A882FF9C7240FF9A9D7BFFB1AE8AFFBAB991FFB8BE
+              94FFB8BE94FF9E6E3EFFFF00FF00FF00FF00FF00FF00FF00FF0086B057FF9F98
+              5FFFA6AB76FF979357FFAA986AFFA49573FFBCB18DFFBCB18DFFBAB991FFBAB9
+              91FFBCB18DFFAB7F56FFFF00FF00FF00FF00FF00FF00FF00FF0090B063FF90B0
+              63FF88AA56FF87A755FF89A054FF8A9A52FF8C934FFF91884AFF928449FF9C72
+              40FFA88559FFFF00FF00FF00FF00FF00FF00FF00FF00}
+            Kind = bkGlyph
+          end>
+        Properties.ClickKey = 115
+        Properties.ViewStyle = vsHideCursor
+        Properties.OnButtonClick = beDT_NAMEPropertiesButtonClick
+        ShowHint = True
+        TabOrder = 2
+        Text = 'beDT_NAME'
+        Width = 380
+      end
+      object lcbDTSC: TcxDBLookupComboBox
+        Left = 112
+        Top = 110
+        Hint = #1040#1085#1072#1083#1080#1090#1080#1082#1072' '#1086#1088#1075#1072#1085#1080#1079#1072#1094#1080#1080
+        DataBinding.DataField = 'DTSC'
+        DataBinding.DataSource = dmDB.IBCDataSourceDocs
+        ParentShowHint = False
+        Properties.KeyFieldNames = 'SYSSID'
+        Properties.ListColumns = <
+          item
+            FieldName = 'TITLE'
+          end>
+        Properties.ListOptions.ShowHeader = False
+        Properties.ListSource = dmDB.IBCDataSourceAnalitica
+        ShowHint = True
+        TabOrder = 3
+        Width = 380
+      end
+      object lcbDTDEP: TcxDBLookupComboBox
+        Left = 112
+        Top = 182
+        Hint = 'Depozitul documentului'
+        DataBinding.DataField = 'DTDEP'
+        DataBinding.DataSource = dmDB.IBCDataSourceDocs
+        ParentShowHint = False
+        Properties.DropDownRows = 16
+        Properties.DropDownWidth = 300
+        Properties.IncrementalFilteringOptions = [ifoHighlightSearchText, ifoUseContainsOperator]
+        Properties.KeyFieldNames = 'STOCKID'
+        Properties.ListColumns = <
+          item
+            Caption = 'Cod'
+            FieldName = 'STOCKID'
+          end
+          item
+            Caption = 'Depozit'
+            Width = 200
+            FieldName = 'TITLE'
+          end
+          item
+            Caption = 'Mapa'
+            Width = 100
+            FieldName = 'PARENT_TITLE'
+          end>
+        Properties.ListFieldIndex = 1
+        Properties.ListOptions.ShowHeader = False
+        Properties.ListOptions.SyncMode = True
+        Properties.ListSource = dmDB.IBCDataSourceStocks
+        ShowHint = True
+        TabOrder = 5
+        Width = 380
+      end
+      object beCT_NAME: TcxButtonEdit
+        Left = 112
+        Top = 218
+        Hint = 'Clientul documentului - F4 pentru alegere'
+        ParentShowHint = False
+        Properties.Buttons = <
+          item
+            Default = True
+            Glyph.SourceDPI = 96
+            Glyph.Data = {
+              424D360400000000000036000000280000001000000010000000010020000000
+              000000000000C40E0000C40E00000000000000000000FF00FF00FF00FF00FF00
+              FF00FF00FF00B8C698FFA6AE7AFF948F55FFFF00FF00FF00FF00FF00FF00FF00
+              FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF0086B558FF8DB4
+              61FF92B266FF99B56DFF9EB975FF91884AFF718043FF757C43FF8F8C4DFF9284
+              49FFA58D5EFFFF00FF00FF00FF00FF00FF00FF00FF00FF00FF0086B558FFA4BD
+              7EFFA4BD7EFFA4C17EFFA4C17EFF91884AFF96A67CFF98AA7FFFB5CD98FFB5CD
+              98FFB1C58DFFA88559FFFF00FF00FF00FF00FF00FF00FF00FF0086B558FFA4B9
+              7DFFA4BD7EFFA4BD7EFFA4BD7EFF928449FF96A67CFF98AA7FFFB5CD98FFB5CD
+              98FFB5CD98FF9C7240FFFF00FF00FF00FF00FF00FF00FF00FF0086B558FFA4B9
+              7DFFA6AE7AFFA4B97DFFA4BD7EFF928449FF96A67CFF98AA7FFFB5CD98FFB5CD
+              98FFB5CD98FF9C7240FFFF00FF00FF00FF00FF00FF00FF00FF0086B558FFA9AA
+              78FFA4B97DFFA6AE7AFFA4B97DFF928449FF96A67CFF98A57DFFB5CD98FFB5CD
+              98FFB5CD98FF9D703FFFFF00FF00FF00FF00FF00FF00FF00FF0086B558FFA9AA
+              78FFA9AA78FFA6AE7AFFA4B97DFF967D46FF96A67CFF98A57DFFB6C596FFB6C5
+              96FFB5CD98FF9D703FFFFF00FF00FF00FF00FF00FF00FF00FF0086B558FFABA5
+              76FFA9AA78FFA9AA78FFA4B97DFF967D46FF979E7AFF98A57DFFB6C596FFB6C5
+              96FFB6C997FF9D703FFFFF00FF00FF00FF00FF00FF00FF00FF0086B558FFADA1
+              74FFABA576FFA9AA78FFB6B188FF967D46FF979E7AFF98A57DFFB6C596FFB6C5
+              96FFB6C596FF9D703FFFFF00FF00FF00FF00FF00FF00FF00FF0086B057FFADA1
+              74FFADA174FFABA576FFBAB991FF967D46FF979E7AFF9A9D7BFFB6C596FFB6C5
+              96FFB6C596FF9D703FFFFF00FF00FF00FF00FF00FF00FF00FF0086B057FFB296
+              6FFFB09A70FFADA174FFBAB991FF9C7240FF979E7AFF9A9D7BFFB8BE94FFB8C0
+              95FFB6C596FF9D703FFFFF00FF00FF00FF00FF00FF00FF00FF0086B057FFB296
+              6FFFB2966FFFB09A70FFC5B395FF967D46FF9A9777FF9A9D7BFFB8BE94FFB8BE
+              94FFB8C095FF9D703FFFFF00FF00FF00FF00FF00FF00FF00FF0086B057FFB78E
+              6BFFB2966FFFB2966FFFC5B395FF9C7240FF9A9D7BFF9A9D7BFFB8BE94FFB8BE
+              94FFB8BE94FF9D703FFFFF00FF00FF00FF00FF00FF00FF00FF0086B057FFB78E
+              6BFFB78E6BFFC1AC8CFFB9A882FF9C7240FF9A9D7BFFB1AE8AFFBAB991FFB8BE
+              94FFB8BE94FF9E6E3EFFFF00FF00FF00FF00FF00FF00FF00FF0086B057FF9F98
+              5FFFA6AB76FF979357FFAA986AFFA49573FFBCB18DFFBCB18DFFBAB991FFBAB9
+              91FFBCB18DFFAB7F56FFFF00FF00FF00FF00FF00FF00FF00FF0090B063FF90B0
+              63FF88AA56FF87A755FF89A054FF8A9A52FF8C934FFF91884AFF928449FF9C72
+              40FFA88559FFFF00FF00FF00FF00FF00FF00FF00FF00}
+            Kind = bkGlyph
+          end>
+        Properties.ClickKey = 115
+        Properties.OnButtonClick = beCT_NAMEPropertiesButtonClick
+        ShowHint = True
+        TabOrder = 6
+        Text = 'beCT_NAME'
+        Width = 380
+      end
+      object cxDBLookupComboBox1: TcxDBLookupComboBox
+        Left = 112
+        Top = 218
+        Hint = #1040#1085#1072#1083#1080#1090#1080#1082#1072' '#1086#1088#1075#1072#1085#1080#1079#1072#1094#1080#1080
+        DataBinding.DataField = 'CTSC'
+        DataBinding.DataSource = dmDB.IBCDataSourceDocs
+        ParentShowHint = False
+        Properties.GridMode = True
+        Properties.ImmediateDropDownWhenActivated = True
+        Properties.IncrementalFilteringOptions = [ifoHighlightSearchText, ifoUseContainsOperator]
+        Properties.KeyFieldNames = 'SYSSID'
+        Properties.ListColumns = <
+          item
+            FieldName = 'TITLE'
+          end>
+        Properties.ListOptions.ShowHeader = False
+        Properties.ListSource = dmDB.IBCDataSourceSYSSList
+        Properties.ValidateOnEnter = False
+        Properties.ValidationOptions = [evoRaiseException, evoShowErrorIcon]
+        ShowHint = True
+        TabOrder = 7
+        Visible = False
+        Width = 380
+      end
+      object ceRATE: TcxDBCalcEdit
+        Left = 352
+        Top = 336
+        DataBinding.DataField = 'RATE'
+        DataBinding.DataSource = dmDB.IBCDataSourceDocs
+        Properties.ImmediatePost = True
+        TabOrder = 10
+        Width = 140
+      end
+      inline frameDelivery: TframeDocsDelivery
+        Left = 516
+        Top = 34
+        Width = 460
+        Height = 280
+        TabOrder = 15
+        ExplicitLeft = 516
+        ExplicitTop = 34
+        ExplicitWidth = 460
+        inherited lbEmptyHint: TLabel
+          Width = 460
+          StyleElements = [seFont, seClient, seBorder]
+        end
+        inherited cxDBVerticalGrid1: TcxDBVerticalGrid
+          Width = 460
+          ExplicitWidth = 460
+          Version = 1
+          inherited cxDBVerticalGrid1DOCID: TcxDBEditorRow
+            ID = 0
+            ParentID = -1
+            Index = 0
+            Version = 1
+          end
+          inherited cxDBVerticalGrid1COURIERID: TcxDBEditorRow
+            ID = 1
+            ParentID = -1
+            Index = 1
+            Version = 1
+          end
+          inherited cxDBVerticalGrid1CategoryRow2: TcxCategoryRow
+            ID = 2
+            ParentID = -1
+            Index = 2
+            Version = 1
+          end
+          inherited cxDBVerticalGrid1COURIER_NAME: TcxDBEditorRow
+            ID = 3
+            ParentID = 2
+            Index = 0
+            Version = 1
+          end
+          inherited cxDBVerticalGrid1AWB: TcxDBEditorRow
+            ID = 4
+            ParentID = 2
+            Index = 1
+            Version = 1
+          end
+          inherited cxDBVerticalGrid1DBMultiEditorRow1: TcxDBMultiEditorRow
+            ID = 5
+            ParentID = 2
+            Index = 2
+            Version = 1
+          end
+          inherited cxDBVerticalGrid1CategoryRow1: TcxCategoryRow
+            ID = 6
+            ParentID = -1
+            Index = 3
+            Version = 1
+          end
+          inherited cxDBVerticalGrid1DELIVERY_DATE: TcxDBEditorRow
+            ID = 7
+            ParentID = 6
+            Index = 0
+            Version = 1
+          end
+          inherited cxDBVerticalGrid1DELIVERY_TIME: TcxDBEditorRow
+            ID = 8
+            ParentID = 6
+            Index = 1
+            Version = 1
+          end
+          inherited cxDBVerticalGrid1DELIVERY_ADDRESS: TcxDBEditorRow
+            ID = 9
+            ParentID = 6
+            Index = 2
+            Version = 1
+          end
+        end
+        inherited pnButtons: TPanel
+          Width = 460
+          StyleElements = [seFont, seClient, seBorder]
+          ExplicitWidth = 460
+        end
+      end
+      object mmCOMMENTS: TcxDBMemo
+        Left = 516
+        Top = 356
+        Hint = 'Click pentru a edita mentiunile documentului'
+        DataBinding.DataField = 'COMMENTS'
+        DataBinding.DataSource = IBCDataSourceDocProps
+        ParentShowHint = False
+        Properties.ReadOnly = True
+        Properties.ScrollBars = ssVertical
+        Properties.VisibleLineCount = 4
+        Properties.WantReturns = False
+        ShowHint = True
+        TabOrder = 14
+        OnClick = mmCOMMENTSClick
+        OnEnter = mmCOMMENTSClick
+        Width = 460
+      end
+      object cbFLG_ACNT: TcxDBCheckBox
+        Left = 352
+        Top = 394
+        Caption = 'Export contabilitate'
+        DataBinding.DataField = 'FLG_ACNT'
+        DataBinding.DataSource = dmDB.IBCDataSourceDocs
+        Properties.Alignment = taLeftJustify
+        Properties.ImmediatePost = True
+        Properties.NullStyle = nssUnchecked
+        Properties.ValueChecked = 1
+        Properties.ValueUnchecked = 0
+        Properties.OnEditValueChanged = lcbCURRENCYPropertiesEditValueChanged
+        Style.TransparentBorder = False
+        TabOrder = 13
+        Visible = False
+      end
+      object ceRATEUSD: TcxDBCalcEdit
+        Left = 112
+        Top = 372
+        DataBinding.DataField = 'RATEUSD'
+        DataBinding.DataSource = dmDB.IBCDataSourceDocs
+        Properties.ImmediatePost = True
+        TabOrder = 11
+        Width = 120
+      end
+      object lcbAnalytics: TcxDBLookupComboBox
+        Left = 112
+        Top = 146
+        Hint = #1040#1085#1072#1083#1080#1090#1080#1082#1072' '#1076#1086#1082#1091#1084#1077#1085#1090#1072
+        DataBinding.DataField = 'SC2'
+        DataBinding.DataSource = dmDB.IBCDataSourceDocs
+        ParentShowHint = False
+        Properties.DropDownAutoSize = True
+        Properties.DropDownRows = 16
+        Properties.KeyFieldNames = 'ANALITICAID'
+        Properties.ListColumns = <
+          item
+            Fixed = True
+            Width = 180
+            FieldName = 'TITLE'
+          end
+          item
+            Fixed = True
+            Width = 180
+            FieldName = 'PARENT_TITLE'
+          end>
+        Properties.ListOptions.ShowHeader = False
+        Properties.ListSource = dmDB.IBCDataSourceAnalytics
+        ShowHint = True
+        TabOrder = 4
+        Width = 380
+      end
+      object beContract: TcxButtonEdit
+        Left = 112
+        Top = 254
+        Properties.Buttons = <
+          item
+            Default = True
+            Glyph.SourceDPI = 96
+            Glyph.Data = {
+              424D360400000000000036000000280000001000000010000000010020000000
+              000000000000C40E0000C40E00000000000000000000FF00FF00FF00FF00FF00
+              FF00FF00FF00B8C698FFA6AE7AFF948F55FFFF00FF00FF00FF00FF00FF00FF00
+              FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF0086B558FF8DB4
+              61FF92B266FF99B56DFF9EB975FF91884AFF718043FF757C43FF8F8C4DFF9284
+              49FFA58D5EFFFF00FF00FF00FF00FF00FF00FF00FF00FF00FF0086B558FFA4BD
+              7EFFA4BD7EFFA4C17EFFA4C17EFF91884AFF96A67CFF98AA7FFFB5CD98FFB5CD
+              98FFB1C58DFFA88559FFFF00FF00FF00FF00FF00FF00FF00FF0086B558FFA4B9
+              7DFFA4BD7EFFA4BD7EFFA4BD7EFF928449FF96A67CFF98AA7FFFB5CD98FFB5CD
+              98FFB5CD98FF9C7240FFFF00FF00FF00FF00FF00FF00FF00FF0086B558FFA4B9
+              7DFFA6AE7AFFA4B97DFFA4BD7EFF928449FF96A67CFF98AA7FFFB5CD98FFB5CD
+              98FFB5CD98FF9C7240FFFF00FF00FF00FF00FF00FF00FF00FF0086B558FFA9AA
+              78FFA4B97DFFA6AE7AFFA4B97DFF928449FF96A67CFF98A57DFFB5CD98FFB5CD
+              98FFB5CD98FF9D703FFFFF00FF00FF00FF00FF00FF00FF00FF0086B558FFA9AA
+              78FFA9AA78FFA6AE7AFFA4B97DFF967D46FF96A67CFF98A57DFFB6C596FFB6C5
+              96FFB5CD98FF9D703FFFFF00FF00FF00FF00FF00FF00FF00FF0086B558FFABA5
+              76FFA9AA78FFA9AA78FFA4B97DFF967D46FF979E7AFF98A57DFFB6C596FFB6C5
+              96FFB6C997FF9D703FFFFF00FF00FF00FF00FF00FF00FF00FF0086B558FFADA1
+              74FFABA576FFA9AA78FFB6B188FF967D46FF979E7AFF98A57DFFB6C596FFB6C5
+              96FFB6C596FF9D703FFFFF00FF00FF00FF00FF00FF00FF00FF0086B057FFADA1
+              74FFADA174FFABA576FFBAB991FF967D46FF979E7AFF9A9D7BFFB6C596FFB6C5
+              96FFB6C596FF9D703FFFFF00FF00FF00FF00FF00FF00FF00FF0086B057FFB296
+              6FFFB09A70FFADA174FFBAB991FF9C7240FF979E7AFF9A9D7BFFB8BE94FFB8C0
+              95FFB6C596FF9D703FFFFF00FF00FF00FF00FF00FF00FF00FF0086B057FFB296
+              6FFFB2966FFFB09A70FFC5B395FF967D46FF9A9777FF9A9D7BFFB8BE94FFB8BE
+              94FFB8C095FF9D703FFFFF00FF00FF00FF00FF00FF00FF00FF0086B057FFB78E
+              6BFFB2966FFFB2966FFFC5B395FF9C7240FF9A9D7BFF9A9D7BFFB8BE94FFB8BE
+              94FFB8BE94FF9D703FFFFF00FF00FF00FF00FF00FF00FF00FF0086B057FFB78E
+              6BFFB78E6BFFC1AC8CFFB9A882FF9C7240FF9A9D7BFFB1AE8AFFBAB991FFB8BE
+              94FFB8BE94FF9E6E3EFFFF00FF00FF00FF00FF00FF00FF00FF0086B057FF9F98
+              5FFFA6AB76FF979357FFAA986AFFA49573FFBCB18DFFBCB18DFFBAB991FFBAB9
+              91FFBCB18DFFAB7F56FFFF00FF00FF00FF00FF00FF00FF00FF0090B063FF90B0
+              63FF88AA56FF87A755FF89A054FF8A9A52FF8C934FFF91884AFF928449FF9C72
+              40FFA88559FFFF00FF00FF00FF00FF00FF00FF00FF00}
+            Kind = bkGlyph
+          end>
+        Properties.ClearKey = 46
+        Properties.ClickKey = 115
+        Properties.ViewStyle = vsHideCursor
+        Properties.OnButtonClick = beContractPropertiesButtonClick
+        TabOrder = 8
+        OnKeyDown = beContractKeyDown
+        Width = 380
+      end
+      object lcbCURRENCY: TcxDBLookupComboBox
+        Left = 112
+        Top = 336
+        DataBinding.DataField = 'CURRENCYID'
+        DataBinding.DataSource = dmDB.IBCDataSourceDocs
+        Properties.DropDownListStyle = lsFixedList
+        Properties.ImmediatePost = True
+        Properties.KeyFieldNames = 'CURRENCYID'
+        Properties.ListColumns = <
+          item
+            Caption = #1053#1072#1079#1074#1072#1085#1080#1077
+            Width = 150
+            FieldName = 'TITLE'
+          end>
+        Properties.ListOptions.ShowHeader = False
+        Properties.ListSource = dmDB.IBCDataSourceCurrency
+        Properties.OnEditValueChanged = lcbCURRENCYPropertiesEditValueChanged
+        TabOrder = 9
+        Width = 120
+      end
+      object cbFLG_FURNITURE: TcxDBCheckBox
+        Left = 352
+        Top = 369
+        Caption = 'Producere mobila'
+        DataBinding.DataField = 'FLG_FURNITURE'
+        DataBinding.DataSource = dmDB.IBCDataSourceDocs
+        Properties.Alignment = taLeftJustify
+        Properties.ImmediatePost = True
+        Properties.NullStyle = nssUnchecked
+        Properties.ValueChecked = 1
+        Properties.ValueUnchecked = 0
+        Properties.OnEditValueChanged = lcbCURRENCYPropertiesEditValueChanged
+        Style.TransparentBorder = False
+        TabOrder = 12
+      end
+      object lcbDocumentState: TcxDBLookupComboBox
+        Left = 332
+        Top = 38
+        Hint = 'Starea documentului'
+        DataBinding.DataField = 'STATEID'
+        DataBinding.DataSource = dmDB.IBCDataSourceDocs
+        ParentShowHint = False
+        Properties.DropDownWidth = 300
+        Properties.ImmediatePost = True
+        Properties.KeyFieldNames = 'STATEID'
+        Properties.ListColumns = <
+          item
+            Caption = 'cod'
+            Fixed = True
+            HeaderAlignment = taCenter
+            MinWidth = 30
+            Width = 30
+            FieldName = 'STATEID'
+          end
+          item
+            Caption = 'statut'
+            HeaderAlignment = taCenter
+            MinWidth = 100
+            Width = 150
+            FieldName = 'TITLE'
+          end>
+        Properties.ListFieldIndex = 1
+        Properties.ListSource = dmDB.IBCDataSourceDocTypeStates
+        ShowHint = True
+        TabOrder = 1
+        Width = 160
+      end
+    end
+  end
+  object btnOk: TcxButton
+    Left = 816
+    Top = 522
+    Width = 90
+    Height = 29
+    Anchors = [akRight, akBottom]
+    Caption = '&OK'
+    Default = True
+    ModalResult = 1
+    TabOrder = 2
+    ExplicitLeft = 804
+    ExplicitTop = 523
+  end
+  object btnCancel: TcxButton
+    Left = 914
+    Top = 522
+    Width = 90
+    Height = 29
+    Anchors = [akRight, akBottom]
+    Cancel = True
+    Caption = 'Renunta'
+    ModalResult = 2
+    TabOrder = 3
+    ExplicitLeft = 902
+    ExplicitTop = 523
+  end
+  object IBCQueryDocProps: TIBCQuery
+    KeyFields = 'DOCID'
+    SQLInsert.Strings = (
+      'INSERT INTO TDB_DOCS_PROPS'
+      '  (DOCID, INBAZA, COMMENTS)'
+      'VALUES'
+      '  (:DOCID, :INBAZA, :COMMENTS)')
+    SQLUpdate.Strings = (
+      'UPDATE TDB_DOCS_PROPS'
+      'SET'
+      '  INBAZA = :INBAZA, COMMENTS = :COMMENTS'
+      'WHERE'
+      '  DOCID = :Old_DOCID')
+    SQLRefresh.Strings = (
+      'SELECT '
+      ' INBAZA, '
+      ' COMMENTS '
+      'FROM '
+      ' TDB_DOCS_PROPS'
+      'WHERE'
+      '  DOCID = :DOCID')
+    Connection = dmDB.IBCConnection
+    Transaction = dmDB.IBCTrDefaultSelect
+    UpdateTransaction = dmDB.IBCTrDefaultUpdate
+    SQL.Strings = (
+      'SELECT'
+      '    DOCID,'
+      '    INBAZA,'
+      '    COMMENTS'
+      'FROM'
+      '    TDB_DOCS_PROPS')
+    MasterFields = 'DOCID'
+    DetailFields = 'DOCID'
+    MasterSource = dmDB.IBCDataSourceDocs
+    AutoCommit = False
+    Left = 336
+    Top = 52
+    ParamData = <
+      item
+        DataType = ftUnknown
+        Name = 'DOCID'
+        Value = nil
+      end>
+  end
+  object IBCDataSourceDocProps: TIBCDataSource
+    DataSet = IBCQueryDocProps
+    Left = 344
+    Top = 4
+  end
+  object IBCQuery1: TIBCQuery
+    Connection = dmDB.IBCConnection
+    SQL.Strings = (
+      'select * from ts_deals ds'
+      'join tdb_deal_docs dd on dd.')
+    Left = 352
+    Top = 276
+  end
+end

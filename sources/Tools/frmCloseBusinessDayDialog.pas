@@ -135,7 +135,7 @@ begin
      end
      else
      begin
-          ShowErrorDialog(cMSG_GeneralError_Title,'¬ыберите типы документов дл€ проверки!');
+          ShowErrorDialog(cMSG_GeneralError_Title,'Selectati tipurile de documente pentru verificare!');
           Exit;
      end;
 

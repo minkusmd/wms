@@ -68,8 +68,8 @@ begin
      Result:=False;
      ErrorStr:='';
 
-     if fMasterDataSet.FieldByName('GOODSID').IsNull then AddErrorToStr(ErrorStr,'Товар не выбран!');
-     if fMasterDataSet.FieldByName('DATA_START').IsNull or fMasterDataSet.FieldByName('DATA_END').IsNull then AddErrorToStr(ErrorStr,'Интервал для промо акции!');
+     if fMasterDataSet.FieldByName('GOODSID').IsNull then AddErrorToStr(ErrorStr,'Produsul nu este selectat!');
+     if fMasterDataSet.FieldByName('DATA_START').IsNull or fMasterDataSet.FieldByName('DATA_END').IsNull then AddErrorToStr(ErrorStr,'Interval pentru promotie!');
 
      if ErrorStr='' then Result:=True
      else ShowErrorDialog(cMSG_GeneralInputError_Title,cMSG_GeneralInputError_Text,ErrorStr);
@@ -165,7 +165,7 @@ begin
          then N:=fMasterDataSet.FieldByName('GOODSID').AsInteger
          else if fLastGoodsID<>-1 then N:=fLastGoodsID;
 
-        if dialog.SelectGoods(N,False,0,'Выбор товара для промо акции') then
+        if dialog.SelectGoods(N,False,0,'Selectare marfa pentru promotie') then
         begin
              fMasterDataSet.FieldByName('GOODSID').AsInteger:=dialog.GoodsID;
              beGOODS_NAME.Text:=dialog.GoodsTitle;

@@ -1,6 +1,6 @@
 unit frame23SalidoKontragentovUnit;
 {
-  ОСТАТКИ. Сальдо контрагентов
+  STOCURI. Sold parteneri
   DocTypeID = 123
   Frame Index = 23
 }
@@ -105,7 +105,7 @@ end;
 
 procedure Tframe23SalidoKontragentov.bbSKCloseDocClick(Sender: TObject);
 begin
-     if ShowAskDialog('Закрыть документ','Вы хотите закрыть документ?')=mrYes then
+     if ShowAskDialog('Inchide documentul','Doriti sa inchideti documentul?')=mrYes then
      begin
           ChangeSKDocumentCloseFlag(dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger,1);
           dmDB.IBCQueryDocs.Refresh;
@@ -114,7 +114,7 @@ end;
 
 procedure Tframe23SalidoKontragentov.bbSKOpenDocClick(Sender: TObject);
 begin
-     if ShowAskDialog('Открыть документ','Вы хотите открыть документ?')=mrYes then
+     if ShowAskDialog('Deschide documentul','Doriti sa deschideti documentul?')=mrYes then
      begin
           ChangeSKDocumentCloseFlag(dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger,0);
           dmDB.IBCQueryDocs.Refresh;
@@ -205,7 +205,7 @@ end;
 
 procedure Tframe23SalidoKontragentov.DeleteRecord;
 begin
-     if ShowAskDialog(cMSG_DELETERECORD_DeleteDocument,Format('Удалить запись номер %d?',[dmDB.IBCQueryDocs.FieldByName('DOCID').asInteger]))=mrYes then
+     if ShowAskDialog(cMSG_DELETERECORD_DeleteDocument,Format('Stergeti inregistrarea numarul %d?',[dmDB.IBCQueryDocs.FieldByName('DOCID').asInteger]))=mrYes then
      begin
           dmDB.IBCQueryDocs.UpdateTransaction.StartTransaction;
           try
@@ -276,7 +276,7 @@ begin
           // context from Docs
           if cxGridSK_CT_NAME.Focused then
           begin
-               // Контрагент
+               // Contraagent
                Result.Context := ffCustomer;
                Result.ValueInt := dmDB.IBCQueryDocs.FieldByName('CT').AsInteger;
                Result.ValueStr := dmDB.IBCQueryDocs.FieldByName('CT_NAME').AsString;
@@ -284,7 +284,7 @@ begin
           else
               if cxGridSK_DATA.Focused then
               begin
-                   // Дата
+                   // Data
                    Result.Context := ffDate;
                    Result.ValueDateTime := dmDB.IBCQueryDocs.FieldByName('DATA').AsDateTime;
               end
@@ -311,7 +311,7 @@ end;
 
 function Tframe23SalidoKontragentov.InitFrameID: integer;
 begin
-     // ОСТАТКИ. Сальдо контрагентов
+     // STOCURI. Sold contraagenti
      Result:=23;
 end;
 

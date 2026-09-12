@@ -310,7 +310,7 @@ var
   s: string;
 begin
   s := IBCQueryScop.FieldByName('TITLE').AsString;
-  if ShowAskDialog('Удаление цели', Format('Вы хотите удалить цель "%s"?', [s])) = mrYes then
+  if ShowAskDialog('Stergere obiectiv', Format('Doriti sa stergeti obiectivul "%s"?', [s])) = mrYes then
   begin
     IBCQueryScop.UpdateTransaction.StartTransaction;
     try
@@ -332,7 +332,7 @@ var
   s: string;
 begin
   s := IBCQueryScop.FieldByName('TITLE').AsString;
-  if ShowAskDialog('Удаление папки', Format('Вы хотите удалить папку "%s"?', [s]), 'Папка должна быть пустой!') = mrYes then
+  if ShowAskDialog('Stergere folder', Format('Doriti sa stergeti folderul "%s"?', [s]), 'Folderul trebuie sa fie gol!') = mrYes then
   begin
     IBCQueryScop.UpdateTransaction.StartTransaction;
     try

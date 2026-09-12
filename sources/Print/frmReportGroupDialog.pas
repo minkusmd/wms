@@ -103,11 +103,11 @@ procedure TfrmReportGroupDlg.DeleteReportGroup;
 begin
   if (IBCQueryReportGroup.FieldByName('REPORTGROUPID').asInteger = -1) then
   begin
-    ShowErrorDialog('Нельзя', 'Нельзя удалять группу по умолчанию!');
+    ShowErrorDialog('Nu se poate', 'Nu se poate sterge grupul implicit!');
     Exit;
   end;
 
-  if ShowAskDialog('Удаление группы', Format('Вы хотите удалить группу "%s"?', [IBCQueryReportGroup.FieldByName('TITLE').AsString])) = mrYes then
+  if ShowAskDialog('Stergere grup', Format('Doriti sa stergeti grupul "%s"?', [IBCQueryReportGroup.FieldByName('TITLE').AsString])) = mrYes then
   begin
     IBCTrDefaultUpdate.StartTransaction;
     try

@@ -340,7 +340,7 @@ begin
     end
     else
     begin
-      // ShowInfo('Неправильная серия!',clRed);
+      // ShowInfo('Serie incorecta!',clRed);
       ResetInputBuffer;
     end;
   end

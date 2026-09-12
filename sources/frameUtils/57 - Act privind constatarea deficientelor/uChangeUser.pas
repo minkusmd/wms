@@ -59,7 +59,7 @@ var Errors:String;
 begin
      Result:=False;
      Errors:='';
-     if VarIsNull(cbNewUser.EditValue) or (cbNewUser.EditValue<=0) then AddErrorToStr(Errors,'Выберите нового пользователя!');
+     if VarIsNull(cbNewUser.EditValue) or (cbNewUser.EditValue<=0) then AddErrorToStr(Errors,'Selectati utilizatorul nou!');
 
      if Errors='' then Result:=True
      else ShowErrorDialog(cMSG_GeneralInputError_Title,cMSG_GeneralInputError_Text,Errors);

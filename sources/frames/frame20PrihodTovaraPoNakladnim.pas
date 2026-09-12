@@ -1,6 +1,6 @@
 unit frame20PrihodTovaraPoNakladnim;
 {
-  НАКЛАДНЫЕ. Приход Товара По Накладным.
+  FACTURI. Intrare marfa pe facturi.
   DocTypeID = 109
   Frame Index = 20
 }
@@ -192,9 +192,9 @@ type
     function DoImportDocFromRashodDB(const DocID: integer): Integer;
     procedure DoImportFromPrihodnayaNakl_InDoc;
     function DoImportFromPrihodnayaNakl_inDoc_db(const Docid: integer): integer;
-    procedure DoImport_1506;  //закрытие товара в комисию
+    procedure DoImport_1506;  //inchiderea marfii in comision
 
-    procedure DoImport_1757;  //принятие в баланс с комисии
+    procedure DoImport_1757;  //acceptare in bilant din comision
 
     procedure ShowCreateNewInvoiceDialog;
     procedure ShowEditInvoiceDialog;
@@ -651,7 +651,7 @@ begin
     Query.Transaction := dmDB.IBCTrDefaultUpdate;
     Query.Transaction.StartTransaction;
     try
-           // Банковское платежное поручение
+           // Ordin de plata bancar
       Query.SQL.Text :=
         'EXECUTE PROCEDURE SP_CREATE_BANK_TRANSFER(:DOCID,:SUMA,:CurrencyID,:Rate)';
            // params
@@ -1010,7 +1010,7 @@ end;
 
 function Tframe20PrihotTovaraPoNakladnim.InitFrameID: integer;
 begin
-  Result := 20; // НАКЛАДНЫЕ. Приход Товара По Накладным
+  Result := 20; // NAKLADNIE. Intrare Marfa pe Nakladnie
   SetupQtyFields;
 end;
 
@@ -1103,10 +1103,10 @@ end;
 
 procedure Tframe20PrihotTovaraPoNakladnim.SetupQtyFields;
 begin
-     // Кол-во
+     // Cantitate
   TcxCalcEditProperties(cxGridDBCol_QTY.Properties).DisplayFormat := QtyDisplayFormat;
   cxGridDBCol_QTY.Summary.FooterFormat := QtyDisplayFormat;
-     // Остаток
+     // Stoc
   TcxCurrencyEditProperties(cxGridDBCol_STOCK_QTY.Properties).DisplayFormat :=
     QtyDisplayFormat;
 end;
@@ -1162,8 +1162,8 @@ begin
     fDocEdit := fSECURITY_CanEdit and not FLG_CLOSED;
     fDocDelete := fSECURITY_CanDelete and not FLG_CLOSED;
 
-    fCanClose := not FLG_CLOSED; // Закрыть накладную
-    fCanOpen := FLG_CLOSED;     // Открыть накладную
+    fCanClose := not FLG_CLOSED; // Inchide nakladnaia
+    fCanOpen := FLG_CLOSED;     // Deschide nakladnaia
   end;
      // doc
   ButtonStateChanged(fbtADD, fDocNew);
@@ -1171,8 +1171,8 @@ begin
   ButtonStateChanged(fbtDELETE, fDocDelete);
 
      // popup
-  bbActionCloseDoc.Enabled := fCanClose;  // Закрыть накладную
-  bbActionOpenDoc.Enabled := fCanOpen;  // Открыть накладную
+  bbActionCloseDoc.Enabled := fCanClose;  // Inchide nakladnaia
+  bbActionOpenDoc.Enabled := fCanOpen;  // Deschide nakladnaia
 
   if fDocEdit then
     cxGridComponents_GOODS_NAMEACNT.Options.ShowEditButtons := isebDefault

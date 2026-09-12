@@ -53,10 +53,10 @@ begin
 
   if fMasterDataSet.FieldByName('START_DATE').IsNull or fMasterDataSet.FieldByName('END_DATE').IsNull or
     (fMasterDataSet.FieldByName('END_DATE').AsDateTime < fMasterDataSet.FieldByName('START_DATE').AsDateTime) then
-    AddErrorToStr(ErrorStr, 'Период!');
+    AddErrorToStr(ErrorStr, 'Perioada!');
 
   if fMasterDataSet.FieldByName('FIRMAID').IsNull or (fMasterDataSet.FieldByName('FIRMAID').AsInteger = -1) then
-    AddErrorToStr(ErrorStr, 'Фирма!');
+    AddErrorToStr(ErrorStr, 'Firma!');
 
   if ErrorStr = '' then
     Result := True
@@ -91,12 +91,12 @@ begin
   try
     if FCreateNewRecord then
     begin
-      dtDialogTitle.Text := 'Создание новой записи';
+      dtDialogTitle.Text := 'Creare inregistrare noua';
       fMasterDataSet.Insert;
     end
     else
     begin
-      dtDialogTitle.Text := 'Изменение записи';
+      dtDialogTitle.Text := 'Modificare inregistrare';
       fMasterDataSet.Edit;
     end;
     dmDB.IBCQueryFirms.Active := True;

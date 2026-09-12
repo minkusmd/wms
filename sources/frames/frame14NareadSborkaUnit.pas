@@ -1,6 +1,6 @@
 unit frame14NareadSborkaUnit;
 
-// СБОРКА. Наряд на сборку
+// ASAMBLARE. Naryad de asamblare
 // DocTypeID = 113
 // Frame Index = 14
 
@@ -232,8 +232,8 @@ uses
 
 procedure Tframe14NareadSborka.bbMarkAsReadyClick(Sender: TObject);
 begin
-     // Комплект готов
-  if ShowAskDialog('Комплекты готовы', 'Все комплекты были собранны?') = mrYes then
+     // Setul este gata
+  if ShowAskDialog('Seturile sunt gata', 'Toate seturile au fost asamblate?') = mrYes then
   begin
     if MarkDocAsShipped(dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger) then
     begin
@@ -256,14 +256,14 @@ var
   newDocID: integer;
 begin
   S := dmDB.IBCQueryDocs.FieldByName('DOCID').AsString;
-  if ShowAskDialog('Клонирование документа', 'Создать копию наряда на сборку №' + S + '?') <> mrYes then
+  if ShowAskDialog('Clonare document', 'Creeaza copie a naryad-ului de asamblare nr.' + S + '?') <> mrYes then
     Exit;
 
   if dmDB.CloneDocumentDB(dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger, newDocID) then
   begin
     dmDB.RefreshDocs;
     dmDB.IBCQueryDocs.Locate('DOCID', newDocID, []);
-    ShowInfoDialog('Клонирование документа', 'Созданна новая копия.'#13#10'Конфигурация №' + dmDB.IBCQueryDocs.FieldByName
+    ShowInfoDialog('Clonare document', 'A fost creata o copie noua.'#13#10'Configuratia nr.' + dmDB.IBCQueryDocs.FieldByName
       ('DOCID').AsString);
   end;
 end;
@@ -489,10 +489,10 @@ end;
 
 procedure Tframe14NareadSborka.bbCreateRazborcaClick(Sender: TObject);
 begin
-  if ShowAskDialog('Создать Разборку', 'Вы хотите разобрать данную сборку?') = mrYes then
+  if ShowAskDialog('Creeaza Dezasamblare', 'Doriti sa dezasamblati aceasta asamblare?') = mrYes then
   begin
     if CreateRazborcaDB(dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger) then
-      ShowInfoDialog('Разборка', 'Созданна новая разборка.');
+      ShowInfoDialog('Dezasamblare', 'A fost creata o dezasamblare noua.');
   end;
 end;
 
@@ -656,7 +656,7 @@ end;
 
 procedure Tframe14NareadSborka.DoOpenDocument;
 begin
-  if ShowAskDialog('Открыть документ', 'Вы хотите открыть документ?') = mrYes then
+  if ShowAskDialog('Deschide documentul', 'Doriti sa deschideti documentul?') = mrYes then
   begin
     if DoOpenDocumentDB(dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger) then
       dmDB.IBCQueryDocs.Refresh;
@@ -716,8 +716,8 @@ begin
   ClearAll := True;
      // ask for options
   if IBCQueryJurnalKit.RecordCount > 0 then
-    Allow := ShowAskDialogVerification('Добавление из комплекта', 'Добавить товары из комплекта в данную конфигурацию?',
-      'Удалить существующие товары?', Format('Комплект: %s', [dmDB.IBCQueryJurnal.FieldByName('GOODS_NAME').AsString]), ClearAll) = mrYes
+    Allow := ShowAskDialogVerification('Adaugare din set', 'Adaugati marfa din set in aceasta configuratie?',
+      'Stergeti marfa existenta?', Format('Set: %s', [dmDB.IBCQueryJurnal.FieldByName('GOODS_NAME').AsString]), ClearAll) = mrYes
   else
     Allow := True;
 
@@ -726,12 +726,12 @@ begin
     RecordsAdded := KitAddGoodsFromComplectDB(dmDB.IBCQueryJurnal.FieldByName('DOCID').asInteger, dmDB.IBCQueryJurnal.FieldByName
       ('GOODSID').asInteger, ClearAll);
     if (RecordsAdded <= 0) then
-      ShowErrorDialog('Добавление из комплекта', 'В данном комплекте отсутствуют товары!', 'Смотрите "Комплектация" в справочнике товаров.')
+      ShowErrorDialog('Adaugare din set', 'In acest set lipseste marfa!', 'Vedeti "Configurare set" in nomenclatorul de marfa.')
     else
     begin
       dmDB.FullRefresh;
       IBCQueryJurnalKit.Refresh;
-      ShowInfoDialog('Добавление из комплекта', Format('Готово! Добавленно товаров: %d ', [RecordsAdded]));
+      ShowInfoDialog('Adaugare din set', Format('Gata! Marfa adaugata: %d ', [RecordsAdded]));
     end;
   end;
 end;
@@ -776,7 +776,7 @@ begin
 
   if cxGridComponentsTable.Site.Focused then
   begin
-          // context from Jurnal: Код + Наименование
+          // context from Jurnal: Cod + Denumire
     Result.Context := ffGoods;
     Result.ValueInt := dmDB.IBCQueryJurnal.FieldByName('GOODSID').AsInteger;
     Result.ValueStr := dmDB.IBCQueryJurnal.FieldByName('GOODS_NAME').AsString;
@@ -786,20 +786,20 @@ begin
               // context from Docs
     if cxGridSborkaTableCtName.Focused then
     begin
-                   // Контрагент
+                   // Contraagent
       Result.Context := ffCustomer;
       Result.ValueInt := dmDB.IBCQueryDocs.FieldByName('CT').AsInteger;
       Result.ValueStr := dmDB.IBCQueryDocs.FieldByName('CT_NAME').AsString;
     end
     else if cxGridSborka_DATA.Focused then
     begin
-                       // Дата
+                       // Data
       Result.Context := ffDate;
       Result.ValueDateTime := dmDB.IBCQueryDocs.FieldByName('DATA').AsDateTime;
     end
     else if cxGridSborkaTableWarehouse.Focused then
     begin
-                           // Склад
+                           // Depozit
       Result.Context := ffStock;
       Result.ValueInt := dmDB.IBCQueryDocs.FieldByName('DTDEP').AsInteger;
       Result.ValueStr := dmDB.IBCQueryDocs.FieldByName('DTDEP_NAME').AsString;
@@ -845,20 +845,20 @@ begin
     FLG_CLOSED := dmDB.IBCQueryDocs.FieldByName('FLG_CLOSED').AsInteger = 1; // Document closed
     if (cxGridComponentsTable.DataController.RecNo > 0) and (dmdb.IsKit(dmDB.IBCQueryJurnal.FieldByName('GOODS_TYPE_ID').AsInteger)) then
     begin
-               // Комплектация
-      fKitAdd := fSECURITY_CanEdit and not FLG_CLOSED; // Добавить товар
+               // Configurare set
+      fKitAdd := fSECURITY_CanEdit and not FLG_CLOSED; // Adauga produs
       if cxGridComplectTable.DataController.RecNo > 0 then
       begin
-        fKitModify := fSECURITY_CanEdit and not FLG_CLOSED;  // Изменить товар
-        fKitDelete := fSECURITY_CanEdit and not FLG_CLOSED;  // Удалить товар
-                    // Серийный учет & Партийный учет
+        fKitModify := fSECURITY_CanEdit and not FLG_CLOSED;  // Modifica marfa
+        fKitDelete := fSECURITY_CanEdit and not FLG_CLOSED;  // Sterge marfa
+                    // Evidenta seriala & Evidenta pe partizi
         fKitSerialPartNo := (IBCQueryJurnalKit.FieldByName('GOODS_SERIAL_TYPE_ID').AsInteger =
           cSYSS_GOODS_SERIAL_TYPE_Серийный_учет) or (IBCQueryJurnalKit.FieldByName('GOODS_SERIAL_TYPE_ID').AsInteger =
           cSYSS_GOODS_SERIAL_TYPE_Партийный_учет);
       end;
     end;
   end;
-     // Комплектация
+     // Configurare set
   bbAddGoodsComplect.Enabled := fKitAdd;
   bbModifyGoodsComplect.Enabled := fKitModify;
   bbDeleteGoodsComplect.Enabled := fKitDelete;
@@ -884,14 +884,14 @@ begin
   if cxGridSborkaTable.DataController.RecNo > 0 then
   begin
     FLG_CLOSED := dmDB.IBCQueryDocs.FieldByName('FLG_CLOSED').AsInteger = 1; // Document closed
-    fComplectAdd := (fSECURITY_CanEdit and not FLG_CLOSED); // Добавить комплект
+    fComplectAdd := (fSECURITY_CanEdit and not FLG_CLOSED); // Adauga set
     if (cxGridComponentsTable.DataController.RecNo > 0) then
     begin
-               // Состав
-      fComplectEdit := fSECURITY_CanEdit and not FLG_CLOSED; // Изменить комплект
+               // Componenta
+      fComplectEdit := fSECURITY_CanEdit and not FLG_CLOSED; // Modifica setul
       fComplectDelete := fSECURITY_CanEdit and not FLG_CLOSED;
       fKit := dmDB.IsKit(dmDB.IBCQueryJurnal.FieldByName('GOODS_TYPE_ID').AsInteger);
-               // Серийный учет
+               // Evidenta seriala
       fComplectSerial := (dmDB.IBCQueryJurnal.FieldByName('GOODS_SERIAL_TYPE_ID').AsInteger = cSYSS_GOODS_SERIAL_TYPE_Серийный_учет);
       fChangePrice := not FLG_CLOSED;
     end;
@@ -899,7 +899,7 @@ begin
      // tabs
   tbsKitContent.TabVisible := fKit;
 
-     // Состав
+     // Componenta
   bbAddGoods.Enabled := fComplectAdd;
   bbModifyGoods.Enabled := fComplectEdit;
   bbDeleteGoods.Enabled := fComplectDelete;
@@ -918,7 +918,7 @@ end;
 
 function Tframe14NareadSborka.InitFrameID: integer;
 begin
-  Result := 14; // СБОРКА - Наряд на сборку
+  Result := 14; // ASAMBLARE - Naryad de asamblare
   SetupQtyFields;
 end;
 
@@ -1000,7 +1000,7 @@ var
   S: string;
 begin
   S := dmDB.IBCQueryJurnal.FieldByName('GOODS_NAME').AsString + '?';
-  if ShowAskDialog('Удаление товара', 'Вы хотите удалить товар' + #13#10 + S) = mrYes then
+  if ShowAskDialog('Stergere produs', 'Doriti sa stergeti produsul' + #13#10 + S) = mrYes then
   begin
     dmDB.IBCQueryJurnal.UpdateTransaction.StartTransaction;
     try
@@ -1020,9 +1020,9 @@ var
 begin
   S := #13#10 + Format('[%d] - %s', [IBCQueryJurnalKit.FieldByName('GOODSID').asInteger, IBCQueryJurnalKit.FieldByName('GOODS_NAME').AsString])
     + #13#10;
-  S2 := Format('Комплект: [%d] - %s', [dmDB.IBCQueryJurnal.FieldByName('GOODSID').AsInteger, dmDB.IBCQueryJurnal.FieldByName
+  S2 := Format('Set: [%d] - %s', [dmDB.IBCQueryJurnal.FieldByName('GOODSID').AsInteger, dmDB.IBCQueryJurnal.FieldByName
     ('GOODS_NAME').AsString]);
-  if ShowAskDialog('Удаление товара из комплектации', 'Вы хотите удалить товар' + S + 'из комплекта?', S2) = mrYes then
+  if ShowAskDialog('Stergere marfa din configurarea setului', 'Doriti sa stergeti produsul' + S + 'din set?', S2) = mrYes then
   begin
     IBCQueryJurnalKit.UpdateTransaction.StartTransaction;
     try
@@ -1101,15 +1101,15 @@ end;
 
 procedure Tframe14NareadSborka.SetupQtyFields;
 begin
-     // Состав: Кол-во
+     // Componenta: Cantitate
   TcxCalcEditProperties(cxGridDBCol_QTY.Properties).DisplayFormat := QtyDisplayFormat;
   cxGridDBCol_QTY.Summary.FooterFormat := QtyDisplayFormat;
-     // Состав: Остаток
+     // Componenta: Stoc
   TcxCalcEditProperties(cxGridDBCol_STOCK_QTY.Properties).DisplayFormat := QtyDisplayFormat;
-     // Комплектация: Кол-во
+     // Configurare set: Cantitate
   TcxCalcEditProperties(cxGridComplect_QTY.Properties).DisplayFormat := QtyDisplayFormat;
   cxGridComplect_QTY.Summary.FooterFormat := QtyDisplayFormat;
-     // Комплектация: Остаток
+     // Configurare set: Stoc
   TcxCalcEditProperties(cxGridComplect_STOCK_QTY.Properties).DisplayFormat := QtyDisplayFormat;
 end;
 
@@ -1128,7 +1128,7 @@ begin
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_СБОРКА_ННС_Открыть_закрытую_сборку) then
     bbDocOpen.Visible := ivNever;
 
-     // Колонка цен
+     // Coloana preturi
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Справочники_Товары_Колонка_цен_0) then
     bbPriceCol0.Visible := ivNever;
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Справочники_Товары_Колонка_цен_1) then
@@ -1183,8 +1183,8 @@ begin
     DocChanged := fLastDocID <> dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger;
     fLastDocID := dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger;
 
-    fCloseComplect := not FLG_CLOSED;  // Комплект готов + Security
-    fOpenComplect := FLG_CLOSED;  // Открыть закрытую сборку
+    fCloseComplect := not FLG_CLOSED;  // Setul este gata + Security
+    fOpenComplect := FLG_CLOSED;  // Deschide asamblarea inchisa
     fRazborca := FLG_CLOSED;
 
     fDocComments := fSECURITY_CanEdit;
@@ -1319,9 +1319,9 @@ begin
 
   N := IBCQueryJurnalKit.FieldByName('GOODS_SERIAL_TYPE_ID').AsInteger;
   if (N = cSYSS_GOODS_SERIAL_TYPE_Серийный_учет) then
-    ShowGoodsComplectSerialNumberDialog(readonly)  // Серийный учет
+    ShowGoodsComplectSerialNumberDialog(readonly)  // Evidenta seriala
   else if (N = cSYSS_GOODS_SERIAL_TYPE_Партийный_учет) then
-    ShowGoodsComplectPartNumberDialog(readonly); // Партийный учет
+    ShowGoodsComplectPartNumberDialog(readonly); // Evidenta pe partizi
 end;
 
 procedure Tframe14NareadSborka.ShowSerialPartNumbersGoodsDialogs;
@@ -1333,7 +1333,7 @@ begin
   else
     readonly := fSECURITY_CanView;
 
-     // ONLY Серийный учет
+     // ONLY Evidenta seriala
   if (dmDB.IBCQueryJurnal.FieldByName('GOODS_SERIAL_TYPE_ID').AsInteger = cSYSS_GOODS_SERIAL_TYPE_Серийный_учет) then
     ShowGoodsSerialNumbersDialog(readonly);
 end;

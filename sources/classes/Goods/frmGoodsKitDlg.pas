@@ -147,7 +147,7 @@ begin
       if DocActionDB_ImportGoodsIntoComplect(dialog.DocID) then
       begin
         IBCQueryGoodsComplecte.Refresh;
-        ShowInfoDialog('Импорт из документа', 'Готово!');
+        ShowInfoDialog('Import din document', 'Gata!');
       end;
     end;
   finally
@@ -293,7 +293,7 @@ end;
 
 procedure TfrmGoodsKitEditorDialog.bbRemoveClick(Sender: TObject);
 begin
-  if ShowAskDialog('Удаление товара из комплекта', 'Удалить "' + IBCQueryGoodsComplecte.FieldByName('GOODS_TITLE').AsString
+  if ShowAskDialog('Stergere marfa din set', 'Stergeti "' + IBCQueryGoodsComplecte.FieldByName('GOODS_TITLE').AsString
     + '" ?') = mrYes then
   begin
     try
@@ -617,7 +617,7 @@ var
 begin
   // Numarul de zecimale in QTY :
   qtyDigitsMode := AppUserTempConfigStorage.IntValues.GetValue(cSETTINGS_AppQtyDigits, cAppDefault_QtyDigits);
-  // Товарные позиции: Кол-во
+  // Pozitii marfa: Cantitate
   TcxCalcEditProperties(cxGridComplecte_QTY.Properties).DisplayFormat := cQTY_DigitsMask[qtyDigitsMode];
   cxGridComplecte_QTY.Summary.FooterFormat := cQTY_DigitsMask[qtyDigitsMode];
 end;

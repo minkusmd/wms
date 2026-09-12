@@ -306,7 +306,7 @@ end;
 
 procedure TfrmGoodsEditorDialog.cxGridChartDBGetValueHint(Sender: TcxGridChartView; ASeries: TcxGridChartSeries; AValueIndex: Integer; var AHint: string);
 begin
-  AHint := ASeries.GetDisplayText + #13#10 + 'Цена: ' + FloatToStr(ASeries.Values[AValueIndex]);
+  AHint := ASeries.GetDisplayText + #13#10 + 'Pret: ' + FloatToStr(ASeries.Values[AValueIndex]);
 end;
 
 procedure TfrmGoodsEditorDialog.cxGridChartDBValueClick(Sender: TcxGridChartView; ASeries: TcxGridChartSeries; AValueIndex: Integer; var AHandled: Boolean);
@@ -439,7 +439,7 @@ begin
       fMasterDataSet.UpdateTransaction.Commit;
     except
       on e: Exception do begin
-        MessageDlg('Ошибка при формирование seo данных', mtError, [mbOK], 0);
+        MessageDlg('Eroare la formarea datelor seo', mtError, [mbOK], 0);
         raise;
       end;
     end;

@@ -1,6 +1,6 @@
 unit frame55VozvratPriemServiceUnit;
 {
-  СЕРВИС. Возврат в / Прием из Сервис центра
+  SERVICE. Retur in / Primire din Centrul Service
   DocTypeID = 1978
   Frame Index = 55
 }
@@ -266,7 +266,7 @@ end;
 
 procedure Tframe55VozvratPriemService.DeleteGoods;
 begin
-  if ShowAskDialog(cMSG_DELETERECORD_DeleteGoods, Format('Удалить %s?', [IBCQueryGoods.FieldByName('DT_GOODS_TITLE').asString])) = mrYes then
+  if ShowAskDialog(cMSG_DELETERECORD_DeleteGoods, Format('Stergeti %s?', [IBCQueryGoods.FieldByName('DT_GOODS_TITLE').asString])) = mrYes then
   begin
     IBCQueryGoods.UpdateTransaction.StartTransaction;
     try
@@ -285,7 +285,7 @@ end;
 
 procedure Tframe55VozvratPriemService.DeleteRecord;
 begin
-  if ShowAskDialog(cMSG_DELETERECORD_DeleteDocument, Format('Удалить запись номер %d?', [dmDB.IBCQueryDocs.FieldByName('DOCID').asInteger])) = mrYes then
+  if ShowAskDialog(cMSG_DELETERECORD_DeleteDocument, Format('Stergeti inregistrarea numarul %d?', [dmDB.IBCQueryDocs.FieldByName('DOCID').asInteger])) = mrYes then
   begin
     dmDB.IBCQueryDocs.UpdateTransaction.StartTransaction;
     try
@@ -304,7 +304,7 @@ end;
 
 procedure Tframe55VozvratPriemService.DoCloseDocument;
 begin
-  if ShowAskDialog('Закрытие документа', 'Вы хотите закрыть документ?') = mrYes then
+  if ShowAskDialog('Inchidere document', 'Doriti sa inchideti documentul?') = mrYes then
   begin
     if CloseDocumentDB(dmDB.IBCQueryDocs.FieldByName('DOCID').asInteger) then
       dmDB.IBCQueryDocs.Refresh;
@@ -386,7 +386,7 @@ end;
 
 procedure Tframe55VozvratPriemService.DoOpenDocument;
 begin
-  if ShowAskDialog('Открыть документ', 'Вы хотите открыть документ?') = mrYes then
+  if ShowAskDialog('Deschide documentul', 'Doriti sa deschideti documentul?') = mrYes then
   begin
     if OpenDocumentDB(dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger) then
       dmDB.IBCQueryDocs.Refresh;
@@ -402,7 +402,7 @@ begin
           // context from Docs
     if cxGridDocs_CT_NAME.Focused then
     begin
-               // Поставщик
+               // Furnizor
       Result.Context := ffCustomer;
       Result.ValueInt := dmDB.IBCQueryDocs.FieldByName('CT').AsInteger;
       Result.ValueStr := dmDB.IBCQueryDocs.FieldByName('CT_NAME').AsString;
@@ -464,7 +464,7 @@ end;
 
 function Tframe55VozvratPriemService.InitFrameID: integer;
 begin
-     // СЕРВИС. Возврат в / Прием из Сервис центра
+     // SERVICE. Retur in / Primire din Centrul Service
   Result := 55;
 end;
 
@@ -562,7 +562,7 @@ end;
 
 procedure Tframe55VozvratPriemService.SetupSecurityItems;
 begin
-     // Возврат в / Прием из Сервис центра
+     // Retur in / Primire din Centrul Service
   fSECURITY_CanView := SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_СЕРВИС_ВВ_ПИСЦ_Просмотр);
   fSECURITY_CanNew := SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_СЕРВИС_ВВ_ПИСЦ_Создать);
   fSECURITY_CanEdit := SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_СЕРВИС_ВВ_ПИСЦ_Изменить);
@@ -586,7 +586,7 @@ begin
   if not (fSECURITY_CanGoodsEdit or fSECURITY_CanView) then
     bbGoodsEdit.Visible := ivNever
   else if not fSECURITY_CanGoodsEdit and fSECURITY_CanView then
-    bbGoodsEdit.Caption := 'Смотреть';
+    bbGoodsEdit.Caption := 'Vizualizare';
 
   if dxBarManager1Bar1.ItemLinks.VisibleItemCount = 0 then
   begin

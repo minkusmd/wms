@@ -49,6 +49,7 @@ type
         cxGridAttrs: TcxGrid;
         cxGridAttrsTable: TcxGridDBTableView;
         cxGridAttrsLevel: TcxGridLevel;
+        cxGridAttrs_FILTERID: TcxGridDBColumn;
         cxGridAttrs_NAME_RO: TcxGridDBColumn;
         cxGridAttrs_VALUE_RO: TcxGridDBColumn;
         cxGridAttrs_VALUE_RU: TcxGridDBColumn;

@@ -96,7 +96,7 @@ begin
       if ExtendPeriod(IBCQueryMiss.FieldByName('MISSHOURID').asInteger, dialog.GetEndDate) then
       begin
         IBCQueryMiss.Refresh;
-        ShowInfoDialog('Готово', 'Evenimentul este prelungit pina la  ' + FormatDateTime('dd.mm.yyyy', dialog.GetEndDate));
+        ShowInfoDialog('Gata', 'Evenimentul este prelungit pina la  ' + FormatDateTime('dd.mm.yyyy', dialog.GetEndDate));
       end;
     end;
   finally

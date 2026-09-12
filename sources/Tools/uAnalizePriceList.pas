@@ -93,7 +93,7 @@ begin
   // dialog := TfrmCustomersDlg.Create(Self);
   // try
   // dialog.CustomFilter:=[cfCustomers, cfVendors, cfDiler];
-  // if dialog.SelectCustomer(FCustomerID, False, 0, 'Выбор контрагента для анализа прайса') then
+  // if dialog.SelectCustomer(FCustomerID, False, 0, 'Selectare contraagent pentru analiza preturilor') then
   // begin
   // FCustomerID := dialog.CustomerID;
   // beSourceProgressFirma.Text := dialog.CustomerTitle;
@@ -120,7 +120,7 @@ begin
   // end
   // else
   // begin
-  // ShowErrorDialog(cMSG_GeneralInputError_Title,cMSG_GeneralInputError_Text,'Не заполнены входные параметры! Клиент и дата!');
+  // ShowErrorDialog(cMSG_GeneralInputError_Title,cMSG_GeneralInputError_Text,'Nu sunt completati parametrii de intrare! Client si data!');
   // end;
 end;
 
@@ -148,7 +148,7 @@ begin
   dialog := TfrmCustomersDlg.Create(Self);
   try
     // dialog.CustomFilter:=dialog.CustomFilter-[cfCustomers];
-    if dialog.SelectCustomer(beCT_NAME.Tag, False, 0, 'Выбор контрагента') then
+    if dialog.SelectCustomer(beCT_NAME.Tag, False, 0, 'Selectare contraagent') then
     begin
       beCT_NAME.Tag := dialog.CustomerID;
       // IBCQueryPriceList.FieldByName('CUSTOMERID').asInteger := dialog.CustomerID;

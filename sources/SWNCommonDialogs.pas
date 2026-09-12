@@ -8,22 +8,22 @@ type
   TSWNCommonDialogs = class
   public
     { public declarations }
-    /// <summary>Show dialog "Карточка товара".</summary>
+    /// <summary>Show dialog "Fisa produsului".</summary>
     class procedure GoodsInfoCardDialog(const GoodsID: Integer; const GoodsTitle:String);
 
-    /// <summary>Show dialog "Изменение цен товара".</summary>
+    /// <summary>Show dialog "Modificare preturi marfa".</summary>
     class procedure ModifyGoodsPriceDlg(const GoodsID: Integer; const GoodsTitle:String);
 
-    /// <summary>Show dialog "Соответствие товара в других фирмах"</summary>
+    /// <summary>Show dialog "Corespondenta produsului in alte firme"</summary>
     class procedure GoodsForeignCode(const GoodsID: Integer; qty: double = 0);
 
-    /// <summary>Show dialog "Текущие долги контрагента"</summary>
+    /// <summary>Show dialog "Datorii curente contraagent"</summary>
     class procedure CustomerDebts(const CustomerID: Integer);
 
-    /// <summary>Show dialog "Напоминание о долгах контрагента"</summary>
+    /// <summary>Show dialog "Reamintire despre datoriile contraagentului"</summary>
     class procedure CustomerNotifyDebts(const CustomerID: Integer);
 
-    /// <summary>Show dialog "Договора"</summary>
+    /// <summary>Show dialog "Contracte"</summary>
     class function ContractsDialog(ANewContractID: Integer; ACurrencyID: integer; AFLG_ACNT: integer;
                                    const ACT: Integer; const AContractID: Integer): string;
   end;
@@ -102,7 +102,7 @@ begin
   contractInfo := SelectCustomerContract(ACT, AContractID);
   if Assigned(contractInfo) then
   begin
-    Result := Format('%s (#%s от %s)', [contractInfo.ContractTypeTitle, contractInfo.Code, FormatDateTime('dd MMMM yyyy', contractInfo.SignDate)]);
+    Result := Format('%s (#%s din %s)', [contractInfo.ContractTypeTitle, contractInfo.Code, FormatDateTime('dd MMMM yyyy', contractInfo.SignDate)]);
 //    ANewContractID := contractInfo.ContractID;
 //    ACurrencyID := contractInfo.CurrencyID;
 //    if contractInfo.FLG_ACNT then

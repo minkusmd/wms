@@ -46,17 +46,17 @@ uses DataModuleAdditions, DataModuleDB, SWNUtils, SWNConst;
 
 function TfrmGoodsTypeNPSC_Clone_Dlg.AskUser: Boolean;
 begin
-     Result:=ShowAskDialog('Копирование типизации',
-       Format('Вы хотите копировать типизацию из'#13#10'"%s"'#13#10'в'#13#10'"%s"?',[lcbSource.Text,lcbTarget.Text]),
-       'Все текушие компоненты будут удалены!')=mrYes;
+     Result:=ShowAskDialog('Copiere tipizare',
+       Format('Doriti sa copiati tipizarea din'#13#10'"%s"'#13#10'in'#13#10'"%s"?',[lcbSource.Text,lcbTarget.Text]),
+       'Toate componentele curente vor fi sterse!')=mrYes;
 end;
 
 function TfrmGoodsTypeNPSC_Clone_Dlg.CheckInputParams: Boolean;
 var Errors:String;
 begin
      Result:=True;
-     if VarIsNull(lcbSource.EditValue) or (lcbSource.EditValue<=0) then AddErrorToStr(Errors,'Из какого типа товара?');
-     if VarIsNull(lcbTarget.EditValue) or (lcbTarget.EditValue<=0) then AddErrorToStr(Errors,'В какой тип товара?');
+     if VarIsNull(lcbSource.EditValue) or (lcbSource.EditValue<=0) then AddErrorToStr(Errors,'Din ce tip de marfa?');
+     if VarIsNull(lcbTarget.EditValue) or (lcbTarget.EditValue<=0) then AddErrorToStr(Errors,'In ce tip de marfa?');
 
      if (Errors='')
        then Result:=True

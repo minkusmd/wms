@@ -132,11 +132,11 @@ end;
 
 procedure TfrmCustomerJoinDlg.btnOkClick(Sender: TObject);
 begin
-     if (fSourceCustomerID=-1) or (fTargetCustomerID=-1) then ShowErrorDialog('Ошибка','Выберите контрагентов!')
+     if (fSourceCustomerID=-1) or (fTargetCustomerID=-1) then ShowErrorDialog('Eroare','Selectati contraagentii!')
      else
      if DoMergeCustomers then
      begin
-          ShowInfoDialog('Обьединение 2-х контрагентов','Обьединение контрагентов готово.');
+          ShowInfoDialog('Unificare a 2 contraagenti','Unificarea contraagentilor este gata.');
           ModalResult:=mrOk;
      end
 end;
@@ -227,7 +227,7 @@ begin
      dialog:=TfrmCustomersDlg.Create(Self);
      try
         if Not SWNSecurityManager.LoggedUser.IsInAdminGroup then dialog.CustomFilter:=[cfCustomers];
-        if dialog.SelectCustomer(fSourceCustomerID,false,0,'Выберите исходного контрагента') then
+        if dialog.SelectCustomer(fSourceCustomerID,false,0,'Selectati contraagentul sursa') then
            SetSourceCustomerID(dialog.CustomerID);
      finally
         dialog.Free;
@@ -240,7 +240,7 @@ begin
      dialog:=TfrmCustomersDlg.Create(Self);
      try
         if Not SWNSecurityManager.LoggedUser.IsInAdminGroup then dialog.CustomFilter:=[cfCustomers];
-        if dialog.SelectCustomer(fTargetCustomerID,false,0,'Выберите итогового контрагента') then
+        if dialog.SelectCustomer(fTargetCustomerID,false,0,'Selectati contraagentul final') then
         begin
              fTargetCustomerID:=dialog.CustomerID;
              OpenDataSet(IBCQueryTarget, fTargetCustomerID);

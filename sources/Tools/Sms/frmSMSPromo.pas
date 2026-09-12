@@ -59,7 +59,7 @@ procedure TfrmSMSPromoDialog.cxBarEditItem1PropertiesButtonClick(Sender: TObject
 var
 q : TIBCQuery;
 begin
-// отправить тестовую рассылку
+// trimite mesaj de test
    q := TIBCQuery.Create(self);
    try
      q.Transaction := dmdb.IBCTrDefaultUpdate;
@@ -77,10 +77,10 @@ procedure TfrmSMSPromoDialog.dxBarButton5Click(Sender: TObject);
 var
 q : TIBCQuery;
 begin
-  // отправить всем рассылку
+  // trimite mesaj tuturor
    if IBCQuery1.FieldByName('State').AsInteger=1 then
    begin
-     ShowErrorDialog('Рассылка уже отправленна');
+     ShowErrorDialog('Mesajul a fost deja trimis');
      Exit;
    end;
 

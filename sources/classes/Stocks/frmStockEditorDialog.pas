@@ -191,7 +191,7 @@ begin
   Result := False;
 
   if (fMasterDataSet.FieldByName('TITLE').IsNull) or (fMasterDataSet.FieldByName('TITLE').AsString = '') then
-    AddErrorToStr(ErrorStr, 'Название склада!');
+    AddErrorToStr(ErrorStr, 'Denumirea depozitului!');
 
   if ErrorStr = '' then
     Result := True
@@ -238,7 +238,7 @@ begin
     if FCreateNewRecord then
     begin
       // new record
-      dtDialogTitle.Text := 'Создание нового склада';
+      dtDialogTitle.Text := 'Creare depozit nou';
 
       fMasterDataSet.Append;
       fMasterDataSet.FieldByName('PARENTID').AsInteger := fParentID;
@@ -247,7 +247,7 @@ begin
     else
     begin
       // modify
-      dtDialogTitle.Text := 'Изменение склада';
+      dtDialogTitle.Text := 'Modificare depozit';
 
       fMasterDataSet.Edit;
     end;

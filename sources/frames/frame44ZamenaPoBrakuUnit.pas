@@ -1,6 +1,6 @@
 unit frame44ZamenaPoBrakuUnit;
 {
-  СЕРВИС - Замена по браку
+  SERVICE - Inlocuire pe defect
   DocTypeID = 1487
   Frame Index = 44
 }
@@ -146,7 +146,7 @@ end;
 
 procedure Tframe44ZamenaPoBraku.bbCreateSFClick(Sender: TObject);
 begin
-     // Создать "Счет-Фактуры"
+     // Creare "Facturi fiscale"
   if ShowAskDialog('Inlocuirea produsului', 'Creati document "FACTURA FISCALA" ?') <> mrYes then
     Exit;
 
@@ -159,7 +159,7 @@ end;
 
 procedure Tframe44ZamenaPoBraku.bbCreateTTNClick(Sender: TObject);
 begin
-     // Создать "Товаро-транспортную накладную"
+     // Creare "Nakladnaia marfa-transport"
   if ShowAskDialog('Inlocuirea produsului', 'Creati document "Factura de expeditie"?')
     <> mrYes then
     Exit;
@@ -203,12 +203,12 @@ var
   tmpParams: TReportParamsList;
   reportID: integer;
 begin
-     // luam codul raportului din grupa "Гарантийный талон" pentru firma curenta
+     // luam codul raportului din grupa "Talon de garantie" pentru firma curenta
 //  reportID := dmDB.GetDefaultReportForReportGroup('WARRANTY');
 //
 //  if (reportID = -1) then
 //  begin
-//    ShowErrorDialog('Ошибка', 'Отчет не найден!');
+//    ShowErrorDialog('Eroare', 'Raportul nu a fost gasit!');
 //    Exit;
 //  end;
 
@@ -570,7 +570,7 @@ begin
 
   if cxGridGoodsTable.Site.Focused then
   begin
-          // context from Jurnal: Код + Наименование
+          // context from Jurnal: Cod + Denumire
     Result.Context := ffGoods;
     Result.ValueInt := dmDB.IBCQueryJurnal.FieldByName('GOODSID').AsInteger;
     Result.ValueStr := dmDB.IBCQueryJurnal.FieldByName('GOODS_NAME').AsString;
@@ -580,20 +580,20 @@ begin
               // context from Docs
     if cxGridNPNCol_CT_NAME.Focused then
     begin
-                   // Контрагент
+                   // Contraagent
       Result.Context := ffCustomer;
       Result.ValueInt := dmDB.IBCQueryDocs.FieldByName('CT').AsInteger;
       Result.ValueStr := dmDB.IBCQueryDocs.FieldByName('CT_NAME').AsString;
     end
     else if cxGridDocs_DATA.Focused then
     begin
-                       // Дата
+                       // Data
       Result.Context := ffDate;
       Result.ValueDateTime := dmDB.IBCQueryDocs.FieldByName('DATA').AsDateTime;
     end
     else if cxGridDocsTableWarehouse.Focused then
     begin
-                           // Склад
+                           // Depozit
       Result.Context := ffStock;
       Result.ValueInt := dmDB.IBCQueryDocs.FieldByName('DTDEP').AsInteger;
       Result.ValueStr := dmDB.IBCQueryDocs.FieldByName('DTDEP_NAME').AsString;
@@ -636,13 +636,13 @@ begin
   begin
     FLG_CLOSED := dmDB.IBCQueryDocs.FieldByName('FLG_CLOSED').AsInteger = 1;
 
-    fNew := fSECURITY_CanEdit and not FLG_CLOSED;  // Новый товар + Security
+    fNew := fSECURITY_CanEdit and not FLG_CLOSED;  // Produs nou + Security
     if cxGridGoodsTable.DataController.RecNo > 0 then
     begin
-      fModify := fSECURITY_CanEdit and not FLG_CLOSED;  // Изменить + Security
-      fDelete := fSECURITY_CanEdit and not FLG_CLOSED;  // Удалить + Security
+      fModify := fSECURITY_CanEdit and not FLG_CLOSED;  // Modifica + Security
+      fDelete := fSECURITY_CanEdit and not FLG_CLOSED;  // Sterge + Security
 
-               // Серийные, Партий номера + Security
+               // Numere seriale, Partizi + Security
       fSerials := (dmDB.IBCQueryJurnal.FieldByName('GOODS_SERIAL_TYPE_ID').AsInteger =
         cSYSS_GOODS_SERIAL_TYPE_Серийный_учет) or (dmDB.IBCQueryJurnal.FieldByName('GOODS_SERIAL_TYPE_ID').AsInteger =
         cSYSS_GOODS_SERIAL_TYPE_Партийный_учет);
@@ -657,7 +657,7 @@ end;
 
 function Tframe44ZamenaPoBraku.InitFrameID: integer;
 begin
-  Result := 44; // СЕРВИС - Замена по браку
+  Result := 44; // SERVICE - Inlocuire pe rebut
   dmDB.CreateGridImageColumnItems(cxGridDBCol_IMG);
 end;
 
@@ -724,7 +724,7 @@ end;
 
 procedure Tframe44ZamenaPoBraku.SetupSecurityItems;
 begin
-     // Замена товара в гарантии
+     // Inlocuire produs in garantie
   fSECURITY_CanView := SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_СЕРВИС_ЗТВГ_Просмотр);
   fSECURITY_CanNew := SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_СЕРВИС_ЗТВГ_Создать);
   fSECURITY_CanEdit := SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_СЕРВИС_ЗТВГ_Изменить);
@@ -734,10 +734,10 @@ begin
     bbCloseDocument.Visible := ivNever;
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_СЕРВИС_ЗТВГ_Открыть) then
     bbOpenDocument.Visible := ivNever;
-     // Создать "Счет-Фактуры"
+     // Creare "Facturi fiscale"
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_СФ_СФ_Создать) then
     bbCreateSF.Visible := ivNever;
-     // Создать "Товаро-транспортную накладную"
+     // Creare "Nakladnaia marfa-transport"
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_СФ_ТТН_Создать_документ) then
     bbCreateTTN.Visible := ivNever;
 end;

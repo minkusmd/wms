@@ -129,7 +129,7 @@ procedure TfrmGoodsCompatibleGoodsDlg.dxBarButton1Click(Sender: TObject);
 var diff:integer;
 begin
      diff:=TdxBarButton(Sender).Tag;
-     if ShowAskDialog('Ценовая разница',Format('Установить ценовую разницу для всех товаров в %d%%?',[diff]))=mrYes then
+     if ShowAskDialog('Diferenta de pret',Format('Setati diferenta de pret pentru toate marfurile la %d%%?',[diff]))=mrYes then
      begin
           SetCustomPriceDiffPercent(diff);
           IBCQueryCompatible.Refresh;

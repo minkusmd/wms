@@ -1,7 +1,7 @@
 ﻿unit frame64;
 
 {
-  НАКЛАДНЫЕ. Расходная накладная
+  NAKLADNIE. Nakladnaia de iesire
   DocTypeID = 107
   Frame Index = 64
 }
@@ -366,7 +366,7 @@ var
 begin
   CanCreateShipment := False;
 
-  // Отгрузить
+  // Expediaza
   dialog := TfrmOtgruzkaDlg.Create(Self);
   try
     dialog.DocID := IBCQueryDocs.FieldByName('DOCID').AsInteger;
@@ -382,7 +382,7 @@ begin
   if CanCreateShipment and DoCreateShipmentDB(IBCQueryDocs.FieldByName('DOCID').AsInteger, ActiuniList) then
   begin
     IBCQueryDocs.Refresh;
-    ShowInfoDialog('Отгрузка товара', 'Отгрузили успешно!');
+    ShowInfoDialog('Expediere marfa', 'Expediat cu succes!');
     DocumentSelectionChanged;
   end;
 end;
@@ -408,9 +408,9 @@ end;
 
 procedure Tframe64.bbActionStartEnterSerialsClick(Sender: TObject);
 begin
-  // Начать вводить серийники
-  // if ShowAskDialog('Начать вводить серийники', 'Вы хотите заблокировать документ для ввода серийных номеров?',
-  // 'Только Вы сможеты изменить документ и его состав!') = mrYes then
+  // Incepe introducerea seriilor
+  // if ShowAskDialog('Incepe introducerea seriilor', 'Doriti sa blocati documentul pentru introducerea numerelor seriale?',
+  // 'Doar dumneavoastra veti putea modifica documentul si componenta lui!') = mrYes then
   // begin
   // if DoDBAction(4) then
   // IBCQueryDocs.Refresh;
@@ -419,8 +419,8 @@ end;
 
 procedure Tframe64.bbActionVSFClick(Sender: TObject);
 begin
-  // Выписать "Счет фактуру"
-  if ShowAskDialog('Выписать "Счет фактуру"', 'Вы хотите выписать "Счет фактуру"?') = mrYes then
+  // Emite "Factura fiscala"
+  if ShowAskDialog('Emite "Factura fiscala"', 'Doriti sa emiteti "Factura fiscala"?') = mrYes then
   begin
     if DoDBAction(3) then
       IBCQueryDocs.Refresh;
@@ -457,26 +457,26 @@ end;
 
 procedure Tframe64.bbCreateCecClick(Sender: TObject);
 begin
-  // Выписать чек
-  if ShowAskDialog('Выписать чек', 'Вы хотите выписать чек?') = mrYes then
+  // Emite bon
+  if ShowAskDialog('Emite bon', 'Doriti sa emiteti bonul?') = mrYes then
   begin
     if DoDBAction(10) then
     begin
       IBCQueryDocs.Refresh;
-      ShowInfoDialog('Выписать чек', 'Готово!');
+      ShowInfoDialog('Emite bon', 'Gata!');
     end;
   end;
 end;
 
 procedure Tframe64.bbCreateProformaInvoiceClick(Sender: TObject);
 begin
-  // Выписать "Счет на оплату"
-  if ShowAskDialog('Счет на оплату', 'Вы хотите Создать "Счет на оплату"?') = mrYes then
+  // Emite "Factura de plata"
+  if ShowAskDialog('Factura de plata', 'Doriti sa creati "Factura de plata"?') = mrYes then
   begin
     if DoDBAction(8) then
     begin
       IBCQueryDocs.Refresh;
-      ShowInfoDialog('Выписать "Счет на оплату"', 'Готово!');
+      ShowInfoDialog('Emitere "Factura de plata"', 'Gata!');
     end;
   end;
 end;
@@ -518,7 +518,7 @@ begin
   if VerifyBeforePrintWarranty then
     ShowPrintWarranty
   else
-    ShowErrorDialog('Ошибка', 'Для печати гарантийного талона нужно проставить все серийные/партийные номера!');
+    ShowErrorDialog('Eroare', 'Pentru tiparirea talonului de garantie trebuie completate toate numerele de serie/lot!');
 end;
 
 procedure Tframe64.bbRemoveGoodsClick(Sender: TObject);
@@ -531,14 +531,14 @@ end;
 
 procedure Tframe64.bbRollbackOtgruzkaClick(Sender: TObject);
 begin
-  // Отгрузить
-  if ShowAskDialog('Отмена отгрузки', 'Вы хотите вернуть отгруженный товар?') = mrYes then
+  // Expediaza
+  if ShowAskDialog('Anulare expediere', 'Doriti sa returnati marfa expediata?') = mrYes then
   begin
     if DoDBAction(7) then
     begin
       IBCQueryDocs.Refresh;
       DocumentSelectionChanged;
-      ShowInfoDialog('Отмена отгрузки', 'Отгруженный товар возвращен!');
+      ShowInfoDialog('Anulare expediere', 'Marfa expediata a fost returnata!');
     end;
   end;
 end;
@@ -552,11 +552,11 @@ begin
 
   flg_serial := IBCQueryJurnal.FieldByName('GOODS_SERIAL_TYPE_ID').AsInteger;
 
-  // Серийный учет
+  // Evidenta seriala
   if flg_serial = cSYSS_GOODS_SERIAL_TYPE_Серийный_учет then
     ShowSelectGoodsSerialNumberDialog(IBCQueryDocs.FieldByName('FLG_SHIP').AsInteger = 1)
   else
-    // Партийный учет
+    // Evidenta pe partizi
  if flg_serial = cSYSS_GOODS_SERIAL_TYPE_Партийный_учет then
     ShowSelectGoodsPartNumberDialog(IBCQueryDocs.FieldByName('FLG_SHIP').AsInteger = 1);
 end;
@@ -609,7 +609,7 @@ begin
   if (IBCQueryDocs.FieldByName('FLG_PROTECTED').AsInteger = 1) and (dmDB.GetDocumentProtectedUser(IBCQueryDocs.FieldByName('DOCID').AsInteger, UserName) <> dmDB.CurrentUserID) then
   begin
     Result := True;
-    ShowErrorDialog('Документ заблокирован', 'Данный документ заблокирован для ввода серийных номеров.', '', Format('Пользователь: %s', [UserName]));
+    ShowErrorDialog('Document blocat', 'Acest document este blocat pentru introducerea numerelor de serie.', '', Format('Utilizator: %s', [UserName]));
   end;
 end;
 
@@ -619,14 +619,14 @@ var
   newDocID: integer;
 begin
   S := IBCQueryDocs.FieldByName('DOCID').AsString;
-  if ShowAskDialog('Клонирование документа', 'Создать копию Расходной накладной №' + S + '?') <> mrYes then
+  if ShowAskDialog('Clonare document', 'Creati o copie a Nakladnaia de iesire nr.' + S + '?') <> mrYes then
     Exit;
 
   if dmDB.CloneDocumentDB(IBCQueryDocs.FieldByName('DOCID').AsInteger, newDocID) then
   begin
     dmDB.RefreshDocs;
     IBCQueryDocs.Locate('DOCID', newDocID, []);
-    ShowInfoDialog('Клонирование документа', 'Созданна новая копия.'#13#10'Расходная накладная №' + IBCQueryDocs.FieldByName('DOCID').AsString);
+    ShowInfoDialog('Clonare document', 'A fost creata o copie noua.'#13#10'Nakladnaia de iesire nr.' + IBCQueryDocs.FieldByName('DOCID').AsString);
   end;
 end;
 
@@ -638,8 +638,8 @@ var
   DocTypeConfig: integer;
   found: Boolean;
 begin
-  // Создать наряд на сборку
-  if ShowAskDialog('Создать наряд на сборку', 'Вы хотите создать наряд на сборку?') = mrYes then
+  // Creare naryad de asamblare
+  if ShowAskDialog('Creare naryad de asamblare', 'Doriti sa creati un naryad de asamblare?') = mrYes then
   begin
     // verificam
     // 1. daca suma documentului nu s-a schimbat fata de suma documentului din Configurator
@@ -666,7 +666,7 @@ begin
     end;
 
     if found and ((DocTypeConfig = 115) or (DocTypeConfig = 101)) then
-    // 115 = Конфигуратор, 101 = Счета на оплату
+    // 115 = Configurator, 101 = Facturi de plata
     begin
       // TEMP. Functie inchisa
       if (DocTypeConfig = 101) then
@@ -675,7 +675,7 @@ begin
         if dmDB.CreateNariadNaSborku_Other_DB(IBCQueryDocs.FieldByName('DOCID').AsInteger) then
         begin
           IBCQueryDocs.Refresh;
-          ShowInfoDialog('Наряд на сборку', 'Наряд на сборку сделан!');
+          ShowInfoDialog('Naryad de asamblare', 'Naryad de asamblare a fost creat!');
         end
       end
       else
@@ -686,27 +686,27 @@ begin
         if dmDB.CreateNariadNaSborku_Other_DB(IBCQueryDocs.FieldByName('DOCID').AsInteger) then
         begin
           IBCQueryDocs.Refresh;
-          ShowInfoDialog('Наряд на сборку', 'Наряд на сборку сделан!');
+          ShowInfoDialog('Naryad de asamblare', 'Naryad de asamblare a fost creat!');
         end
       end
       else if DocTypeConfig = 115 then
       begin
-        if ShowAskDialog('Наряд на сборку', 'Данные из Расходной накладной отличаются от данных из Конфигуратора!' + #13#10 + #13#10 + 'Вы хотите чтобы данные из Конфигуратора сделать идентичными данным из Расходной накладной и потом ' + 'создать наряд на сборку?', 'Вы можете в ручном режиме сделать исправления в Конфигураторе.') = mrYes then
+        if ShowAskDialog('Naryad de asamblare', 'Datele din Nakladnaia de iesire difera de datele din Configurator!' + #13#10 + #13#10 + 'Doriti ca datele din Configurator sa devina identice cu datele din Nakladnaia de iesire si apoi ' + 'sa creati naryad de asamblare?', 'Puteti face corectii manual in Configurator.') = mrYes then
         begin
           if dmDB.CreateNariadNaSborku_Other_DB(IBCQueryDocs.FieldByName('DOCID').AsInteger) then
           begin
             IBCQueryDocs.Refresh;
-            ShowInfoDialog('Наряд на сборку', 'Наряд на сборку сделан!');
+            ShowInfoDialog('Naryad de asamblare', 'Naryad de asamblare a fost creat!');
           end;
         end;
       end
       else
-          // sumele sunt diferite! Operatia este interzisa daca documentul initial este "Счет на оплату"
+          // sumele sunt diferite! Operatia este interzisa daca documentul initial este "Factura de plata"
  if DocTypeConfig = 101 then
-        ShowErrorDialog(cMSG_GeneralError_Title, 'Данные из Расходной накладной отличаются от данных из Счета на оплату!' + #13#10#13#10 + 'Наряд на сборку не может быть сделан!');
+        ShowErrorDialog(cMSG_GeneralError_Title, 'Datele din Nakladnaia de iesire difera de datele din Factura de plata!' + #13#10#13#10 + 'Naryad de asamblare nu poate fi creat!');
     end
     else
-      ShowErrorDialog(cMSG_GeneralError_Title, 'Данная Расходная накладная должна исходить из Конфигуратора или Счета на оплату!');
+      ShowErrorDialog(cMSG_GeneralError_Title, 'Aceasta Nakladnaia de iesire trebuie sa provina din Configurator sau Factura de plata!');
   end;
 end;
 
@@ -882,9 +882,9 @@ var
 begin
   dialog := TfrmMoneyIncomeDlg.Create(Self, IBCQueryDocs, dmDB.IBCDataSourceDocs);
   try
-    dialog.SetCustomTitle('Приходный кассовый ордер', 'приходного кассового ордера');
+    dialog.SetCustomTitle('Dispozitie de incasare', 'dispozitiei de incasare');
     dialog.TargetDocTypeID := cDBID_DocType_КАССОВЫЕ_ОПЕРАЦИИ_ПКО;
-    // Приходный кассовый ордер
+    // Dispozitie de incasare
     if dialog.ShowModal = mrOk then
     begin
       dmDB.CreatePrihodniiKasoviiOrder(IBCQueryDocs.FieldByName('DOCID').AsInteger, dialog.CurrencyID, dialog.FLG_ACNT, dialog.Rate, dialog.SUMA, 0);
@@ -900,9 +900,9 @@ var
 begin
   dialog := TfrmMoneyIncomeDlg.Create(Self, IBCQueryDocs, dmDB.IBCDataSourceDocs);
   try
-    dialog.SetCustomTitle('Расходный кассовый ордер', 'расходного кассового ордера');
+    dialog.SetCustomTitle('Dispozitie de plata', 'dispozitiei de plata');
     dialog.TargetDocTypeID := cDBID_DocType_КАССОВЫЕ_ОПЕРАЦИИ_РКО;
-    // Расходный кассовый ордер
+    // Dispozitie de plata
     if dialog.ShowModal = mrOk then
     begin
       dmDB.CreateRashodniiKasoviiOrder(IBCQueryDocs.FieldByName('DOCID').AsInteger, dialog.CurrencyID, dialog.FLG_ACNT, dialog.Rate, dialog.SUMA);
@@ -1007,10 +1007,10 @@ begin
   if (cxGridNPNTable.DataController.RecNo > 0) then
   begin
     FLG_PROTECTED := IBCQueryDocs.FieldByName('FLG_PROTECTED').AsInteger = 1;
-    // Ввод серийников
-    FLG_SHIP := IBCQueryDocs.FieldByName('FLG_SHIP').AsInteger = 1; // Отгружен
+    // Introducere numere seriale
+    FLG_SHIP := IBCQueryDocs.FieldByName('FLG_SHIP').AsInteger = 1; // Expediat
     FLG_ACNT := IBCQueryDocs.FieldByName('FLG_ACNT').AsInteger = 1;
-    // Бухгалтерия
+    // Contabilitate
     FLG_CLOSED := IBCQueryDocs.FieldByName('FLG_CLOSED').AsInteger = 1;
 
     fDocEdit := fSECURITY_CanEdit and not FLG_SHIP or fSECURITY_CanView;
@@ -1020,15 +1020,15 @@ begin
     fLastDocID := IBCQueryDocs.FieldByName('DOCID').AsInteger;
 
     // popup
-    fActionPKO := True; // Приходный кассовый ордер
-    fActionRKO := True; // Расходный кассовый ордер
+    fActionPKO := True; // Dispozitie de incasare
+    fActionRKO := True; // Dispozitie de plata
     fActionStartEnterSerials := (not FLG_SHIP) and (not FLG_PROTECTED);
-    // Начать вводить серийники
-    fActionSNS := (not FLG_SHIP); // Создать наряд на сборку
-    fActionOtgruziti := fSECURITY_CanEdit and (not FLG_SHIP); // Отгрузить
+    // Incepe introducerea seriilor
+    fActionSNS := (not FLG_SHIP); // Creare naryad de asamblare
+    fActionOtgruziti := fSECURITY_CanEdit and (not FLG_SHIP); // Expediaza
     fActionRollbackOtgruzka := FLG_SHIP and fSYS_OtmenitiOtgruzku;
     fActionBringGoods := (not FLG_SHIP);
-    fActionVSF := (not FLG_PROTECTED) and FLG_ACNT; // Выписать "Счет фактуру"
+    fActionVSF := (not FLG_PROTECTED) and FLG_ACNT; // Emite "Factura fiscala"
     fActionCalcProfitability := True;
     fGotoParent := not IBCQueryDocs.FieldByName('PARENTDOCID').IsNull;
     fActionPrintWarranty := True; // FLG_SHIP;
@@ -1079,22 +1079,22 @@ begin
     Query.Transaction.StartTransaction;
     try
       case ActionID of
-        // Выписать "Счет фактуру"
+        // Emite "Factura fiscala"
         3:
           Query.SQL.Text := 'EXECUTE PROCEDURE SP_CREATE_FISCAL_INVOICE(:DOCID)';
-        // Начать вводить серийники
+        // Incepe introducerea seriilor
             4:
           Query.SQL.Text := 'EXECUTE PROCEDURE SP_BEGIN_SN_ENTER(:DOCID)';
-        // Отмена отгрузки
+        // Anulare expediere
             7:
           Query.SQL.Text := 'EXECUTE PROCEDURE SP_ROLLBACK_SHIPMENT(:DOCID)';
-        // Счет на оплату
+        // Factura de plata
             8:
           Query.SQL.Text := 'EXECUTE PROCEDURE SP_CREATE_D101_FROM_RASHOD(:DOCID)';
-        // Выписать "ТТН"
+        // Emite "TTN"
             9:
           Query.SQL.Text := 'EXECUTE PROCEDURE SP_CREATE_TTN_INVOICE(:DOCID)';
-        // Выписать чек
+        // Emite bon
             10:
           Query.SQL.Text := 'EXECUTE PROCEDURE SP_CREATE_FISCAL_INVOICE_CEC(:DOCID)';
       end;
@@ -1173,7 +1173,7 @@ begin
   try
     if dialog.ShowModal = mrOk then
     begin
-      if (ShowAskDialog('Замена пользователя', Format('Вы хотите поменять пользователя товара %s на нового пользователя %s?', [UserName, dialog.NewUserName])) = mrYes) and ChangeGoodsUser(IBCQueryJurnal.FieldByName('DOCID').AsInteger, IBCQueryJurnal.FieldByName('DTDEP').AsInteger, IBCQueryJurnal.FieldByName('CTDEP').AsInteger, IBCQueryJurnal.FieldByName('GOODSCOMPLECT_ID').AsInteger, IBCQueryJurnal.FieldByName('GOODSID').AsInteger, dialog.NewUserID) then
+      if (ShowAskDialog('Schimbare utilizator', Format('Doriti sa schimbati utilizatorul marfii %s cu noul utilizator %s?', [UserName, dialog.NewUserName])) = mrYes) and ChangeGoodsUser(IBCQueryJurnal.FieldByName('DOCID').AsInteger, IBCQueryJurnal.FieldByName('DTDEP').AsInteger, IBCQueryJurnal.FieldByName('CTDEP').AsInteger, IBCQueryJurnal.FieldByName('GOODSCOMPLECT_ID').AsInteger, IBCQueryJurnal.FieldByName('GOODSID').AsInteger, dialog.NewUserID) then
         dmDB.FullRefresh;
     end;
   finally
@@ -1226,7 +1226,7 @@ begin
 
   if cxGridComponentsTable.Site.Focused then
   begin
-    // context from Jurnal: Код + Наименование
+    // context from Jurnal: Cod + Denumire
     Result.Context := ffGoods;
     Result.ValueInt := IBCQueryJurnal.FieldByName('GOODSID').AsInteger;
     Result.ValueStr := IBCQueryJurnal.FieldByName('GOODS_NAME').AsString;
@@ -1236,20 +1236,20 @@ begin
     // context from Docs
     if cxGridNPN_CT_NAME.Focused then
     begin
-      // Контрагент
+      // Contraagent
       Result.Context := ffCustomer;
       Result.ValueInt := IBCQueryDocs.FieldByName('CT').AsInteger;
       Result.ValueStr := IBCQueryDocs.FieldByName('CT_NAME').AsString;
     end
     else if cxGridNPN_DATA.Focused then
     begin
-      // Дата
+      // Data
       Result.Context := ffDate;
       Result.ValueDateTime := IBCQueryDocs.FieldByName('DATA').AsDateTime;
     end
     else if cxGridNPN_DTDEP_NAME.Focused then
     begin
-      // Склад
+      // Depozit
       Result.Context := ffStock;
       Result.ValueInt := IBCQueryDocs.FieldByName('DTDEP').AsInteger;
       Result.ValueStr := IBCQueryDocs.FieldByName('DTDEP_NAME').AsString;
@@ -1290,7 +1290,7 @@ end;
 
 function Tframe64.InitFrameID: integer;
 begin
-  // НАКЛАДНЫЕ. Расходная накладная незакрытые по всем филиалам
+  // NAKLADNIE. Nakladnaia de iesire neinchise pe toate filialele
   Result := 64;
   dmDB.CreateGridImageColumnItems(cxGridDBCol_IMG);
   SetupQtyFields;
@@ -1372,7 +1372,7 @@ procedure Tframe64.ShowApplyDiscountCodeDialog(const DocID: integer);
 var
   dialog: TfrmProduseCuReducereDlg;
 begin
-  if ShowAskDialog('Дискоунт-код', 'Все товары и их серийные номера должны быть введенны перед применением дискоунт-кода. Вы ввели все товары, все серийники и готовы применить дискоунт-код?') <> mrYes then
+  if ShowAskDialog('Cod discount', 'Toate marfurile si numerele lor de serie trebuie introduse inainte de aplicarea codului de discount. Ati introdus toate marfurile, toate seriile si sunteti gata sa aplicati codul de discount?') <> mrYes then
     Exit;
 
   dialog := TfrmProduseCuReducereDlg.Create(Self);
@@ -1384,7 +1384,7 @@ begin
     begin
       if ApplyPromoCodeOverDocumentDB(dialog.PromoCode, IBCQueryDocs.FieldByName('DOCID').AsInteger) then
       begin
-        ShowInfoDialog('Дискоунт-код', Format('Скидка из дискоунт-кода (%s) применена!', [GetDiscountText(dialog.DiscountType, dialog.DiscountValue)]));
+        ShowInfoDialog('Cod discount', Format('Discountul din codul de discount (%s) a fost aplicat!', [GetDiscountText(dialog.DiscountType, dialog.DiscountValue)]));
         dmDB.FullRefresh;
       end;
     end;
@@ -1436,11 +1436,11 @@ end;
 
 procedure Tframe64.ShowCreateTTN;
 begin
-  // Выписать "товаро транспортную накладную"
-  if ShowAskDialog('Товаро-транспортная накладная', Format('Вы хотите выписать "Товаро-транспортную накладную" на'#13#10'"%s"?', [IBCQueryDocs.FieldByName('CT_NAME').AsString])) = mrYes then
+  // Emitere "factura de transport marfa"
+  if ShowAskDialog('Nakladnaia marfa-transport', Format('Doriti sa emiteti "Nakladnaia marfa-transport" pe'#13#10'"%s"?', [IBCQueryDocs.FieldByName('CT_NAME').AsString])) = mrYes then
   begin
     if DoDBAction(9) then
-      ShowInfoDialog('Товаро-транспортная накладная', 'Готово!');
+      ShowInfoDialog('Nakladnaia marfa-transport', 'Gata!');
   end;
 end;
 
@@ -1468,14 +1468,14 @@ procedure Tframe64.ShowNewYear2011PromoCodeDialog;
 var
   dialog: TfrmApplyPromoCodeDlg;
 begin
-  if ShowAskDialog('Новогодний Промо-код', 'Все товары и их серийные номера должны быть введенны перед применением промо-кода. Вы ввели все товары, все серийники и готовы применить промо-код?') <> mrYes then
+  if ShowAskDialog('Cod promo de Anul Nou', 'Toate produsele si numerele lor seriale trebuie introduse inainte de aplicarea codului promo. Ati introdus toate produsele, toate seriile si sunteti gata sa aplicati codul promo?') <> mrYes then
     Exit;
 
   dialog := TfrmApplyPromoCodeDlg.Create(Self);
   try
     if dialog.ShowModal = mrOk then
     begin
-      if ShowAskDialog('Промо-код', 'Вы точно хотите применить промо-код для этого расхода?') = mrYes then
+      if ShowAskDialog('Cod promo', 'Sigur doriti sa aplicati codul promo pentru aceasta iesire?') = mrYes then
       begin
         if ApplyPromoCodeDB(IBCQueryDocs.FieldByName('DOCID').AsInteger, dialog.PromoCode) then
           dmDB.FullRefresh;
@@ -1492,12 +1492,12 @@ var
   tmpParams: TReportParamsList;
   reportID: integer;
 begin
-  // luam codul raportului din grupa "Гарантийный талон" pentru firma curenta
+  // luam codul raportului din grupa "Talon de garantie" pentru firma curenta
   reportID := dmDB.GetDefaultReportForReportGroup('WARRANTY');
 
   if (reportID = -1) then
   begin
-    ShowErrorDialog('Ошибка', 'Отчет не найден!');
+    ShowErrorDialog('Eroare', 'Raportul nu a fost gasit!');
     Exit;
   end;
 
@@ -1574,10 +1574,10 @@ end;
 function Tframe64.TestGoodsIdForActiune(const GoodsID: integer): Boolean;
 begin
   Result := (GoodsID = 50128) // TVA Inapoi
-    or (GoodsID = 52988) // Reducere pentru actiunea "Новогодний промо-код"
+    or (GoodsID = 52988) // Reducere pentru actiunea "Cod promo de Anul Nou"
     or (GoodsID = 54252) // Reducere pentru actiunea "Vîrsta Ta = % reducere"
     or (GoodsID = 55108) // Reducere pentru actiunea "Dăm Bani!"
-    or (GoodsID = 51346) // Reducere pentru actiunea "Скидка на 2-ю покупку"
+    or (GoodsID = 51346) // Reducere pentru actiunea "Discount la a 2-a achizitie"
     or (GoodsID = 70529); // Reducere pentru actiunea "Happy Hour 2013"
 end;
 
@@ -1610,7 +1610,7 @@ end;
 //
 //  if (ErrorList.Count > N) then
 //  begin
-//    ErrorList.Insert(N, 'Акция "Скидка на вторую покупку"');
+//    ErrorList.Insert(N, 'Actiune "Discount la a doua achizitie"');
 //    Result := True;
 //  end;
 //end;
@@ -1623,33 +1623,33 @@ end;
 //  Result := False;
 //  N := ErrorList.Count;
 //  if IBCQueryDocs.FieldByName('CURRENCYID').AsInteger <> 498 then
-//    ErrorList.Add('> Расчет должен быть в леях!')
+//    ErrorList.Add('> Calculul trebuie sa fie in lei!')
 //  else
 //  begin
 //    SUMA := VerifyActiuneTVAInapoi_SumaProduselor;
 //
 //    if SUMA < 100 then
-//      ErrorList.Add('> Сумма товаров должна быть больше 100 леев!');
+//      ErrorList.Add('> Suma marfurilor trebuie sa fie mai mare de 100 lei!');
 //
 //    if not VerifyActiuneTVAInapoi_ProduseVinduteDupaCol1(IBCQueryDocs.FieldByName('DOCID').AsInteger) then
-//      ErrorList.Add('> Цены должны быть установленны по 1 колонке!');
+//      ErrorList.Add('> Preturile trebuie sa fie setate pe coloana 1!');
 //
 //    if not VerifyActiuneTVAInapoi_CustomerIsPF(IBCQueryDocs.FieldByName('CT').AsInteger) then
-//      ErrorList.Add('> Контрагент не должен быть юридическим лицом или сотрудником фирмы!');
+//      ErrorList.Add('> Contragentul nu trebuie sa fie persoana juridica sau angajat al firmei!');
 //
 //    if not VerifyActiuneTVAInapoi_IsCustomerMobileOk(IBCQueryDocs.FieldByName('CT').AsInteger) then
-//      ErrorList.Add('> У контрагента должен быть указан номер мобильного телефона!');
+//      ErrorList.Add('> Contragentul trebuie sa aiba indicat numarul de telefon mobil!');
 //
 //    if VerifyActiuneTVAInapoi_HasInvoice(IBCQueryDocs.FieldByName('DOCID').AsInteger) then
-//      ErrorList.Add('> Не должны быть выданны Счет-фактуры!');
+//      ErrorList.Add('> Nu trebuie sa fie emise Facturi fiscale!');
 //
 //    if VerifyActiuneTVAInapoi_DejaInActiune then
-//      ErrorList.Add('> Нельзя повторно участвовать а акции!');
+//      ErrorList.Add('> Nu se poate participa repetat la actiune!');
 //  end;
 //
 //  if ErrorList.Count > N then
 //  begin
-//    ErrorList.Insert(N, 'Акция "TVA înapoi"');
+//    ErrorList.Insert(N, 'Actiunea "TVA inapoi"');
 //    Result := True;
 //  end;
 //end;
@@ -1768,7 +1768,7 @@ end;
 //  for i := 0 to cxGridComponentsTable.DataController.RecordCount - 1 do
 //  begin
 //    GoodsType := cxGridComponentsTable.DataController.Values[i, cxGridDBCol_GOODS_TYPE_ID.Index];
-//    if (GoodsType = cSYSS_GOODS_TYPE_Товар) or (GoodsType = cSYSS_GOODS_TYPE_Товары_для_сервиса) or (GoodsType = cSYSS_GOODS_TYPE_Комплект) // Товар, Комплект
+//    if (GoodsType = cSYSS_GOODS_TYPE_Товар) or (GoodsType = cSYSS_GOODS_TYPE_Товары_для_сервиса) or (GoodsType = cSYSS_GOODS_TYPE_Комплект) // Produs, Set
 //      then
 //      Result := Result + cxGridComponentsTable.DataController.Values[i, cxGridDBCol_SUMA.Index];
 //  end;
@@ -1860,7 +1860,7 @@ begin
   begin
     FLG_SHIP := IBCQueryDocs.FieldByName('FLG_SHIP').AsInteger = 1;
 
-    fGoodsAdd := not FLG_SHIP; // New item for "Состав"+ Security
+    fGoodsAdd := not FLG_SHIP; // New item for "Componenta"+ Security
     fChangeColumnPrice := not FLG_SHIP;
 
     if (cxGridComponentsTable.DataController.RecNo > 0) then
@@ -1870,9 +1870,9 @@ begin
 
       fInActiune := TestGoodsIdForActiune(IBCQueryJurnal.FieldByName('GOODSID').AsInteger);
       fGoodsEdit := not fInActiune and not FLG_SHIP;
-      // Modify "Состав" + Security
+      // Modify "Componenta" + Security
       fGoodsDelete := not fInActiune and not FLG_SHIP;
-      // Delete "Состав" + Security
+      // Delete "Componenta" + Security
       fSerials := not fInActiune and (GoodsTypeID <> 4214) // Otkat
         and ((SerialType = cSYSS_GOODS_SERIAL_TYPE_Серийный_учет) or (SerialType = cSYSS_GOODS_SERIAL_TYPE_Партийный_учет));
 
@@ -1916,10 +1916,10 @@ end;
 
 procedure Tframe64.SetupQtyFields;
 begin
-  // Товарные позиции: Кол-во
+  // Pozitii marfa: Cantitate
   TcxCalcEditProperties(cxGridDBCol_QTY.Properties).DisplayFormat := QtyDisplayFormat;
   cxGridDBCol_QTY.Summary.FooterFormat := QtyDisplayFormat;
-  // Товарные позиции: Остаток
+  // Pozitii marfa: Stoc
   TcxCalcEditProperties(cxGridDBCol_STOCK_QTY.Properties).DisplayFormat := QtyDisplayFormat;
 end;
 
@@ -1930,14 +1930,14 @@ begin
   fSECURITY_CanEdit := SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_НАКЛАДНЫЕ_РНОУ_Изменить);
   fSECURITY_CanDelete := SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_НАКЛАДНЫЕ_РНОУ_Удалить);
 
-  // Menu: Отменить проводку
+  // Menu: Anuleaza inregistrarea
   fSYS_OtmenitiOtgruzku := SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_НАКЛАДНЫЕ_РНОУ_Отменить_отгрузку);
 
-  // Цена клиента
+  // Pretul clientului
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_НАКЛАДНЫЕ_РНОУ_Изменить_цены_по_колонке_клиента) or not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_НАКЛАДНЫЕ_РНОУ_Цена_клиента) then
     bbChangeColumnPrice.Visible := ivNever;
 
-  // Колонка цен
+  // Coloana preturi
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Справочники_Товары_Колонка_цен_0) then
     bbPriceCol0.Visible := ivNever;
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Справочники_Товары_Колонка_цен_1) then
@@ -1958,41 +1958,41 @@ begin
   if (bbSubItemsPriceColumns.ItemLinks.VisibleItemCount = 0) then
     bbSubItemsPriceColumns.Visible := ivNever;
 
-  // Menu: Изменить пользователя
+  // Menu: Modifica utilizatorul
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_НАКЛАДНЫЕ_РНОУ_Изменить_создателя_в_Журнале_Товаров) then
     bbGoodsChangeUser.Visible := ivNever;
-  // Menu: Расчет рентабильности
+  // Menu: Calcul rentabilitate
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_НАКЛАДНЫЕ_РНОУ_Расчет_рентабильности) then
     bbCalcProfitability.Visible := ivNever;
-  // Колонка цен
+  // Coloana preturi
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_НАКЛАДНЫЕ_РНОУ_Видеть_колонку_цен) or SWNSecurityManager.IsPartialAccessMode then
   begin
     cxGridComponents_PRICE_COLUMN.Visible := False;
     cxGridComponents_PRICE_COLUMN.VisibleForCustomization := False;
   end;
-  // Menu: Выписать чек
+  // Menu: Emite bon
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_НАКЛАДНЫЕ_РНОУ_Создать_чек) then
     bbCreateCec.Visible := ivNever;
-  // Menu: Выписать товаро-транспортную накладную
+  // Menu: Emite nakladnaia marfa-transport
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_СФ_ТТН_Создать_документ) then
     bbTTN.Visible := ivNever;
 
-  // Обновить остатки
+  // Actualizeaza stocurile
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_НАКЛАДНЫЕ_РНОУ_Обновить_остатки) then
     bbCheckStock.Visible := ivNever;
-  // Акции
+  // Actiuni
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_НАКЛАДНЫЕ_РНОУ_Акции) then
     bbActiuni.Visible := ivNever;
 
-  // Карточка товара
+  // Fisa produsului
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Справочники_Товары_Карточка_товара) or SWNSecurityManager.IsPartialAccessMode then
     bbGoodsInfoCard.Visible := ivNever;
 
-  // Изменить цены товара
+  // Modifica preturile marfii
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Справочники_Товары_Изменение_валюты_и_цены_товара) or SWNSecurityManager.IsPartialAccessMode then
     bbGoodsPrice.Visible := ivNever;
 
-  // Соответствие товара в других фирмах
+  // Corespondenta produsului in alte firme
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Справочники_Товары_Товары_из_других_фирм) then
     bbGoodsForeignCode.Visible := ivNever;
 

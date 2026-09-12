@@ -1,7 +1,7 @@
 unit frame08ConfigurationKonfiguratorUnit;
 
 {
-  КОНФИГУРАЦИИ. Быстрый расчет конфигурации
+  CONFIGURATII. Calcul rapid al configuratiei
   DocTypeID = 115
   Frame Index = 8
 }
@@ -378,13 +378,13 @@ begin
     fKit := False;
 
      // common
-    fAddFromKit := False; // Добавить из комплекта
-    fInsertFromTemplate := False; // Вставка из шаблона
+    fAddFromKit := False; // Adauga din set
+    fInsertFromTemplate := False; // Inserare din sablon
      // specific: Goods
-    fCalcConfig := False; // Расчет конфигурации
-    fAddToQTY := False; // Изменение количество
-    fAddToSUMA := False; // Изменение суммы комплектов
-    fMoveGoods := False; // Переместить товары в комплект
+    fCalcConfig := False; // Calcul configuratie
+    fAddToQTY := False; // Modificare cantitate
+    fAddToSUMA := False; // Modificare suma seturi
+    fMoveGoods := False; // Muta produsele in set
     GoodsChanged := True;
 
     if cxGridBRKDBTable.DataController.RecNo > 0 then
@@ -397,15 +397,15 @@ begin
 
         if (cxGridComponentsTable.DataController.RecNo > 0) then
         begin
-               // Состав
+               // Componenta
             fGoodsEdit := fGoodsAdd;   // Edit Goods + Security
             fGoodsDelete := fGoodsAdd; // Delete Goods + Security
             fKit := dmDB.IsKit(dmDB.IBCQueryJurnal.FieldByName('GOODS_TYPE_ID').AsInteger);
 
-            fCalcConfig := True; // Расчет конфигурации
-            fAddToQTY := fGoodsAdd; // Изменение количество
-            fAddToSUMA := fGoodsAdd; // Изменение суммы
-            fMoveGoods := fKit; // Переместить товары в комплект
+            fCalcConfig := True; // Calcul configuratie
+            fAddToQTY := fGoodsAdd; // Modificare cantitate
+            fAddToSUMA := fGoodsAdd; // Modificare suma
+            fMoveGoods := fKit; // Muta produsele in set
             fGoodsSelected := True;
 
             GoodsChanged := fLastGoodsID <> dmDB.IBCQueryJurnal.FieldByName('GOODSID').AsInteger;
@@ -418,15 +418,15 @@ begin
     bbGoodsNew.Enabled := fGoodsAdd;
     bbGoodsModify.Enabled := fGoodsEdit;
     bbGoodsDelete.Enabled := fGoodsDelete;
-     // Инструменты, common
-    bbAddFromKit.Enabled := fAddFromKit;                  // Добавить из комплекта
-    bbInsertFromTemplate.Enabled := fInsertFromTemplate;  // Вставка из шаблона
-     // Инструменты, Goods
-    bbCalcKit.Enabled := fCalcConfig;                     // Расчет конфигурации
-    bbAddToQTY.Enabled := fAddToQTY;                      // Изменение количество
-    bbIncreaseSum.Enabled := fAddToSUMA;                  // Изменение суммы
+     // Instrumente, common
+    bbAddFromKit.Enabled := fAddFromKit;                  // Adauga din set
+    bbInsertFromTemplate.Enabled := fInsertFromTemplate;  // Inserare din sablon
+     // Instrumente, Goods
+    bbCalcKit.Enabled := fCalcConfig;                     // Calcul configuratie
+    bbAddToQTY.Enabled := fAddToQTY;                      // Modificare cantitate
+    bbIncreaseSum.Enabled := fAddToSUMA;                  // Modificare suma
     bbMoveGoodsInComplect.Enabled := fMoveGoods;
-     // Колонки цен
+     // Coloane preturi
     bbPriceColSelector.Enabled := fGoodsAdd;
 
     bbGoodsInfoCard.Enabled := fGoodsSelected;
@@ -1023,9 +1023,9 @@ begin
     DocID := dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger;
 
     result := 0; // nothing done
-     // 1 - Расходная на  кладная была успешна создана
-     // 2 - Расходная накладная была успешна создана! Внимание! Наряд на сборку не сделан.
-     // 3 - Расходная накладная и Наряд на сборку были успешно созданны!
+     // 1 - Nakladnaia de iesire a fost creata cu succes
+     // 2 - Nakladnaia de iesire a fost creata cu succes! Atentie! Naryad de asamblare nu a fost creat.
+     // 3 - Nakladnaia de iesire si Naryad de asamblare au fost create cu succes!
     if dmDB.DocumentHasComplecte(DocID) then
     begin
         createSborka := True;
@@ -1082,21 +1082,21 @@ end;
 
 procedure Tframe08ConfigurationBRK.CreateRashodnaiaNakladnaiaServis;
 begin
-     // Создать "Расходную накладную в сервис"
-//  if ShowAskDialog('Создать "Расходную накладную в сервис"', 'Вы хотите создать расходную накладную в сервис ?') = mrYes then
+     // Creare "Nakladnaia de iesire in service"
+//  if ShowAskDialog('Creeaza "Nakladnaia de iesire in service"', 'Doriti sa creati nakladnaia de iesire in service?') = mrYes then
     begin
 
         dmDB.CreateRashodnaiaNakladnaiaServis_DB(dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger);
-//      ShowInfoDialog('Расходная накладная в сервис', 'Расходная накладная в сервис создана!');
+//      ShowInfoDialog('Nakladnaia de iesire in service', 'Nakladnaia de iesire in service a fost creata!');
     end;
 end;
 
 procedure Tframe08ConfigurationBRK.CreateSciotNaOplatu;
 begin
-     // Создать "Счет на оплату"
+     // Creare "Factura de plata"
 //  if ShowAskDialog('Creare document', 'Doriti sa creati documentul "Proforma" ?') = mrYes then
 //  begin
-    dmDB.CreateSciotNaOplatu(dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger);
+    dmDB.CreateProforma(dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger);
 //      ShowInfoDialog('Proforma', 'Document Proforma creat cu succes!');
 //  end;
 end;
@@ -1485,7 +1485,7 @@ end;
 
 procedure Tframe08ConfigurationBRK.bbTenderClick(Sender: TObject);
 begin
-     // Создать Документ Тендер
+     // Creare Document Tender
     if ShowAskDialog('Creare document', 'Doriti sa creati documentul "Tender" ?') = mrYes then
     begin
         if dmDB.CreateTender(dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger) then
@@ -1864,7 +1864,7 @@ begin
 
     if cxGridComponentsTable.Site.Focused then
     begin
-          // context from Jurnal: Код + Наименование
+          // context from Jurnal: Cod + Denumire
         result.Context := ffGoods;
         result.ValueInt := dmDB.IBCQueryJurnal.FieldByName('GOODSID').AsInteger;
         result.ValueStr := dmDB.IBCQueryJurnal.FieldByName('GOODS_NAME').AsString;
@@ -1874,20 +1874,20 @@ begin
               // context from Docs
         if cxGridBRKDB_CT_NAME.Focused then
         begin
-                   // Контрагент
+                   // Contraagent
             result.Context := ffCustomer;
             result.ValueInt := dmDB.IBCQueryDocs.FieldByName('CT').AsInteger;
             result.ValueStr := dmDB.IBCQueryDocs.FieldByName('CT_NAME').AsString;
         end
         else if cxGridBRKDBTableData.Focused then
         begin
-                       // Дата
+                       // Data
             result.Context := ffDate;
             result.ValueDateTime := dmDB.IBCQueryDocs.FieldByName('DATA').AsDateTime;
         end
         else if cxGridBRKDB_DTDEP_NAME.Focused then
         begin
-                           // Склад
+                           // Depozit
             result.Context := ffStock;
             result.ValueInt := dmDB.IBCQueryDocs.FieldByName('DTDEP').AsInteger;
             result.ValueStr := dmDB.IBCQueryDocs.FieldByName('DTDEP_NAME').AsString;
@@ -1940,9 +1940,9 @@ begin
     fGoodsComplectDelete := False;
 
      // common
-    fAddFromKit := False; // Добавить из комплекта
+    fAddFromKit := False; // Adauga din set
      // specific: Complect
-    fAddToQTYComplect := False; // Изменение количество
+    fAddToQTYComplect := False; // Modificare cantitate
     fAddToSUMAInComplect := False;
     fGoodsSelected := False;
 
@@ -1950,9 +1950,9 @@ begin
     begin
         if (cxGridComponentsTable.DataController.RecNo > 0) then
         begin
-            if (dmDB.IsKit(dmDB.IBCQueryJurnal.FieldByName('GOODS_TYPE_ID').AsInteger)) then // Комплект
+            if (dmDB.IsKit(dmDB.IBCQueryJurnal.FieldByName('GOODS_TYPE_ID').AsInteger)) then // Set
             begin
-                    // --Комплектация--
+                    // --Configurare set--
                 fAddFromKit := fSECURITY_CanEdit;
                 fGoodsComplectAdd := fSECURITY_CanEdit;
 
@@ -1974,10 +1974,10 @@ begin
     bbGoodsComplectEdit.Enabled := fGoodsComplectEdit;
     bbGoodsComplectDelete.Enabled := fGoodsComplectDelete;
 
-  // Инструменты
-    bbAddFromKit.Enabled := fAddFromKit;                  // Добавить из комплекта
-    bbAddToQTYComplect.Enabled := fAddToQTYComplect;      // Изменение количество
-    bbAddSumaToComplect.Enabled := fAddToSUMAInComplect;  // Изменение суммы в комплекте
+  // Instrumente
+    bbAddFromKit.Enabled := fAddFromKit;                  // Adauga din set
+    bbAddToQTYComplect.Enabled := fAddToQTYComplect;      // Modificare cantitate
+    bbAddSumaToComplect.Enabled := fAddToSUMAInComplect;  // Modificare suma in set
     bbKitGoodsInfoCard.Enabled := fGoodsSelected;
     bbKitGoodsPrice.Enabled := fGoodsSelected;
     bbKitGoodsForeignCode.Enabled := fGoodsSelected;
@@ -1985,7 +1985,7 @@ end;
 
 function Tframe08ConfigurationBRK.InitFrameID: Integer;
 begin
-  // КОНФИГУРАЦИИ. Быстрый расчет конфигурации
+  // CONFIGURATII. Calcul rapid configuratie
     result := 8;
 
     dmDB.CreateGridImageColumnItems(cxGridDBCol_IMG);
@@ -2298,7 +2298,7 @@ procedure Tframe08ConfigurationBRK.ShowRascetKonfiguratiiDialog;
 var
     dialog: TfrmRascetKonfiguratiiDlg;
 begin
-     // Расчет конфигурации
+     // Calcul configuratie
     dialog := TfrmRascetKonfiguratiiDlg.Create(Self, dmDB.IBCQueryDocs, dmDB.IBCDataSourceDocs);
     try
         dialog.ShowModal;
@@ -2450,25 +2450,25 @@ procedure Tframe08ConfigurationBRK.WhenDocumentPopupMenu;
 var
     fPopup1, fPopup2, fPopup3, fDiscount: Boolean;
 begin
-    fPopup1 := False;     // Создать "Расходную накладную"
-    fPopup2 := False;     // Создать "Расходную накладную в сервис"
-    fPopup3 := False;     // Создать "Счет на оплату" + Security
-    fDiscount := False; // Скидка
+    fPopup1 := False;     // Creare "Nakladnaia de iesire"
+    fPopup2 := False;     // Creare "Nakladnaia de iesire in service"
+    fPopup3 := False;     // Creare "Factura de plata" + Security
+    fDiscount := False; // Discount
     if cxGridBRKDBTable.DataController.RecNo > 0 then
     begin
-          // Создать "Расходную накладную"
+          // Creare "Nakladnaia de iesire"
         fPopup1 := True;
-          // Создать "Расходную накладную в сервис"
+          // Creare "Nakladnaia de iesire in service"
         fPopup2 := True;
-          // Создать "Счет на оплату" + Security
+          // Creare "Factura de plata" + Security
         fPopup3 := ((dmDB.IBCQueryDocs.FieldByName('CURRENCYID').AsInteger = 498)); // Valuta = MDL
-          // Скидка
+          // Discount
         fDiscount := dmDB.IBCQueryDocs.FieldByName('SUMA').AsFloat > 0;
     end;
      // popup
-    bbPopup_CreateRashod.Enabled := fPopup1;  // Создать "Расходную накладную"
-    bbPopup_Menu2.Enabled := fPopup2;  // Создать "Расходную накладную в сервис"
-    bbPopup_CreateScet.Enabled := fPopup3;  // Создать "Счет на оплату"
+    bbPopup_CreateRashod.Enabled := fPopup1;  // Creare "Nakladnaia de iesire"
+    bbPopup_Menu2.Enabled := fPopup2;  // Creare "Nakladnaia de iesire in service"
+    bbPopup_CreateScet.Enabled := fPopup3;  // Creare "Factura de plata"
     bbDocDiscount.Enabled := fDiscount;
 end;
 
@@ -2494,15 +2494,15 @@ end;
 
 procedure Tframe08ConfigurationBRK.SetupQtyFields;
 begin
-     // Состав: Кол-во
+     // Componenta: Cantitate
     TcxCalcEditProperties(cxGridDBCol_QTY.Properties).DisplayFormat := QtyDisplayFormat;
     cxGridDBCol_QTY.Summary.FooterFormat := QtyDisplayFormat;
-     // Состав: Остаток
+     // Componenta: Stoc
     TcxCalcEditProperties(cxGridDBCol_STOCK_QTY.Properties).DisplayFormat := QtyDisplayFormat;
-     // Комплектация: Кол-во
+     // Configurare set: Cantitate
     TcxCalcEditProperties(cxGridComplect_QTY.Properties).DisplayFormat := QtyDisplayFormat;
     cxGridComplect_QTY.Summary.FooterFormat := QtyDisplayFormat;
-     // Комплектация: Остаток
+     // Configurare set: Stoc
     TcxCalcEditProperties(cxGridComplect_STOCK_QTY.Properties).DisplayFormat := QtyDisplayFormat;
 end;
 
@@ -2513,7 +2513,7 @@ begin
     fSECURITY_CanEdit := SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_КОНФИГУРАЦИИ_Конфигуратор_Изменить);
     fSECURITY_CanDelete := SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_КОНФИГУРАЦИИ_Конфигуратор_Удалить);
 
-     // Колонка цен
+     // Coloana preturi
     if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Справочники_Товары_Колонка_цен_0) then
         bbPriceCol0.Visible := ivNever;
     if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Справочники_Товары_Колонка_цен_1) then
@@ -2540,29 +2540,29 @@ begin
     if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_OFERTE_Oferte_Calcul_TVA_0) then
         bbTVA0.Visible := ivNever;
 
-     // Создать "Счет на оплату"
+     // Creare "Factura de plata"
     if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_СЧЕТА_СНО_Создать) then
         bbPopup_CreateScet.Visible := ivNever;
-     // Создать "Расходную накладную"
+     // Creare "Nakladnaia de iesire"
     if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_НАКЛАДНЫЕ_РНОУ_Создать) then
         bbPopup_CreateRashod.Visible := ivNever;
 
     if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_КОНФИГУРАЦИИ_Конфигуратор_Дополнительные_операции) then
         cxGridPopupMenuBRK.PopupMenus.Clear;
 
-     // Карточка товара
+     // Fisa produsului
     if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Справочники_Товары_Карточка_товара) or SWNSecurityManager.IsPartialAccessMode then
     begin
         bbGoodsInfoCard.Visible := ivNever;
         bbKitGoodsInfoCard.Visible := ivNever;
     end;
-     // Изменить цены товара
+     // Modifica preturile marfii
     if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Справочники_Товары_Изменение_валюты_и_цены_товара) or SWNSecurityManager.IsPartialAccessMode then
     begin
         bbGoodsPrice.Visible := ivNever;
         bbKitGoodsPrice.Visible := ivNever;
     end;
-     // Соответствие товара в других фирмах
+     // Corespondenta produsului in alte firme
     if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Справочники_Товары_Товары_из_других_фирм) then
     begin
         bbGoodsForeignCode.Visible := ivNever;

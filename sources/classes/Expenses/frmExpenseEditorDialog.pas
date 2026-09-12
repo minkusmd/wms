@@ -106,12 +106,12 @@ begin
      Result:=False;
      ErrorStr:='';
 
-     if fMasterDataSet.FieldByName('DOCID').IsNull then AddErrorToStr(ErrorStr,'Документ!');
-     if fMasterDataSet.FieldByName('DT').IsNull then AddErrorToStr(ErrorStr,'Фирма!');
-     if fMasterDataSet.FieldByName('CT').IsNull then AddErrorToStr(ErrorStr,'Контрагент!');
-     if fMasterDataSet.FieldByName('ANALITICAID').IsNull or (fMasterDataSet.FieldByName('ANALITICAID').asInteger<=0) then AddErrorToStr(ErrorStr,'Аналитика!');
-     //if fMasterDataSet.FieldByName('DETAILS').IsNull then AddErrorToStr(ErrorStr,'Описание расходов!');
-     if fMasterDataSet.FieldByName('SUMA').IsNull or (fMasterDataSet.FieldByName('SUMA').AsInteger<=0) then AddErrorToStr(ErrorStr,'Сумма, лей!');
+     if fMasterDataSet.FieldByName('DOCID').IsNull then AddErrorToStr(ErrorStr,'Document!');
+     if fMasterDataSet.FieldByName('DT').IsNull then AddErrorToStr(ErrorStr,'Firma!');
+     if fMasterDataSet.FieldByName('CT').IsNull then AddErrorToStr(ErrorStr,'Contraagent!');
+     if fMasterDataSet.FieldByName('ANALITICAID').IsNull or (fMasterDataSet.FieldByName('ANALITICAID').asInteger<=0) then AddErrorToStr(ErrorStr,'Analitica!');
+     //if fMasterDataSet.FieldByName('DETAILS').IsNull then AddErrorToStr(ErrorStr,'Descrierea cheltuielilor!');
+     if fMasterDataSet.FieldByName('SUMA').IsNull or (fMasterDataSet.FieldByName('SUMA').AsInteger<=0) then AddErrorToStr(ErrorStr,'Suma, lei!');
 
      if ErrorStr='' then Result:=True
      else ShowErrorDialog(cMSG_GeneralInputError_Title,cMSG_GeneralInputError_Text,ErrorStr);
@@ -181,7 +181,7 @@ begin
      try
         if FCreateNewRecord then
         begin
-             dtDialogTitle.Text:='Создание новой записи';
+             dtDialogTitle.Text:='Creare inregistrare noua';
              fMasterDataSet.Insert;
 
              fMasterDataSet.FieldByName('DOCID').AsInteger:=FDocID;
@@ -200,7 +200,7 @@ begin
         end
         else
         begin
-             dtDialogTitle.Text:='Изменение записи';
+             dtDialogTitle.Text:='Modificare inregistrare';
              fMasterDataSet.Edit;
 
              if fMasterDataSet.FieldByName('DOCID').AsInteger<>-1 then
@@ -209,13 +209,13 @@ begin
                   beDT.Enabled:=False;
                   beCT.Enabled:=False;
              end
-             else beDocID.Text:='Нет привязки к документу.';
+             else beDocID.Text:='Nu exista legatura cu documentul.';
              if fMasterDataSet.FieldByName('DT').AsInteger<>-1
                then beDT.Text:=fMasterDataSet.FieldByName('DT_NAME').AsString
-               else beDT.Text:='Нет фирмы.';
+               else beDT.Text:='Nu exista firma.';
              if fMasterDataSet.FieldByName('CT').AsInteger<>-1
                then beCT.Text:=fMasterDataSet.FieldByName('CT_NAME').AsString
-               else beCT.Text:='Нет контрагента.';
+               else beCT.Text:='Nu exista contraagent.';
         end;
         IBCQueryExpAnalytics.Active:=True;
      except
@@ -234,7 +234,7 @@ begin
 
      dialog:=TfrmCustomersDlg.Create(Self);
      try
-        if dialog.SelectCustomer(custID,false,0,'Выберите контрагента...') then
+        if dialog.SelectCustomer(custID,false,0,'Selectati contraagentul...') then
         begin
              fMasterDataSet.FieldByName('CT').AsInteger:=dialog.CustomerID;
              beCT.Text:=dialog.CustomerTitle;
@@ -270,7 +270,7 @@ begin
 
      dialog:=TfrmCustomersDlg.Create(Self);
      try
-        if dialog.SelectCustomer(custID,false,0,'Выберите фирму...') then
+        if dialog.SelectCustomer(custID,false,0,'Selectati firma...') then
         begin
              fMasterDataSet.FieldByName('DT').AsInteger:=dialog.CustomerID;
              beDT.Text:=dialog.CustomerTitle;

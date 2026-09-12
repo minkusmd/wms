@@ -124,8 +124,8 @@ begin
      ErrorStr:='';
 
      if fMasterDataSet.FieldByName('TITLE').IsNull or (Trim(fMasterDataSet.FieldByName('TITLE').asString)='')
-      then AddErrorToStr(ErrorStr,'Новость!');
-     if fMasterDataSet.FieldByName('POSTEDTIME').IsNull then AddErrorToStr(ErrorStr,'Дата и время!');
+      then AddErrorToStr(ErrorStr,'Stirea!');
+     if fMasterDataSet.FieldByName('POSTEDTIME').IsNull then AddErrorToStr(ErrorStr,'Data si ora!');
 
      if ErrorStr='' then Result:=True
      else ShowErrorDialog(cMSG_GeneralInputError_Title,cMSG_GeneralInputError_Text,ErrorStr);
@@ -170,13 +170,13 @@ begin
      try
         if FCreateNewnews then
         begin
-             dtDialogTitle.Text:='Новая новость';
+             dtDialogTitle.Text:='Stire noua';
              fMasterDataSet.Insert;
              fMasterDataSet.FieldByName('POSTEDTIME').AsDateTime:=NOW;
         end
         else
         begin
-             dtDialogTitle.Text:='Изменение новости';
+             dtDialogTitle.Text:='Modificare stire';
              fMasterDataSet.Edit;
         end;
      except

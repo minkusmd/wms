@@ -343,7 +343,7 @@ end;
 
 procedure Tframe76ActiuniProduseWeb.SetupQtyFields;
 begin
-  // Кол-во
+  // Cantitate
 end;
 
 procedure Tframe76ActiuniProduseWeb.SetupSecurityItems;
@@ -371,7 +371,7 @@ begin
   then
   begin
     FLG_CLOSED := dmDB.IBCQueryDocs.FieldByName('FLG_CLOSED').AsInteger = 1;
-    fCreatePrihodRashod := (not FLG_CLOSED); // Создать Приходную накладную
+    fCreatePrihodRashod := (not FLG_CLOSED); // Creare Nakladnaia de intrare
   end;
 end;
 

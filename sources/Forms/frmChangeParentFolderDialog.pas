@@ -499,7 +499,7 @@ begin
                      Data^.Loaded:=False;
                      Data^.isItem:=False;
                      tmpNode2:=cxTree.AddChild(tmpNode,Data);
-                     tmpNode2.Texts[0]:='Чтение данных...';
+                     tmpNode2.Texts[0]:='Citire date...';
                      tmpNode2.Texts[1]:='';
                      tmpNode2.ImageIndex:=-1;
                      tmpNode2.SelectedIndex:=-1;

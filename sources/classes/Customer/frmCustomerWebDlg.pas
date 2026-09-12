@@ -89,17 +89,17 @@ begin
   ErrorStr := '';
   if (IBCQueryWEB.FieldByName('LOGIN').IsNull) or
     (IBCQueryWEB.FieldByName('LOGIN').asString = '') then
-    AddErrorToStr(ErrorStr, 'Логин!')
+    AddErrorToStr(ErrorStr, 'Login!')
   else
   begin
     S := IBCQueryWEB.FieldByName('LOGIN').asString;
     if (Length(S) < 6) or (Pos('@', S) = 0) then
-      AddErrorToStr(ErrorStr, 'Логин (Е-Мэйл)!');
+      AddErrorToStr(ErrorStr, 'Login (E-Mail)!');
   end;
   if (IBCQueryWEB.FieldByName('PASSWORD_HASH').IsNull) then
-    AddErrorToStr(ErrorStr, 'Пароль!');
+    AddErrorToStr(ErrorStr, 'Parola!');
   if (IBCQueryWEB.FieldByName('FLG_ENABLED').IsNull) then
-    AddErrorToStr(ErrorStr, 'Интернет доступ!');
+    AddErrorToStr(ErrorStr, 'Acces internet!');
 
   if ErrorStr = '' then
     Result := True
@@ -228,7 +228,7 @@ begin
 
     if IBCQueryWEB.RecordCount=0 then
     begin
-      dtDialogTitle.Text := 'Создание новой записи';
+      dtDialogTitle.Text := 'Creare inregistrare noua';
       dtDialogTitle.Color := clWebLightCoral;
 
       IBCQueryWEB.Append;
@@ -251,7 +251,7 @@ begin
     end
     else
     begin
-      dtDialogTitle.Text := 'Изменение записи';
+      dtDialogTitle.Text := 'Modificare inregistrare';
       dtDialogTitle.Color := clWebLightSkyBlue;
       IBCQueryWEB.Edit;
     end;
@@ -301,7 +301,7 @@ const
   EmailTemplateRu = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">' +
                     '<html xmlns="http://www.w3.org/1999/xhtml">' +
                     '<head>' +
-                    '<title>Добро пожаловать в интернет-магазин %s</title>' +
+                    '<title>Bun venit in magazinul online %s</title>' +
                     '</head>' +
                     '<body>' +
                     '<div style="font-family: Arial; font-size: 16px; padding: 16px;">' +
@@ -309,20 +309,20 @@ const
                     '<img src="%s/images/webOrder-Header.png" />' +
                     '<div>' +
                     '<br />' +
-                    '<div>Здравствуйте, <b>%s</b>!</div>' +
+                    '<div>Buna ziua, <b>%s</b>!</div>' +
                     '<br />' +
-                    '<div>Добро пожаловать в наш интернет-магазин %s.</div>' +
+                    '<div>Bun venit in magazinul nostru online %s.</div>' +
                     '<br />' +
-                    '<div>Ваш аккаунт создан — теперь вы легко сможете делать покупки в нашем интернет-магазине.</div>' +
+                    '<div>Contul dumneavoastra a fost creat - acum puteti face cumparaturi usor in magazinul nostru online.</div>' +
                     '<br />' +
-                    '<div>Ваш логин: <b>%s</b></div>' +
-                    '<div>Ваш пароль: <b>%s</b></div>' +
+                    '<div>Login-ul dumneavoastra: <b>%s</b></div>' +
+                    '<div>Parola dumneavoastra: <b>%s</b></div>' +
                     '<br />' +
-                    '<div>Вы можете изменить пароль и дополнить персональную информацию в "Личном кабинете".</div>' +
+                    '<div>Puteti modifica parola si completa informatiile personale in "Contul personal".</div>' +
                     '<br/>' +
-                    '<div>Если есть вопросы или возникли трудности в использование аккаунта %s - позвоните по телефону %s.</div>' +
+                    '<div>Daca aveti intrebari sau intampinati dificultati in utilizarea contului %s - sunati la telefonul %s.</div>' +
                     '<br />' +
-                    '<div>Спасибо, ваш <a href="%s">%s</a>.</div>' +
+                    '<div>Multumim, al dumneavoastra <a href="%s">%s</a>.</div>' +
                     '<br />' +
                     '</div>' +
                     '<br/>' +
@@ -333,7 +333,7 @@ const
                     '</html>';
 
    SubjectTemplateRo = 'Bun venit în internet-magazin Fantastic.MD';
-   SubjectTemplateRu = 'Добро пожаловать в интернет-магазин Fantastic.MD';
+   SubjectTemplateRu = 'Bun venit in magazinul online Fantastic.MD';
 var
   Body: string;
   subject: string;

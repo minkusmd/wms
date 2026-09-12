@@ -58,7 +58,7 @@ var N:integer;
 begin
      N:=StrToIntDef(edSeachText.Text,-1);
      if N>0 then DoSearch(N)
-     else ShowErrorDialog('Ошибка','');
+     else ShowErrorDialog('Eroare','');
 end;
 
 procedure TfrmSearchDocByDocNoDlg.DoSearch(const DocNO: integer);

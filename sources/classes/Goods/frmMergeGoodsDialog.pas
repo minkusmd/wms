@@ -62,11 +62,11 @@ end;
 
 procedure TfrmMergeGoodsDlg.btnOkClick(Sender: TObject);
 begin
-     if (fSourceGoodsID=-1) or (fTargetGoodsID=-1) then ShowErrorDialog('Ошибка','Выберите товары!')
+     if (fSourceGoodsID=-1) or (fTargetGoodsID=-1) then ShowErrorDialog('Eroare','Selectati marfurile!')
      else
      if DoMergeGoods then
      begin
-          ShowInfoDialog('Обьединение 2-х товаров','Обьединение товаров готово.');
+          ShowInfoDialog('Unificare a 2 marfuri','Unificarea marfurilor este gata.');
           ModalResult:=mrOk;
      end
 end;
@@ -152,7 +152,7 @@ var dialog:TfrmGoodsBrowser;
 begin
      dialog:=TfrmGoodsBrowser.Create(Self);
      try
-        if dialog.SelectGoods(fSourceGoodsID,false,0,'Выберите товар для копирования') then
+        if dialog.SelectGoods(fSourceGoodsID,false,0,'Selectati marfa pentru copiere') then
         begin
             OpenSourceGoodsInfo(dialog.GoodsID);
 //            beSourceGoodsID.Tag := dialog.goodsid;
@@ -167,7 +167,7 @@ var dialog:TfrmGoodsBrowser;
 begin
      dialog:=TfrmGoodsBrowser.Create(Self);
      try
-        if dialog.SelectGoods(fTargetGoodsID,false,0,'Выберите товар для куда скопировать') then
+        if dialog.SelectGoods(fTargetGoodsID,false,0,'Selectati marfa unde sa copiati') then
         begin
             OpenTargetGoodsInfo(dialog.GoodsID);
             beTargetGoodsID.Tag := dialog.GoodsID;

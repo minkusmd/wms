@@ -162,13 +162,13 @@ procedure TfrmFiscalPrinterServiceDlg.btnPrint_Z_ReportClick(Sender: TObject);
 begin
   if ShowAskDialog('Tipar Z raport',
     'Raportul va inchide schimbul si va inscrie valoarea curenta a bonurilor fiscale tiparite pina acum.' +
-    #13#10 + 'Вы точно хотите напечатать Z отчет?') = mrYes then
+    #13#10 + 'Sigur doriti sa printati raportul Z?') = mrYes then
     PrintZReport;
 end;
 
 procedure TfrmFiscalPrinterServiceDlg.btnSetupFPDateTimeClick(Sender: TObject);
 begin
-  if ShowAskDialog('Исправление даты и времени', 'Вы хотите исправить дату и время на фискальном принтера?') =
+  if ShowAskDialog('Corectare data si ora', 'Doriti sa corectati data si ora pe imprimanta fiscala?') =
     mrYes then
     SetupFiscalPrinterdateTime;
 end;
@@ -235,15 +235,15 @@ begin
   FP := TZekaFP.Create(Self);
   try
     FP.Setup(fPrinterPort, fPrinterBoundRate, 3, 1000);
-    lbInfo1.Caption := 'Фискальный номер: ' + FP.GetFiscalNumber;
-    lbInfo2.Caption := 'Налоговый номер: ' + FP.GetTaxNumber;
+    lbInfo1.Caption := 'Numar fiscal: ' + FP.GetFiscalNumber;
+    lbInfo2.Caption := 'Cod fiscal: ' + FP.GetTaxNumber;
     D := FP.GetDateTime;
     lbFP_DateTime.Caption := FormatDateTime('dd MMMM yyyy, HH:NN', D);
     // check time differences
     N := MinutesBetween(Now, D);
     if N >= cFISCAL_PRINTER_MaxMinutesDifferenceAllowed then
     begin
-      lbFP_DateTime.Caption := lbFP_DateTime.Caption + ' (Разница в минутах: ' + IntToStr(N) + ')';
+      lbFP_DateTime.Caption := lbFP_DateTime.Caption + ' (Diferenta in minute: ' + IntToStr(N) + ')';
       lbFPDateTimeWarning.Visible := True;
       btnSetupFPDateTime.Visible := True;
     end;

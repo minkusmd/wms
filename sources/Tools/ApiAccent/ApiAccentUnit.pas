@@ -427,8 +427,9 @@ begin
 
 //        if FFlgImportWithRRP then
 //        begin
-        q.ParamByName('PRICE3').AsFloat := iif(AccentProductList[I].ProductPricePromo = 0, AccentProductList[I].ProductPriceOnline,
-          AccentProductList[I].ProductPricePromo);
+        q.ParamByName('PRICE3').AsFloat := AccentProductList[I].ProductPricePromo;
+//        iif(AccentProductList[I].ProductPricePromo = 0, AccentProductList[I].ProductPriceOnline,
+//          AccentProductList[I].ProductPricePromo);
 //        end;
         q.ParamByName('CURRENCY3ID').AsInteger := 498;
 
@@ -462,7 +463,7 @@ begin
       on E: Exception do
       begin
         if Assigned(ErrorList) then
-          ErrorList.Add('Ошибка скачивания файла: ' + E.Message);
+          ErrorList.Add('Eroare la descarcarea fisierului: ' + E.Message);
       end;
     end;
     ms.Position := 0;

@@ -1,6 +1,6 @@
 unit SWNPNClasses;
 {
- Партийные номера
+ Numere de lot
 }
 
 interface

@@ -95,7 +95,7 @@ var
 begin
   printWizard := TfrmPrintWizardDlg.Create(Self, dmDB.CurrentFirma, -1);
   try
-    printWizard.ShowReportsFromGroupOnly(30); // 30 - Пользователи
+    printWizard.ShowReportsFromGroupOnly(30); // 30 - Utilizatori
 //    printWizard.Set
     printWizard.OnPrintWizardSetupReportParams := SetupReportParams;
     printWizard.ShowModal;

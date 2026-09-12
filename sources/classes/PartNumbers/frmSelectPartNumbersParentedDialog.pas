@@ -880,15 +880,15 @@ var
 begin
   // Numarul de zecimale in QTY :
   qtyDigitsMode := AppUserTempConfigStorage.IntValues.GetValue(cSETTINGS_AppQtyDigits, cAppDefault_QtyDigits);
-  // Количество
+  // Cantitate
   TcxCalcEditProperties(edQTY.Properties).DisplayFormat := cQTY_DigitsMask[qtyDigitsMode];
-  // Доступные партийные номера: Кол-во
+  // Numere de partida disponibile: Cantitate
   TcxCalcEditProperties(cxGridAParts_QTY.Properties).DisplayFormat := cQTY_DigitsMask[qtyDigitsMode];
-  // Доступные партийные номера (Footer): Кол-во
+  // Numere de partida disponibile (Footer): Cantitate
   cxGridAParts_QTY.Summary.FooterFormat := cQTY_DigitsMask[qtyDigitsMode];
-  // Выбранные партийные номера: Кол-во
+  // Numere de partida selectate: Cantitate
   TcxCalcEditProperties(cxGridSPartsTable_QTY.Properties).DisplayFormat := cQTY_DigitsMask[qtyDigitsMode];
-  // Выбранные партийные номера (Footer): Кол-во
+  // Numere de partida selectate (Footer): Cantitate
   cxGridSPartsTable_QTY.Summary.FooterFormat := cQTY_DigitsMask[qtyDigitsMode];
 end;
 

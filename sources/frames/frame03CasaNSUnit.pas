@@ -1,6 +1,6 @@
 unit frame03CasaNSUnit;
 
-// ÊÀÑÑÎÂÛÅ ÎÏÅÐÀÖÈÈ. Íאקאכüםמו סאכüהמ
+// OPERATIUNI DE CASA. Sold initial
 // DocTypeID = 1193
 // Frame Index = 3
 
@@ -195,7 +195,7 @@ begin
           // context from Docs
       if cxGridCasaNS_DATA.Focused then
       begin
-               // Äאעא
+               // Data
          Result.Context := ffDate;
          Result.ValueDateTime := dmDB.IBCQueryDocs.FieldByName('DATA').AsDateTime;
       end
@@ -225,7 +225,7 @@ end;
 
 function Tframe03CasaNS.InitFrameID: Integer;
 begin
-     //  ÊÀÑÑÎÂÛÅ ÎÏÅÐÀÖÈÈ. Íאקאכüםמו סאכüהמ
+     //  OPERATIUNI DE CASA. Sold initial
    Result := 3;
 end;
 

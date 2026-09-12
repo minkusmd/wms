@@ -1,6 +1,6 @@
 unit frame36ServiceNewIncidentsUnit;
 {
-  СЕРВИС. Новые инциденты
+  SERVICE. Incidente noi
   DocTypeID = 1280
   Frame Index = 36
 }
@@ -112,7 +112,7 @@ end;
 
 procedure Tframe36ServiceNewIncidents.CreateПереработка(const IncidentID: Integer);
 begin
-     if IncidentCanBeStarted(IncidentID) and (ShowAskDialog('В переработку', 'Запустить инцидент в переработку?')= mrYes)
+     if IncidentCanBeStarted(IncidentID) and (ShowAskDialog('In prelucrare', 'Porniti incidentul in prelucrare?')= mrYes)
         and DoStartIncidentDB(IncidentID) then dmDB.IBCQueryIncidente.Refresh;
 end;
 
@@ -144,7 +144,7 @@ begin
 
 
 {    Х if Not VarIsNull(AViewInfo.GridRecord.Values[cxGridIncidente_TYPE_TITLE.index]) and
-     (AViewInfo.GridRecord.Values[cxGridIncidente_TYPE_TITLE.index]='Гарантийный ремонт') then
+     (AViewInfo.GridRecord.Values[cxGridIncidente_TYPE_TITLE.index]='Reparatie in garantie') then
      if Not VarIsNull(AViewInfo.GridRecord.Values[cxGridIncidente_DATA.index]) then
      begin
       ndays := Date - AViewInfo.GridRecord.Values[cxGridIncidente_DATA.index];
@@ -292,7 +292,7 @@ begin
           // context from Incidente
           if cxGridIncidente_DOC_CUSTOMER.Focused then
           begin
-               // Контрагент
+               // Contraagent
                Result.Context := ffCustomer;
                Result.ValueInt := dmDB.IBCQueryIncidente.FieldByName('CT').AsInteger;
                Result.ValueStr := dmDB.IBCQueryIncidente.FieldByName('DOC_CUSTOMER').AsString;
@@ -300,7 +300,7 @@ begin
           else
               if cxGridIncidente_GOODS_TITLE.Focused then
               begin
-                   // Товар
+                   // Produs
                    Result.Context := ffGoods;
                    Result.ValueInt := dmDB.IBCQueryIncidente.FieldByName('GOODS_DOCID').AsInteger;
                    Result.ValueStr := dmDB.IBCQueryIncidente.FieldByName('GOODS_TITLE').AsString;
@@ -308,7 +308,7 @@ begin
               else
                   if cxGridIncidente_GOODS_SN.Focused then
                   begin
-                       // Серийный номер
+                       // Numar serial
                        Result.Context := ffGoodsSN;
                        Result.ValueStr := dmDB.IBCQueryIncidente.FieldByName('GOODS_SN').AsString;
                   end;
@@ -390,7 +390,7 @@ end;
 
 function Tframe36ServiceNewIncidents.InitFrameID: Integer;
 begin
-     Result := 36; // СЕРВИС - Новые инциденты
+     Result := 36; // SERVICE - Incidente noi
 end;
 
 procedure Tframe36ServiceNewIncidents.ModifyRecord;

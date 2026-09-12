@@ -1,6 +1,6 @@
 unit frame95VouchereCadouUnit;
 
-// ÐÅÊËÀÌÀ - ןנמלמ ךמהû
+// PUBLICITATE - coduri promo
 
 interface
 

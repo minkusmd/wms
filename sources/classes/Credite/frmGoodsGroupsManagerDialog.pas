@@ -67,8 +67,8 @@ uses DataModuleAdditions, DataModuleDB, SWNConst, SWNUtils, SWNDBErrors, frmGood
 
 procedure TfrmGoodsGroupsManagerDlg.bbDeleteClick(Sender: TObject);
 begin
-     if ShowAskDialog('Удаление товарной группы',
-                      Format('Вы хотите удалить товарную группу "%s"?',[IBCQueryGG.FieldByName('TITLE').AsString]))<>mrYes then Exit;
+     if ShowAskDialog('Stergere grup de marfa',
+                      Format('Doriti sa stergeti grupul de marfa "%s"?',[IBCQueryGG.FieldByName('TITLE').AsString]))<>mrYes then Exit;
 
      IBCQueryGG.UpdateTransaction.StartTransaction;
      try

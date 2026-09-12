@@ -373,11 +373,11 @@ var
 begin
   // Numarul de zecimale in QTY :
   qtyDigitsMode := AppUserTempConfigStorage.IntValues.GetValue(cSETTINGS_AppQtyDigits, cAppDefault_QtyDigits);
-  // Товарные позиции: Кол-во
+  // Pozitii marfa: Cantitate
   TcxCalcEditProperties(cxGridParts_QTY.Properties).DisplayFormat := cQTY_DigitsMask[qtyDigitsMode];
-  // Товарные позиции (Footer): Кол-во
+  // Pozitii marfa (Footer): Cantitate
   cxGridParts_QTY.Summary.FooterFormat := cQTY_DigitsMask[qtyDigitsMode];
-  // Кол-во
+  // Cantitate
   TcxCalcEditProperties(edGOODS_QTY.Properties).DisplayFormat := cQTY_DigitsMask[qtyDigitsMode];
 end;
 

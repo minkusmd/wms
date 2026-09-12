@@ -58,11 +58,11 @@ begin
   inherited;
   if FCreateNewRecord then
   begin
-    dtDialogTitle.Title := 'Новая запись';
+    dtDialogTitle.Title := 'Inregistrare noua';
   end
   else
   begin
-    dtDialogTitle.Title := 'Редактировать запись';
+    dtDialogTitle.Title := 'Editeaza inregistrarea';
   end;
 
   cxDBTextEdit1.DataBinding.DataSource := fMasterDataSource;
@@ -91,7 +91,7 @@ begin
 
   fMasterDataSet.UpdateTransaction.StartTransaction;
   try
-    dtDialogTitle.Text := 'Единица измерения "' + fMasterDataSet.FieldByName('TITLE').AsString + '"';
+    dtDialogTitle.Text := 'Unitatea de masura "' + fMasterDataSet.FieldByName('TITLE').AsString + '"';
     if FCreateNewRecord then
     begin
       fMasterDataSet.Append;

@@ -206,15 +206,15 @@ begin
      inherited Create(AScript);
      with AScript do
      begin
-          AddMethod('function DateToTextRom(Data:TDateTime): String',CallMethod, 'Мои функции', 'Возвращает дату прописью на румынском');
-          AddMethod('function DateTimeToTextRom(Data:TDateTime): String',CallMethod, 'Мои функции', 'Возвращает дату и время прописью на румынском');
-          AddMethod('function MonthToRomStr(Month:Integer): String',CallMethod, 'Мои функции', 'Возвращает название месяца на румынском');
-          AddMethod('procedure SumaToTextRom(Sum: Currency; Currency: Integer): String', CallMethod, 'Мои функции', 'Возвращает сумму прописью на румынском. Currency может иметь следующие значения: 486-MDL, 840-USD, 976-EURO');
-          AddMethod('function CustomerContactsFull(Address,Phone1,Phon2,Fax,Email,WWW:String): String',CallMethod, 'Мои функции', 'Возвращает адресс, телефон, факс, емайл и интернет адресс одной строкой. HTML форматирование!');
-          AddMethod('function CustomerAddressPhones(Address,Phone1,Phon2,Fax:String): String',CallMethod, 'Мои функции', 'Возвращает адресс, телефон и факс одной строкой. HTML форматирование!');
-          AddMethod('function InvoiceDelegatProcura(Delegat,ProcuraNo:String; StartDate:TDateTime): String',CallMethod, 'Мои функции', 'Возвращает Делегат, Номер и Дату выдачи доверености одной строкой. HTML форматирование!');
-          AddMethod('function InvoiceDocumenteAnexate(ListaBonuri,ActLucrari:String; ActLucrariData:TDateTime; FoaieDeParcurs:String): String',CallMethod, 'Мои функции', 'Возвращает макс 3 строки: список фискальных чеков, акт проделанных работ и номер путевого листа!');
-          AddMethod('function FirstDayInMonth(ADate:TDateTime): TDate',CallMethod, 'Мои функции', 'Возвращает первое число месяца!');
+          AddMethod('function DateToTextRom(Data:TDateTime): String',CallMethod, 'Functiile mele', 'Returneaza data scrisa in litere in limba romana');
+          AddMethod('function DateTimeToTextRom(Data:TDateTime): String',CallMethod, 'Functiile mele', 'Returneaza data si ora scrise in litere in limba romana');
+          AddMethod('function MonthToRomStr(Month:Integer): String',CallMethod, 'Functiile mele', 'Returneaza denumirea lunii in limba romana');
+          AddMethod('procedure SumaToTextRom(Sum: Currency; Currency: Integer): String', CallMethod, 'Functiile mele', 'Returneaza suma scrisa in litere in limba romana. Currency poate avea urmatoarele valori: 486-MDL, 840-USD, 976-EURO');
+          AddMethod('function CustomerContactsFull(Address,Phone1,Phon2,Fax,Email,WWW:String): String',CallMethod, 'Functiile mele', 'Returneaza adresa, telefonul, faxul, emailul si adresa de internet intr-un singur rand. Formatare HTML!');
+          AddMethod('function CustomerAddressPhones(Address,Phone1,Phon2,Fax:String): String',CallMethod, 'Functiile mele', 'Returneaza adresa, telefonul si faxul intr-un singur rand. Formatare HTML!');
+          AddMethod('function InvoiceDelegatProcura(Delegat,ProcuraNo:String; StartDate:TDateTime): String',CallMethod, 'Functiile mele', 'Returneaza Delegatul, Numarul si Data eliberarii procurii intr-un singur rand. Formatare HTML!');
+          AddMethod('function InvoiceDocumenteAnexate(ListaBonuri,ActLucrari:String; ActLucrariData:TDateTime; FoaieDeParcurs:String): String',CallMethod, 'Functiile mele', 'Returneaza max 3 randuri: lista bonurilor fiscale, actul lucrarilor efectuate si numarul foii de parcurs!');
+          AddMethod('function FirstDayInMonth(ADate:TDateTime): TDate',CallMethod, 'Functiile mele', 'Returneaza prima zi a lunii!');
      end;
 end;
 

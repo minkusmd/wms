@@ -161,17 +161,17 @@ begin
         try
             JpegImage.LoadFromStream(MemoryStream);
 
-            // Переводим в Bitmap
+            // Convertim in Bitmap
             Bitmap.Assign(JpegImage);
 
-            // Сохраняем Bitmap в MemoryStream
+            // Salvam Bitmap in MemoryStream
             Bitmap.SaveToStream(MemoryStream);
-            MemoryStream.Position := 0;  // Обнуляем позицию потока
+            MemoryStream.Position := 0;  // Resetam pozitia fluxului
 
-            // Загружаем Bitmap в PNG
+            // Incarcam Bitmap in PNG
             PngImage.Assign(Bitmap);
 
-            // Сохраняем PNG в файл
+            // Salvam PNG in fisier
             PngImage.SaveToStream(MemoryStream);
 
         except
@@ -241,14 +241,14 @@ begin
     if Response.GetStatusCode = 200 then
         ResponseContent := Response.ContentAsString(TEncoding.UTF8)
     else
-        ShowMessage('Ошибка: ' + Response.GetStatusCode.ToString);
+        ShowMessage('Eroare: ' + Response.GetStatusCode.ToString);
 
     ProductUrl:=GetProductDetailPage(ResponseContent);
     productURL := DecodeEscapedUnicode(productURL);
     productURL := productUrl.Replace('about:', 'https://doxyterra.md', []);
 
 
-    // парсим страницу товара и находим изображения товара
+    // parsam pagina produsului si gasim imaginile produsului
     FDocumentProductPage := CoHTMLDocument.Create as IHTMLDocument2; // create IHTMLDocument2 instance
     vs := VarArrayCreate([0, 0], varVariant);
     s := GetProductDetail(ProductURL);

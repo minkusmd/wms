@@ -3,7 +3,7 @@ object frmCustomerAccountEditorDialog: TfrmCustomerAccountEditorDialog
   Top = 0
   BorderStyle = bsDialog
   Caption = 'Cont bancar'
-  ClientHeight = 272
+  ClientHeight = 298
   ClientWidth = 482
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -11,12 +11,11 @@ object frmCustomerAccountEditorDialog: TfrmCustomerAccountEditorDialog
   Font.Height = -12
   Font.Name = 'Segoe UI'
   Font.Style = []
-  OldCreateOrder = False
   Position = poOwnerFormCenter
+  OnCreate = FormCreate
   DesignSize = (
     482
-    272)
-  PixelsPerInch = 96
+    298)
   TextHeight = 15
   object dtDialogTitle: TDialogTitle
     Left = 0
@@ -43,7 +42,7 @@ object frmCustomerAccountEditorDialog: TfrmCustomerAccountEditorDialog
     Left = 8
     Top = 72
     Width = 466
-    Height = 144
+    Height = 170
     Margins.Left = 8
     Margins.Top = 8
     Margins.Right = 8
@@ -55,6 +54,9 @@ object frmCustomerAccountEditorDialog: TfrmCustomerAccountEditorDialog
     Color = clWindow
     ParentBackground = False
     TabOrder = 1
+    ExplicitLeft = 13
+    ExplicitTop = 75
+    ExplicitHeight = 144
     object cxLabel1: TLabel
       Left = 12
       Top = 16
@@ -86,9 +88,10 @@ object frmCustomerAccountEditorDialog: TfrmCustomerAccountEditorDialog
     object cbDefaultAccount: TcxDBCheckBox
       Left = 12
       Top = 111
-      Caption = 'Cont de baza'
+      Caption = 'Default'
       DataBinding.DataField = 'DEFAULT_ACCOUNT'
       Properties.Alignment = taLeftJustify
+      Properties.NullStyle = nssUnchecked
       Properties.ValueChecked = 1
       Properties.ValueUnchecked = 0
       TabOrder = 3
@@ -148,14 +151,25 @@ object frmCustomerAccountEditorDialog: TfrmCustomerAccountEditorDialog
       DataBinding.DataField = 'ACCOUNTNUMBER'
       Properties.CharCase = ecUpperCase
       Properties.ValidationOptions = [evoRaiseException, evoShowErrorIcon]
-      Properties.OnValidate = edAccountNumberPropertiesValidate
       TabOrder = 1
       Width = 197
+    end
+    object cbContCurent: TcxDBCheckBox
+      Left = 13
+      Top = 133
+      Caption = 'Cont curent'
+      DataBinding.DataField = 'FLG_CONT_CURENT'
+      Properties.Alignment = taLeftJustify
+      Properties.NullStyle = nssUnchecked
+      Properties.ValueChecked = 1
+      Properties.ValueUnchecked = 0
+      Style.TransparentBorder = False
+      TabOrder = 4
     end
   end
   object btnCancel: TcxButton
     Left = 376
-    Top = 231
+    Top = 257
     Width = 90
     Height = 29
     Anchors = [akRight, akBottom]
@@ -163,10 +177,11 @@ object frmCustomerAccountEditorDialog: TfrmCustomerAccountEditorDialog
     Caption = 'Renunta'
     ModalResult = 2
     TabOrder = 3
+    ExplicitTop = 231
   end
   object btnOk: TcxButton
     Left = 272
-    Top = 231
+    Top = 257
     Width = 90
     Height = 29
     Anchors = [akRight, akBottom]
@@ -174,5 +189,6 @@ object frmCustomerAccountEditorDialog: TfrmCustomerAccountEditorDialog
     Default = True
     ModalResult = 1
     TabOrder = 2
+    ExplicitTop = 231
   end
 end

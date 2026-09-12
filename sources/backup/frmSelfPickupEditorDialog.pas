@@ -72,14 +72,14 @@ begin
                OrasID:=cxGridTable.Controller.FocusedRecord.Values[cxGridTable_ORASID.Index];
                CustomerID:=cxGridTable.Controller.FocusedRecord.Values[cxGridTable_CUSTOMERID.Index];
 
-               if fOnSelfPickupCheckIfExists(FirmaID, OrasID, CustomerID) then AddErrorToStr(ErrorStr,'Такой пункт самовывоза уже существует!');
+               if fOnSelfPickupCheckIfExists(FirmaID, OrasID, CustomerID) then AddErrorToStr(ErrorStr,'Acest punct de ridicare exista deja!');
           end;
 
           fMasterDataSet.FieldByName('FIRMAID').AsInteger:=IBCQuerySP.FieldByName('FIRMAID').AsInteger;
           fMasterDataSet.FieldByName('ORASID').AsInteger:=IBCQuerySP.FieldByName('ORASID').AsInteger;
           fMasterDataSet.FieldByName('CUSTOMERID').AsInteger:=IBCQuerySP.FieldByName('CUSTOMERID').AsInteger;
      end
-     else AddErrorToStr(ErrorStr,'Выберите пункт самовывоза!');
+     else AddErrorToStr(ErrorStr,'Selectati punctul de ridicare!');
 
      if ErrorStr='' then Result:=True
      else ShowErrorDialog(cMSG_GeneralInputError_Title,ErrorStr);

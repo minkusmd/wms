@@ -1,6 +1,6 @@
 unit frame34ServiceReturnFromVendorUnit;
 {
-  СЕРВИС. Возврат от поставщика
+  SERVICE. Retur de la furnizor
   DocTypeID = 127
   Frame Index = 34
 }
@@ -223,7 +223,7 @@ end;
 
 procedure Tframe34ServiceReturnFromVendor.DeleteRecord;
 begin
-  if ShowAskDialog('Удаление записи', 'Вы хотите удалить возврат от поставщика №' + dmDB.IBCQueryDocs.FieldByName('DOCID').AsString + '?') = mrYes then
+  if ShowAskDialog('Stergere inregistrare', 'Doriti sa stergeti returul de la furnizor nr.' + dmDB.IBCQueryDocs.FieldByName('DOCID').AsString + '?') = mrYes then
   begin
     dmDB.IBCQueryDocs.UpdateTransaction.StartTransaction;
     try
@@ -242,7 +242,7 @@ end;
 
 procedure Tframe34ServiceReturnFromVendor.DoCloseDocument;
 begin
-  if ShowAskDialog('Закрыть документ', 'Вы хотите закрыть документ?') = mrYes then
+  if ShowAskDialog('Inchide documentul', 'Doriti sa inchideti documentul?') = mrYes then
   begin
     if DoCloseDocumentDB(dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger) then
     begin
@@ -345,7 +345,7 @@ end;
 
 procedure Tframe34ServiceReturnFromVendor.DoOpenDocument;
 begin
-  if ShowAskDialog('Открыть документ', 'Вы хотите открыть документ?') = mrYes then
+  if ShowAskDialog('Deschide documentul', 'Doriti sa deschideti documentul?') = mrYes then
   begin
     if DoOpenDocumentDB(dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger) then
     begin
@@ -400,7 +400,7 @@ begin
 
   if cxGridGoodsTable.Site.Focused then
   begin
-          // context from Jurnal: Код + Наименование
+          // context from Jurnal: Cod + Denumire
     Result.Context := ffGoods;
     Result.ValueInt := dmDB.IBCQueryJurnal.FieldByName('GOODSID').AsInteger;
     Result.ValueStr := dmDB.IBCQueryJurnal.FieldByName('GOODS_NAME').AsString;
@@ -410,14 +410,14 @@ begin
               // context from Docs
     if cxGridNPNCol_CT_NAME.Focused then
     begin
-                   // Контрагент
+                   // Contraagent
       Result.Context := ffCustomer;
       Result.ValueInt := dmDB.IBCQueryDocs.FieldByName('CT').AsInteger;
       Result.ValueStr := dmDB.IBCQueryDocs.FieldByName('CT_NAME').AsString;
     end
     else if cxGridDocsTableData.Focused then
     begin
-                       // Дата
+                       // Data
       Result.Context := ffDate;
       Result.ValueDateTime := dmDB.IBCQueryDocs.FieldByName('DATA').AsDateTime;
     end
@@ -447,12 +447,12 @@ begin
   if cxGridDocsTable.DataController.RecNo > 0 then
   begin
     FLG_CLOSED := dmDB.IBCQueryDocs.FieldByName('FLG_CLOSED').AsInteger = 1;
-    fNew := not FLG_CLOSED;  // Новый товар + Security
+    fNew := not FLG_CLOSED;  // Produs nou + Security
     if cxGridGoodsTable.DataController.RecNo > 0 then
     begin
-      fModify := not FLG_CLOSED;  // Изменить + Security
-      fDelete := not FLG_CLOSED;  // Удалить + Security
-               // Серийные, Партий номера + Security
+      fModify := not FLG_CLOSED;  // Modifica + Security
+      fDelete := not FLG_CLOSED;  // Sterge + Security
+               // Numere seriale, Partizi + Security
       fSerials := (dmDB.IBCQueryJurnal.FieldByName('GOODS_SERIAL_TYPE_ID').AsInteger = cSYSS_GOODS_SERIAL_TYPE_Серийный_учет) or (dmDB.IBCQueryJurnal.FieldByName('GOODS_SERIAL_TYPE_ID').AsInteger = cSYSS_GOODS_SERIAL_TYPE_Партийный_учет);
     end;
   end;
@@ -465,7 +465,7 @@ end;
 
 function Tframe34ServiceReturnFromVendor.InitFrameID: integer;
 begin
-  Result := 34; // СЕРВИС - Возврат от поставщика
+  Result := 34; // SERVICE - Retur de la furnizor
   dmDB.CreateGridImageColumnItems(cxGridDBCol_IMG);
 end;
 
@@ -537,7 +537,7 @@ end;
 
 procedure Tframe34ServiceReturnFromVendor.ShowDeleteGoodsDialog;
 begin
-  if ShowAskDialog(cMSG_DELETERECORD_DeleteDocument, 'Удалить товар "' + dmDB.IBCQueryJurnal.FieldByName('GOODS_NAME').AsString + '"?') = mrYes then
+  if ShowAskDialog(cMSG_DELETERECORD_DeleteDocument, 'Stergeti marfa "' + dmDB.IBCQueryJurnal.FieldByName('GOODS_NAME').AsString + '"?') = mrYes then
   begin
     dmDB.IBCQueryJurnal.UpdateTransaction.StartTransaction;
     try

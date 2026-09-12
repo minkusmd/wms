@@ -128,9 +128,9 @@ procedure Tframe37ServiceDispatcher.cxGridTasksDBTableStylesGetContentStyle(Send
 var
   TaskStatus: integer;
 begin
-     // Статус задач в сервисе
-     // 6301 - В ожидание
-     // 6302 - В исполнение
+     // Status sarcini in service
+     // 6301 - In asteptare
+     // 6302 - In executare
 
   TaskStatus := ARecord.Values[cxGridTasksDB_STATUS_ID.Index];
   case TaskStatus of
@@ -188,7 +188,7 @@ end;
 
 function Tframe37ServiceDispatcher.InitFrameID: integer;
 begin
-  Result := 37; // СЕРВИС - Диспетчер сервиса
+  Result := 37; // SERVICE - Dispecer service
 end;
 
 procedure Tframe37ServiceDispatcher.RefreshAllData;
@@ -203,27 +203,27 @@ end;
 
 procedure Tframe37ServiceDispatcher.sbPreset_CriticalTasksClick(Sender: TObject);
 begin
-     // Статус задач в сервисе
-     // 6301 - В ожидание
-     // 6302 - В исполнение
+     // Status sarcini in service
+     // 6301 - In asteptare
+     // 6302 - In executare
 
-     // Типы задач в сервисе
-     // 6201 - Прием товара
-     // 6202 - Распределение на обслуживание (ремонт)
-     // 6203 - Обслуживание (ремонт) товара
+     // Tipuri de sarcini in service
+     // 6201 - Primire marfa
+     // 6202 - Distribuire pentru deservire (reparatie)
+     // 6203 - Deservire (reparatie) marfa
 
   SetCustomFilter([6301, 6302], [6201, 6202, 6203]);
 end;
 
 procedure Tframe37ServiceDispatcher.sbPreset_CurrentTasksClick(Sender: TObject);
 begin
-     // Статус задач в сервисе
-     // 6301 - В ожидание
-     // 6302 - В исполнение
+     // Status sarcini in service
+     // 6301 - In asteptare
+     // 6302 - In executare
 
-     // Типы задач в сервисе
-     // 6202 - Распределение на обслуживание (ремонт)
-     // 6203 - Обслуживание (ремонт) товара
+     // Tipuri de sarcini in service
+     // 6202 - Distribuire pentru deservire (reparatie)
+     // 6203 - Deservire (reparatie) marfa
      // 6210 - Возврат товара поставщику
      // 6211 - Возврат товара от поставщика
      // 6220 - Приход запасных частей
@@ -234,22 +234,22 @@ end;
 
 procedure Tframe37ServiceDispatcher.sbPreset_NewAssignmentClick(Sender: TObject);
 begin
-     // Статус задач в сервисе
-     // 6301 - В ожидание
+     // Status sarcini in service
+     // 6301 - In asteptare
 
-     // Типы задач в сервисе
-     // 6202 - Распределение на обслуживание (ремонт)
+     // Tipuri de sarcini in service
+     // 6202 - Distribuire pentru deservire (reparatie)
 
   SetCustomFilter([6301], [6202]);
 end;
 
 procedure Tframe37ServiceDispatcher.sbPreset_NewGoodsClick(Sender: TObject);
 begin
-     // Статус задач в сервисе
-     // 6301 - В ожидание
+     // Status sarcini in service
+     // 6301 - In asteptare
 
-     // Типы задач в сервисе
-     // 6201 - Прием товара
+     // Tipuri de sarcini in service
+     // 6201 - Primire marfa
 
   SetCustomFilter([6301], [6201]);
 end;

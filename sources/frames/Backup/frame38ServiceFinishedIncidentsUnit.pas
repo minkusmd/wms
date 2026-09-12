@@ -201,7 +201,7 @@ end;
 
 function Tframe38ServiceFinishedIncidents.InitFrameID: integer;
 begin
-  Result := 38; // СЕРВИС - Решённые инциденты
+  Result := 38; // SERVICE - Incidente rezolvate
 end;
 
 procedure Tframe38ServiceFinishedIncidents.OpenData;

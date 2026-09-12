@@ -64,10 +64,10 @@ begin
      Result:=false;
      Errors:='';
 
-     if fMasterDataSet.FieldByName('DT').IsNull then AddErrorToStr(Errors,'Фирма!');
-     if fMasterDataSet.FieldByName('DATA').IsNull then AddErrorToStr(Errors,'Дата!');
-     if fMasterDataSet.FieldByName('SUMA').IsNull or (fMasterDataSet.FieldByName('SUMA').AsFloat<0) then AddErrorToStr(Errors,'План продаж!');
-     if fMasterDataSet.FieldByName('SUMA_SAL').IsNull or (fMasterDataSet.FieldByName('SUMA_SAL').AsFloat<0) then AddErrorToStr(Errors,'Фонд заплат!');
+     if fMasterDataSet.FieldByName('DT').IsNull then AddErrorToStr(Errors,'Firma!');
+     if fMasterDataSet.FieldByName('DATA').IsNull then AddErrorToStr(Errors,'Data!');
+     if fMasterDataSet.FieldByName('SUMA').IsNull or (fMasterDataSet.FieldByName('SUMA').AsFloat<0) then AddErrorToStr(Errors,'Planul de vanzari!');
+     if fMasterDataSet.FieldByName('SUMA_SAL').IsNull or (fMasterDataSet.FieldByName('SUMA_SAL').AsFloat<0) then AddErrorToStr(Errors,'Fondul de salarii!');
 
      if Errors='' then Result:=True
      else ShowErrorDialog(cMSG_GeneralInputError_Title,cMSG_GeneralInputError_Text,Errors);
@@ -100,7 +100,7 @@ begin
         if fCreateNewPlan then
         begin
              // create new record
-             dtDialogTitle.Text:='Создание нового плана';
+             dtDialogTitle.Text:='Creare plan nou';
              fMasterDataSet.Insert;
              fMasterDataSet.FieldByName('DATA').AsDateTime:=RecodeDay(DateOf(NOW)+1,1);
              fMasterDataSet.FieldByName('SUMA').AsFloat:=0;
@@ -109,7 +109,7 @@ begin
         else
         begin
              // modify
-             dtDialogTitle.Text:='Изменение информации';
+             dtDialogTitle.Text:='Modificare informatie';
              fMasterDataSet.Edit;
         end;
         beDT.Text:=fMasterDataSet.FieldByName('DT_NAME').AsString;
@@ -130,7 +130,7 @@ begin
      dialog:=TfrmCustomersDlg.Create(Self);
      try
         dialog.CustomFilter:=[cfFirms];
-        if dialog.SelectCustomer(dt,false,5209,'Выбор фирмы для Плана продаж') then
+        if dialog.SelectCustomer(dt,false,5209,'Selectare firma pentru Planul de vanzari') then
         begin
              fMasterDataSet.FieldByName('DT').AsInteger:=dialog.CustomerID;
              beDT.Text:=dialog.CustomerTitle;

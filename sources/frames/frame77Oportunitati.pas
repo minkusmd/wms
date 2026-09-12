@@ -1,6 +1,6 @@
 unit frame77OportunitatiUnit;
 {
-  СЕРВИС. Новые инциденты
+  SERVICE. Incidente noi
   DocTypeID = 1280
   Frame Index = 36
 }

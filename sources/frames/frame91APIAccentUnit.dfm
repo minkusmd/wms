@@ -191,7 +191,7 @@ inherited frame91APIAccent: Tframe91APIAccent
         Margins.Bottom = 2
         Anchors = [akLeft, akTop, akRight, akBottom]
         TabOrder = 11
-        Properties.ActivePage = tbsPricelist
+        Properties.ActivePage = tbsProperties
         Properties.CustomButtons.Buttons = <>
         ClientRectBottom = 459
         ClientRectLeft = 4
@@ -216,6 +216,23 @@ inherited frame91APIAccent: Tframe91APIAccent
             Align = alClient
             TabOrder = 0
             object cxGrid1TableView1: TcxGridTableView
+              Navigator.Buttons.First.Visible = False
+              Navigator.Buttons.PriorPage.Visible = False
+              Navigator.Buttons.Prior.Visible = False
+              Navigator.Buttons.Next.Visible = False
+              Navigator.Buttons.NextPage.Visible = False
+              Navigator.Buttons.Last.Visible = False
+              Navigator.Buttons.Insert.Visible = False
+              Navigator.Buttons.Delete.Visible = False
+              Navigator.Buttons.Edit.Visible = False
+              Navigator.Buttons.Post.Visible = False
+              Navigator.Buttons.Cancel.Visible = False
+              Navigator.Buttons.Refresh.Visible = False
+              Navigator.Buttons.SaveBookmark.Visible = False
+              Navigator.Buttons.GotoBookmark.Visible = False
+              Navigator.Buttons.Filter.Visible = False
+              Navigator.InfoPanel.Visible = True
+              Navigator.Visible = True
               FindPanel.DisplayMode = fpdmAlways
               FindPanel.UseExtendedSyntax = True
               Filtering.ExpressionEditing = True
@@ -389,9 +406,6 @@ inherited frame91APIAccent: Tframe91APIAccent
           Margins.Bottom = 2
           Caption = #1048#1079#1086#1073#1088#1072#1078#1077#1085#1080#1103
           ImageIndex = 1
-          ExplicitLeft = 3
-          ExplicitWidth = 1138
-          ExplicitHeight = 436
           object cxGrid3: TcxGrid
             Left = 14
             Top = 13
@@ -403,6 +417,22 @@ inherited frame91APIAccent: Tframe91APIAccent
             Margins.Bottom = 2
             TabOrder = 0
             object cxGrid3DBTableView1: TcxGridDBTableView
+              Navigator.Buttons.First.Visible = False
+              Navigator.Buttons.PriorPage.Visible = False
+              Navigator.Buttons.Prior.Visible = False
+              Navigator.Buttons.Next.Visible = False
+              Navigator.Buttons.NextPage.Visible = False
+              Navigator.Buttons.Last.Visible = False
+              Navigator.Buttons.Delete.Visible = False
+              Navigator.Buttons.Edit.Visible = False
+              Navigator.Buttons.Post.Visible = False
+              Navigator.Buttons.Cancel.Visible = False
+              Navigator.Buttons.Refresh.Visible = False
+              Navigator.Buttons.SaveBookmark.Visible = False
+              Navigator.Buttons.GotoBookmark.Visible = False
+              Navigator.Buttons.Filter.Visible = False
+              Navigator.InfoPanel.Visible = True
+              Navigator.Visible = True
               DataController.DataSource = IBCDataSourceImages
               OptionsData.CancelOnExit = False
               OptionsData.Deleting = False
@@ -470,9 +500,6 @@ inherited frame91APIAccent: Tframe91APIAccent
           Margins.Bottom = 2
           Caption = #1061#1072#1088#1072#1082#1090#1077#1088#1080#1089#1090#1080#1082#1080
           ImageIndex = 2
-          ExplicitLeft = 3
-          ExplicitWidth = 1138
-          ExplicitHeight = 436
           object cxGrid4: TcxGrid
             Left = 21
             Top = 19
@@ -484,6 +511,23 @@ inherited frame91APIAccent: Tframe91APIAccent
             Margins.Bottom = 2
             TabOrder = 0
             object cxGridDBTableView1: TcxGridDBTableView
+              Navigator.Buttons.First.Visible = False
+              Navigator.Buttons.PriorPage.Visible = False
+              Navigator.Buttons.Prior.Visible = False
+              Navigator.Buttons.Next.Visible = False
+              Navigator.Buttons.NextPage.Visible = False
+              Navigator.Buttons.Last.Visible = False
+              Navigator.Buttons.Insert.Visible = False
+              Navigator.Buttons.Delete.Visible = False
+              Navigator.Buttons.Edit.Visible = False
+              Navigator.Buttons.Post.Visible = False
+              Navigator.Buttons.Cancel.Visible = False
+              Navigator.Buttons.Refresh.Visible = False
+              Navigator.Buttons.SaveBookmark.Visible = False
+              Navigator.Buttons.GotoBookmark.Visible = False
+              Navigator.Buttons.Filter.Visible = False
+              Navigator.InfoPanel.Visible = True
+              Navigator.Visible = True
               DataController.DataSource = IBCDataSourceProperties
               OptionsData.CancelOnExit = False
               OptionsData.Deleting = False
@@ -518,9 +562,6 @@ inherited frame91APIAccent: Tframe91APIAccent
           Margins.Bottom = 2
           Caption = 'cxTabSheet1'
           ImageIndex = 3
-          ExplicitLeft = 3
-          ExplicitWidth = 1138
-          ExplicitHeight = 436
           object cxGrid5: TcxGrid
             Left = 0
             Top = 0
@@ -532,8 +573,6 @@ inherited frame91APIAccent: Tframe91APIAccent
             Margins.Bottom = 2
             Align = alClient
             TabOrder = 0
-            ExplicitWidth = 1138
-            ExplicitHeight = 436
             object cxGrid5DBTableView1: TcxGridDBTableView
               FindPanel.DisplayMode = fpdmAlways
               FindPanel.UseExtendedSyntax = True
@@ -583,8 +622,6 @@ inherited frame91APIAccent: Tframe91APIAccent
       Margins.Bottom = 2
       Caption = 'Products Images'
       ImageIndex = 1
-      ExplicitLeft = 3
-      ExplicitWidth = 1167
       DesignSize = (
         1165
         524)
@@ -599,7 +636,6 @@ inherited frame91APIAccent: Tframe91APIAccent
         Margins.Bottom = 2
         Align = alLeft
         TabOrder = 0
-        ExplicitHeight = 525
         object btnStart: TcxButton
           Left = 6
           Top = 70

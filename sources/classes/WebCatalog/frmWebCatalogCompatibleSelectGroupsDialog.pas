@@ -59,7 +59,7 @@ begin
   end
   else
   begin
-    ShowErrorDialog(cMSG_GeneralError_Title, 'Выберите группу товаров со второго уровня!');
+    ShowErrorDialog(cMSG_GeneralError_Title, 'Selectati grupul de marfa de la nivelul doi!');
     Result := False;
   end;
 end;

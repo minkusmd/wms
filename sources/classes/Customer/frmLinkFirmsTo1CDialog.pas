@@ -88,8 +88,8 @@ end;
 
 procedure TfrmLinkFirmsTo1CDlg.DeleteSelectedFirma;
 begin
-     if ShowAskDialog('Удаление фирмы',Format('Вы хотите удалить фирму "%s"?',[IBCQuery1C.FieldByName('CUSTOMER_TITLE').asString]),
-                      'Экспорт данных для этой фирмы в 1С больше не будет!')<>mrYes then Exit;
+     if ShowAskDialog('Stergere firma',Format('Doriti sa stergeti firma "%s"?',[IBCQuery1C.FieldByName('CUSTOMER_TITLE').asString]),
+                      'Exportul datelor pentru aceasta firma in 1C nu va mai avea loc!')<>mrYes then Exit;
 
      IBCQuery1C.UpdateTransaction.StartTransaction;
      try

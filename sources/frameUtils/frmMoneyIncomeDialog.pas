@@ -247,7 +247,7 @@ begin
 //  ceSUMA_CASH.Value := Suma_Cash;
 //  ceSUMA_TRANSFER.Value := Suma_Transfer;
 
-  if fTargetDocTypeID = cDBID_DocType_КАССОВЫЕ_ОПЕРАЦИИ_ПКО then // Приходный кассовый ордер
+  if fTargetDocTypeID = cDBID_DocType_КАССОВЫЕ_ОПЕРАЦИИ_ПКО then // Dispozitie de incasare
   begin
     Doc_CurrID := fMasterDataSet.FieldByName('CURRENCYID').AsInteger;
 

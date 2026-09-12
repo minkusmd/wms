@@ -50,7 +50,7 @@ begin
           TaskDialog:=TTaskDialog.Create(nil);
           try
              // setup
-             TaskDialog.Caption:=' '; // Подтверждение
+             TaskDialog.Caption:=' '; // Confirmare
              TaskDialog.MainIcon:=tdiShield;
              TaskDialog.Title:=Title;
              TaskDialog.Text:=Text;
@@ -88,7 +88,7 @@ begin
           TaskDialog:=TTaskDialog.Create(nil);
           try
              // setup
-             TaskDialog.Caption:=' '; // Подтверждение
+             TaskDialog.Caption:=' '; // Confirmare
              TaskDialog.MainIcon:=tdiShield;
              TaskDialog.Title:=Title;
              TaskDialog.Text:=Text;
@@ -132,7 +132,7 @@ begin
           TaskDialog:=TTaskDialog.Create(nil);
           try
              // setup
-             TaskDialog.Caption:=' '; // Ошибка
+             TaskDialog.Caption:=' '; 'Eroare'
              TaskDialog.MainIcon:=tdiError;
              TaskDialog.Title:=Title;
              TaskDialog.Text:=Text;
@@ -166,7 +166,7 @@ begin
           TaskDialog:=TTaskDialog.Create(nil);
           try
              // setup
-             TaskDialog.Caption:=' '; // Ошибка
+             TaskDialog.Caption:=' '; 'Eroare'
              TaskDialog.MainIcon:=tdiInformation;
              TaskDialog.Title:=Title;
              TaskDialog.Text:=Text;
@@ -196,7 +196,7 @@ begin
           TaskDialog:=TTaskDialog.Create(nil);
           try
              // setup
-             TaskDialog.Caption:=' '; // Ошибка
+             TaskDialog.Caption:=' '; 'Eroare'
              TaskDialog.MainIcon:=tdiInformation;
              TaskDialog.Title:=Title;
              TaskDialog.Text:=Text;
@@ -231,7 +231,7 @@ begin
           TaskDialog:=TTaskDialog.Create(nil);
           try
              // setup
-             TaskDialog.Caption:=' '; // Ошибка
+             TaskDialog.Caption:=' '; 'Eroare'
              TaskDialog.MainIcon:=tdiWarning;
              TaskDialog.Title:=Title;
              TaskDialog.Text:=Text;

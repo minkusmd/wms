@@ -158,7 +158,7 @@ begin
 
         NodeR:=cxTreeList.Add;
         NodeR.Data:=Data;
-        NodeR.Texts[0]:='Без типа документа';
+        NodeR.Texts[0]:='Fara tip de document';
         NodeR.ImageIndex:=23;
         NodeR.SelectedIndex:=23;
 

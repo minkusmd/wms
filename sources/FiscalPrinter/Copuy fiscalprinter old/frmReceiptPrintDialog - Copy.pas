@@ -278,7 +278,7 @@ end;
 
 procedure TfrmReceiptPrintDlg.ApplyDocsInfo;
 begin
-     // load Приходный кассовый ордер / Приход денег на счет info
+     // load Dispozitie de incasare / Incasare bani in cont info
     if rbUseExistingDocument.Checked and not VarIsNull(lcbExistingDocumentSelector.EditValue) and (lcbExistingDocumentSelector.EditValue
         <> -1) then
     begin
@@ -334,18 +334,18 @@ begin
         if rbCreateПКО.Checked then
         begin
             fTargetPrihodDocInfo.DocTypeID := 116;
-            cmbFR_PaymentType.ItemIndex := 0   // Приходный кассовый ордер (Наличный расчет)
+            cmbFR_PaymentType.ItemIndex := 0   // Dispozitie de incasare (Numerar)
         end
         else if rbCreateПДНС.Checked then
         begin
             fTargetPrihodDocInfo.DocTypeID := 120;
-            cmbFR_PaymentType.ItemIndex := 1; // Приход денег на счет (Банковская карточка)
+            cmbFR_PaymentType.ItemIndex := 1; // Incasare bani in cont (Card bancar)
         end;
           // userul nu poate selecta
         cmbFR_PaymentType.Enabled := False;
     end;
 
-     // load Приходный кассовый ордер / Приход денег на счет info
+     // load Dispozitie de incasare / Incasare bani in cont info
     if rbUseExistingSF.Checked and not VarIsNull(lcbFacturaSelect.EditValue) and (lcbFacturaSelect.EditValue <> -1) then
     begin
         ReadDocumentInfo(lcbFacturaSelect.EditValue, fTargetFacturaDocInfo, True);
@@ -472,7 +472,7 @@ begin
     if rbUseExistingDocument.Checked and not VarIsNull(lcbExistingDocumentSelector.EditValue) and (lcbExistingDocumentSelector.EditValue
         <> -1) then
     begin
-          // load Приходный кассовый ордер / Приход денег на счет info
+          // load Dispozitie de incasare / Incasare bani in cont info
         ReadDocumentInfo(lcbExistingDocumentSelector.EditValue, PrihodInfo);
 
           // daca nu este indicat Rashodu, nu se verifica
@@ -485,7 +485,7 @@ begin
 
     if rbUseExistingSF.Checked and not VarIsNull(lcbFacturaSelect.EditValue) and (lcbFacturaSelect.EditValue <> -1) then
     begin
-          // Счет-фактура
+          // Factura fiscala
         ReadDocumentInfo(lcbFacturaSelect.EditValue, FacturaInfo, True);
 
         if fRashodDocInfo.DocID > 1 then
@@ -673,7 +673,7 @@ begin
                 lbInfo2.Caption := 'Tax Number: ' + FP.GetTaxNumber;
 
                 lbPrinterInfo.Font.Color := clGreen;
-                lbPrinterInfo.Caption := 'MCC ' + fFactoryNumber + ' (' + FP.GetVersion + ') на COM' +
+                lbPrinterInfo.Caption := 'MCC ' + fFactoryNumber + ' (' + FP.GetVersion + ') pe COM' +
                     IntToStr(fPrinterPort);
                 fPrinterExists := True;
 
@@ -830,7 +830,7 @@ begin
         if not FP_Error(FP, True) then
         begin
             if cmbCekType.ItemIndex = 0 then
-             // Полный чек
+             // Bon complet
                 for i := 0 to cxGridTable.DataController.RecordCount - 1 do
                 begin
                     GoodsTitle := cxGridTable.DataController.Values[i, cxGridTable_TITLE.Index];
@@ -865,7 +865,7 @@ begin
                         end;
                     end;
                 end
-            else             // Половинный чек, print only 1 item with selected sum
+            else             // Bon partial, print only 1 item with selected sum
             begin
                 GoodsVAT := 20;                 // in avansuri TVA intotdeauna este 20%
                 case GoodsVat of
@@ -1070,7 +1070,7 @@ begin
     if fFactura_DOCID <> -1 then
         ReadDocumentInfo(fFactura_DOCID, fFacturaDocInfo);
 
-     // combo "Существующий документ"
+     // combo "Document existent"
     if fRashodDocInfo.DocID = -1 then
     begin
           // nu este rashod, luam datele din factura

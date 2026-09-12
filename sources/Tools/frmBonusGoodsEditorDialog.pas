@@ -72,20 +72,20 @@ begin
      Result:=False;
      Errors:='';
 
-     if fMasterDataSet.FieldByName('GOODSID').IsNull then AddErrorToStr(Errors,'Товар!');
-     if fMasterDataSet.FieldByName('DATA1').IsNull then AddErrorToStr(Errors,'Дата, начало!');
-     if fMasterDataSet.FieldByName('DATA2').IsNull then AddErrorToStr(Errors,'Дата, конец!');
+     if fMasterDataSet.FieldByName('GOODSID').IsNull then AddErrorToStr(Errors,'Marfa!');
+     if fMasterDataSet.FieldByName('DATA1').IsNull then AddErrorToStr(Errors,'Data, inceput!');
+     if fMasterDataSet.FieldByName('DATA2').IsNull then AddErrorToStr(Errors,'Data, sfarsit!');
 
      if (Not fMasterDataSet.FieldByName('DATA1').IsNull) and (Not fMasterDataSet.FieldByName('DATA2').IsNull)
-        and (fMasterDataSet.FieldByName('DATA2').AsDateTime<=fMasterDataSet.FieldByName('DATA1').AsDateTime) then AddErrorToStr(Errors,'Нужен временной период!');
+        and (fMasterDataSet.FieldByName('DATA2').AsDateTime<=fMasterDataSet.FieldByName('DATA1').AsDateTime) then AddErrorToStr(Errors,'Este necesara o perioada de timp!');
 
      if fMasterDataSet.FieldByName('FLG_CALC_BY_SUMA').asInteger=1 then
      begin
-          if fMasterDataSet.FieldByName('SUMA_BONUS').IsNull or (fMasterDataSet.FieldByName('SUMA_BONUS').AsFloat<=0) then AddErrorToStr(Errors,'Сумма бонуса, $!');
+          if fMasterDataSet.FieldByName('SUMA_BONUS').IsNull or (fMasterDataSet.FieldByName('SUMA_BONUS').AsFloat<=0) then AddErrorToStr(Errors,'Suma bonusului, $!');
      end
      else
      begin
-          if fMasterDataSet.FieldByName('PERCENT_BONUS').IsNull or (fMasterDataSet.FieldByName('PERCENT_BONUS').AsFloat<=0) or (fMasterDataSet.FieldByName('PERCENT_BONUS').AsFloat>30)  then AddErrorToStr(Errors,'Процент бонуса, %!');
+          if fMasterDataSet.FieldByName('PERCENT_BONUS').IsNull or (fMasterDataSet.FieldByName('PERCENT_BONUS').AsFloat<=0) or (fMasterDataSet.FieldByName('PERCENT_BONUS').AsFloat>30)  then AddErrorToStr(Errors,'Procentul bonusului, %!');
      end;
 
      if Errors='' then Result:=True
@@ -94,7 +94,7 @@ end;
 
 procedure TfrmBonusGoodsEditorDlg.DisplayMultiGoodsTitle;
 begin
-     if fGoodsIDList.Count>1 then beGOODS.Text:=Format('Множество товаров: %d',[fGoodsIDList.Count]);
+     if fGoodsIDList.Count>1 then beGOODS.Text:=Format('Multiple marfuri: %d',[fGoodsIDList.Count]);
 end;
 
 procedure TfrmBonusGoodsEditorDlg.FormCreate(Sender: TObject);
@@ -175,7 +175,7 @@ begin
         end
         else
         begin
-             dtDialogTitle.Text:='Редактирование записи';
+             dtDialogTitle.Text:='Editare inregistrare';
              fMasterDataSet.Edit;
         end;
         beGOODS.Text:=fMasterDataSet.FieldByName('GOODSNAME').AsString;
@@ -200,7 +200,7 @@ begin
         dialog.BurstMode:=True;
         dialog.OnBurstAddGoods:=WhenBurstAddGoods;
         dialog.OnCheckIfGoodsExists:=WhenCheckIfGoodsExists;
-        if dialog.SelectGoods(goodsID,false,0,'Выберите товар для Бонусные Товары') then
+        if dialog.SelectGoods(goodsID,false,0,'Selectati marfa pentru Marfuri Bonus') then
         begin
              if fGoodsIDList.Count=0 then
              begin

@@ -56,7 +56,7 @@ begin
   Errors := '';
 
   if fMasterDataSet.FieldByName('FILTER_BUTTON_ID').IsNull then
-    AddErrorToStr(Errors, 'Кнопка!');
+    AddErrorToStr(Errors, 'Butonul!');
 
   if Errors = '' then
     Result := True
@@ -83,14 +83,14 @@ procedure TfrmDescriptionLinkButtonEditorDlg.Prepare;
 begin
   if fCreateNewButton then
   begin
-    dtDialogTitle.Text := 'Добавление новой кнопки';
+    dtDialogTitle.Text := 'Adaugare buton nou';
     fMasterDataSet.Insert;
     fMasterDataSet.FieldByName('TEMPLATEID').AsInteger := FTemplateID;
     fMasterDataSet.FieldByName('STRUCTID').AsInteger := FStructID;
   end
   else
   begin
-    dtDialogTitle.Text := 'Изменение информации';
+    dtDialogTitle.Text := 'Modificare informatie';
     fMasterDataSet.Edit;
   end;
   IBCQueryButtons.Active := True;

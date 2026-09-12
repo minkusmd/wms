@@ -1,6 +1,6 @@
 unit frame27AktOprihodovaniaUnit;
 {
-  ИНВЕНТАРИЗАЦИЯ. Акт оприходования
+  INVENTARIERE. Act de intrare
   DocTypeID = 130
   Frame Index = 27
 }
@@ -361,7 +361,7 @@ procedure Tframe27AktOprihodovania.DeleteSelectedExpense;
 var
   S: string;
 begin
-  S := #13#10 + IBCQueryExpenses.FieldByName('EXPENSE_TITLE').AsString + #13#10 + Format('на сумму %f %s ?', [IBCQueryExpenses.FieldByName('EXPENSE_DOC_SUMA').AsCurrency, IBCQueryExpenses.FieldByName('EXPENSE_DOC_CURRENCY_NAME').AsString]);
+  S := #13#10 + IBCQueryExpenses.FieldByName('EXPENSE_TITLE').AsString + #13#10 + Format('in suma %f %s ?', [IBCQueryExpenses.FieldByName('EXPENSE_DOC_SUMA').AsCurrency, IBCQueryExpenses.FieldByName('EXPENSE_DOC_CURRENCY_NAME').AsString]);
   if ShowAskDialog('Act de primire', 'Sterge articolul de chelcuieri' + S) = mrYes then
   begin
     IBCQueryExpenses.UpdateTransaction.StartTransaction;
@@ -556,7 +556,7 @@ begin
 
   if cxGridComponentsTable.Site.Focused then
   begin
-          // context from Jurnal: Код + Наименование
+          // context from Jurnal: Cod + Denumire
     Result.Context := ffGoods;
     Result.ValueInt := dmDB.IBCQueryJurnal.FieldByName('GOODSID').AsInteger;
     Result.ValueStr := dmDB.IBCQueryJurnal.FieldByName('GOODS_NAME').AsString;
@@ -566,13 +566,13 @@ begin
               // context from Docs
     if cxGridAS_DATA.Focused then
     begin
-                   // Дата
+                   // Data
       Result.Context := ffDate;
       Result.ValueDateTime := dmDB.IBCQueryDocs.FieldByName('DATA').AsDateTime;
     end
     else if cxGridAS_DTDEP_NAME.Focused then
     begin
-                       // Склад
+                       // Depozit
       Result.Context := ffStock;
       Result.ValueInt := dmDB.IBCQueryDocs.FieldByName('DTDEP').AsInteger;
       Result.ValueStr := dmDB.IBCQueryDocs.FieldByName('DTDEP_NAME').AsString;
@@ -603,7 +603,7 @@ end;
 
 function Tframe27AktOprihodovania.InitFrameID: integer;
 begin
-     // ИНВЕНТАРИЗАЦИЯ. Акт оприходования
+     // INVENTARIERE. Act de intrare
   Result := 27;
   SetupQtyFields;
 end;
@@ -668,7 +668,7 @@ begin
     begin
       fGoodsEdit := fSECURITY_CanEdit and not FLG_CLOSED;   // Edit Goods + Security
       fGoodsDelete := fSECURITY_CanEdit and not FLG_CLOSED; // Delete Goods + Security
-               // Серийные/партийные номера
+               // Numere seriale/de partida
       fGoodsSPNumber := (dmDB.IBCQueryJurnal.FieldByName('GOODS_SERIAL_TYPE_ID').AsInteger = cSYSS_GOODS_SERIAL_TYPE_Серийный_учет) or (dmDB.IBCQueryJurnal.FieldByName('GOODS_SERIAL_TYPE_ID').AsInteger = cSYSS_GOODS_SERIAL_TYPE_Партийный_учет);
     end;
   end;
@@ -704,7 +704,7 @@ end;
 
 procedure Tframe27AktOprihodovania.SetupQtyFields;
 begin
-     // Кол-во
+     // Cantitate
   TcxCalcEditProperties(cxGridDBCol_QTY.Properties).DisplayFormat := QtyDisplayFormat;
   cxGridDBCol_QTY.Summary.FooterFormat := QtyDisplayFormat;
 end;

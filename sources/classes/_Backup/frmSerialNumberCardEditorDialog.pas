@@ -58,9 +58,9 @@ begin
 
      if fMasterDataSet.FieldByName('SN').IsNull
         or (fMasterDataSet.FieldByName('SN').AsString='')
-        or (Not ValidateTextForSerial(fMasterDataSet.FieldByName('SN').AsString)) then AddErrorToStr(ErrorStr,'Серийный номер!');
-     if fMasterDataSet.FieldByName('PRICECOLUMN').IsNull or (fMasterDataSet.FieldByName('PRICECOLUMN').AsInteger<0) or (fMasterDataSet.FieldByName('PRICECOLUMN').AsInteger>5) then AddErrorToStr(ErrorStr,'Колонка цен!');
-     if fMasterDataSet.FieldByName('SERVICEDISCOUNT').IsNull or (fMasterDataSet.FieldByName('SERVICEDISCOUNT').AsInteger<0) then AddErrorToStr(ErrorStr,'Скидка сервиса!');
+        or (Not ValidateTextForSerial(fMasterDataSet.FieldByName('SN').AsString)) then AddErrorToStr(ErrorStr,'Numarul serial!');
+     if fMasterDataSet.FieldByName('PRICECOLUMN').IsNull or (fMasterDataSet.FieldByName('PRICECOLUMN').AsInteger<0) or (fMasterDataSet.FieldByName('PRICECOLUMN').AsInteger>5) then AddErrorToStr(ErrorStr,'Coloana preturi!');
+     if fMasterDataSet.FieldByName('SERVICEDISCOUNT').IsNull or (fMasterDataSet.FieldByName('SERVICEDISCOUNT').AsInteger<0) then AddErrorToStr(ErrorStr,'Discount service!');
 
      if ErrorStr='' then Result:=True
      else ShowErrorDialog(cMSG_GeneralInputError_Title,cMSG_GeneralInputError_Text,ErrorStr);
@@ -104,7 +104,7 @@ begin
      try
        if fCreateNewSerial then
         begin
-             dtDialogTitle.Text:='Новый номер карточки';
+             dtDialogTitle.Text:='Numar de card nou';
 
              fMasterDataSet.Append;
              fMasterDataSet.FieldByName('PRICECOLUMN').asInteger:=3;
@@ -113,7 +113,7 @@ begin
         end
         else
         begin
-             dtDialogTitle.Text:='Изменение данных';
+             dtDialogTitle.Text:='Modificare date';
 
              fMasterDataSet.Edit;
              fMasterDataSet.FieldByName('CREATED_BY').asInteger:=UserID;

@@ -332,7 +332,7 @@ end;
 
 procedure TfrmPrintEngine.PrepareMessage(FromField, ToField, BccField, SubjectField, TextField: WideString);
 begin
-  IdMessage.Clear; // очищаю письмо
+  IdMessage.Clear; // curat mesajul
   IdSMTP1.AuthType := satDefault;
   IdMessage.From.Text := FromField;
   IdMessage.CharSet := 'UTF-8';

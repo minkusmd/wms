@@ -1,12 +1,12 @@
 object frmGoodsEditorDialog: TfrmGoodsEditorDialog
   Left = 0
-  Top = 0
+  Top = 332
   HelpType = htKeyword
   HelpKeyword = #1099
   ActiveControl = mmTITLE
   BorderStyle = bsDialog
   Caption = 'Adauga / modifica produs'
-  ClientHeight = 714
+  ClientHeight = 743
   ClientWidth = 970
   Color = clBtnFace
   Font.Charset = RUSSIAN_CHARSET
@@ -15,22 +15,23 @@ object frmGoodsEditorDialog: TfrmGoodsEditorDialog
   Font.Name = 'Segoe UI'
   Font.Style = []
   KeyPreview = True
-  Position = poDefault
+  Position = poDesigned
   DesignSize = (
     970
-    714)
+    743)
   TextHeight = 15
   object lbCREATED_BY: TLabel
     Left = 16
-    Top = 453
+    Top = 482
     Width = 78
     Height = 15
     Anchors = [akLeft, akBottom]
     Caption = 'lbCREATED_BY'
+    ExplicitTop = 453
   end
   object lbLastModify: TLabel
     Left = 16
-    Top = 474
+    Top = 503
     Width = 69
     Height = 15
     Anchors = [akLeft, akBottom]
@@ -59,7 +60,6 @@ object frmGoodsEditorDialog: TfrmGoodsEditorDialog
     TabOrder = 2
     TabStop = False
     OnChange = cxPageControlChange
-    ExplicitTop = 209
     object tbsGeneral: TTabSheet
       Caption = '(&1) Date generale'
       Highlighted = True
@@ -734,7 +734,6 @@ object frmGoodsEditorDialog: TfrmGoodsEditorDialog
     Color = clWindow
     ParentBackground = False
     TabOrder = 0
-    ExplicitLeft = 13
     object Label4: TLabel
       Left = 13
       Top = 103
@@ -854,7 +853,7 @@ object frmGoodsEditorDialog: TfrmGoodsEditorDialog
   end
   object btnOk: TcxButton
     Left = 749
-    Top = 659
+    Top = 688
     Width = 90
     Height = 29
     Anchors = [akRight, akBottom]
@@ -862,10 +861,11 @@ object frmGoodsEditorDialog: TfrmGoodsEditorDialog
     Default = True
     ModalResult = 1
     TabOrder = 3
+    ExplicitTop = 659
   end
   object btnCancel: TcxButton
     Left = 845
-    Top = 659
+    Top = 688
     Width = 90
     Height = 29
     Anchors = [akRight, akBottom]
@@ -873,10 +873,11 @@ object frmGoodsEditorDialog: TfrmGoodsEditorDialog
     Caption = 'Renunta'
     ModalResult = 2
     TabOrder = 4
+    ExplicitTop = 659
   end
   object dxStatusBar1: TdxStatusBar
     Left = 0
-    Top = 694
+    Top = 723
     Width = 970
     Height = 20
     Images = dmAdditions.cxImageList_SWN
@@ -897,6 +898,7 @@ object frmGoodsEditorDialog: TfrmGoodsEditorDialog
     Font.Name = 'Segoe UI'
     Font.Style = []
     ParentFont = False
+    ExplicitTop = 694
   end
   object dxBarManagerGoods: TdxBarManager
     Scaled = False

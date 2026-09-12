@@ -125,7 +125,7 @@ begin
       ServSockConnectionFailed:
         ShowMessage('When the server can not connect to the fiscal device');
       ServTCPAuth:
-        ShowMessage('Wrong device ТCP password');
+        ShowMessage('Wrong device TCP password');
       ServWaitOtherClientCmdProcessingTimeOut:
         ShowMessage('Proccessing of other clients command is taking too long');
       FPException:
@@ -264,13 +264,13 @@ procedure TfrmFiscalPrinterServiceDlg.btnPrint_Z_ReportClick(Sender: TObject);
 begin
   if ShowAskDialog('Tipar Z raport',
     'Raportul va inchide schimbul si va inscrie valoarea curenta a bonurilor fiscale tiparite pina acum.' + #13#10 +
-    'Вы точно хотите напечатать Z отчет?') = mrYes then
+    'Sigur doriti sa printati raportul Z?') = mrYes then
     PrintZReport;
 end;
 
 procedure TfrmFiscalPrinterServiceDlg.btnSetupFPDateTimeClick(Sender: TObject);
 begin
-  if ShowAskDialog('Исправление даты и времени', 'Вы хотите исправить дату и время на фискальном принтера?') = mrYes then
+  if ShowAskDialog('Corectare data si ora', 'Doriti sa corectati data si ora pe imprimanta fiscala?') = mrYes then
     SetupFiscalPrinterdateTime;
 end;
 
@@ -351,15 +351,15 @@ var
 //  TaxPerc: ITaxNumbers;
   VATRates: VATRatesRes;
 begin
-  lbInfo1.Caption := 'Фискальный номер: ' + fpc.ReadSerialAndFiscalNums_V2.FMNum;
-  lbInfo2.Caption := 'Налоговый номер: ' + fpc.ReadSerialAndFiscalNums_V2.UniCode;
+  lbInfo1.Caption := 'Numar fiscal: ' + fpc.ReadSerialAndFiscalNums_V2.FMNum;
+  lbInfo2.Caption := 'Cod fiscal: ' + fpc.ReadSerialAndFiscalNums_V2.UniCode;
   D := fpc.ReadDateTime;
   lbFP_DateTime.Caption := FormatDateTime('dd MMMM yyyy, HH:NN', D);
     // check time differences
   N := MinutesBetween(Now, D);
   if N >= cFISCAL_PRINTER_MaxMinutesDifferenceAllowed then
   begin
-    lbFP_DateTime.Caption := lbFP_DateTime.Caption + ' (Разница в минутах: ' + IntToStr(N) + ')';
+    lbFP_DateTime.Caption := lbFP_DateTime.Caption + ' (Diferenta in minute: ' + IntToStr(N) + ')';
     lbFPDateTimeWarning.Visible := True;
     btnSetupFPDateTime.Visible := True;
   end;

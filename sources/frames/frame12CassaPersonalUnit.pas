@@ -1,6 +1,6 @@
 ﻿unit frame12CassaPersonalUnit;
 
-// КАССА. Касса персональная
+// CASA. Casa personala
 // DocTypeID = 1206
 // Frame Index = 12
 
@@ -205,7 +205,7 @@ end;
 
 function Tframe12CassaPersonal.InitFrameID: integer;
 begin
-     Result:=12; // КАССА. Касса персональная
+     Result:=12; // CASA. Casa personala
 end;
 
 procedure Tframe12CassaPersonal.OpenData;

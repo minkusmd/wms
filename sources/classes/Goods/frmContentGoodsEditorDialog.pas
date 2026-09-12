@@ -3,17 +3,100 @@
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, SWNBaseUnit, JPEG, PngImage, Types, Dialogs,
-  cxStyles, cxLabel, DB, dxBar, ExtDlgs, DBAccess, IBC, MemDS, cxDBEdit, StdCtrls, cxGridDBTableView, cxTextEdit, cxGridLevel,
-  cxGridCustomTableView, cxGridTableView, cxGrid, ExtCtrls, ComCtrls, cxGridPopupMenu, dxPSCore, dxPScxGridLnk, GifImg,
-  dxBarExtItems, cxButtons, frameGoodsEditDescriptionUnit, frameGoodsAttributesUnit, frameGoodsServicesUnit, cxGraphics, cxControls, cxLookAndFeels,
+  Windows,
+  Messages,
+  SysUtils,
+  Variants,
+  Classes,
+  Graphics,
+  Controls,
+  Forms,
+  SWNBaseUnit,
+  JPEG,
+  PngImage,
+  Types,
+  Dialogs,
+  cxStyles,
+  cxLabel,
+  DB,
+  dxBar,
+  ExtDlgs,
+  DBAccess,
+  IBC,
+  MemDS,
+  cxDBEdit,
+  StdCtrls,
+  cxGridDBTableView,
+  cxTextEdit,
+  cxGridLevel,
+  cxGridCustomTableView,
+  cxGridTableView,
+  cxGrid,
+  ExtCtrls,
+  ComCtrls,
+  cxGridPopupMenu,
+  dxPSCore,
+  dxPScxGridLnk,
+  GifImg,
+  dxBarExtItems,
+  cxButtons,
+  frameGoodsEditDescriptionUnit,
+  frameGoodsAttributesUnit,
+  frameGoodsServicesUnit,
+  cxGraphics,
+  cxControls,
+  cxLookAndFeels,
   cxLookAndFeelPainters,
-  cxContainer, cxEdit, cxCustomData, cxFilter, cxData, cxDataStorage, cxNavigator, dxDateRanges, dxScrollbarAnnotations,
-  cxDBData, cxImageComboBox, cxCheckBox, Vcl.Menus, dxBarBuiltInMenu, dxPSGlbl, dxPSUtl, dxPSEngn, dxPrnPg, dxBkgnd, dxWrap,
-  dxPrnDev, dxPSCompsProvider, dxPSFillPatterns, dxPSEdgePatterns, dxPSPDFExportCore, dxPSPDFExport, cxDrawTextUtils,
-  dxPSPrVwStd, dxPSPrVwAdv, dxPSPrVwRibbon, dxPScxPageControlProducer, dxPScxGridLayoutViewLnk, dxPScxEditorProducers,
-  dxPScxExtEditorProducers, dxPScxCommon, cxGridCustomPopupMenu, cxClasses, cxGridCustomView, cxMemo, cxPC, System.Actions,
-  Vcl.ActnList, Vcl.Grids, Vcl.DBGrids, cxDBLabel, dxUIAClasses, SynEdit, SynDBEdit, SynEditHighlighter, SynHighlighterHtml,
+  cxContainer,
+  cxEdit,
+  cxCustomData,
+  cxFilter,
+  cxData,
+  cxDataStorage,
+  cxNavigator,
+  dxDateRanges,
+  dxScrollbarAnnotations,
+  cxDBData,
+  cxImageComboBox,
+  cxCheckBox,
+  Vcl.Menus,
+  dxBarBuiltInMenu,
+  dxPSGlbl,
+  dxPSUtl,
+  dxPSEngn,
+  dxPrnPg,
+  dxBkgnd,
+  dxWrap,
+  dxPrnDev,
+  dxPSCompsProvider,
+  dxPSFillPatterns,
+  dxPSEdgePatterns,
+  dxPSPDFExportCore,
+  dxPSPDFExport,
+  cxDrawTextUtils,
+  dxPSPrVwStd,
+  dxPSPrVwAdv,
+  dxPSPrVwRibbon,
+  dxPScxPageControlProducer,
+  dxPScxGridLayoutViewLnk,
+  dxPScxEditorProducers,
+  dxPScxExtEditorProducers,
+  dxPScxCommon,
+  cxGridCustomPopupMenu,
+  cxClasses,
+  cxGridCustomView,
+  cxMemo,
+  cxPC,
+  System.Actions,
+  Vcl.ActnList,
+  Vcl.Grids,
+  Vcl.DBGrids,
+  cxDBLabel,
+  dxUIAClasses,
+  SynEdit,
+  SynDBEdit,
+  SynEditHighlighter,
+  SynHighlighterHtml,
   Vcl.WebpImage;
 
 type
@@ -221,6 +304,7 @@ type
     frameGoodsAttributes1: TframeGoodsAttributes;
     tbsServices: TcxTabSheet;
     frameGoodsServices1: TframeGoodsServices;
+    bbDeleteAll: TdxBarButton;
     procedure actSaveImagesExecute(Sender: TObject);
     procedure actSaveImagesUpdate(Sender: TObject);
     procedure actSaveSearchKeysExecute(Sender: TObject);
@@ -242,14 +326,14 @@ type
     procedure bbFilterEditClick(Sender: TObject);
     procedure bbDeleteAllPropertiesClick(Sender: TObject);
     procedure bbFilterSortClick(Sender: TObject);
-    procedure cxGridFilters_PARAM_VALUE_RUSGetDisplayText(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord; var
-      AText: string);
-    procedure cxGridFilters_FILTERNAME_RUSGetDisplayText(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord; var
-      AText: string);
-    procedure cxGridFilters_PARAM_VALUE_ROMGetDisplayText(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord; var
-      AText: string);
-    procedure cxGridFilters_FILTERNAME_ROMGetDisplayText(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord; var
-      AText: string);
+    procedure cxGridFilters_PARAM_VALUE_RUSGetDisplayText(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord;
+      var AText: string);
+    procedure cxGridFilters_FILTERNAME_RUSGetDisplayText(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord;
+      var AText: string);
+    procedure cxGridFilters_PARAM_VALUE_ROMGetDisplayText(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord;
+      var AText: string);
+    procedure cxGridFilters_FILTERNAME_ROMGetDisplayText(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord;
+      var AText: string);
     procedure cxGridFiltersTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo;
       AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
     procedure dxBarPopupMenuFiltersPopup(Sender: TObject);
@@ -257,8 +341,8 @@ type
     procedure bbPrintClick(Sender: TObject);
     procedure bbGotoButtonsClick(Sender: TObject);
     procedure bbFilterCloneClick(Sender: TObject);
-    procedure cxGridFiltersTableStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; AItem:
-      TcxCustomGridTableItem; var AStyle: TcxStyle);
+    procedure cxGridFiltersTableStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
+      AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
     procedure dxBarButton2Click(Sender: TObject);
     procedure bbBClick(Sender: TObject);
     procedure bbPClick(Sender: TObject);
@@ -287,6 +371,7 @@ type
     procedure btnGenSlugClick(Sender: TObject);
     procedure edYouTubeURLPropertiesChange(Sender: TObject);
     procedure btnOpenYouTubeClick(Sender: TObject);
+    procedure bbDeleteAllClick(Sender: TObject);
   private
     FActiveTabsheetIndex: Integer;
     { Private declarations }
@@ -366,11 +451,32 @@ type
 implementation
 
 uses
-  DateUtils, DataModuleAdditions, Math, ClipBrd, SWNUtils, frmGoodsImageEventDialog, SWNValueStorageUnit, SWNDBErrors,
-  frmGoodsImagePreviewDlg, frmChangeOrderNoDialog, frmGoodsFilterTemplateSelectorDialog, SWNConst,
-  frmWebDescriptionElementEditorDialog, frmGoodsDescFilterButtonsDialog, DataModuleDB, frmGoodsSelectUnit, ShellApi,
-  frmHistoryGoodsFiltersUnit, SWNSecurity, SWNGoodsUtils, frmWebFiltersDialog, SWNSecurityFlags, frmWebSelectFiltersDialog,
-  frmOrdinaryFilterValueDialog, System.UITypes, System.Net.HttpClient;
+  DateUtils,
+  DataModuleAdditions,
+  Math,
+  ClipBrd,
+  SWNUtils,
+  frmGoodsImageEventDialog,
+  SWNValueStorageUnit,
+  SWNDBErrors,
+  frmGoodsImagePreviewDlg,
+  frmChangeOrderNoDialog,
+  frmGoodsFilterTemplateSelectorDialog,
+  SWNConst,
+  frmWebDescriptionElementEditorDialog,
+  frmGoodsDescFilterButtonsDialog,
+  DataModuleDB,
+  frmGoodsSelectUnit,
+  ShellApi,
+  frmHistoryGoodsFiltersUnit,
+  SWNSecurity,
+  SWNGoodsUtils,
+  frmWebFiltersDialog,
+  SWNSecurityFlags,
+  frmWebSelectFiltersDialog,
+  frmOrdinaryFilterValueDialog,
+  System.UITypes,
+  System.Net.HttpClient;
 
 {$R *.dfm}
 { TfrmGoodsDescriptionsDlg }
@@ -507,6 +613,21 @@ begin
   ClearFilterClone;
 end;
 
+procedure TfrmContentGoodsEditorDlg.bbDeleteAllClick(Sender: TObject);
+begin
+  if MessageDlg('Stergeti toate imaginile pentru acest produs?', TMsgDlgType.mtConfirmation, [mbYes, mbNO], 0) = mrYes then
+  begin
+    var q := TIBCSQL.Create(nil);
+    try
+      q.SQL.Add('delete from ts_goods_image where goodsid = :goodsid');
+      q.ParamByName('goodsid').AsInteger := GoodsID;
+      q.Execute;
+    finally
+      q.Free;
+    end;
+  end;
+end;
+
 procedure TfrmContentGoodsEditorDlg.bbDeleteAllPropertiesClick(Sender: TObject);
 begin
   DoDeleteFilter;
@@ -596,7 +717,8 @@ begin
   else
     control := mmGOODS_DESCRIPTION;
 
-  control.SelText := Format('<iframe width="800" height="415" src="%s" frameborder="0" allowfullscreen=""></iframe>'#13#10, [control.SelText]);
+  control.SelText := Format('<iframe width="800" height="415" src="%s" frameborder="0" allowfullscreen=""></iframe>'#13#10,
+    [control.SelText]);
 end;
 
 procedure TfrmContentGoodsEditorDlg.edYouTubeURLPropertiesChange(Sender: TObject);
@@ -661,7 +783,7 @@ end;
 
 function TfrmContentGoodsEditorDlg.ExtractYouTubeID(const AUrl: string): string;
 const
-  cValidChars = ['A'..'Z', 'a'..'z', '0'..'9', '_', '-'];
+  cValidChars =[ 'A'.. 'Z',  'a'.. 'z',  '0'.. '9',  '_',  '-'];
 var
   S, LowUrl: string;
   P, i: Integer;
@@ -755,8 +877,7 @@ begin
   Query := TIBCQuery.Create(Self);
   try
     Query.Connection := fIBCConnection;
-    Query.SQL.Text :=
-      'SELECT FIRST 1 YOUTUBEID FROM TS_GOODS_YOUTUBE_VIDEO ' +
+    Query.SQL.Text := 'SELECT FIRST 1 YOUTUBEID FROM TS_GOODS_YOUTUBE_VIDEO ' +
       'WHERE (GOODSID=:GOODSID) AND (FLG_VISIBLE=1) ORDER BY ORDERNO';
     Query.ParamByName('GOODSID').AsInteger := fMasterDataSet.FieldByName('GOODSID').AsInteger;
     Query.ExecSQL;
@@ -796,8 +917,7 @@ begin
 
     if id <> '' then
     begin
-      Query.SQL.Text :=
-        'INSERT INTO TS_GOODS_YOUTUBE_VIDEO (GOODSID, YOUTUBEID, ORDERNO, FLG_VISIBLE) ' +
+      Query.SQL.Text := 'INSERT INTO TS_GOODS_YOUTUBE_VIDEO (GOODSID, YOUTUBEID, ORDERNO, FLG_VISIBLE) ' +
         'VALUES (:GOODSID, :YOUTUBEID, 1, 1)';
       Query.ParamByName('GOODSID').AsInteger := goodsId;
       Query.ParamByName('YOUTUBEID').AsString := id;
@@ -991,8 +1111,8 @@ begin
   end;
 end;
 
-procedure TfrmContentGoodsEditorDlg.cxGridFiltersTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord,
-  AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
+procedure TfrmContentGoodsEditorDlg.cxGridFiltersTableFocusedRecordChanged(Sender: TcxCustomGridTableView;
+  APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
 begin
   FilterSelectionChanged;
 end;
@@ -1403,8 +1523,8 @@ end;
 
 procedure TfrmContentGoodsEditorDlg.dxBarPopupMenuFiltersPopup(Sender: TObject);
 begin
-  if cxGridFiltersTable.DataController.Values[cxGridFiltersTable.Controller.FocusedRecordIndex, cxGridFilters_FLG_VISIBLE.Index]
-    = 1 then
+  if cxGridFiltersTable.DataController.Values[cxGridFiltersTable.Controller.FocusedRecordIndex,
+    cxGridFilters_FLG_VISIBLE.Index] = 1 then
     bbChangeFilterVisibility.Caption := 'Ascunde caracterice'
   else
     bbChangeFilterVisibility.Caption := 'Arata caracterice';
@@ -1549,8 +1669,8 @@ begin
     CanClose := ShowAskDialog('Datele au fost modificate!', 'Doriti sa iesiti fara a salva datele?') = mrYes;
 end;
 
-procedure TfrmContentGoodsEditorDlg.frameGoodsEditDescription2edBASE_PARAM_RUKeyDown(Sender: TObject; var Key: Word; Shift:
-  TShiftState);
+procedure TfrmContentGoodsEditorDlg.frameGoodsEditDescription2edBASE_PARAM_RUKeyDown(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
 begin
   if (Key = VK_RETURN) and (ssAlt in Shift) then
   begin
@@ -1640,7 +1760,6 @@ begin
   IBCQueryDSC.UpdateTransaction := fMasterDataSet.UpdateTransaction;
   IBCQueryDSC.MasterSource := frameGoodsEditDescription1.IBCDataSourceGOODS;
 
-
   mmTITLE.DataBinding.DataSource := fMasterDataSource;
 
   pcDescriptions.ActivePageIndex := 0;
@@ -1648,17 +1767,14 @@ end;
 
 procedure TfrmContentGoodsEditorDlg.btnGenSlugClick(Sender: TObject);
 var
-    slug: string;
+  slug: string;
 begin
   // generate slug
-  slug := GenerateSlug(
-    frameGoodsEditDescription1.IBCDataSourceWebGoodsType.DataSet.FieldByName('TITLE').AsString + ' ' +
-    frameGoodsEditDescription1.IBCQueryVendors.FieldByName('TITLE').AsString + ' ' +
-    frameGoodsEditDescription1.IBCDataSourceGOODS.DataSet.FieldByName('CODE').AsString + ' ' +
-    frameGoodsEditDescription1.IBCDataSourceGOODS.DataSet.FieldByName('BASE_PARAM').AsString + ' ' +
-    frameGoodsEditDescription1.IBCDataSourceGOODS.DataSet.FieldByName('DETAILS').AsString + ' ' +
-    frameGoodsEditDescription1.IBCDataSourceGOODS.DataSet.FieldByName('GOODSID').AsString
-  );
+  slug := GenerateSlug(frameGoodsEditDescription1.IBCDataSourceWebGoodsType.DataSet.FieldByName('TITLE').AsString + ' '
+    + frameGoodsEditDescription1.IBCQueryVendors.FieldByName('TITLE').AsString + ' ' + frameGoodsEditDescription1.IBCDataSourceGOODS.DataSet.FieldByName
+    ('CODE').AsString + ' ' + frameGoodsEditDescription1.IBCDataSourceGOODS.DataSet.FieldByName('BASE_PARAM').AsString +
+    ' ' + frameGoodsEditDescription1.IBCDataSourceGOODS.DataSet.FieldByName('DETAILS').AsString + ' ' +
+    frameGoodsEditDescription1.IBCDataSourceGOODS.DataSet.FieldByName('GOODSID').AsString);
 end;
 
 procedure TfrmContentGoodsEditorDlg.dxBarButton9Click(Sender: TObject);
@@ -1675,7 +1791,6 @@ begin
     ms := TMemoryStream.Create;
     httpclient.Get(url, ms);
     ms.Position := 0;
-
 
     bmp := TBitmap.Create;
     try
@@ -1711,13 +1826,11 @@ begin
   Result := False;
   try
     // avertisment neblocant: atribute recomandate necompletate
-    var missingAttrs := GetMissingRecommendedAttributes(
-      fMasterDataSet.FieldByName('GOODSID').AsInteger,
-      fMasterDataSet.FieldByName('WEBGOODSTYPE_ID').AsInteger,
-      fMasterDataSet.UpdateTransaction);
+    var missingAttrs := GetMissingRecommendedAttributes(fMasterDataSet.FieldByName('GOODSID').AsInteger, fMasterDataSet.FieldByName
+      ('WEBGOODSTYPE_ID').AsInteger, fMasterDataSet.UpdateTransaction);
     if missingAttrs <> '' then
-      MessageDlg('Atribute recomandate necompletate: ' + missingAttrs + #13#10 +
-        'Produsul se salveaza oricum.', mtWarning, [mbOK], 0);
+      MessageDlg('Atribute recomandate necompletate: ' + missingAttrs + #13#10 + 'Produsul se salveaza oricum.',
+        mtWarning, [mbOK], 0);
 
     if not (fMasterDataSet.State in dsEditModes) then
       fMasterDataSet.Edit;
@@ -1793,8 +1906,8 @@ begin
   SelectionImagesChanged;
 end;
 
-procedure TfrmContentGoodsEditorDlg.lbImagesDragOver(Sender, Source: TObject; X, Y: Integer; State: TDragState; var Accept:
-  Boolean);
+procedure TfrmContentGoodsEditorDlg.lbImagesDragOver(Sender, Source: TObject; X, Y: Integer; State: TDragState; var
+  Accept: Boolean);
 begin
   Accept := Source = lbImages;
 end;
@@ -1895,8 +2008,8 @@ begin
       S := FormatDateTime('dd.mm.yyyy', imageItem.fDateStart) + ' - ' + FormatDateTime('dd.mm.yyyy', imageItem.fDateEnd);
       DrawText(fWorkBMP.Canvas.Handle, PWideChar(S), Length(S), R, DT_SINGLELINE or DT_VCENTER);
       // 4.1. event image
-      dmAdditions.cxImageList_SWN.Draw(fWorkBMP.Canvas, R.Left - dmAdditions.cxImageList_SWN.Width - 4, R.Top + (R.Bottom - R.Top
-        - dmAdditions.cxImageList_SWN.Height) div 2, 37);
+      dmAdditions.cxImageList_SWN.Draw(fWorkBMP.Canvas, R.Left - dmAdditions.cxImageList_SWN.Width - 4, R.Top + (R.Bottom
+        - R.Top - dmAdditions.cxImageList_SWN.Height) div 2, 37);
     end;
     // image
     R := R2;
@@ -1922,8 +2035,8 @@ begin
       w2 := Round(imageItem.Image.Width / delta);
       h2 := Round(imageItem.Image.Height / delta);
 
-      R := Types.Rect(R.Left + (w - w2) div 2, R.Top + (h - h2) div 2, R.Left + ((w - w2) div 2) + w2, R.Top + ((h - h2) div
-        2) + h2);
+      R := Types.Rect(R.Left + (w - w2) div 2, R.Top + (h - h2) div 2, R.Left + ((w - w2) div 2) + w2, R.Top + ((h - h2)
+        div 2) + h2);
       StretchDraw(R, imageItem.Image);
     end;
   end;
@@ -2274,8 +2387,8 @@ begin
     end;
 
     // insert new images
-    Query.SQL.Text := 'INSERT INTO TS_GOODS_IMAGE (GOODSID, GOODS_IMAGE_ID, IMAGE, DATA_START, DATA_END, ORDERNO, FLAGS) ' +
-      'VALUES (:GOODSID, :imageID, :IMAGE, :DATA_START, :DATA_END, :ORDERNO, :FLAGS)';
+    Query.SQL.Text :=
+      'INSERT INTO TS_GOODS_IMAGE (GOODSID, GOODS_IMAGE_ID, IMAGE, DATA_START, DATA_END, ORDERNO, FLAGS) ' + 'VALUES (:GOODSID, :imageID, :IMAGE, :DATA_START, :DATA_END, :ORDERNO, :FLAGS)';
     Query.ParamByName('GOODSID').AsInteger := fMasterDataSet.FieldByName('GOODSID').AsInteger;
 
     for i := 0 to fImageList.Count - 1 do
@@ -2431,7 +2544,6 @@ begin
   fMasterDataSet.FieldByName('CODE_RU').AsString := fMasterDataSet.FieldByName('CODE').AsString;
 end;
 
-
 function TfrmContentGoodsEditorDlg.GetDefaultTemplateID(GoodsID: Integer): Integer;
 var
   query: TIBCQuery;
@@ -2481,8 +2593,8 @@ begin
 
   if NewPage = tbsAttributes then
   begin
-    frameGoodsAttributes1.LoadData(fMasterDataSet.FieldByName('GOODSID').AsInteger,
-      fMasterDataSet.FieldByName('WEBGOODSTYPE_ID').AsInteger, fMasterDataSet.UpdateTransaction);
+    frameGoodsAttributes1.LoadData(fMasterDataSet.FieldByName('GOODSID').AsInteger, fMasterDataSet.FieldByName('WEBGOODSTYPE_ID').AsInteger,
+      fMasterDataSet.UpdateTransaction);
   end;
 end;
 

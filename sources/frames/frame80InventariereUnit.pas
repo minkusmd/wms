@@ -1,6 +1,6 @@
 unit frame80InventariereUnit;
 {
-  ИНВЕНТАРИЗАЦИЯ. Инвентаризация
+  INVENTARIERE. Inventariere
   DocTypeID = 1968
   Frame Index = 80
 }
@@ -563,7 +563,7 @@ begin
       end
       else if cxGrid_DTDEP_NAME.Focused then
       begin
-         // Склад
+         // Depozit
          Result.Context := ffStock;
          Result.ValueInt := dmDB.IBCQueryDocs.FieldByName('DTDEP').AsInteger;
          Result.ValueStr := dmDB.IBCQueryDocs.FieldByName('DTDEP_NAME').AsString;
@@ -641,7 +641,7 @@ end;
 
 function Tframe80Inventariere.InitFrameID: Integer;
 begin
-     // ИНВЕНТАРИЗАЦИЯ. Инвентаризация
+     // INVENTARIERE. Inventariere
    Result := 80;
 end;
 

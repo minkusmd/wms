@@ -1,6 +1,6 @@
 unit frame60PredvaritelnieZakaziUnit;
 {
-  СЧЕТА. Предварительные заказы
+  FACTURI. Comenzi preliminare
   DocTypeID = 104
   Frame Index = 60
 }
@@ -457,7 +457,7 @@ begin
           // context from Docs
           if cxGridPZDocs_DATA.Focused then
           begin
-               // Дата
+               // Data
                Result.Context := ffDate;
                Result.ValueDateTime := dmDB.IBCQueryDocs.FieldByName('DATA').AsDateTime;
           end;
@@ -518,7 +518,7 @@ end;
 
 function Tframe60PredvaritelnieZakazi.InitFrameID: integer;
 begin
-     // Предварительные заказы
+     // Comenzi preliminare
      Result:=60;
 end;
 
@@ -599,7 +599,7 @@ end;
 
 procedure Tframe60PredvaritelnieZakazi.SetupSecurityItems;
 begin
-     // Предварительные заказы
+     // Comenzi preliminare
      fSECURITY_CanView:=SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_СЧЕТА_ПЗ_Просмотр);
      fSECURITY_CanNew:=SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_СЧЕТА_ПЗ_Создать);
      fSECURITY_CanEdit:=SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_СЧЕТА_ПЗ_Изменить);

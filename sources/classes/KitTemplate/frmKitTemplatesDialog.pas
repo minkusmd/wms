@@ -186,7 +186,7 @@ var S,S2:String;
 begin
      S2:='';
      S:=Format(cMSG_DELETERECORD_KitTemplate_DeleteTemplate,[IBCQueryKit.FieldByName('TITLE').AsString]);
-     if (IBCQueryKit.FieldByName('FLG_PUBLIC').AsInteger=1) then S2:='Этот шаблон для общего пользования!';
+     if (IBCQueryKit.FieldByName('FLG_PUBLIC').AsInteger=1) then S2:='Acest sablon este pentru uz general!';
 
      if ShowAskDialog(cMSG_DELETERECORD_DeleteDocument,S,S2)=mrYes then
      begin
@@ -246,8 +246,8 @@ begin
      SetupQtyFields;
 
      if FSelectMode
-      then dtDialogTitle.Text:='Выберите конфигурацию для использования'
-      else dtDialogTitle.Text:='Управление готовыми конфигурациями';
+      then dtDialogTitle.Text:='Selectati configuratia pentru utilizare'
+      else dtDialogTitle.Text:='Gestionare configuratii gata';
 
      dmDB.CreateGridImageColumnItems(cxGridTemplateItemCol_IMG);
 
@@ -268,7 +268,7 @@ begin
      else
      begin
           btnOk.Visible:=False;
-          btnCancel.Caption:='Закрыть';
+          btnCancel.Caption:='Inchide';
      end;
 end;
 
@@ -296,13 +296,13 @@ end;
 procedure TfrmKitTemplatesDlg.SelectedTemplateChanged;
 var fKitNew,fKitEdit,fKitDelete:Boolean;
 begin
-     fKitNew:=True; // Новый шаблон + Security
+     fKitNew:=True; // Sablon nou + Security
      fKitEdit:=False;
      fKitDelete:=False;
      if (cxGridTemplateTable.DataController.RecNo>0) then
      begin
-          fKitEdit:=IBCQueryKit.FieldByName('USERID').AsInteger=UserID; // Изменить шаблон + Security
-          fKitDelete:=IBCQueryKit.FieldByName('USERID').AsInteger=UserID; // Удалить шаблон + Security
+          fKitEdit:=IBCQueryKit.FieldByName('USERID').AsInteger=UserID; // Modifica sablonul + Security
+          fKitDelete:=IBCQueryKit.FieldByName('USERID').AsInteger=UserID; // Sterge sablonul + Security
      end;
      bbNewTemplate.Enabled:=fKitNew;
      bbModifyTemplate.Enabled:=fKitEdit;
@@ -321,7 +321,7 @@ var qtyDigitsMode:Integer;
 begin
      // Numarul de zecimale in QTY :
      qtyDigitsMode:=AppUserTempConfigStorage.IntValues.GetValue(cSETTINGS_AppQtyDigits,cAppDefault_QtyDigits);
-     // Товарные позиции: Кол-во
+     // Pozitii marfa: Cantitate
      TcxCalcEditProperties(cxGridTemplateItemCol_QTY.Properties).DisplayFormat:=cQTY_DigitsMask[qtyDigitsMode];
      cxGridTemplateItemCol_QTY.Summary.FooterFormat:=cQTY_DigitsMask[qtyDigitsMode];
 end;

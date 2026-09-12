@@ -157,17 +157,17 @@ begin
         try
             JpegImage.LoadFromStream(MemoryStream);
 
-            // Переводим в Bitmap
+            // Convertim in Bitmap
             Bitmap.Assign(JpegImage);
 
-            // Сохраняем Bitmap в MemoryStream
+            // Salvam Bitmap in MemoryStream
             Bitmap.SaveToStream(MemoryStream);
-            MemoryStream.Position := 0;  // Обнуляем позицию потока
+            MemoryStream.Position := 0;  // Resetam pozitia fluxului
 
-            // Загружаем Bitmap в PNG
+            // Incarcam Bitmap in PNG
             PngImage.Assign(Bitmap);
 
-            // Сохраняем PNG в файл
+            // Salvam PNG in fisier
             PngImage.SaveToStream(MemoryStream);
 
         except on e: Exception do

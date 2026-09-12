@@ -8,27 +8,27 @@ implementation
 
 uses Windows, SysUtils, PsAPI;
 
-procedure EnableDebugPrivileges; // Получить привилегии отладчика
+procedure EnableDebugPrivileges; // Obtine privilegiile de debug
 var
   hToken: THandle;
   tp: TTokenPrivileges;
   DebugNameValue: Int64;
   ret: Cardinal;
 begin
-  OpenProcessToken(GetCurrentProcess,TOKEN_ADJUST_PRIVILEGES or TOKEN_QUERY,hToken); // Получаем маркер доступа текущего процесса
-  // Получаем значение отладочных привилегий
+  OpenProcessToken(GetCurrentProcess,TOKEN_ADJUST_PRIVILEGES or TOKEN_QUERY,hToken); // Obtinem markerul de acces al procesului curent
+  // Obtinem valoarea privilegiilor de debug
 
   LookupPrivilegeValue(nil,'SeDebugPrivilege',DebugNameValue);
-  tp.PrivilegeCount := 1; // Включаем отладочные привилегии
+  tp.PrivilegeCount := 1; // Activam privilegiile de debug
   tp.Privileges[0].Luid := DebugNameValue;
   tp.Privileges[0].Attributes := SE_PRIVILEGE_ENABLED;
 
-  // Применяем обновленные привилегии
+  // Aplicam privilegiile actualizate
   AdjustTokenPrivileges(hToken,False,tp,sizeof(tp),nil,ret);
 end;
 
 
-procedure DisableDebugPrivileges; // Отключить привилегии отладчика
+procedure DisableDebugPrivileges; // Dezactiveaza privilegiile de debug
 var
   hToken: THandle;
   tp: TTokenPrivileges;
@@ -39,51 +39,51 @@ begin
   LookupPrivilegeValue(nil,'SeDebugPrivilege',DebugNameValue);
   tp.PrivilegeCount := 1;
   tp.Privileges[0].Luid := DebugNameValue;
-  tp.Privileges[0].Attributes := 0; // Отключаем отладочные привилегии
+  tp.Privileges[0].Attributes := 0; // Dezactivam privilegiile de debug
   AdjustTokenPrivileges(hToken,False,tp,sizeof(tp),nil,ret);
 end;
-// Используем ANSI версию функции GetProcessImageFileName
+// Folosim versiunea ANSI a functiei GetProcessImageFileName
 function GetProcessImageFileName(hProcess: THandle; lpFilename: PAnsiChar;
                                  nSize: DWORD): DWORD; stdcall;
                                  external 'psapi.dll'
                                  name 'GetProcessImageFileNameA';
 
-// Получаем список процессов и заполняем им TStringList
+// Obtinem lista proceselor si completam TStringList cu ea
 function FillProcessesList(var slProcesses: TStringList): Boolean;
 const
-  INCREMENTAL_SIZE = 64; // шаг изменения размера массива aProcessIds
+  INCREMENTAL_SIZE = 64; // pasul de modificare a dimensiunii array-ului aProcessIds
 var
-  aProcessIds: array of DWORD; // Динамический массив для PID'ов
-  iSize: Cardinal; // количесво элементов массива aProcessIds
-  dwBytesReturned: DWORD; // количество байт, возвращенных EnumProcesses
-  iProcessesCount: Integer; // количество PID'ов в массиве aProcessIds
-  i: Integer;  // счетчик цикла
-  hProcess: THandle; // дескриптор открытого процесса
-  sBaseName: array [0..MAX_PATH] of Char; // Буферы для строк
+  aProcessIds: array of DWORD; // Array dinamic pentru PID-uri
+  iSize: Cardinal; // numarul de elemente ale array-ului aProcessIds
+  dwBytesReturned: DWORD; // numarul de octeti returnati de EnumProcesses
+  iProcessesCount: Integer; // numarul de PID-uri in array-ul aProcessIds
+  i: Integer;  // contorul buclei
+  hProcess: THandle; // descriptorul procesului deschis
+  sBaseName: array [0..MAX_PATH] of Char; // Buffere pentru siruri
   sFileName: array [0..MAX_PATH] of Char;
   sImageFileName: array [0..MAX_PATH] of Char;
-  sOut: String; // строка для добавления в TStringList
+  sOut: String; // sirul de adaugat in TStringList
   fFound: boolean;
 begin
   Result := False;
-  if slProcesses = nil then Exit; // Проверяем кооректность параметра
-  EnableDebugPrivileges; // Включаем отладочные привилегии
-  iSize := 0; // инициируем размер массива
+  if slProcesses = nil then Exit; // Verificam corectitudinea parametrului
+  EnableDebugPrivileges; // Activam privilegiile de debug
+  iSize := 0; // initializam dimensiunea array-ului
   repeat
-    inc(iSize, INCREMENTAL_SIZE); // увеличиваем размер массива
-    SetLength(aProcessIds,iSize); // устанавливаем новый размер массива
-    if not EnumProcesses(@aProcessIds[0], //заполняем массив PID'ами
-                         iSize * SizeOf(DWORD), //размер массива в байтах
-                         dwBytesReturned) then Exit; //возращенные байты
-  until dwBytesReturned < (iSize * SizeOf(DWORD)); // если буфера мало, то снова
-  // Считаем количество процессов в массиве
+    inc(iSize, INCREMENTAL_SIZE); // marim dimensiunea array-ului
+    SetLength(aProcessIds,iSize); // setam noua dimensiune a array-ului
+    if not EnumProcesses(@aProcessIds[0], //completam array-ul cu PID-uri
+                         iSize * SizeOf(DWORD), //dimensiunea array-ului in octeti
+                         dwBytesReturned) then Exit; //octetii returnati
+  until dwBytesReturned < (iSize * SizeOf(DWORD)); // daca buffer-ul e mic, incercam din nou
+  // Numaram procesele din array
   iProcessesCount := dwBytesReturned div SizeOf(DWORD);
-  // Получаем в цикле инфу для каждого элемента массива
+  // Obtinem in bucla info pentru fiecare element din array
   fFound := false;
   for i := 0 to iProcessesCount-1 do
   begin
        sOut := '';
-    // Открываем процесс по PID'у с флагами для получения информации
+    // Deschidem procesul dupa PID cu flag-uri pentru obtinerea informatiei
     hProcess := OpenProcess(PROCESS_QUERY_INFORMATION or PROCESS_VM_READ,
                             False, aProcessIds[i]);
     if hProcess <> 0 then
@@ -100,15 +100,15 @@ begin
            if UpperCase(SBaseName)= 'COLLABMAN.EXE' then
            fFound := true;
 
-      CloseHandle(hProcess);  // Обязательно закрываем процесс
+      CloseHandle(hProcess);  // Inchidem obligatoriu procesul
     end;
     if length(sout)>0 then
-    slProcesses.Add(UpperCase(sOut)); // Добавляем строчку в TStringList
+    slProcesses.Add(UpperCase(sOut)); // Adaugam randul in TStringList
   end;
-  SetLength(aProcessIds,0); // Освобождаем память
-  DisableDebugPrivileges; // Отключаем отладочные привилегии
+  SetLength(aProcessIds,0); // Eliberam memoria
+  DisableDebugPrivileges; // Dezactivam privilegiile de debug
 
-  Result := FFound; // Функция выполнилась успешно
+  Result := FFound; // Functia s-a executat cu succes
 end;
 
 

@@ -1,6 +1,6 @@
 unit frame43CashTransferUnit;
 {
-  КАССА. Передача денег
+  CASA. Transfer bani
   DocTypeID = 1427
   Frame Index = 43
 }
@@ -172,14 +172,14 @@ begin
      begin
           if cxGridMyTransfers_DATA_DT.Focused then
           begin
-               // Дата
+               // Data
                Result.Context := ffDate;
                Result.ValueDateTime := IBCQueryMyTransfers.FieldByName('DATA_DT').AsDateTime;
           end
           else
               if cxGridMyTransfers_CT_NAME.Focused then
               begin
-                   // В фирму
+                   // La firma
                    Result.Context := ffCustomer;
                    Result.ValueInt := IBCQueryMyTransfers.FieldByName('CT').AsInteger;
                    Result.ValueStr := IBCQueryMyTransfers.FieldByName('CT_NAME').AsString;
@@ -199,7 +199,7 @@ end;
 
 function Tframe43CashTransfer.InitFrameID: integer;
 begin
-     Result:=43;  // КАССА - Передача денег
+     Result:=43;  // CASA - Transfer bani
 end;
 
 procedure Tframe43CashTransfer.OpenData(const FrameDataFilterInfo: TFrameDataFilteringInfo);

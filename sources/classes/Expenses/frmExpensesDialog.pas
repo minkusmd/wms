@@ -113,7 +113,7 @@ end;
 
 procedure TfrmExpensesDlg.DeleteExpense;
 begin
-     if ShowAskDialog('Удаление записи',Format('Вы хотите удалить расход "%s"?',[IBCQueryExp.FieldByName('DETAILS').AsString]))<>mrYes then Exit;
+     if ShowAskDialog('Stergere inregistrare',Format('Doriti sa stergeti cheltuiala "%s"?',[IBCQueryExp.FieldByName('DETAILS').AsString]))<>mrYes then Exit;
 
      IBCQueryExp.UpdateTransaction.StartTransaction;
      try

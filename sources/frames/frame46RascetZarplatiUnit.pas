@@ -1,6 +1,6 @@
 unit frame46RascetZarplatiUnit;
 {
-  ЗАРПЛАТА. Расчет Зарплаты
+  SALARIU. Calcul Salariu
   DocTypeID = 1514
   Frame Index = 46
 }
@@ -184,7 +184,7 @@ begin
   if SWNSecurityManager.LoggedUser.IsInAdminGroup then
     DoOpenDocument
   else
-    ShowInfoDialog('SWN сообщение!', 'Ошибка базы данных!');
+    ShowInfoDialog('SWN mesaj!', 'Eroare baza de date!');
 end;
 
 procedure Tframe46RascetZarplati.bbFillCustomersClick(Sender: TObject);
@@ -199,12 +199,12 @@ end;
 
 procedure Tframe46RascetZarplati.bbRecalcMissedHoursClick(Sender: TObject);
 begin
-  if ShowAskDialog('Пересчет пропущеных часов', 'Вы хотите пересчитать пропущеные часы для всех пользователей?', 'Текущие значение будут утеряны.') = mrYes then
+  if ShowAskDialog('Recalcul ore omise', 'Doriti sa recalculati orele omise pentru toti utilizatorii?', 'Valorile curente vor fi pierdute.') = mrYes then
   begin
     if DoRecalcMissedHoursDB(dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger) then
     begin
       IBCQueryEMP.Refresh;
-      ShowInfoDialog('Пересчет пропущеных часов', 'Готово.');
+      ShowInfoDialog('Recalcul ore omise', 'Gata.');
     end;
   end;
 end;
@@ -391,9 +391,9 @@ var
 begin
   s := '';
   if cxGridCustomereTable.DataController.RecordCount > 0 then
-    s := 'Текущие записи будут удаленны!';
+    s := 'Inregistrarile curente vor fi sterse!';
 
-  if ShowAskDialog('Привести контрагентов', 'Вы хотите заполнить список всеми работниками из фирмы документа?', s) = mrYes then
+  if ShowAskDialog('Adauga contraagenti', 'Doriti sa completati lista cu toti angajatii din firma documentului?', s) = mrYes then
   begin
     if DoFillCustomersDB(dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger) then
     begin
@@ -471,7 +471,7 @@ end;
 
 procedure Tframe46RascetZarplati.DoOpenDocument;
 begin
-  if ShowAskDialog('Открыть документ', 'Вы хотите открыть документ?') = mrYes then
+  if ShowAskDialog('Deschide documentul', 'Doriti sa deschideti documentul?') = mrYes then
   begin
     if DoOpenDocumentDB(dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger) then
       dmDB.IBCQueryDocs.Refresh;
@@ -549,7 +549,7 @@ begin
           // context from Docs
     if cxGridZap_DATA.Focused then
     begin
-               // Дата
+               // Data
       Result.Context := ffDate;
       Result.ValueDateTime := dmDB.IBCQueryDocs.FieldByName('DATA').AsDateTime;
     end
@@ -579,7 +579,7 @@ end;
 
 function Tframe46RascetZarplati.InitFrameID: integer;
 begin
-  Result := 46;  // ЗАРПЛАТА - Расчет Зарплаты
+  Result := 46;  // SALARIU - Calcul Salariu
 end;
 
 procedure Tframe46RascetZarplati.ModifyRecord;
@@ -679,7 +679,7 @@ end;
 
 procedure Tframe46RascetZarplati.DoCalcSalary;
 begin
-  if ShowAskDialog('Расчет зарплаты', 'Вы хотите расчитать зарплату для всех?') = mrYes then
+  if ShowAskDialog('Calcul salariu', 'Doriti sa calculati salariul pentru toti?') = mrYes then
   begin
     if DoCalcSalaryDB(dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger) then
       IBCQueryEMP.Refresh;
@@ -724,7 +724,7 @@ end;
 
 procedure Tframe46RascetZarplati.DoCloseDocument;
 begin
-  if ShowAskDialog('Закрыть документ', 'Вы хотите закрыть документ?') = mrYes then
+  if ShowAskDialog('Inchide documentul', 'Doriti sa inchideti documentul?') = mrYes then
   begin
     if DoCloseDocumentDB(dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger) then
       dmDB.IBCQueryDocs.Refresh;

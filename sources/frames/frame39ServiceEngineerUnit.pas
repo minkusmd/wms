@@ -1,6 +1,6 @@
 unit frame39ServiceEngineerUnit;
 {
-  СЕРВИС. Инжинер сервиса
+  SERVICE. Inginer service
   DocTypeID = 1408
   Frame Index = 39
 }
@@ -515,11 +515,11 @@ var
 begin
   flg_serial := IBC_JurnalPayer.FieldByName('GOODS_SERIAL_TYPE_ID').AsInteger;
 
-  // Серийный учет
+  // Evidenta seriala
   if flg_serial = cSYSS_GOODS_SERIAL_TYPE_Серийный_учет then
     ShowSelectGoodsSerialNumberDialog_Payer(IBCDocs_Pay.FieldByName('FLG_SHIP').AsInteger = 1)
   else
-    // Партийный учет
+    // Evidenta pe partizi
  if flg_serial = cSYSS_GOODS_SERIAL_TYPE_Партийный_учет then
     ShowSelectGoodsPartNumberDialog_Payer(IBCDocs_Pay.FieldByName('FLG_SHIP').AsInteger = 1);
 end;
@@ -581,7 +581,7 @@ procedure Tframe39ServiceEngineer.bbCreateDocumentClick(Sender: TObject);
 var
   q: TIBCQuery;
 begin
-  if ShowAskDialog('Создать Расходную Накладную', Format('Вы хотите создать Расходную Накладную на имя "%s"?', [dmDB.IBCQueryIncidente.FieldByName('DOC_CUSTOMER').AsString])) <> mrYes then
+  if ShowAskDialog('Creare Nakladna de iesire', Format('Doriti sa creati Nakladna de iesire pe numele "%s"?', [dmDB.IBCQueryIncidente.FieldByName('DOC_CUSTOMER').AsString])) <> mrYes then
     Exit;
 
   q := TIBCQuery.Create(Self);
@@ -638,11 +638,11 @@ var
 begin
   flg_serial := IBCQueryJurnal.FieldByName('GOODS_SERIAL_TYPE_ID').AsInteger;
 
-  // Серийный учет
+  // Evidenta seriala
   if flg_serial = cSYSS_GOODS_SERIAL_TYPE_Серийный_учет then
     ShowSelectGoodsSerialNumberDialog(IBCQueryDocs.FieldByName('FLG_SHIP').AsInteger = 1)
   else
-    // Партийный учет
+    // Evidenta pe partizi
  if flg_serial = cSYSS_GOODS_SERIAL_TYPE_Партийный_учет then
     ShowSelectGoodsPartNumberDialog(IBCQueryDocs.FieldByName('FLG_SHIP').AsInteger = 1);
 end;
@@ -683,7 +683,7 @@ begin
     try
       // dialog.CustomFilter:=dialog.CustomFilter-[cfCustomers];
       dmDB.IBCQueryIncidente.Edit;
-      if dialog.SelectCustomer(dmDB.IBCQueryIncidente.FieldByName('PAYERID').AsInteger, False, 0, 'Выбор плательщика для Заявки на гарантийный ремонт') then
+      if dialog.SelectCustomer(dmDB.IBCQueryIncidente.FieldByName('PAYERID').AsInteger, False, 0, 'Selectare platitor pentru Cererea de reparatie in garantie') then
       begin
 
         dmDB.IBCQueryIncidente.FieldByName('PAYERID').AsInteger := dialog.CustomerID;
@@ -741,7 +741,7 @@ procedure Tframe39ServiceEngineer.btnRashodPayerClick(Sender: TObject);
 var
   q: TIBCQuery;
 begin
-  if ShowAskDialog('Создать Расходную Накладную на плательщика', Format('Вы хотите создать Расходную Накладную на плательщика "%s"?', [dmDB.IBCQueryIncidente.FieldByName('PAYER_NAME').AsString])) <> mrYes then
+  if ShowAskDialog('Creare Nakladna de iesire pe platitor', Format('Doriti sa creati Nakladna de iesire pe platitor "%s"?', [dmDB.IBCQueryIncidente.FieldByName('PAYER_NAME').AsString])) <> mrYes then
     Exit;
 
   q := TIBCQuery.Create(Self);
@@ -960,7 +960,7 @@ end;
 
 function Tframe39ServiceEngineer.InitFrameID: Integer;
 begin
-  Result := 39; // СЕРВИС - Инжинер сервиса
+  Result := 39; // SERVICE - Inginer service
   dmDB.CreateGridImageColumnItems(cxGridRashod_IMG);
   dmDB.CreateGridImageColumnItems(cxGridDocPayerGoods_IMG);
 end;
@@ -1396,7 +1396,7 @@ begin
     begin
       Result := SWNSecurityManager.TestUserPassword(UserID, dialog.Password);
       if not Result then
-        ShowErrorDialog('Ошибка', 'Неправильный пароль!');
+        ShowErrorDialog('Eroare', 'Parola incorecta!');
     end;
   finally
     dialog.Free;

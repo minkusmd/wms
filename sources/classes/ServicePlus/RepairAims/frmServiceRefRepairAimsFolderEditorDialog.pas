@@ -51,7 +51,7 @@ begin
   Result := False;
 
   if fMasterDataSet.FieldByName('TITLE').IsNull or (fMasterDataSet.FieldByName('TITLE').AsString = '') then
-    AddErrorToStr(Errors, 'Название группы!');
+    AddErrorToStr(Errors, 'Denumirea grupului!');
 
   if Errors = '' then
     Result := true
@@ -89,7 +89,7 @@ begin
   try
     if fCreateNewScopFolder then
     begin
-      dtDialogTitle.Text := 'Создание новой группы целей';
+      dtDialogTitle.Text := 'Creare grup nou de obiective';
       fMasterDataSet.Insert;
       fMasterDataSet.FieldByName('PARENTID').AsInteger := fParentID;
       fMasterDataSet.FieldByName('FLG_ENABLED').AsInteger := 1;
@@ -97,7 +97,7 @@ begin
     end
     else
     begin
-      dtDialogTitle.Text := 'Изменение группы';
+      dtDialogTitle.Text := 'Modificare grup';
       fMasterDataSet.Edit;
     end;
   except

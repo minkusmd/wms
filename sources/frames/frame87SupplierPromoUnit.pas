@@ -1,6 +1,6 @@
 unit frame87SupplierPromoUnit;
 
-// ÐÅÊËÀÌÀ - ןנמלמ ךמהû
+// PUBLICITATE - coduri promo
 
 interface
 

@@ -60,11 +60,11 @@ begin
      Result:=False;
      ErrorStr:='';
 
-     if fMasterDataSet.FieldByName('FILTERID').IsNull then AddErrorToStr(ErrorStr,'Код!');
+     if fMasterDataSet.FieldByName('FILTERID').IsNull then AddErrorToStr(ErrorStr,'Cod!');
      if (fMasterDataSet.FieldByName('FILTERNAME').IsNull) or (Trim(fMasterDataSet.FieldByName('FILTERNAME').AsString)='')
       then AddErrorToStr(ErrorStr,'Denumirea filtrului!');
      if (fMasterDataSet.FieldByName('FILTERNAME_RUS').IsNull) or (Trim(fMasterDataSet.FieldByName('FILTERNAME_RUS').AsString)='')
-      then AddErrorToStr(ErrorStr,'Название фильтра!');
+      then AddErrorToStr(ErrorStr,'Denumirea filtrului!');
 
      if ErrorStr='' then Result:=True
      else ShowErrorDialog(cMSG_GeneralInputError_Title,cMSG_GeneralInputError_Text,ErrorStr);
@@ -105,14 +105,14 @@ begin
              fMasterDataSet.Insert;
              if fIsFolder then
              begin
-                  dtDialogTitle.Text:='Создание новой папки';
+                  dtDialogTitle.Text:='Creare folder nou';
                   fMasterDataSet.FieldByName('FLG_FOLDER').AsInteger:=1;
                   fMasterDataSet.FieldByName('FLG_ORDINARY_FILTER').AsInteger := 0;
                   chkFLG_ORDINARY_FILTER.Enabled := False;
              end
              else
              begin
-                  dtDialogTitle.Text:='Создание нового фильтра';
+                  dtDialogTitle.Text:='Creare filtru nou';
                   fMasterDataSet.FieldByName('FLG_FOLDER').AsInteger:=0;
                   chkFLG_ORDINARY_FILTER.Enabled := True;
              end;
@@ -123,8 +123,8 @@ begin
         begin
              // edit record
              if fMasterDataSet.FieldByName('FLG_FOLDER').AsInteger=0
-              then dtDialogTitle.Text:='Изменение фильтра'
-              else dtDialogTitle.Text:='Изменение папки';
+              then dtDialogTitle.Text:='Modificare filtru'
+              else dtDialogTitle.Text:='Modificare folder';
 
              fMasterDataSet.Edit;
         end;

@@ -73,10 +73,10 @@ begin
      Result:=False;
      ErrorStr:='';
 
-     if fMasterDataSet.FieldByName('CUSTOMERID').IsNull or (fMasterDataSet.FieldByName('CUSTOMERID').AsInteger=-1) then AddErrorToStr(ErrorStr,'Фирма!');
-     if fMasterDataSet.FieldByName('ADRESA').IsNull or (fMasterDataSet.FieldByName('ADRESA').AsString='') then AddErrorToStr(ErrorStr,'Адрес!');
-     if fMasterDataSet.FieldByName('TELEFOANE').IsNull or (fMasterDataSet.FieldByName('TELEFOANE').AsString='') then AddErrorToStr(ErrorStr,'Телефоны!');
-     if fMasterDataSet.FieldByName('EMAIL').IsNull or (fMasterDataSet.FieldByName('EMAIL').AsString='') then AddErrorToStr(ErrorStr,'Е-мэйл!');
+     if fMasterDataSet.FieldByName('CUSTOMERID').IsNull or (fMasterDataSet.FieldByName('CUSTOMERID').AsInteger=-1) then AddErrorToStr(ErrorStr,'Firma!');
+     if fMasterDataSet.FieldByName('ADRESA').IsNull or (fMasterDataSet.FieldByName('ADRESA').AsString='') then AddErrorToStr(ErrorStr,'Adresa!');
+     if fMasterDataSet.FieldByName('TELEFOANE').IsNull or (fMasterDataSet.FieldByName('TELEFOANE').AsString='') then AddErrorToStr(ErrorStr,'Telefoane!');
+     if fMasterDataSet.FieldByName('EMAIL').IsNull or (fMasterDataSet.FieldByName('EMAIL').AsString='') then AddErrorToStr(ErrorStr,'E-mail!');
 
      if ErrorStr='' then Result:=True
      else ShowErrorDialog(cMSG_GeneralInputError_Title, cMSG_GeneralInputError_Text, ErrorStr);
@@ -137,7 +137,7 @@ begin
 
         if fCreateNewMagazin then
         begin
-             dtDialogTitle.Text:='Создание нового магазина';
+             dtDialogTitle.Text:='Creare magazin nou';
              fMasterDataSet.Insert;
              fMasterDataSet.FieldByName('FIRMAID').AsInteger:=fFirmaID;
              fMasterDataSet.FieldByName('CITYID').AsInteger:=fCityID;
@@ -145,7 +145,7 @@ begin
         end
         else
         begin
-             dtDialogTitle.Text:='Изменение записи';
+             dtDialogTitle.Text:='Modificare inregistrare';
              fMasterDataSet.Edit;
         end;
 

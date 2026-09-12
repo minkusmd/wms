@@ -91,7 +91,7 @@ end;
 
 procedure TfrmGoodsTypeNPSC_APList_Editor_Dlg.DeleteParam;
 begin
-     if ShowAskDialog('Удаление параметра',Format('Вы хотите удалить парамет "%s"?',[IBCQueryParams.FieldByName('PARAM_NAME_RUS').asString]))=mrYes
+     if ShowAskDialog('Stergere parametru',Format('Doriti sa stergeti parametrul "%s"?',[IBCQueryParams.FieldByName('PARAM_NAME_RUS').asString]))=mrYes
        then DoDeleteSelectedParam;
 end;
 

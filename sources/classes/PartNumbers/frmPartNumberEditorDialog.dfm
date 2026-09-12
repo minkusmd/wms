@@ -2,7 +2,7 @@
   Left = 0
   Top = 0
   BorderStyle = bsDialog
-  Caption = 'Партии'
+  Caption = 'Loturi'
   ClientHeight = 498
   ClientWidth = 461
   Color = clBtnFace
@@ -21,7 +21,7 @@
     Top = 0
     Width = 461
     Height = 64
-    Title = 'Партии'
+    Title = 'Loturi'
     Text = ''
     FontTitle.Charset = DEFAULT_CHARSET
     FontTitle.Color = clWindowText
@@ -58,7 +58,7 @@
       Top = 22
       Width = 77
       Height = 15
-      Caption = 'Номер партии'
+      Caption = 'Numar lot'
       Transparent = True
     end
     object cxLabel2: TLabel
@@ -66,7 +66,7 @@
       Top = 109
       Width = 106
       Height = 15
-      Caption = 'Гарантия производителя'
+      Caption = 'Garantie producator'
       Transparent = True
     end
     object cxLabel3: TLabel
@@ -74,7 +74,7 @@
       Top = 138
       Width = 89
       Height = 15
-      Caption = 'Гарантия продавца'
+      Caption = 'Garantie vanzator'
       Transparent = True
     end
     object cxLabel4: TLabel
@@ -90,7 +90,7 @@
       Top = 80
       Width = 48
       Height = 15
-      Caption = 'Количество'
+      Caption = 'Cantitate'
       Transparent = True
     end
     object cxLabel6: TLabel
@@ -98,7 +98,7 @@
       Top = 51
       Width = 67
       Height = 15
-      Caption = 'Сумма акцизов'
+      Caption = 'Suma accizelor'
       Transparent = True
     end
     object cxLabel7: TLabel
@@ -106,7 +106,7 @@
       Top = 51
       Width = 20
       Height = 15
-      Caption = 'лей'
+      Caption = 'lei'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clGrayText
       Font.Height = -12
@@ -120,7 +120,7 @@
       Top = 168
       Width = 78
       Height = 15
-      Caption = 'Страна происхождения'
+      Caption = 'Tara de origine'
       Transparent = True
     end
     object Label2: TLabel
@@ -128,7 +128,7 @@
       Top = 198
       Width = 59
       Height = 15
-      Caption = 'Производитель'
+      Caption = 'Producator'
       Transparent = True
     end
     object Label3: TLabel
@@ -136,7 +136,7 @@
       Top = 227
       Width = 63
       Height = 15
-      Caption = 'Действителен до'
+      Caption = 'Valabil pina la'
       Transparent = True
     end
     object sbCreateValidUntilDate: TSpeedButton
@@ -144,7 +144,7 @@
       Top = 224
       Width = 126
       Height = 23
-      Caption = 'гарантия продавца'
+      Caption = 'garantie vanzator'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
       Font.Height = -11
@@ -341,7 +341,7 @@
     Width = 90
     Height = 29
     Anchors = [akRight, akBottom]
-    Caption = 'ОК'
+    Caption = 'OK'
     Default = True
     ModalResult = 1
     TabOrder = 3
@@ -353,7 +353,7 @@
     Height = 29
     Anchors = [akRight, akBottom]
     Cancel = True
-    Caption = 'Отмена'
+    Caption = 'Anuleaza'
     ModalResult = 2
     TabOrder = 2
   end

@@ -1,6 +1,6 @@
 unit frame58Unit;
 {
-  КАССОВЫЕ ОПЕРАЦИИ. Корректировка кассы
+  OPERATIUNI DE CASA. Corectare casa
   DocTypeID = 2003
   Frame Index = 58
 }
@@ -195,7 +195,7 @@ end;
 
 procedure Tframe58.DoCloseDocument;
 begin
-     if ShowAskDialog('Закрыть документ','Вы хотите закрыть документ?')=mrYes then
+     if ShowAskDialog('Inchide documentul','Doriti sa inchideti documentul?')=mrYes then
      begin
           if DoCloseDocumentDB(dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger) then dmDB.IBCQueryDocs.Refresh;
      end;
@@ -260,7 +260,7 @@ end;
 
 procedure Tframe58.DoOpenDocument;
 begin
-     if ShowAskDialog('Открыть документ','Вы хотите открыть документ?')=mrYes then
+     if ShowAskDialog('Deschide documentul','Doriti sa deschideti documentul?')=mrYes then
      begin
           if DoOpenDocumentDB(dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger) then dmDB.IBCQueryDocs.Refresh;
      end;
@@ -327,7 +327,7 @@ end;
 
 function Tframe58.InitFrameID: integer;
 begin
-     // Корректировка кассы
+     // Corectare casa
      Result:=58;
 end;
 

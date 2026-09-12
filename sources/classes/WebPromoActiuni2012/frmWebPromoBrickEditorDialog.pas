@@ -189,14 +189,14 @@ begin
         if FCreateNewRecord then
         begin
              // new
-             dtDialogTitle.Text:='Создание нового рекламного блока';
+             dtDialogTitle.Text:='Creare bloc publicitar nou';
              fMasterDataSet.Insert;
              fMasterDataSet.FieldByName('PROMOACTIONID').AsInteger:=FPromoActionID;
         end
         else
         begin
              // edit
-             dtDialogTitle.Text:='Изменение данных';
+             dtDialogTitle.Text:='Modificare date';
              fMasterDataSet.Edit;
              LoadLinksList(fMasterDataSet.FieldByName('PAIMAGEBRICKID').AsInteger);
         end;

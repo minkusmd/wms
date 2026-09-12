@@ -59,7 +59,7 @@ begin
            Query.ExecSQL;
            while(Not Query.Eof) do
            begin
-                mmInfo1.Lines.Add(Format('%d [%s] - готово!',[Query.Fields[0].AsInteger,Query.Fields[1].asString]));
+                mmInfo1.Lines.Add(Format('%d [%s] - gata!',[Query.Fields[0].AsInteger,Query.Fields[1].asString]));
                 Query.Next;
            end;
            Query.Transaction.Commit;
@@ -72,7 +72,7 @@ begin
      finally
         Query.Free;
      end;
-     mmInfo1.Lines.Add('Готово!');
+     mmInfo1.Lines.Add('Gata!');
 end;
 
 procedure TfrmNacislenieZarplatiToolsDlg.dtpDateChange(Sender: TObject);
@@ -110,7 +110,7 @@ begin
                 if (Query.Fields[2].AsInteger=1) then
                 begin
                      inc(bad);
-                     mmInfo1.Lines.Add(Format('%d [%s] - есть документ на зарплату!',[Query.Fields[0].AsInteger,Query.Fields[1].asString]));
+                     mmInfo1.Lines.Add(Format('%d [%s] - exista document de salariu!',[Query.Fields[0].AsInteger,Query.Fields[1].asString]));
                 end;
 
                 Query.Next;
@@ -123,7 +123,7 @@ begin
      end;
      if (total>=0) and (bad=0) then
      begin
-          mmInfo1.Lines.Add('Нет документов Начисление зарплаты!');
+          mmInfo1.Lines.Add('Nu exista documente Calcul salariu!');
           btnGen1.Enabled:=True;
      end
      else

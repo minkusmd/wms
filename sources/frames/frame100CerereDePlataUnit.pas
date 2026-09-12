@@ -1,6 +1,6 @@
 unit frame100CerereDePlataUnit;
 
-// Заявка на оплату
+// Cerere de plata
 // DocTypeID = 3363
 // Frame Index = 100
 
@@ -344,14 +344,14 @@ begin
           // context from Docs
         if cxGridBankBPPLDBTableCtName.Focused then
         begin
-               // Получатель
+               // Beneficiar
             Result.Context := ffCustomer;
             Result.ValueInt := dmDB.IBCQueryDocs.FieldByName('CT').AsInteger;
             Result.ValueStr := dmDB.IBCQueryDocs.FieldByName('CT_NAME').AsString;
         end
         else if cxGridBankBPPL_DATA.Focused then
         begin
-               // Дата
+               // Data
             Result.Context := ffDate;
             Result.ValueDateTime := dmDB.IBCQueryDocs.FieldByName('DATA').AsDateTime;
         end
@@ -482,9 +482,9 @@ begin
         fDocModify := fSYS_Edit and not FLG_CLOSED or fSYS_View; // Edit Document
         fDocDelete := fSYS_Delete and not FLG_CLOSED; // Delete Document
 
-        fCloseDoc := not FLG_CLOSED; // Провести
-        fOpenDoc := FLG_CLOSED;      // Отменить проводку
-        fCalcComs := FLG_CLOSED;     // Расчитать комиссион банковского платежа
+        fCloseDoc := not FLG_CLOSED; // Confirma
+        fOpenDoc := FLG_CLOSED;      // Anuleaza inregistrarea
+        fCalcComs := FLG_CLOSED;     // Calculeaza comisionul platii bancare
     end;
      // doc
     ButtonStateChanged(fbtADD, fDocNew);

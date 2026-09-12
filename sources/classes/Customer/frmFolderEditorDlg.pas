@@ -59,9 +59,9 @@ begin
   with fMasterDataSet do
   begin
     if (FieldByName('NAME').IsNull) or (FieldByName('NAME').AsString = '') then
-      AddErrorToStr(ErrorStr, 'Название папки!');
+      AddErrorToStr(ErrorStr, 'Denumirea folderului!');
     if (FieldByName('CUSTOMER_TYPE_ID').IsNull) or (FieldByName('CUSTOMER_TYPE_ID').AsString = '') then
-      AddErrorToStr(ErrorStr, 'Тип папки не указан!');
+      AddErrorToStr(ErrorStr, 'Tipul folderului nu este indicat!');
   end;
   if ErrorStr = '' then
     Result := True
@@ -104,7 +104,7 @@ begin
 
     if fCreateNewRecord then
     begin
-      dtDialogTitle.Text := 'Изменение папки';
+      dtDialogTitle.Text := 'Modificare folder';
 
       fMasterDataSet.Append;
 
@@ -115,7 +115,7 @@ begin
     end
     else
     begin
-      dtDialogTitle.Text := 'Изменение папки';
+      dtDialogTitle.Text := 'Modificare folder';
 
       fMasterDataSet.Edit;
     end;

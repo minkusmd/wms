@@ -1,6 +1,6 @@
 unit frame82Livrari;
 
-// Доставка
+// Livrare
 // DocTypeID = 3232
 // Frame Index = 1
 
@@ -585,14 +585,14 @@ begin
 //          // context from Docs
 //    if cxGridCasaPKO_CT_NAME.Focused then
 //    begin
-//        // Плательщик
+//        // Platitor
 //      Result.Context := ffCustomer;
 //      Result.ValueInt := dmDB.IBCQueryDocs.FieldByName('CT').AsInteger;
 //      Result.ValueStr := dmDB.IBCQueryDocs.FieldByName('CT_NAME').AsString;
 //    end
 //    else if cxGridCasaPKO_DATA.Focused then
 //    begin
-//        // Дата
+//        // Data
 //      Result.Context := ffDate;
 //      Result.ValueDateTime := dmDB.IBCQueryDocs.FieldByName('DATA').AsDateTime;
 //    end;

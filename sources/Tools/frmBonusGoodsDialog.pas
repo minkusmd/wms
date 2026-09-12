@@ -155,7 +155,7 @@ end;
 
 procedure TfrmBonusGoodsDlg.DoDeleteRecord;
 begin
-     if ShowAskDialog('Удаление товара',Format('Вы хотите удалить "%s" ?',[IBCQueryBonus.FieldByName('GOODSNAME').AsString]))=mrYes then
+     if ShowAskDialog('Stergere produs',Format('Doriti sa stergeti "%s" ?',[IBCQueryBonus.FieldByName('GOODSNAME').AsString]))=mrYes then
      begin
           IBCQueryBonus.UpdateTransaction.StartTransaction;
           try

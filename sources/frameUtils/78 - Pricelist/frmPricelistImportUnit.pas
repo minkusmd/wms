@@ -882,7 +882,7 @@ begin
         end
         else
         begin
-          // пропускать товары с нулевыи индикативом ?
+          // a omite marfa cu indicativ zero ?
           ATable.Cells[I, 0].Style.Brush.BackgroundColor := clRed;
           ATable.Cells[I, 0].Style.Brush.ForegroundColor := clWhite;
           Result := False;

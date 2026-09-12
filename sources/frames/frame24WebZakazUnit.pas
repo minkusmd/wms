@@ -1,6 +1,6 @@
 unit frame24WebZakazUnit;
 {
-  WEB. Web Заказ
+  WEB. Comanda Web
   DocTypeID = 134
   Frame Index = 24
 }
@@ -337,10 +337,10 @@ end;
 
 procedure Tframe24WebZakaz.CreateSciotNaOplatu;
 begin
-     // Создать "Счет на оплату"
+     // Creare "Factura de plata"
   if ShowAskDialog('Web-Order"', 'Crearea documentului "PROFORMA"?') = mrYes then
   begin
-    if dmDB.CreateSciotNaOplatu(dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger) then
+    if dmDB.CreateProforma(dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger) then
     begin
       DoCloseDocument;
       ShowInfoDialog('Web-Order', 'Documentul "PROFORMA" creata cu succes!');
@@ -607,7 +607,7 @@ begin
 
   if cxGridComponentsTable.Site.Focused then
   begin
-          // context from Jurnal: Код + Наименование
+          // context from Jurnal: Cod + Denumire
     Result.Context := ffGoods;
     Result.ValueInt := dmDB.IBCQueryJurnal.FieldByName('GOODSID').AsInteger;
     Result.ValueStr := dmDB.IBCQueryJurnal.FieldByName('GOODS_NAME').AsString;
@@ -617,14 +617,14 @@ begin
               // context from Docs
     if cxGridWZ_CT_NAME.Focused then
     begin
-                   // Контрагент
+                   // Contraagent
       Result.Context := ffCustomer;
       Result.ValueInt := dmDB.IBCQueryDocs.FieldByName('CT').AsInteger;
       Result.ValueStr := dmDB.IBCQueryDocs.FieldByName('CT_NAME').AsString;
     end
     else if cxGridWZ_DATA.Focused then
     begin
-                       // Дата
+                       // Data
       Result.Context := ffDate;
       Result.ValueDateTime := dmDB.IBCQueryDocs.FieldByName('DATA').AsDateTime;
     end
@@ -681,7 +681,7 @@ end;
 
 function Tframe24WebZakaz.InitFrameID: integer;
 begin
-  Result := 24; // WEB. Web Заказ
+  Result := 24; // WEB. Comanda Web
 
   dmDB.CreateGridImageColumnItems(cxGridDBCol_IMG);
   SetupQtyFields;
@@ -757,7 +757,7 @@ end;
 
 procedure Tframe24WebZakaz.SetupQtyFields;
 begin
-     // Кол-во
+     // Cantitate
   TcxCalcEditProperties(cxGridDBCol_QTY.Properties).DisplayFormat := QtyDisplayFormat;
   cxGridDBCol_QTY.Summary.FooterFormat := QtyDisplayFormat;
 end;

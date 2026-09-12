@@ -323,7 +323,7 @@ begin
      if IBCQueryIncidents.FieldByName('DEFECT_DSC').IsNull or (IBCQueryIncidents.FieldByName('DEFECT_DSC').AsString='') then AddErrorToStr(ErrorStr,'Описание дефекта!');
 
      if ErrorStr='' then Result:=True
-     else ShowErrorDialog('Ошибка!','Опишите полностью инцидент для создания задачи.',ErrorStr);
+     else ShowErrorDialog('Eroare!','Опишите полностью инцидент для создания задачи.',ErrorStr);
 end;
 
 procedure Tframe36ServiceCardClient.CloseAllData;
@@ -366,9 +366,9 @@ procedure Tframe36ServiceCardClient.cxGridTasksDBTableStylesGetContentStyle(Send
   AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
 var TaskStatus:integer;
 begin
-     // Статус задач в сервисе
-     // 6301 - В ожидание
-     // 6302 - В исполнение
+     // Status sarcini in service
+     // 6301 - In asteptare
+     // 6302 - In executare
 
      TaskStatus:=ARecord.Values[cxGridTasksDB_STATUS_ID.Index];
      case TaskStatus of
@@ -533,7 +533,7 @@ end;
 
 function Tframe36ServiceCardClient.InitFrameID: integer;
 begin
-     Result:=36; // СЕРВИС - Сервисная карта клиента
+     Result:=36; // SERVICE - Сервисная карта клиента
 end;
 
 procedure Tframe36ServiceCardClient.SelectCustomer(const CustomerID: integer);
@@ -615,11 +615,11 @@ begin
           if IBCQueryIncidents.FieldByName('FLG_INCIDENT_CLOSED').AsInteger = 0 then  // FLG_INCIDENT_CLOSED
           begin
                fInDsc:=IBCQueryIncidents.FieldByName('STATUS_ID').AsInteger = 6101; // Описание инцидента
-               fCreateTask:=(IBCQueryIncidents.FieldByName('STATUS_ID').AsInteger = 6101); // Создать задачу
-               fChangeStatus:=True; // Изменить статус
+               fCreateTask:=(IBCQueryIncidents.FieldByName('STATUS_ID').AsInteger = 6101); // Creare задачу
+               fChangeStatus:=True; // Modifica статус
 
-               fDocNew:=True; // Новый расход на сервис
-               fIncidentNew:=True; // Новый звонок
+               fDocNew:=True; // Nou расход на сервис
+               fIncidentNew:=True; // Nou звонок
           end;
      end;
 

@@ -503,14 +503,14 @@ begin
              cxGridSelSN.Enabled:=False;
              cmbKitSN.Enabled:=False;
              cmbKitSN.Properties.DropDownListStyle:=lsEditList;
-             cmbKitSN.Text:='Нет серийного номера!';
+             cmbKitSN.Text:='Nu exista numar serial!';
         end;
 
         if FReadOnly then
         begin
              cxGridAvSN.Enabled:=False;
              btnOk.Visible:=False;
-             btnCancel.Caption:='Закрыть';
+             btnCancel.Caption:='Inchide';
              btnCancel.Default:=True;
              edQuickSearchAv.Enabled:=False;
              edQuickSearchSel.Enabled:=False;

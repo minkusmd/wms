@@ -193,6 +193,7 @@ type
     { Public declarations }
         tmpQuery: TIBCQuery;
         AccentGuid: string;
+        function TryConnect(out ErrorMessage: string): Boolean;
         function GetCurrencyExchangeValue(const CurrencyID: Integer; const ThroughAccount: Boolean; const BNMRate: Boolean = False): Double;
         function TransformCurrency1(const SUMA: Currency; const InitialCurrencyID, FinalCurrencyID: Integer; const ThroughACNT: Boolean; var TransformedSUMA: Currency; var ExchangeRate: Double; const Silent, GetPriceForGoods: Boolean; const DoNotRound: Boolean = False): Boolean;
         function TransformCurrency2(const DocID: Integer; const SUMA: Currency; const InitialCurrencyID, FinalCurrencyID: Integer; const ThroughACNT: Boolean; var TransformedSUMA: Currency; var ExchangeRate: Double; const Silent, GetPriceForGoods: Boolean; const DoNotRound: Boolean = False): Boolean;
@@ -219,36 +220,36 @@ type
         procedure DoActionDB_SP_Expenses2Jurnal(const DocID: Integer);
         function GetGoodsForeignKey(AGoodsID: Integer): string;
 
-    // Создание "Расходнaя накладная"
+    // Creare "Nakladnaia de iesire"
         function CreateRashodnaiaNakladnaia_DB(const DocID: Integer): Integer;
 
-    // Создать "Расходную накладную в сервис"
+    // Creare "Nakladnaia de iesire in service"
         function CreateRashodnaiaNakladnaiaServis_DB(const DocID: Integer): Boolean;
 
-    // Создание "Наряд на сборку" из Конфигуратора
+    // Creare "Naryad de asamblare" din Configurator
         function CreateNariadNaSborkuIzConfiguratora_DB(const DocID, RashodDocID, CustomFirmaID: Integer): Boolean;
 
-    // Создание "Наряд на сборку" из Расхода, Счет на оплату (не из Конфигуратора).
+    // Creare "Naryad de asamblare" din Iesire, Factura de plata (nu din Configurator).
         function CreateNariadNaSborku_Other_DB(const CustomDocID: Integer): Boolean;
 
-    // Создать "Счет на оплату"
-        function CreateSciotNaOplatu(const DocID: Integer): Boolean;
+    // Creare "Factura de plata"
+        function CreateProforma(const DocID: Integer): Boolean;
 
-    // Создать "Приход денег на счет"
+    // Creare "Incasare bani in cont"
         function CreateProhodDenegNaSciot(const DocID, CurrencyID, FLG_ACNT: Integer; const RATE: Double; const SUMA: Currency; SC2: Integer = -1): Boolean;
         function CreateProhodDenegNaSciotMAIN(const DocID, CurrencyID, FLG_ACNT: Integer; const RATE: Double; const SUMA: Currency): Boolean;
 
-    // Создать "Приходный кассовый ордер"
+    // Creare "Dispozitie de incasare"
         function CreatePrihodniiKasoviiOrder(const DocID, CurrencyID, FLG_ACNT: Integer; const RATE: Double; const SUMA: Currency; CashReceiptAnalitics: integer): Boolean;
 
-    // Создать "Расходный кассовый ордер"
+    // Creare "Dispozitie de plata"
         function CreateRashodniiKasoviiOrder(const DocID, CurrencyID, FLG_ACNT: Integer; const RATE: Double; const SUMA: Currency): Boolean;
         function CreateConfiguratorDoc_DB(const DocID: Integer; const CustomUserID: Integer = -1; const CustomComments: string = ''): Integer;
 
-    // Банковское платежное поручение
+    // Ordin de plata bancar
         function CreateBPP(const DocID: Integer; const SUMA: Currency): Boolean;
 
-    // Создать, отменить "Проводку" для Приход денег на счет (4), Приход денег на счет (из кассы) (5), Банковские платежные поручения, Леи (6), Банковские платежные поручения, Валюта (7)
+    // Creare, anuleaza "Inregistrarea" pentru Incasare bani in cont (4), Incasare bani in cont (din casa) (5), Ordine de plata bancare, Lei (6), Ordine de plata bancare, Valuta (7)
         function CreateDocumentProvodka(const DocID: Integer): Boolean;
         function CancelDocumentProvodka(const DocID: Integer): Boolean;
         procedure CreateGridImageColumnItems(const ImageColumn: TcxGridDBColumn; const AddFolderImage: Boolean = False);
@@ -854,6 +855,37 @@ begin
     fDBConnected := True;
 end;
 
+function TdmDB.TryConnect(out ErrorMessage: string): Boolean;
+begin
+    ErrorMessage := '';
+    if fDBConnected then
+    begin
+        Result := True;
+        Exit;
+    end;
+
+    try
+        ConnectToDB;
+        Result := fDBConnected;
+        if Result then
+            Timer1.Enabled := CanRunTimer
+        else
+            ErrorMessage := 'Conexiunea la baza de date nu a fost confirmata.';
+    except
+        on E: Exception do
+        begin
+            fDBConnected := False;
+            Timer1.Enabled := False;
+            ErrorMessage := Format('%s: %s', [E.ClassName, E.Message]);
+            try
+                IBCConnection.Connected := False;
+            except
+            end;
+            Result := False;
+        end;
+    end;
+end;
+
 function TdmDB.CreateConfiguratorDoc_DB(const DocID: Integer; const CustomUserID: Integer; const CustomComments: string): Integer;
 var
     Query: TIBCQuery;
@@ -945,42 +977,42 @@ begin
                 ImageComboBoxItem.Value := 1;
             end;
 
-      // Услуга
+      // Serviciu
             ImageComboBoxItem := ImageComboBoxProp.Items.Add;
             ImageComboBoxItem.ImageIndex := 51;
             ImageComboBoxItem.Value := cSYSS_GOODS_TYPE_Услуга;
-      // Комплект
+      // Set
             ImageComboBoxItem := ImageComboBoxProp.Items.Add;
             ImageComboBoxItem.ImageIndex := 44;
             ImageComboBoxItem.Value := cSYSS_GOODS_TYPE_Комплект;
-      // Услуга собственная
+      // Serviciu propriu
             ImageComboBoxItem := ImageComboBoxProp.Items.Add;
             ImageComboBoxItem.ImageIndex := 51;
             ImageComboBoxItem.Value := cSYSS_GOODS_TYPE_Услуга_собственная;
-      // Дисконтная карта
+      // Card de discount
             ImageComboBoxItem := ImageComboBoxProp.Items.Add;
             ImageComboBoxItem.ImageIndex := 21;
             ImageComboBoxItem.Value := cSYSS_GOODS_TYPE_Дисконтная_карта;
-      // Топливо
-      // Товар для сервиса
+      // Combustibil
+      // Produs pentru service
             ImageComboBoxItem := ImageComboBoxProp.Items.Add;
             ImageComboBoxItem.ImageIndex := 52;
             ImageComboBoxItem.Value := cSYSS_GOODS_TYPE_Товары_для_Сервиса;
-      // Фискальные накладные
-      // Транспортные накладные
-      // Доверености
+      // Nakladnie fiscale
+      // Nakladnie de transport
+      // Procuri
             ImageComboBoxItem := ImageComboBoxProp.Items.Add;
             ImageComboBoxItem.ImageIndex := 33;
             ImageComboBoxItem.Value := cSYSS_GOODS_TYPE_Доверености;
-      // Комплект услуг
+      // Set de servicii
             ImageComboBoxItem := ImageComboBoxProp.Items.Add;
             ImageComboBoxItem.ImageIndex := 44;
             ImageComboBoxItem.Value := cSYSS_GOODS_TYPE_Комплект_услуг;
-      // Скидка
+      // Discount
             ImageComboBoxItem := ImageComboBoxProp.Items.Add;
             ImageComboBoxItem.ImageIndex := 136;
             ImageComboBoxItem.Value := cSYSS_GOODS_TYPE_Discount;
-      // Доставка
+      // Livrare
             ImageComboBoxItem := ImageComboBoxProp.Items.Add;
             ImageComboBoxItem.ImageIndex := 137;
             ImageComboBoxItem.Value := cSYSS_GOODS_TYPE_Delivery;
@@ -1029,7 +1061,7 @@ function TdmDB.CreateNariadNaSborku_Other_DB(const CustomDocID: Integer): Boolea
 var
     Query: TIBCQuery;
 begin
-  // Создание "Наряд на сборку" из Расхода, Счет на оплату (не из Конфигуратора).
+  // Creare "Naryad de asamblare" din Iesire, Factura de plata (nu din Configurator).
   // Returns: True daca a fost facut.
     Result := False;
 
@@ -1061,7 +1093,7 @@ function TdmDB.CreatePrihodniiKasoviiOrder(const DocID, CurrencyID, FLG_ACNT: In
 var
     Query: TIBCQuery;
 begin
-  // Создать "Приходный кассовый ордер"
+  // Creare "Dispozitie de incasare"
   // Returns: True daca a fost facut.
     Result := False;
 
@@ -1100,7 +1132,7 @@ function TdmDB.CreateProhodDenegNaSciot(const DocID, CurrencyID, FLG_ACNT: Integ
 var
     Query: TIBCQuery;
 begin
-  // Создать "Приход денег на счет"
+  // Creare "Incasare bani in cont"
   // Returns: True daca a fost facut.
     Result := False;
 
@@ -1137,7 +1169,7 @@ function TdmDB.CreateProhodDenegNaSciotMAIN(const DocID, CurrencyID, FLG_ACNT: I
 var
     Query: TIBCQuery;
 begin
-  // Создать "Приход денег на счет"
+  // Creare "Incasare bani in cont"
   // Returns: True daca a fost facut.
     Result := False;
 
@@ -1173,7 +1205,7 @@ function TdmDB.CreateRashodnaiaNakladnaiaServis_DB(const DocID: Integer): Boolea
 var
     Query: TIBCQuery;
 begin
-  // // Создать "Расходную накладную в сервис"
+  // // Creare "Nakladnaia de iesire in service"
     Result := False;
 
     Query := TIBCQuery.Create(Self);
@@ -1271,7 +1303,7 @@ function TdmDB.CreateBPP(const DocID: Integer; const SUMA: Currency): Boolean;
 var
     Query: TIBCQuery;
 begin
-  // Создать "Расходный кассовый ордер"
+  // Creare "Dispozitie de plata"
   // Returns: True daca a fost facut.
     Result := False;
 
@@ -1302,11 +1334,11 @@ begin
     end;
 end;
 
-function TdmDB.CreateSciotNaOplatu(const DocID: Integer): Boolean;
+function TdmDB.CreateProforma(const DocID: Integer): Boolean;
 var
     Query: TIBCQuery;
 begin
-  // Создать "Счет на оплату"
+  // Creare "Factura de plata"
   // Returns: True daca a fost facut.
     Result := False;
 
@@ -1392,8 +1424,7 @@ begin
     SWNSecurityManager := TSWNSecurity.Create(IBCConnection, IBCTrDefaultUpdate);
 
     SetupVars;
-    ConnectToDB;
-    Timer1.Enabled := CanRunTimer;
+    Timer1.Enabled := False;
 
   // Initialize tmpQuery for OpenQuery function;
     tmpQuery := TIBCQuery.Create(Self);
@@ -1832,19 +1863,19 @@ begin
         58:
             Result := 58;
         cSYSS_GOODS_TYPE_Услуга:
-            Result := 51; // Услуга
+            Result := 51; // Serviciu
         cSYSS_GOODS_TYPE_Комплект:
-            Result := 44; // Комплект
+            Result := 44; // Set
         cSYSS_GOODS_TYPE_Услуга_собственная:
-            Result := 51; // Услуга собственная
+            Result := 51; // Serviciu propriu
         cSYSS_GOODS_TYPE_Дисконтная_карта:
-            Result := 21; // Дисконтная карта
+            Result := 21; // Card de discount
         cSYSS_GOODS_TYPE_Товары_для_сервиса:
-            Result := 52; // Товар для сервиса
+            Result := 52; // Produs pentru service
         cSYSS_GOODS_TYPE_Доверености:
-            Result := 33; // Доверености
+            Result := 33; // Procuri
         cSYSS_GOODS_TYPE_Комплект_услуг:
-            Result := 44; // Комплект
+            Result := 44; // Set
     else
         Result := 12;
     end;
@@ -2065,7 +2096,7 @@ end;
 
 procedure TdmDB.IBCQueryJurnalAfterDelete(DataSet: TDataSet);
 begin
-    case IBCQueryDocs.FieldByName('DOCTYPEID').AsInteger of    // Приходная накладная
+    case IBCQueryDocs.FieldByName('DOCTYPEID').AsInteger of    // Nakladnaia de intrare
         cDBID_DocType_НАКЛАДНЫЕ_ПН:
             DoActionDB_SP_Expenses2Jurnal(IBCQueryDocs.FieldByName('DOCID').AsInteger);
     end;
@@ -2073,7 +2104,7 @@ end;
 
 procedure TdmDB.IBCQueryJurnalAfterPost(DataSet: TDataSet);
 begin
-    case IBCQueryDocs.FieldByName('DOCTYPEID').AsInteger of    // Приходная накладная
+    case IBCQueryDocs.FieldByName('DOCTYPEID').AsInteger of    // Nakladnaia de intrare
         cDBID_DocType_НАКЛАДНЫЕ_ПН:
             DoActionDB_SP_Expenses2Jurnal(IBCQueryDocs.FieldByName('DOCID').AsInteger);
     end;
@@ -2117,10 +2148,10 @@ end;
 
 function TdmDB.IsCustomerPersoanaJuridica(const CustomerTypeID: Integer): Boolean;
 begin
-    Result := (CustomerTypeID = 4002) or // Фирмы
-        (CustomerTypeID = 4004) or // Франшизы
-        (CustomerTypeID = 4005) or // Поставщики
-        (CustomerTypeID = 4011); // Клиенты Юридические
+    Result := (CustomerTypeID = 4002) or // Firme
+        (CustomerTypeID = 4004) or // Francize
+        (CustomerTypeID = 4005) or // Furnizori
+        (CustomerTypeID = 4011); // Clienti Juridice
 end;
 
 function TdmDB.LoadDocumentDefaults(const DocTypeID, Firma: Integer; const DataSet: TIBCQuery; var AdditionalFlags: TDocumentAdditionalFlags): Boolean;
@@ -2348,16 +2379,16 @@ begin
     if (dfiGoodsID in filters) then
     begin
     // GoodsID se cauta in dependenta de tipul documentului
-    // Инветаризация. (cautam in TDB_JURNAL_SP)
+    // Inventariere. (cautam in TDB_JURNAL_SP)
         if (FrameDataFilterInfo.DocTypeID = 1968) then
             S := S + ' and EXISTS(SELECT docid FROM TDB_JURNAL_SP WHERE (TDB_JURNAL_SP.DOCID=VW_TDB_DOCS.DOCID) AND ((TDB_JURNAL_SP.CT_GOODSID=:GOODSID) OR (TDB_JURNAL_SP.DT_GOODSID=:GOODSID)))'
-        else      // Переоценка товаров. (cautam in TDB_GOODS_PRICE)
+        else      // Reevaluare marfa. (cautam in TDB_GOODS_PRICE)
             if (FrameDataFilterInfo.DocTypeID = 1414) then
             S := S + ' and EXISTS(SELECT GOODSID FROM TDB_GOODS_PRICE WHERE (TDB_GOODS_PRICE.DOCID=VW_TDB_DOCS.DOCID) AND (TDB_GOODS_PRICE.GOODSID=:GOODSID))'
-        else            // Принятие в баланс с комисии. (cautam in TDB_JURNAL_R)
+        else            // Primire in bilant din comision. (cautam in TDB_JURNAL_R)
             if (FrameDataFilterInfo.DocTypeID = 1757) then
             S := S + ' and EXISTS(SELECT DOCID FROM TDB_JURNAL_R WHERE (TDB_JURNAL_R.DOCID=VW_TDB_DOCS.DOCID) AND (TDB_JURNAL_R.GOODSID=:GOODSID))'
-        else              // 1945 - Замена товара у поставщика (cautam in TDB_JURNAL_SP)
+        else              // 1945 - Inlocuire marfa la furnizor (cautam in TDB_JURNAL_SP)
             if (FrameDataFilterInfo.DocTypeID = 1945) then
             S := S + ' and EXISTS(SELECT 1 FROM TDB_JURNAL_SP WHERE (TDB_JURNAL_SP.DOCID=VW_TDB_DOCS.DOCID) AND (TDB_JURNAL_SP.DT_GOODSID=:GOODSID OR TDB_JURNAL_SP.CT_GOODSID=:GOODSID))'
         else            // default search in TDB_JURNAL
@@ -3005,7 +3036,7 @@ function TdmDB.DoCreateFactura(const DocID: Integer): Boolean;
 var
     Query: TIBCQuery;
 begin
-  // Выписать "Счет фактуру"
+  // Emite "Factura fiscala"
     Result := False;
 
     Query := TIBCQuery.Create(Self);
@@ -3384,7 +3415,7 @@ begin
         Query.ExecSQL;
         if not Query.Eof then
         begin
-            ContractName := Format('%s (№%s от %s, TVA-%s)', [Query.FieldByName('CONTRACT_TYPE_TITLE').AsString, Query.FieldByName('CODE').AsString, FormatDateTime('dd MMMM yyyy', Query.FieldByName('SIGN_DATE').AsDateTime), Query.FieldByName('VAT').AsString]);
+            ContractName := Format('%s (№%s din %s, TVA-%s)', [Query.FieldByName('CONTRACT_TYPE_TITLE').AsString, Query.FieldByName('CODE').AsString, FormatDateTime('dd MMMM yyyy', Query.FieldByName('SIGN_DATE').AsDateTime), Query.FieldByName('VAT').AsString]);
 
             ContractID := Query.FieldByName('CONTRACTID').AsInteger;
             ContractCurrencyID := Query.FieldByName('CurrencyID').AsInteger;

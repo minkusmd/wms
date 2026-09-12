@@ -264,7 +264,7 @@ begin
      if Assigned(cxGridTable.Controller.FocusedRow) then
      begin
           s:=cxGridTable.DataController.Values[cxGridTable.Controller.FocusedRowIndex,cxGridTable_TITLE.Index];
-          if ShowAskDialog('Удаление аналитики',Format('Вы хотите удалить аналитику "%s"?',[s]))=mrYes then
+          if ShowAskDialog('Stergere analitica',Format('Doriti sa stergeti analitica "%s"?',[s]))=mrYes then
           begin
                IBCQueryAnalytics.UpdateTransaction.StartTransaction;
                try
@@ -286,7 +286,7 @@ begin
      if Assigned(cxGridTable.Controller.FocusedRow) then
      begin
           s:=cxGridTable.DataController.Values[cxGridTable.Controller.FocusedRowIndex,cxGridTable_TITLE.Index];
-          if ShowAskDialog('Удаление группы аналитики',Format('Вы хотите удалить группу "%s"?',[s]),'Группа должна быть пустой!')=mrYes then
+          if ShowAskDialog('Stergere grup analitica',Format('Doriti sa stergeti grupul "%s"?',[s]),'Grupul trebuie sa fie gol!')=mrYes then
           begin
                IBCQueryAnalytics.UpdateTransaction.StartTransaction;
                try

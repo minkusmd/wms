@@ -14,22 +14,22 @@ const
      cMAX_Variables = 25;
      cVARIABLES:array[0..cMAX_Variables-1] of String =
      (
-      'FIRMAID',                            // код текущий фирмы в которой работает пользователь
-      'FIRMA_NAME',                         // название текущий фирмы в которой работает пользователь
-      'DT',                                 // код фирмы из документа
-      'DT_NAME',                            // название фирмы из документа
-      'CT',                                 // код потребителя из документа
-      'CT_NAME',                            // название потребителя из документа
-      'DOCTYPEID',                          // тип документа
-      'DOCTYPE_NAME',                       // название типа документа
-      'DOCID',                              // код документа
-      'USERID',                             // код пользователя
-      'USER_NAME',                          // имя пользователя
-      'NUMAR_BON_FISCAL',                   // номер кассового чека (Счет фактура,)
-      'INVOICEID',                          // номер Счет Фактуры
-      'TARGET_DT',                          // код выбранной фирмы
-      'USER_GROUPS',                        // список групп пользователей
-      'SHOW_ADMIN',                         // выводить Администраторов в списке пользователей
+      'FIRMAID',                            // codul firmei curente in care lucreaza utilizatorul
+      'FIRMA_NAME',                         // denumirea firmei curente in care lucreaza utilizatorul
+      'DT',                                 // codul firmei din document
+      'DT_NAME',                            // denumirea firmei din document
+      'CT',                                 // codul clientului din document
+      'CT_NAME',                            // denumirea clientului din document
+      'DOCTYPEID',                          // tipul documentului
+      'DOCTYPE_NAME',                       // denumirea tipului de document
+      'DOCID',                              // codul documentului
+      'USERID',                             // codul utilizatorului
+      'USER_NAME',                          // numele utilizatorului
+      'NUMAR_BON_FISCAL',                   // numarul bonului de casa (Factura fiscala,)
+      'INVOICEID',                          // numarul Facturii Fiscale
+      'TARGET_DT',                          // codul firmei selectate
+      'USER_GROUPS',                        // lista grupurilor de utilizatori
+      'SHOW_ADMIN',                         // afisarea Administratorilor in lista utilizatorilor
       'USER_POSITION',                      // functia detinuta
       'SYS_REPORT_RERUN',                   // indica ca raportul se face inc-odata in aceeas fereastra
       'GOODSID',                            // GoodsID din Spravocinik Tovarov

@@ -1,6 +1,6 @@
 ﻿unit frame40InventarizatiaPereotencaTovaraUnit;
 {
-  ИНВЕНТАРИЗАЦИЯ - Переоценка товаров
+  INVENTARIERE - Reevaluare marfuri
   DocTypeID = 1414
   Frame Index = 40
 }
@@ -516,7 +516,7 @@ begin
     dialog.SetGoodsQty(cxGridPricesTable.Controller.SelectedRecordCount);
     if dialog.ShowModal = mrOk then begin
       if SendSelectedGoodsToNPSC(dialog.GetOperatorID, GetSelectionIDList) then
-        ShowInfoDialog('Передать на оформление', 'Готово!');
+        ShowInfoDialog('Transmitere spre inregistrare', 'Gata!');
     end;
   finally
     dialog.Free;
@@ -833,7 +833,7 @@ end;
 procedure Tframe40InventarizatiaPereotencaTovara.SetupSecurityItems;
 begin
   fCanDelete := True;
-  // удалить позицию
+  // sterge pozitia
 //  if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_ИНВЕНТАРИЗАЦИЯ_ПТ_Удалить) then
   bbDeleteGoods.Enabled := fCanDelete;
 
@@ -842,7 +842,7 @@ begin
     TcxButtonEditProperties(cxGridPrices_GOODS_NAMEACNT.Properties).Buttons.Clear;
   end;
 
-  // Соответствие товара в других фирмах
+  // Corespondenta produsului in alte firme
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Справочники_Товары_Товары_из_других_фирм) then
     bbGoodsForeignCode.Visible := ivNever;
 
@@ -1296,7 +1296,7 @@ begin
   Result := inherited;
 
   if cxGridPricesTable.Site.Focused then begin
-    // context from goods: Код + Наименование
+    // context from goods: Cod + Denumire
     Result.Context := ffGoods;
     Result.ValueInt := IBCQueryGoodsPrice.FieldByName('GOODSID').AsInteger;
     Result.ValueStr := IBCQueryGoodsPrice.FieldByName('GOODS_TITLE').AsString;
@@ -1304,7 +1304,7 @@ begin
   else if cxGridDocTable.Site.Focused then begin
     // context from Docs
     if cxGridDoc_DATA.Focused then begin
-      // Дата
+      // Data
       Result.Context := ffDate;
       Result.ValueDateTime := dmDB.IBCQueryDocs.FieldByName('DATA').AsDateTime;
     end
@@ -1418,7 +1418,7 @@ end;
 
 function Tframe40InventarizatiaPereotencaTovara.InitFrameID: Integer;
 begin
-  Result := 40; // ИНВЕНТАРИЗАЦИЯ - Переоценка товаров
+  Result := 40; // INVENTARIERE - Reevaluare marfa
   fLastSelectGoodsID := -1;
   SetupQtyFields;
 end;
@@ -1948,11 +1948,11 @@ begin
     dialog.DefaultFirmaID := dmDB.CurrentFirma;
     dialog.DefaultUserID := dmDB.CurrentUserID;
 
-    dialog.DocTypeList.Add(cDBID_DocType_СЧЕТА_ВС); // Входные счета
-    dialog.DocTypeList.Add(cDBID_DocType_НАКЛАДНЫЕ_ПН); // Приходная накладная
-//  dialog.DocTypeList.Add(cDBID_DocType_НАКЛАДНЫЕ_ПТПН); // Приход товара по накладным
-//  dialog.DocTypeList.Add(cDBID_DocType_ПЕРЕМЕЩЕНИЕ_П); // Перемещение
-//  dialog.DocTypeList.Add(cDBID_DocType_ОСТАТКИ_ОТ); // Остатки товара
+    dialog.DocTypeList.Add(cDBID_DocType_СЧЕТА_ВС); // Facturi de intrare
+    dialog.DocTypeList.Add(cDBID_DocType_НАКЛАДНЫЕ_ПН); // Nakladnaia de intrare
+//  dialog.DocTypeList.Add(cDBID_DocType_НАКЛАДНЫЕ_ПТПН); // Intrare marfa pe nakladnie
+//  dialog.DocTypeList.Add(cDBID_DocType_ПЕРЕМЕЩЕНИЕ_П); // Transfer
+//  dialog.DocTypeList.Add(cDBID_DocType_ОСТАТКИ_ОТ); // Stocuri marfa
     if dialog.SelectDoc then begin
       if DoActionImportGoodsFromDoc(dialog.DocID) then begin
         IBCQueryGoodsPrice.Refresh;

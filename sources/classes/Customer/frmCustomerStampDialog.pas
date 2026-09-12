@@ -58,17 +58,17 @@ implementation
 
 procedure TfCustomerStampDlg.cxDBImage1PropertiesAssignPicture(Sender: TObject; const Picture: TPicture);
 begin
-     lbSignatureSize.Caption:=Format('Размер: %d x %d',[Picture.Width,Picture.Height]);
+     lbSignatureSize.Caption:=Format('Dimensiune: %d x %d',[Picture.Width,Picture.Height]);
 end;
 
 procedure TfCustomerStampDlg.imageLOGOPropertiesAssignPicture(Sender: TObject; const Picture: TPicture);
 begin
-     lbLogoSize.Caption:=Format('Размер: %d x %d',[Picture.Width,Picture.Height]);
+     lbLogoSize.Caption:=Format('Dimensiune: %d x %d',[Picture.Width,Picture.Height]);
 end;
 
 procedure TfCustomerStampDlg.imgStampPropertiesAssignPicture(Sender: TObject; const Picture: TPicture);
 begin
-     lbStamSize.Caption:=Format('Размер: %d x %d',[Picture.Width,Picture.Height]);
+     lbStamSize.Caption:=Format('Dimensiune: %d x %d',[Picture.Width,Picture.Height]);
 end;
 
 procedure TfCustomerStampDlg.BindingDataSource;
@@ -106,9 +106,9 @@ begin
         imageLOGO.Enabled := fStamp;
         imageSTAMP_IMAGE.Enabled := fStamp;
 
-        lbLogoSize.Caption:=Format('Размер: %d x %d',[imageLOGO.Picture.Width,imageLOGO.Picture.Height]);
-        lbStamSize.Caption:=Format('Размер: %d x %d',[imageSTAMP_IMAGE.Picture.Width,imageSTAMP_IMAGE.Picture.Height]);
-        lbSignatureSize.Caption:=Format('Размер: %d x %d',[ImageSIGNATURE.Picture.Width,ImageSIGNATURE.Picture.Height]);
+        lbLogoSize.Caption:=Format('Dimensiune: %d x %d',[imageLOGO.Picture.Width,imageLOGO.Picture.Height]);
+        lbStamSize.Caption:=Format('Dimensiune: %d x %d',[imageSTAMP_IMAGE.Picture.Width,imageSTAMP_IMAGE.Picture.Height]);
+        lbSignatureSize.Caption:=Format('Dimensiune: %d x %d',[ImageSIGNATURE.Picture.Width,ImageSIGNATURE.Picture.Height]);
 
         Panel1.Visible := (fMasterDataSet.FieldByName('CUSTOMER_TYPE_ID').AsInteger = 4002);
         if Panel1.Visible then

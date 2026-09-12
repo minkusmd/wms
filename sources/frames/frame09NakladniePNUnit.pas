@@ -1,6 +1,6 @@
 ﻿unit frame09NakladniePNUnit;
 {
-  НАКЛАДНЫЕ. Приход товара управленческий
+  FACTURI. Intrare marfa manageriala
   DocTypeID = 106
   Frame Index = 9
 }
@@ -666,7 +666,7 @@ begin
     Query.Transaction := dmDB.IBCTrDefaultUpdate;
     Query.Transaction.StartTransaction;
     try
-           // Изменить приходную цену в справочнике
+           // Modifica pretul de intrare in nomenclator
       Query.SQL.Text := 'EXECUTE PROCEDURE SP_GOODS_PRICE_FROM_INVOICE(:DOCID)';
       Query.ParamByName('DOCID').AsInteger := DOCID;
            // exec
@@ -729,7 +729,7 @@ begin
 
     if dialog.ShowModal = mrOk then
     begin
-             // Платежное поручение
+             // Ordin de plata
       DoDBAction(2, docID, dialog.CurrencyID, dialog.FLG_ACNT, dialog.Rate, dialog.SUMA);
     end;
   finally
@@ -813,10 +813,10 @@ begin
     DocChanged := fLastDocID <> dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger;
     fLastDocID := dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger;
 
-    fRashod := True;  // Расходный кассовый ордер
-    fPlatej := True;  // Платежное поручение
-    fCloseDoc := not FLG_CLOSED;  // Закрыть накладную
-    fOpenDoc := FLG_CLOSED;  // Открыть накладную
+    fRashod := True;  // Dispozitie de plata
+    fPlatej := True;  // Ordin de plata
+    fCloseDoc := not FLG_CLOSED;  // Inchide nakladnaia
+    fOpenDoc := FLG_CLOSED;  // Deschide nakladnaia
   end;
      // doc
   ButtonStateChanged(fbtADD, fDocNew);
@@ -824,11 +824,11 @@ begin
   ButtonStateChanged(fbtDELETE, fDocDelete);
 
      // popup
-  bbActionRashodniiKasoviiOrder.Enabled := fRashod;  // Расходный кассовый ордер + Security
-  bbActionPlatejnoePorucenie.Enabled := fPlatej;     // Платежное поручение + Security
+  bbActionRashodniiKasoviiOrder.Enabled := fRashod;  // Dispozitie de plata + Security
+  bbActionPlatejnoePorucenie.Enabled := fPlatej;     // Ordin de plata + Security
 
-  ButtonStateChanged(fbtCloseDocument, fCloseDoc);      // Закрыть накладную + Security
-  ButtonStateChanged(fbtOpenDocument, fOpenDoc);        // Открыть накладную + Security
+  ButtonStateChanged(fbtCloseDocument, fCloseDoc);      // Inchide nakladnaia + Security
+  ButtonStateChanged(fbtOpenDocument, fOpenDoc);        // Deschide nakladnaia + Security
   if DocChanged then
     cxPageControlGeneral.ActivePage := tbsGoods;
 
@@ -849,13 +849,13 @@ begin
     Query.Transaction := dmDB.IBCTrDefaultUpdate;
     Query.Transaction.StartTransaction;
     try
-      case ActionID of           // Расходный кассовый ордер
+      case ActionID of           // Dispozitie de plata
         1:
           begin
             Query.SQL.Text := 'EXECUTE PROCEDURE SP_CREATE_RKO(:DOCID,:CurrencyID,:FLG_ACNT,:Rate,:SUMA)';
             Query.ParamByName('FLG_ACNT').AsInteger := FLG_ACNT;
           end;
-           // Платежное поручение
+           // Ordin de plata
         2:
           Query.SQL.Text := 'EXECUTE PROCEDURE SP_CREATE_BANK_TRANSFER(:DOCID,:SUMA,:CurrencyID,:Rate)';
       end;
@@ -1254,7 +1254,7 @@ begin
     fExpenseNew := True; // New Expense + Security
     if (cxGridExpensesTable.DataController.RecNo > 0) then
     begin
-               // Дополнительные затраты
+               // Cheltuieli suplimentare
       fExpenseEdit := True; // Edit Expense+ Security
       fExpenseDelete := True; // Delete Expense + Security
     end;
@@ -1267,7 +1267,7 @@ end;
 
 function Tframe09NakladniePN.InitFrameID: Integer;
 begin
-  Result := 9; // НАКЛАДНЫЕ. Приход товара (Оперативный учет)
+  Result := 9; // NAKLADNIE. Intrare marfa (Evidenta operativa)
   SetuQtyFields;
 end;
 
@@ -1406,17 +1406,17 @@ begin
   end;
 
 
-     // Карточка товара
+     // Fisa produsului
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Справочники_Товары_Карточка_товара) or SWNSecurityManager.IsPartialAccessMode
     then
     bbGoodsInfoCard.Visible := ivNever;
 
-     // Изменить цены товара
+     // Modifica preturile marfii
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Справочники_Товары_Изменение_валюты_и_цены_товара) or
     SWNSecurityManager.IsPartialAccessMode then
     bbGoodsPrice.Visible := ivNever;
 
-     // Соответствие товара в других фирмах
+     // Corespondenta produsului in alte firme
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Справочники_Товары_Товары_из_других_фирм) then
     bbGoodsForeignCode.Visible := ivNever;
 
@@ -1446,7 +1446,7 @@ end;
 
 procedure Tframe09NakladniePN.SetuQtyFields;
 begin
-     // Список товара: Кол-во
+     // Lista marfii: Cantitate
   TcxCalcEditProperties(cxGridDBCol_QTY.Properties).DisplayFormat := QtyDisplayFormat;
   cxGridDBCol_QTY.Summary.FooterFormat := QtyDisplayFormat;
 end;
@@ -1457,7 +1457,7 @@ begin
 
   if cxGridGoodsTable.Site.Focused then
   begin
-          // context from Jurnal: Код + Наименование
+          // context from Jurnal: Cod + Denumire
     Result.Context := ffGoods;
     Result.ValueInt := dmDB.IBCQueryJurnal.FieldByName('GOODSID').AsInteger;
     Result.ValueStr := dmDB.IBCQueryJurnal.FieldByName('GOODS_NAME').AsString;
@@ -1467,20 +1467,20 @@ begin
               // context from Docs
     if cxGridNPN_CT_NAME.Focused then
     begin
-                   // Контрагент
+                   // Contraagent
       Result.Context := ffCustomer;
       Result.ValueInt := dmDB.IBCQueryDocs.FieldByName('CT').AsInteger;
       Result.ValueStr := dmDB.IBCQueryDocs.FieldByName('CT_NAME').AsString;
     end
     else if cxGridNPN_DATA.Focused then
     begin
-                       // Дата
+                       // Data
       Result.Context := ffDate;
       Result.ValueDateTime := dmDB.IBCQueryDocs.FieldByName('DATA').AsDateTime;
     end
     else if cxGridNPN_DTDEP_NAME.Focused then
     begin
-                           // Склад
+                           // Depozit
       Result.Context := ffStock;
       Result.ValueInt := dmDB.IBCQueryDocs.FieldByName('DTDEP').AsInteger;
       Result.ValueStr := dmDB.IBCQueryDocs.FieldByName('DTDEP_NAME').AsString;
@@ -1529,11 +1529,11 @@ begin
 
     if (cxGridGoodsTable.DataController.RecNo > 0) then
     begin
-               // Список товара
+               // Lista marfii
       fGoodsEdit := not FLG_CLOSED;
       fGoodsDelete := not FLG_CLOSED;
 
-               // Серийный учет, Партийный учет
+               // Evidenta seriala, Evidenta pe partizi
       fGoodsSN := (dmDB.IBCQueryJurnal.FieldByName('GOODS_SERIAL_TYPE_ID').AsInteger =
         cSYSS_GOODS_SERIAL_TYPE_Серийный_учет) or (dmDB.IBCQueryJurnal.FieldByName('GOODS_SERIAL_TYPE_ID').AsInteger =
         cSYSS_GOODS_SERIAL_TYPE_Партийный_учет);
@@ -1578,7 +1578,7 @@ begin
     begin
       dmDB.IBCTrDefaultUpdate.StartTransaction;
       try
-        dmDB.DoActionDB_SP_Expenses2Jurnal(dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger); // Приходная накладная
+        dmDB.DoActionDB_SP_Expenses2Jurnal(dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger); // Nakladnaia de intrare
         dmDB.IBCTrDefaultUpdate.Commit;
       except
         on E: Exception do
@@ -1636,7 +1636,7 @@ begin
     IBCQueryExpenses.UpdateTransaction.StartTransaction;
     try
       IBCQueryExpenses.Delete;
-      dmDB.DoActionDB_SP_Expenses2Jurnal(dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger); // Приходная накладная
+      dmDB.DoActionDB_SP_Expenses2Jurnal(dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger); // Nakladnaia de intrare
       IBCQueryExpenses.UpdateTransaction.Commit;
     except
       on E: Exception do
@@ -1730,7 +1730,7 @@ begin
     begin
       dmDB.IBCTrDefaultUpdate.StartTransaction;
       try
-        dmDB.DoActionDB_SP_Expenses2Jurnal(dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger); // Приходная накладная
+        dmDB.DoActionDB_SP_Expenses2Jurnal(dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger); // Nakladnaia de intrare
         dmDB.IBCTrDefaultUpdate.Commit;
       except
         on E: Exception do

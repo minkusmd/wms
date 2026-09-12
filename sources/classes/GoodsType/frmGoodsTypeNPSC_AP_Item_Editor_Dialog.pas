@@ -56,14 +56,14 @@ begin
      Errors:='';
 
      if fMasterDataSet.FieldByName('PARAM_NAME_RUS').IsNull or (fMasterDataSet.FieldByName('PARAM_NAME_RUS').AsString='')
-       then AddErrorToStr(Errors,'Название на русском!');
+       then AddErrorToStr(Errors,'Denumirea in rusa!');
      if fMasterDataSet.FieldByName('PARAM_NAME_ROM').IsNull or (fMasterDataSet.FieldByName('PARAM_NAME_ROM').AsString='')
-       then AddErrorToStr(Errors,'Название на румынском!');
+       then AddErrorToStr(Errors,'Denumirea in romana!');
      if fMasterDataSet.FieldByName('PARAM_VALUE').IsNull or (fMasterDataSet.FieldByName('PARAM_VALUE').AsString='')
-       then AddErrorToStr(Errors,'Значение(я)!');
+       then AddErrorToStr(Errors,'Valoarea(ile)!');
 
-     if fMasterDataSet.FieldByName('FLG_VALUE_IS_COMMENT').IsNull then AddErrorToStr(Errors,'Значение коментарий?');
-     if fMasterDataSet.FieldByName('FLG_OPTIONAL').IsNull then AddErrorToStr(Errors,'Компонент опционален?');
+     if fMasterDataSet.FieldByName('FLG_VALUE_IS_COMMENT').IsNull then AddErrorToStr(Errors,'Valoare comentariu?');
+     if fMasterDataSet.FieldByName('FLG_OPTIONAL').IsNull then AddErrorToStr(Errors,'Componenta este optionala?');
 
      if (Errors='') then Result:=True
      else ShowErrorDialog(cMSG_GeneralInputError_Title,cMSG_GeneralInputError_Text,Errors);
@@ -94,7 +94,7 @@ procedure TfrmGoodsTypeNPSC_AP_Item_Editor_Dlg.Prepare;
 begin
      if FCreateNewRecord then
      begin
-          dtDialogTitle.Text:='Создание нового компонента';
+          dtDialogTitle.Text:='Creare componenta noua';
           fMasterDataSet.Insert;
           fMasterDataSet.FieldByName('FLG_VALUE_IS_COMMENT').AsInteger:=0;
           fMasterDataSet.FieldByName('FLG_OPTIONAL').AsInteger:=0;
@@ -102,7 +102,7 @@ begin
      end
      else
      begin
-          dtDialogTitle.Text:='Изменение записи';
+          dtDialogTitle.Text:='Modificare inregistrare';
           fMasterDataSet.Edit;
      end;
 

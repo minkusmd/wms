@@ -86,7 +86,7 @@ end;
 
 function TfrmCopyReportDlg.DoCopyReport:Boolean;
 begin
-     Result:=(ShowAskDialog('Копировать отчет','Вы хотите сделать копию отчета?')=mrYes) and CopyReport;
+     Result:=(ShowAskDialog('Copiere raport','Doriti sa faceti o copie a raportului?')=mrYes) and CopyReport;
 end;
 
 function TfrmCopyReportDlg.IsFormDataPosted: Boolean;

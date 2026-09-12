@@ -52,7 +52,7 @@ begin
      Result:=False;
      ErrorStr:='';
 
-     if (fMasterDataSet.FieldByName('TITLE').IsNull) or (fMasterDataSet.FieldByName('TITLE').AsWideString='') then AddErrorToStr(ErrorStr,'Название шаблона!');
+     if (fMasterDataSet.FieldByName('TITLE').IsNull) or (fMasterDataSet.FieldByName('TITLE').AsWideString='') then AddErrorToStr(ErrorStr,'Denumirea sablonului!');
 
      if ErrorStr='' then Result:=True
      else ShowErrorDialog(cMSG_GeneralInputError_Title,cMSG_GeneralInputError_Text,ErrorStr);
@@ -85,7 +85,7 @@ begin
      try
         if FCreateNewRecord then
         begin
-             dtDialogTitle.Text:='Создать новый шаблон';
+             dtDialogTitle.Text:='Creeaza sablon nou';
 
              fMasterDataSet.Append;
              fMasterDataSet.FieldByName('FLG_PUBLIC').AsInteger:=0;
@@ -93,7 +93,7 @@ begin
         end
         else
         begin
-             dtDialogTitle.Text:='Изменить шаблон';
+             dtDialogTitle.Text:='Modifica sablonul';
              fMasterDataSet.Edit;
         end;
      except on E:Exception do

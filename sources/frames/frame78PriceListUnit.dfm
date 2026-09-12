@@ -38,10 +38,6 @@ inherited frame78PriceList: Tframe78PriceList
       Margins.Bottom = 2
       Caption = 'Price list'
       ImageIndex = 0
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object pnClient: TPanel
         Left = 0
         Top = 0
@@ -104,7 +100,7 @@ inherited frame78PriceList: Tframe78PriceList
             TabOrder = 0
             object SpeedButton1: TSpeedButton
               Left = 175
-              Top = 21
+              Top = 0
               Width = 24
               Height = 19
               Margins.Left = 2
@@ -161,7 +157,7 @@ inherited frame78PriceList: Tframe78PriceList
             end
             object cxLabel3: TcxLabel
               Left = 9
-              Top = 45
+              Top = 162
               Margins.Left = 2
               Margins.Top = 2
               Margins.Right = 2
@@ -172,7 +168,7 @@ inherited frame78PriceList: Tframe78PriceList
             end
             object lcbPriceCategory: TcxLookupComboBox
               Left = 10
-              Top = 63
+              Top = 183
               Margins.Left = 2
               Margins.Top = 2
               Margins.Right = 2
@@ -193,7 +189,7 @@ inherited frame78PriceList: Tframe78PriceList
             end
             object lcbCompareWithPrice: TcxLookupComboBox
               Left = 120
-              Top = 226
+              Top = 355
               Margins.Left = 2
               Margins.Top = 2
               Margins.Right = 2
@@ -227,7 +223,7 @@ inherited frame78PriceList: Tframe78PriceList
             end
             object cxLabel4: TcxLabel
               Left = 11
-              Top = 226
+              Top = 355
               Margins.Left = 2
               Margins.Top = 2
               Margins.Right = 2
@@ -242,20 +238,21 @@ inherited frame78PriceList: Tframe78PriceList
             end
             object cxButton3: TcxButton
               Left = 19
-              Top = 256
-              Width = 141
+              Top = 386
+              Width = 38
               Height = 24
               Margins.Left = 2
               Margins.Top = 2
               Margins.Right = 2
               Margins.Bottom = 2
               Action = actAnalizaPriceLIst
+              Caption = 'A'
               OptionsImage.Spacing = 2
               TabOrder = 6
             end
             object Panel3: TPanel
               Left = 11
-              Top = 92
+              Top = 218
               Width = 171
               Height = 123
               Margins.Left = 2
@@ -345,65 +342,91 @@ inherited frame78PriceList: Tframe78PriceList
               end
             end
             object cxButton1: TcxButton
-              Left = 19
-              Top = 430
-              Width = 141
+              Left = 117
+              Top = 414
+              Width = 40
               Height = 24
               Margins.Left = 2
               Margins.Top = 2
               Margins.Right = 2
               Margins.Bottom = 2
-              Caption = 'Creaza o reevaluare noua'
+              Caption = 'R +'
               OptionsImage.Spacing = 2
               TabOrder = 10
               OnClick = cxButton1Click
             end
             object btnUpdatePriceFromDB: TButton
-              Left = 19
-              Top = 467
-              Width = 141
+              Left = 113
+              Top = 386
+              Width = 38
               Height = 24
               Margins.Left = 2
               Margins.Top = 2
               Margins.Right = 2
               Margins.Bottom = 2
-              Caption = 'Sincronizeaza cu produse'
+              Caption = 'SYNC'
               TabOrder = 5
               OnClick = btnUpdatePriceFromDBClick
             end
-            object lcbSupplier: TcxLookupComboBox
+            object cxGridSuppliers: TcxGrid
               Left = 10
-              Top = 21
+              Top = 20
+              Width = 182
+              Height = 130
               Margins.Left = 2
               Margins.Top = 2
               Margins.Right = 2
               Margins.Bottom = 2
-              Properties.DropDownWidth = 205
-              Properties.ImmediatePost = True
-              Properties.IncrementalFilteringOptions = [ifoHighlightSearchText, ifoUseContainsOperator]
-              Properties.KeyFieldNames = 'CUSTOMERID'
-              Properties.ListColumns = <
-                item
-                  Caption = 'ID'
-                  Fixed = True
-                  FieldName = 'CUSTOMERID'
-                end
-                item
-                  Caption = 'Furnizor'
-                  Fixed = True
-                  Width = 350
-                  FieldName = 'DISPLAYNAME'
-                end>
-              Properties.ListFieldIndex = 1
-              Properties.ListOptions.SyncMode = True
-              Properties.ListSource = IBCDataSourceSuppliers
-              Properties.OnCloseUp = cxLookupComboBox1PropertiesCloseUp
               TabOrder = 0
-              Width = 162
+              object cxGridSuppliersDBTableView1: TcxGridDBTableView
+                OnDblClick = cxGridSuppliersDBTableView1DblClick
+                OnKeyDown = cxGridSuppliersDBTableView1KeyDown
+                OnFocusedRecordChanged = cxGridSuppliersDBTableView1FocusedRecordChanged
+                DataController.DataSource = IBCDataSourceSuppliers
+                DataController.KeyFieldNames = 'CUSTOMERID'
+                OptionsBehavior.IncSearch = True
+                OptionsBehavior.ImmediateEditor = False
+                OptionsData.CancelOnExit = False
+                OptionsData.Deleting = False
+                OptionsData.DeletingConfirmation = False
+                OptionsData.Editing = False
+                OptionsData.Inserting = False
+                OptionsSelection.HideFocusRectOnExit = False
+                OptionsSelection.UnselectFocusedRecordOnExit = False
+                OptionsView.ColumnAutoWidth = True
+                OptionsView.GroupByBox = False
+                OptionsView.Indicator = True
+                object cxGridSuppliersDBTableView1CUSTOMERID: TcxGridDBColumn
+                  Caption = 'ID'
+                  DataBinding.FieldName = 'CUSTOMERID'
+                  HeaderAlignmentHorz = taCenter
+                  MinWidth = 30
+                  Options.HorzSizing = False
+                  Width = 30
+                end
+                object cxGridSuppliersDBTableView1DISPLAYNAME: TcxGridDBColumn
+                  Caption = 'Furnizor'
+                  DataBinding.FieldName = 'SUPPLIER_NAME'
+                  Width = 96
+                end
+                object cxGridSuppliersDBTableView1LAST_PRICELIST_DATE: TcxGridDBColumn
+                  Caption = 'Ultimul pricelist'
+                  DataBinding.FieldName = 'LAST_PRICELIST_DATE'
+                  PropertiesClassName = 'TcxDateEditProperties'
+                  Properties.DisplayFormat = 'dd.mm.yy'
+                  HeaderAlignmentHorz = taCenter
+                  SortIndex = 0
+                  SortOrder = soDescending
+                  Width = 56
+                end
+              end
+              object cxGridSuppliersLevel1: TcxGridLevel
+                GridView = cxGridSuppliersDBTableView1
+              end
             end
             object cbRRP: TcxCheckBox
-              Left = 29
-              Top = 408
+              Left = 23
+              Top = 443
               Margins.Left = 2
               Margins.Top = 2
               Margins.Right = 2
@@ -429,42 +452,42 @@ inherited frame78PriceList: Tframe78PriceList
             end
             object cxButton2: TcxButton
               Left = 19
-              Top = 283
-              Width = 141
+              Top = 414
+              Width = 36
               Height = 24
               Margins.Left = 2
               Margins.Top = 2
               Margins.Right = 2
               Margins.Bottom = 2
-              Caption = 'Creaza reevaluari'
+              Caption = 'R1+'
               OptionsImage.Spacing = 2
               TabOrder = 12
               OnClick = cxButton2Click
             end
             object cxButton4: TcxButton
-              Left = 19
-              Top = 373
-              Width = 141
+              Left = 71
+              Top = 386
+              Width = 38
               Height = 24
               Margins.Left = 2
               Margins.Top = 2
               Margins.Right = 2
               Margins.Bottom = 2
-              Caption = 'Seteaza RRP'
+              Caption = 'RRP'
               OptionsImage.Spacing = 2
               TabOrder = 13
               OnClick = cxButton4Click
             end
             object btnAnalizaReevaluare: TcxButton
-              Left = 19
-              Top = 319
-              Width = 141
-              Height = 34
+              Left = 59
+              Top = 413
+              Width = 56
+              Height = 26
               Margins.Left = 2
               Margins.Top = 2
               Margins.Right = 2
               Margins.Bottom = 2
-              Caption = 'Creaza reevaluari'
+              Caption = 'R ALL'
               OptionsImage.Spacing = 2
               TabOrder = 14
               OnClick = btnAnalizaReevaluareClick
@@ -520,10 +543,6 @@ inherited frame78PriceList: Tframe78PriceList
               Margins.Bottom = 2
               Caption = '(1) Toate produsele'
               ImageIndex = 5
-              ExplicitLeft = 0
-              ExplicitTop = 0
-              ExplicitWidth = 0
-              ExplicitHeight = 0
               object cxGridItems: TcxGrid
                 Left = 0
                 Top = 0
@@ -925,10 +944,6 @@ inherited frame78PriceList: Tframe78PriceList
                 object tsLog: TcxTabSheet
                   Caption = 'tsLog'
                   ImageIndex = 0
-                  ExplicitLeft = 0
-                  ExplicitTop = 0
-                  ExplicitWidth = 0
-                  ExplicitHeight = 0
                   object meLog: TcxMemo
                     Left = 0
                     Top = 0
@@ -953,10 +968,6 @@ inherited frame78PriceList: Tframe78PriceList
                 object cxTabSheet2: TcxTabSheet
                   Caption = 'tsGoodsInfo'
                   ImageIndex = 1
-                  ExplicitLeft = 0
-                  ExplicitTop = 0
-                  ExplicitWidth = 0
-                  ExplicitHeight = 0
                   object cxGrid6: TcxGrid
                     Left = 0
                     Top = 0
@@ -2045,6 +2056,12 @@ inherited frame78PriceList: Tframe78PriceList
         end
       end
     end
+  end
+  object tmrSupplierRefresh: TTimer
+    Enabled = False
+    OnTimer = tmrSupplierRefreshTimer
+    Left = 158
+    Top = 55
   end
   object dxBarManager1: TdxBarManager
     Scaled = False
@@ -3809,8 +3826,43 @@ inherited frame78PriceList: Tframe78PriceList
     Connection = dmDB.IBCConnection
     Transaction = dmDB.IBCTrDefaultSelect
     SQL.Strings = (
-      'select * from vw_ts_customer where parentid = 227869'
-      'order by displayname')
+      'WITH c AS ('
+      '    SELECT customerid, displayname '
+      '    FROM vw_ts_customer '
+      '    WHERE parentid = 227869'
+      '),'
+      'last_prices AS ('
+      '    SELECT '
+      '        p.plid,'
+      '        p.supplierid,'
+      '        p.price_categoryid,'
+      '        p.data,'
+      '        p.mentiuni,'
+      '        p.created_by,'
+      '        p.flg_done'
+      '    FROM vw_ts_pricelists p'
+      '    WHERE p.plid = ('
+      '        SELECT MAX(p2.plid) '
+      '        FROM vw_ts_pricelists p2 '
+      '        WHERE p2.supplierid = p.supplierid'
+      '    )'
+      ')'
+      'SELECT '
+      '    c.customerid AS customerid,'
+      '    c.displayname AS supplier_name,'
+      '    lp.plid,'
+      '    lp.data AS LAST_PRICELIST_DATE,'
+      '    lp.mentiuni,'
+      '    (u.last_name || '#39' '#39' || u.first_name) AS created_by_name,'
+      '    lp.flg_done,'
+      '    b.title AS category_name'
+      'FROM c'
+      'LEFT JOIN last_prices lp ON c.customerid = lp.supplierid'
+      'LEFT JOIN ts_users u ON lp.created_by = u.userid'
+      
+        'LEFT JOIN ts_cust_price_categories b ON lp.price_categoryid = b.' +
+        'price_categoryid'
+      'ORDER BY LAST_PRICELIST_DATE desc;')
     Left = 85
     Top = 78
   end

@@ -47,7 +47,7 @@ begin
      Errors:='';
      Result:=False;
      N:=StrToIntDef(edDiscount.Text,-1);
-     if (N<1) or (N>50) then AddErrorToStr(Errors,'Скидка 1-50% только!');
+     if (N<1) or (N>50) then AddErrorToStr(Errors,'Discount doar 1-50%!');
 
      if Errors='' then Result:=True
      else ShowErrorDialog(cMSG_GeneralError_Title,cMSG_GeneralInputError_Text,Errors);

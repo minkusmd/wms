@@ -730,6 +730,19 @@ inherited frame25ScetFaktura: Tframe25ScetFaktura
             MinWidth = 67
             Width = 109
           end
+          object cxGridInvoiceTable_EF_STATUS: TcxGridDBColumn
+            Caption = 'e-Factura'
+            DataBinding.FieldName = 'EF_STATUS'
+            OnGetDisplayText = cxGridInvoiceTable_EF_STATUSGetDisplayText
+            MinWidth = 90
+            Width = 130
+          end
+          object cxGridInvoiceTable_EF_STATUS_DATE: TcxGridDBColumn
+            Caption = 'status e-Factura la'
+            DataBinding.FieldName = 'EF_STATUS_DATE'
+            MinWidth = 80
+            Width = 110
+          end
           object cxGridInvoiceTable_DATA_ELIBERARII: TcxGridDBColumn
             Caption = 'data eliberarii'
             DataBinding.FieldName = 'DATA_ELIBERARII'
@@ -1688,6 +1701,23 @@ inherited frame25ScetFaktura: Tframe25ScetFaktura
           BeginGroup = True
           Visible = True
           ItemName = 'bbExport2eFactura'
+        end
+        item
+          BeginGroup = True
+          Visible = True
+          ItemName = 'bbEFacturaSend'
+        end
+        item
+          Visible = True
+          ItemName = 'bbEFacturaSync'
+        end
+        item
+          Visible = True
+          ItemName = 'bbEFacturaPdf'
+        end
+        item
+          Visible = True
+          ItemName = 'bbEFacturaCancel'
         end>
       NotDocking = [dsNone, dsLeft, dsTop, dsRight, dsBottom]
       OneOnRow = True
@@ -2207,10 +2237,38 @@ inherited frame25ScetFaktura: Tframe25ScetFaktura
       Visible = ivAlways
       OnClick = bbFLG_Export_CancelClick
     end
-    object bbExport2eFactura: TdxBarButton
-      Caption = 'eFactura'
+    object bbEFacturaSend: TdxBarButton
+      Caption = 'Trimite in e-Factura'
       Category = 0
-      Hint = 'eFactura'
+      Hint = 'Trimite factura in e-Factura prin API (nesemnata, la "Facturi noi")'
+      Visible = ivAlways
+      OnClick = bbEFacturaSendClick
+    end
+    object bbEFacturaSync: TdxBarButton
+      Caption = 'Actualizeaza status'
+      Category = 0
+      Hint = 'Preia din e-Factura statusul si seria/numarul facturii'
+      Visible = ivAlways
+      OnClick = bbEFacturaSyncClick
+    end
+    object bbEFacturaPdf: TdxBarButton
+      Caption = 'PDF e-Factura'
+      Category = 0
+      Hint = 'Deschide PDF-ul facturii generat de e-Factura'
+      Visible = ivAlways
+      OnClick = bbEFacturaPdfClick
+    end
+    object bbEFacturaCancel: TdxBarButton
+      Caption = 'Anuleaza in e-Factura'
+      Category = 0
+      Hint = 'Anuleaza factura in e-Factura (doar pana semneaza cumparatorul)'
+      Visible = ivAlways
+      OnClick = bbEFacturaCancelClick
+    end
+    object bbExport2eFactura: TdxBarButton
+      Caption = 'Export XML e-Factura'
+      Category = 0
+      Hint = 'Salveaza XML-ul facturii pentru importul manual in e-Factura'
       Visible = ivAlways
       ShortCut = 16453
       OnClick = bbExport2eFacturaClick
@@ -2404,7 +2462,11 @@ inherited frame25ScetFaktura: Tframe25ScetFaktura
       ''
       '  ')
     SQLRefresh.Strings = (
-      'SELECT * FROM VW_TDB_INVOICES'
+      'SELECT VW_TDB_INVOICES.*,'
+      ' (SELECT E.EF_STATUS FROM TDB_EFACTURA E WHERE E.INVOICEID = VW_TDB_INVOICES.INVOICEID) EF_STATUS,'
+      ' (SELECT E.EF_STATUS_DATE FROM TDB_EFACTURA E WHERE E.INVOICEID = VW_TDB_INVOICES.INVOICEID) EF_STATUS_DATE,'
+      ' (SELECT E.SERIA || '#39' '#39' || E.EF_NUMBER FROM TDB_EFACTURA E WHERE E.INVOICEID = VW_TDB_INVOICES.INVOICEID) EF_SERIA_NUMBER'
+      'FROM VW_TDB_INVOICES'
       'WHERE'
       '  INVOICEID = :INVOICEID AND DOCID = :DOCID')
     SQLLock.Strings = (
@@ -2421,7 +2483,10 @@ inherited frame25ScetFaktura: Tframe25ScetFaktura
     UpdateTransaction = dmDB.IBCTrDefaultUpdate
     SQL.Strings = (
       'SELECT'
-      ' *'
+      ' VW_TDB_INVOICES.*,'
+      ' (SELECT E.EF_STATUS FROM TDB_EFACTURA E WHERE E.INVOICEID = VW_TDB_INVOICES.INVOICEID) EF_STATUS,'
+      ' (SELECT E.EF_STATUS_DATE FROM TDB_EFACTURA E WHERE E.INVOICEID = VW_TDB_INVOICES.INVOICEID) EF_STATUS_DATE,'
+      ' (SELECT E.SERIA || '#39' '#39' || E.EF_NUMBER FROM TDB_EFACTURA E WHERE E.INVOICEID = VW_TDB_INVOICES.INVOICEID) EF_SERIA_NUMBER'
       'FROM'
       ' VW_TDB_INVOICES')
     MasterFields = 'DOCID'
@@ -2758,183 +2823,5 @@ inherited frame25ScetFaktura: Tframe25ScetFaktura
     DataSet = IBCQueryCities
     Left = 296
     Top = 304
-  end
-  object IBCQueryeFactura: TIBCQuery
-    Connection = dmDB.IBCConnection
-    SQL.Strings = (
-      '  SELECT'
-      ' VW_TDB_DOCS.*,'
-      
-        ' (SELECT A.FULL_ADDRESS FROM VW_TS_CUST_ADDR A WHERE A.ADDRID=TD' +
-        'B_INVOICES.PUNCT_INCARCARE) DT_ADDRESS,'
-      
-        ' (SELECT A.FULL_ADDRESS FROM VW_TS_CUST_ADDR A WHERE A.CUSTOMERI' +
-        'D=VW_TDB_DOCS.DT AND ADDRTYPEID = 7663) DT_ADDRESS2,'
-      
-        ' (SELECT TS_CUST_INFO.CHIEF FROM TS_CUST_INFO WHERE TS_CUST_INFO' +
-        '.CUSTOMERID=VW_TDB_DOCS.DT) DT_DIRECTOR,'
-      
-        ' (SELECT IDEN_NUMBER FROM TS_CUST_INFO WHERE TS_CUST_INFO.CUSTOM' +
-        'ERID=VW_TDB_DOCS.DT) DT_IDEN_NUMBER,'
-      
-        ' (SELECT VAT_NUMBER FROM TS_CUST_INFO WHERE TS_CUST_INFO.CUSTOME' +
-        'RID=VW_TDB_DOCS.DT) DT_VAT_NUMBER,'
-      ''
-      
-        ' (SELECT A.FULL_ADDRESS FROM VW_TS_CUST_ADDR A WHERE A.ADDRID=TD' +
-        'B_INVOICES.PUNCT_DESCARCARE) CT_ADDRESS, /* adresa fizica */'
-      
-        ' (SELECT A.FULL_ADDRESS FROM VW_TS_CUST_ADDR A WHERE A.CUSTOMERI' +
-        'D = VW_TDB_DOCS.CT AND ADDRTYPEID = 7663) CT_ADDRESS2, /* adresa' +
-        ' juridica */'
-      
-        ' (SELECT IDEN_NUMBER FROM TS_CUST_INFO WHERE TS_CUST_INFO.CUSTOM' +
-        'ERID=VW_TDB_DOCS.CT) CT_IDEN_NUMBER,'
-      
-        ' (SELECT VAT_NUMBER FROM TS_CUST_INFO WHERE TS_CUST_INFO.CUSTOME' +
-        'RID=VW_TDB_DOCS.CT) CT_VAT_NUMBER,'
-      '                                     '
-      ' DT_ACCOUNTS.ACCOUNTNUMBER DT_ACCOUNT,'
-      ' DT_ACCOUNTS.BANKACCOUNT DT_BANKACCOUNT,'
-      
-        ' (SELECT BANKNAME FROM TS_BANKS WHERE TS_BANKS.BANKACCOUNT=DT_AC' +
-        'COUNTS.BANKACCOUNT) DT_BANKNAME,'
-      ''
-      '                                    '
-      ' CT_ACCOUNTS.ACCOUNTNUMBER CT_ACCOUNT,'
-      ' CT_ACCOUNTS.BANKACCOUNT CT_BANKACCOUNT,'
-      
-        ' (SELECT BANKNAME FROM TS_BANKS WHERE TS_BANKS.BANKACCOUNT=CT_AC' +
-        'COUNTS.BANKACCOUNT) CT_BANKNAME,'
-      ' '
-      ''
-      
-        ' (SELECT PROCURA_NO FROM TS_PROCURI WHERE TS_PROCURI.PROCURAID=(' +
-        'SELECT PROCURAID FROM TDB_INVOICES WHERE TDB_INVOICES.FLG_CANCEL' +
-        'ED=0 AND TDB_INVOICES.DOCID=VW_TDB_DOCS.DOCID)) PROCURA_NO,'
-      ' TDB_INVOICES.DELEGAT,'
-      ''
-      ' TDB_INVOICES.TRANSPORTATOR,'
-      
-        ' (SELECT IDEN_NUMBER FROM TS_CUST_INFO WHERE TS_CUST_INFO.CUSTOM' +
-        'ERID=TDB_INVOICES.TRANSPORTATOR) TRANSPORTATOR_IDNO, '
-      
-        ' (SELECT VAT_NUMBER FROM TS_CUST_INFO WHERE TS_CUST_INFO.CUSTOME' +
-        'RID=TDB_INVOICES.TRANSPORTATOR) TRANSPORTATOR_VAT_NUMBER,  '
-      
-        '  IIF(EXISTS(SELECT FIRMA_NAME FROM TS_CUST_1C WHERE CUSTOMERID=' +
-        'TDB_INVOICES.TRANSPORTATOR),'
-      
-        '        (SELECT FIRMA_NAME FROM TS_CUST_1C WHERE CUSTOMERID=TDB_' +
-        'INVOICES.TRANSPORTATOR),'
-      
-        '        (SELECT DISPLAYNAME FROM TS_CUSTOMER WHERE TS_CUSTOMER.C' +
-        'USTOMERID=TDB_INVOICES.TRANSPORTATOR AND TDB_INVOICES.TRANSPORTA' +
-        'TOR>-1)) TRANSPORTATOR_NUME,'
-      ' TA.BANKACCOUNT TRANS_BANKACCOUNT,'
-      ' TA.ACCOUNTNUMBER TRANS_ACCOUNT,'
-      
-        ' (SELECT BANKNAME FROM TS_BANKS WHERE TS_BANKS.BANKACCOUNT=TA.BA' +
-        'NKACCOUNT) TRANS_BANKNAME,'
-      
-        ' (SELECT A.FULL_ADDRESS FROM VW_TS_CUST_ADDR A WHERE A.CUSTOMERI' +
-        'D = TDB_INVOICES.TRANSPORTATOR AND ADDRTYPEID = 7663) TRANS_ADDR' +
-        'ESS,'
-      ''
-      ' TDB_INVOICES.DATA_ELIBERARII,'
-      ' TDB_INVOICES.NRMATRICULARE,'
-      ' TDB_INVOICES.NRFOAIEDEPARCURS,'
-      ' TDB_INVOICES.FPDATAELIBERARII,'
-      ' TDB_INVOICES.DOCUMENTE_ANEXATE,     '
-      ' TDB_INVOICES.REDIRIJARIID,'
-      
-        ' (select title from ts_syss where syssid = redirijariid) REDIRIJ' +
-        'ARI_NAME,'
-      ' TDB_INVOICES.FFTYPEID,  '
-      '                                               '
-      '   '
-      
-        ' (SELECT DATA_START FROM TS_PROCURI WHERE TS_PROCURI.PROCURAID=(' +
-        'SELECT PROCURAID FROM TDB_INVOICES WHERE TDB_INVOICES.FLG_CANCEL' +
-        'ED=0 AND TDB_INVOICES.DOCID=VW_TDB_DOCS.DOCID)) PROCURA_DATA_ELI' +
-        'BERARII,'
-      ' IIF(TDB_INVOICES.PROCURAID IS NULL,0,1) ARE_PROCURA,'
-      ''
-      
-        ' (SELECT LIST(LPAD(NUMAR_BON,3,'#39'0'#39')) FROM TDB_DOCS_RECEIPT WHERE' +
-        ' TDB_DOCS_RECEIPT.DOCID=VW_TDB_DOCS.DOCID AND GET_FLG_VALUE(TDB_' +
-        'DOCS_RECEIPT.FLAGS,3)=0) BONURI_FISCALE,'
-      ' TDB_INVOICES.FACTURANO,'
-      
-        ' (SELECT FIRMA_NAME FROM TS_CUST_1C WHERE CUSTOMERID=VW_TDB_DOCS' +
-        '.DT) ORGANIZATION     '
-      ''
-      'FROM'
-      ' VW_TDB_DOCS'
-      
-        ' LEFT OUTER JOIN TDB_DOCS_RECHIZITE ON (TDB_DOCS_RECHIZITE.DOCID' +
-        '=VW_TDB_DOCS.DOCID)'
-      
-        ' LEFT OUTER JOIN TS_CUST_ACCOUNTS DT_ACCOUNTS ON (DT_ACCOUNTS.CU' +
-        'STOMERID=VW_TDB_DOCS.DT AND DT_ACCOUNTS.ACCOUNTNUMBER=TDB_DOCS_R' +
-        'ECHIZITE.DT_CD)'
-      
-        ' LEFT OUTER JOIN TS_CUST_ACCOUNTS CT_ACCOUNTS ON (CT_ACCOUNTS.CU' +
-        'STOMERID=VW_TDB_DOCS.CT AND CT_ACCOUNTS.ACCOUNTNUMBER=TDB_DOCS_R' +
-        'ECHIZITE.CT_CD)'
-      
-        ' LEFT OUTER JOIN TDB_INVOICES ON (TDB_INVOICES.DOCID=VW_TDB_DOCS' +
-        '.DOCID)'
-      
-        ' LEFT OUTER JOIN TS_CUST_ACCOUNTS TA ON (TA.CUSTOMERID=TDB_INVOI' +
-        'CES.TRANSPORTATOR AND'
-      
-        '        TA.ACCOUNTNUMBER=(SELECT ACCOUNTNUMBER FROM TS_CUST_ACCO' +
-        'UNTS TA1 WHERE TA1.CUSTOMERID = TA.CUSTOMERID AND TA1.DEFAULT_AC' +
-        'COUNT=1))'
-      ''
-      'WHERE'
-      ' VW_TDB_DOCS.DOCID=:DOCID')
-    Left = 704
-    Top = 361
-    ParamData = <
-      item
-        DataType = ftUnknown
-        Name = 'DOCID'
-        Value = nil
-      end>
-  end
-  object IBCQueryDetail: TIBCQuery
-    Connection = dmDB.IBCConnection
-    SQL.Strings = (
-      'SELECT DOCID,'
-      'DTDEP,'
-      'CTDEP,'
-      'GOODSCOMPLECT_ID,'
-      'GOODSID,'
-      'goods_name,                         '
-      'GOODS_ACNT_ID,'
-      'NAMEACNT,'
-      'QTY,'
-      'PRICE,'
-      
-        '(select vat from ts_goods g where g.goodsid = p.goodsid) vat_rat' +
-        'e,'
-      
-        'round((ROUND(SUMA,3)-round(sumavat,3)) / qty,2) PRICE_WVAT,     ' +
-        '                      '
-      'ROUND(SUMA,2) SUMA,'
-      'ROUND(SUMAVAT,2) SUMAVAT,     '
-      'UM_NAME'
-      ''
-      'FROM GET_GOODS_FOR_RECEIPT(:DOCID) p')
-    Left = 648
-    Top = 480
-    ParamData = <
-      item
-        DataType = ftUnknown
-        Name = 'DOCID'
-        Value = nil
-      end>
   end
 end

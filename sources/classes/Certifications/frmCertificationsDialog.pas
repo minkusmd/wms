@@ -139,7 +139,7 @@ end;
 
 procedure TfrmCertificationsDlg.DeleteCurrentCertificat;
 begin
-     if ShowAskDialog('Eliminare certificat','Elimia certificat nr.'+#13#10+IBCQueryCertif.FieldByName('NUMAR_INREG').asWideString+' ?','Соответсвтующие товары будут лишены данного сертификаты!')=mrYes then
+     if ShowAskDialog('Eliminare certificat','Elimia certificat nr.'+#13#10+IBCQueryCertif.FieldByName('NUMAR_INREG').asWideString+' ?','Marfurile corespunzatoare vor fi lipsite de acest certificat!')=mrYes then
      begin
           IBCQueryCertif.Delete;
           IBCTrUpdateCertif.Commit;

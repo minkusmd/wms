@@ -1,8 +1,8 @@
 //******************************************************************************
-//                                                      (c) корпорация Галактика
+//                                                      (c) corporatia Galaktika
 //                                                       http://www.galaktika.by
-// Галактика 8.10 - Отчетность FastReport 3
-// Модуль импорта из Excel
+// Galaktika 8.10 - Rapoarte FastReport 3
+// Modul de import din Excel
 //******************************************************************************
 
 unit gfrExcelImportWizard;
@@ -46,9 +46,9 @@ type
     selected : boolean;
     name : string;
     index : integer;
-    pRowBegin, pColBegin, pRowEnd, pColEnd : integer;       // координаты используемой области
-    uRowBegin, uColBegin, uRowEnd, uColEnd : integer;       // пользовательские координаты
-    usedRange : array of TUsedRanges                        // массив страниц
+    pRowBegin, pColBegin, pRowEnd, pColEnd : integer;       // coordonatele zonei utilizate
+    uRowBegin, uColBegin, uRowEnd, uColEnd : integer;       // coordonatele utilizatorului
+    usedRange : array of TUsedRanges                        // matricea paginilor
   end;
 
   TgfrExcelImportForm = class(TForm)
@@ -101,15 +101,15 @@ type
     procedure btnUncheckAllClick(Sender: TObject);
     procedure rbPrintAreaClick(Sender: TObject);
     procedure ImportPage( fReport     : TfrxReport;
-                          StatusBar   : TStatusBar;     //  статус панель с 3 элементами
-                          sheet       : integer;        //  номер листа
-                          colStart    : integer;        //  начальный столбец
-                          rowStart    : integer;        //  начальная строка
-                          colEnd      : integer;        //  конечный столбец
-                          rowEnd      : integer;        //  конечная строка
-                          koef        : extended;       //  коэффициент
-                          fPageDef    : boolean;        //  флаг отмены импорта
-                          fAccuracy   : boolean         //  флаг точности
+                          StatusBar   : TStatusBar;     //  status bar cu 3 elemente
+                          sheet       : integer;        //  numarul foii
+                          colStart    : integer;        //  coloana initiala
+                          rowStart    : integer;        //  randul initial
+                          colEnd      : integer;        //  coloana finala
+                          rowEnd      : integer;        //  randul final
+                          koef        : extended;       //  coeficient
+                          fPageDef    : boolean;        //  flag anulare import
+                          fAccuracy   : boolean         //  flag precizie
                         );
     function selectedPagesCount() : integer;
   private
@@ -137,7 +137,7 @@ implementation
 uses ComObj;
 
 ////////////////////////////////////////////////////////////////////////////////
-// взято из unit Excel2000;
+// preluat din unit Excel2000;
 const
   xlManual = $FFFFEFD9;
 
@@ -180,19 +180,19 @@ threadvar
   bmp: Graphics.TBitmap;
 
 Const
-  XlsWizardCaption = 'Импорт формы отчета из Excel';
+  XlsWizardCaption = 'Import forma de raport din Excel';
 
 {$R *.dfm}
 {$R *.res}
 
 //==============================================================================
-// обработчики событий формы
+// tratatoare evenimente formular
 //==============================================================================
 
 { TgfrGalaxyParamWizard }
 function TfrxExcelImportWizard.Execute: Boolean;
 begin
-  { запрещаем любые отрисовки в дизайнере }
+  { interzicem orice desenare in designer }
   Designer.Lock;
 
   gfrExcelImportForm := TgfrExcelImportForm.Create(Report);
@@ -218,7 +218,7 @@ procedure TgfrExcelImportForm.FormShow(Sender: TObject);
 begin
   edFileName.Enabled := true;
   btnOpen.Enabled := true;
-  btnImport.Caption := 'Импорт';
+  btnImport.Caption := 'Import';
   edFileName.Text := '';
   Caption := XlsWizardCaption;
   sheetsList.Items.Clear;
@@ -260,7 +260,7 @@ begin
 end;
 //==============================================================================
 
-function AddrCell(Col, Row: integer): string; // адрес ячейки в буквенном формате
+function AddrCell(Col, Row: integer): string; // adresa celulei in format alfabetic
 var kol, i: integer;
 begin
   kol := ord('z') - ord('a') + 1;
@@ -276,7 +276,7 @@ begin
   Result := Result + IntToStr(row);
 end;
 
-function DecodeCol(Col: string): integer;  // перевод буквенного обозначения колонки в числовое
+function DecodeCol(Col: string): integer;  // transforma denumirea alfabetica a coloanei in numar
 var kol, i: integer;
 begin
   col := trim(LowerCase(Col));
@@ -303,7 +303,7 @@ procedure TgfrExcelImportForm.xlUsedRange(address: string; sheetIndex : integer;
             begin
               sheets[len].pRowBegin := strToInt(substr);
               sheets[len].uRowBegin := strToInt(substr);
-              sheets[len].pRowEnd := 1; //  Для случая одной ячейки
+              sheets[len].pRowEnd := 1; //  Pentru cazul unei singure celule
               sheets[len].uRowEnd := 1; //
               sheets[len].pColBegin := 1;
               sheets[len].uColBegin := 1;
@@ -328,7 +328,7 @@ procedure TgfrExcelImportForm.xlUsedRange(address: string; sheetIndex : integer;
     sheets[len].index  := sheetIndex;
     sheets[len].name   := shName;
 
-    if (sheets[len].pColBegin = 0) or (sheets[len].pRowBegin = 0) or     // удаление пустых листов
+    if (sheets[len].pColBegin = 0) or (sheets[len].pRowBegin = 0) or     // stergerea foilor goale
        (sheets[len].pRowEnd = 0) or (sheets[len].pColEnd = 0) then
       begin
         SetLength(sheets, length(sheets)-1);
@@ -341,9 +341,9 @@ procedure TgfrExcelImportForm.xlUsedRange(address: string; sheetIndex : integer;
     HBreaksCount := ExcelApp.Worksheets[sheetIndex].HPageBreaks.Count;
     VBreaksCount := ExcelApp.Worksheets[sheetIndex].VPageBreaks.Count;
 
-//    if (HBreaksCount = 0) and (VBreaksCount <> 0) then    // если отчет "высокий" шириной на 1 страницу, был глюк
-//      dec(VBreaksCount);                                  // так все ок
-//    if (VBreaksCount = 0) and (HBreaksCount <> 0) then    // если отчет "широкий"
+//    if (HBreaksCount = 0) and (VBreaksCount <> 0) then    // daca raportul este "inalt" cu latimea de 1 pagina, a fost un bug
+//      dec(VBreaksCount);                                  // asa totul e ok
+//    if (VBreaksCount = 0) and (HBreaksCount <> 0) then    // daca raportul este "lat"
 //      dec(HBreaksCount);
 
     for i := 1 to HBreaksCount + 1 do
@@ -414,23 +414,23 @@ Result := 0;
      inc(Result);
 end;
 
-// функция импорта
+// functia de import
 procedure TgfrExcelImportForm.ImportPage( fReport     : TfrxReport;
-                          StatusBar   : TStatusBar;     //  статус панель с 3 элементами
-                          sheet       : integer;        //  номер листа
-                          colStart    : integer;        //  начальный столбец
-                          rowStart    : integer;        //  начальная строка
-                          colEnd      : integer;        //  конечный столбец
-                          rowEnd      : integer;        //  конечная строка
-                          koef        : extended;       //  коэффициент
-                          fPageDef    : boolean;        //  флаг отмены импорта
-                          fAccuracy   : boolean         //  флаг точности
+                          StatusBar   : TStatusBar;     //  status bar cu 3 elemente
+                          sheet       : integer;        //  numarul foii
+                          colStart    : integer;        //  coloana initiala
+                          rowStart    : integer;        //  randul initial
+                          colEnd      : integer;        //  coloana finala
+                          rowEnd      : integer;        //  randul final
+                          koef        : extended;       //  coeficient
+                          fPageDef    : boolean;        //  flag anulare import
+                          fAccuracy   : boolean         //  flag precizie
                         );
 var row, Col : integer;
     firstX, firstY, maxHeight, maxWidth : extended;
     adr, txt: string;
     frType: TfrxFrameTypes;
-    is4Frame, isColor, fMerge{, isSame {если предыдущая ячейка = текущей}: boolean;
+    is4Frame, isColor, fMerge{, isSame {daca celula precedenta = celula curenta}: boolean;
     color : TColor;
     v: TfrxMemoView;
     ProgressBar : TProgressBar;
@@ -503,7 +503,7 @@ var row, Col : integer;
     Result := DecodeCol(substr);
   end;
 
-  function CellWidth(isMerge : boolean) : extended;        //  вычисляет ширину ячейки
+  function CellWidth(isMerge : boolean) : extended;        //  calculeaza latimea celulei
   begin
 //  koef := 1.358;
   if isMerge then
@@ -519,7 +519,7 @@ var row, Col : integer;
 
 
  //   if Result <
-    //  if v.HAlign <> haRight then                            // надо что-то придумать для размера шрифта
+    //  if v.HAlign <> haRight then                            // trebuie de gasit ceva pentru dimensiunea fontului
 //    Result := length(v.Memo.Text)*4
 //  else
 //    begin
@@ -530,7 +530,7 @@ var row, Col : integer;
 
   procedure createPage();
   begin
-  // создание новой страницы в отчете
+  // crearea unei pagini noi in raport
   Page := TfrxReportPage.Create(fReport);
   Page.CreateUniqueName;
   Page.SetDefaults;
@@ -553,7 +553,7 @@ begin
     ProgressBar.Min := RowStart;
   end;
   ExcelApp.WorkSheets[sheet].Activate;
-  // создание новой страницы страницы
+  // crearea unei pagini noi
   createPage();
 
   maxHeight := 0;
@@ -643,9 +643,9 @@ begin
           v.Top := curRange.Top - firstY;
           v.Width := CellWidth(fMerge);
           v.Height := curRange.MergeArea.Height;
-          // перенос по словам
+          // incadrare dupa cuvinte
           v.WordWrap := curRange.WrapText;
-          // текст под наклоном
+          // text inclinat
           if curRange.Orientation <> -4128 then
             v.Rotation := curRange.Orientation
           else
@@ -687,8 +687,8 @@ begin
     end;
   end;
 
-  if Page.Objects.Count = 0 then  // если страница ничего не содержит, те пустая
-  begin                           // то удаляем ее
+  if Page.Objects.Count = 0 then  // daca pagina nu contine nimic, adica este goala
+  begin                           // atunci o stergem
     Page.Free;
     ProgressBar.Free;
     exit;
@@ -708,7 +708,7 @@ end;
 end;
 
 //==============================================================================
-// обработчики кнопок
+// handler-e pentru butoane
 //==============================================================================
 
 procedure TgfrExcelImportForm.btnOpenClick(Sender: TObject);
@@ -737,8 +737,8 @@ begin
   except
     ExcelApp := Unassigned;
 
-    Application.MessageBox(PChar('Ошибка инициализации Excel.'#13#10'Возможно приложение не установлено.'),
-                                 'Ошибка', MB_OK or MB_ICONERROR);
+    Application.MessageBox(PChar('Eroare la initializarea Excel.'#13#10'Posibil aplicatia nu este instalata.'),
+                                 'Eroare', MB_OK or MB_ICONERROR);
     exit;
   end;
 
@@ -785,7 +785,7 @@ begin
     enableAllControls;
   end
   else
-    MessageDlg('Требуется MS Office версии XP или старше!', mtWarning, [mbOK], 0);
+    MessageDlg('Este necesar MS Office versiunea XP sau mai noua!', mtWarning, [mbOK], 0);
 end;
 
 procedure TgfrExcelImportForm.btnImportClick(Sender: TObject);
@@ -793,7 +793,7 @@ var
   i, k, all, current, sec : integer;
   adr : string;
 begin     // Import
-if trim(btnImport.Caption) = 'Импорт' then
+if trim(btnImport.Caption) = 'Import' then
 begin
   current := 0;
   all := selectedPagesCount();
@@ -808,9 +808,9 @@ begin
     begin
       sec := strtoInt(FormatDateTime('ss', Now))+strtoInt(FormatDateTime('nn', Now))*60;
       inc(current);
-      btnImport.Caption := 'Стоп';
+      btnImport.Caption := 'Stop';
       sheetsList.Selected[i] := true;
-      Self.Text := 'Импорт страницы '+inttostr(current)+' из '+inttostr(all);
+      Self.Text := 'Import pagina '+inttostr(current)+' din '+inttostr(all);
       if rbUsedRange.Checked then
       begin
         adr := AddrCell(sheets[i].pColBegin, sheets[i].pRowBegin);
@@ -841,7 +841,7 @@ begin
         if cbDivByPages.Checked then
         for k := 0 to length(sheets[i].usedRange)-1 do
         begin
-          Self.Text := 'Импорт области печати ' +inttostr(k + 1) + ' из ' + inttostr(length(sheets[i].usedRange));
+          Self.Text := 'Import zona de printare ' +inttostr(k + 1) + ' din ' + inttostr(length(sheets[i].usedRange));
           adr := AddrCell(sheets[i].usedRange[k].urColBegin, sheets[i].usedRange[k].urRowBegin);
           edRowStart.Text := inttostr(sheets[i].usedRange[k].urRowBegin);
           edColStart.Text := copy(adr, 1, length(adr)-length(edRowStart.Text));
@@ -860,12 +860,12 @@ begin
       end;
 
       sec := strtoInt(FormatDateTime('ss', Now)) + strtoInt(FormatDateTime('nn', Now))*60 - sec;
-      StatusBar.Panels[2].Text := 'время импорта: ' + inttoStr(sec) + ' сек.';
+      StatusBar.Panels[2].Text := 'timp de import: ' + inttoStr(sec) + ' sec.';
           {FormatDateTime('hh:nn:ss:zzz', TimeStampToDateTime(MSecsToTimeStamp(t2-t1)));}
     end;
     ExcelApp.DisplayAlerts := false;
 //  except
-//    showmessage('Возникла ошибка при импорте');
+//    showmessage('A aparut o eroare la import');
 //  end;
   enableAllControls;
 
@@ -877,7 +877,7 @@ end
 else
   fCancel := true;
   enableAllControls;
-  btnImport.Caption := 'Импорт';
+  btnImport.Caption := 'Import';
   Self.Text := XlsWizardCaption;
   ModalResult := mrOk;
 end;
@@ -891,7 +891,7 @@ end;
 procedure TgfrExcelImportForm.btnCheckAllClick(Sender: TObject);
 var i : integer;
 begin
-  sheetsList.SelectAll;  // ?? не работает
+  sheetsList.SelectAll;  // ?? nu functioneaza
   for i:=0 to sheetsList.Count-1 do
     sheetsList.Checked[i] := true;
   sheetsListClickCheck(Sender);
@@ -919,7 +919,7 @@ var i, j, nearestItem : integer;
     finded : array of integer;
     k : extended;
 
-  function findNearest(curItNum : integer; isToRight : boolean) : integer; // находи крайний правый или левый элемент
+  function findNearest(curItNum : integer; isToRight : boolean) : integer; // gaseste elementul cel mai din dreapta sau din stanga
   var min, max : integer;
       crItem, cItem : TfrxCustomMemoView;
 
@@ -983,7 +983,7 @@ var i, j, nearestItem : integer;
         if cItem.Left < crItem.Left then
           result := finded[min]
       end
-      else  // крайний правый элемент
+      else  // elementul cel mai din dreapta
           result := -1;
     end
     else if (not isToRight) then
@@ -1152,7 +1152,7 @@ begin
     for i := 0 to sheetslist.Count-1 do
       if sheetsList.Selected[i] then
       begin
-        for k := 0 to length(sheets[i].usedRange) do     //  по страницам
+        for k := 0 to length(sheets[i].usedRange) do     //  pe pagini
         begin
           adr := AddrCell(sheets[i].usedRange[k].urColBegin, sheets[i].usedRange[k].urRowBegin);
           edRowStart.Text := inttostr(sheets[i].usedRange[k].urRowBegin);

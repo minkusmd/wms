@@ -166,7 +166,7 @@ begin
     dtDialogTitle.Color := cCOLOR_DocReadOnly;
     btnOk.Visible := False;
     btnCancel.Default := True;
-    btnCancel.Caption := 'Закрыть';
+    btnCancel.Caption := 'Inchide';
 
     IBCQueryCredits.UpdateTransaction := nil;
   end;
@@ -179,7 +179,7 @@ begin
     if not FReadOnly then
       LockCustomerCredits;
 
-    dtDialogTitle.Text := 'Контрагент: ' + fMasterDataSet.FieldByName('DISPLAYNAME').AsString;
+    dtDialogTitle.Text := 'Contraagent: ' + fMasterDataSet.FieldByName('DISPLAYNAME').AsString;
 
     if FReadOnly then
       IBCQueryCredits.ReadOnly := True;
@@ -197,9 +197,9 @@ procedure TfrmCustomerCreditDialog.RemoveSelectedCredit;
 var
   S: string;
 begin
-  S := #13#10 + 'Сумма наличного кредита: $' + IBCQueryCredits.FieldByName('SUMA_CASH').AsString + #13#10 +
-    'Сумма безналичного кредита: ' + IBCQueryCredits.FieldByName('SUMA_TRANSFER').AsString + 'LEI' + #13#10 + #13#10;
-  if ShowAskDialog('Удаление кредитной записи', 'Кредит' + S + 'Удалить кредитную запись?') = mrYes then
+  S := #13#10 + 'Suma creditului in numerar: $' + IBCQueryCredits.FieldByName('SUMA_CASH').AsString + #13#10 +
+    'Suma creditului fara numerar: ' + IBCQueryCredits.FieldByName('SUMA_TRANSFER').AsString + 'LEI' + #13#10 + #13#10;
+  if ShowAskDialog('Stergere inregistrare credit', 'Credit' + S + 'Stergeti inregistrarea de credit?') = mrYes then
   begin
     try
       IBCQueryCredits.Delete;
@@ -244,7 +244,7 @@ begin
     dxBarManager1Bar2.Visible := False;
     dxBarDockControl1.Visible := False;
     btnOk.Visible := False;
-    btnCancel.Caption := 'Закрыть';
+    btnCancel.Caption := 'Inchide';
   end;
 end;
 

@@ -1,6 +1,6 @@
 unit SWNSNClasses;
 {
- Серийные номера
+ Numere de serie
 }
 
 interface

@@ -57,7 +57,7 @@ begin
      Result:=False;
      ErrorStr:='';
 
-     if Trim(beURL.Text)='' then AddErrorToStr(ErrorStr,'—сылка!');
+     if Trim(beURL.Text)='' then AddErrorToStr(ErrorStr,'Legatura!');
 
      if ErrorStr='' then Result:=True
      else ShowErrorDialog(cMSG_GeneralInputError_Title,cMSG_GeneralInputError_Text,ErrorStr);

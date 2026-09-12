@@ -1,6 +1,6 @@
 unit frame26AktSpisaniaUnit;
 {
-  ИНВЕНТАРИЗАЦИЯ. Акт списания товара
+  INVENTARIERE. Act de casare marfa
   DocTypeID = 129
   Frame Index = 26
 }
@@ -604,7 +604,7 @@ begin
 
   if cxGridComponentsTable.Site.Focused then
   begin
-          // context from Jurnal: Код + Наименование
+          // context from Jurnal: Cod + Denumire
     Result.CONTEXT := ffGoods;
     Result.ValueInt := dmDB.IBCQueryJurnal.FieldByName('GOODSID').AsInteger;
     Result.ValueStr := dmDB.IBCQueryJurnal.FieldByName('GOODS_NAME').AsString;
@@ -614,13 +614,13 @@ begin
               // context from Docs
     if cxGridAS_DATA.Focused then
     begin
-                   // Дата
+                   // Data
       Result.CONTEXT := ffDate;
       Result.ValueDateTime := dmDB.IBCQueryDocs.FieldByName('DATA').AsDateTime;
     end
     else if cxGridAS_DTDEP_NAME.Focused then
     begin
-                       // Склад
+                       // Depozit
       Result.CONTEXT := ffStock;
       Result.ValueInt := dmDB.IBCQueryDocs.FieldByName('DTDEP').AsInteger;
       Result.ValueStr := dmDB.IBCQueryDocs.FieldByName('DTDEP_NAME').AsString;
@@ -651,7 +651,7 @@ end;
 
 function Tframe26AktSpisania.InitFrameID: Integer;
 begin
-  Result := 26; // ИНВЕНТАРИЗАЦИЯ. Акт списания
+  Result := 26; // INVENTARIERE. Act de casare
   SetupQtyFields;
 end;
 
@@ -716,7 +716,7 @@ begin
     begin
       fGoodsEdit := fSECURITY_CanEdit and not FLG_CLOSED;   // Edit Goods + Security
       fGoodsDelete := fSECURITY_CanEdit and not FLG_CLOSED; // Delete Goods + Security
-               // Серийные/партийные номера
+               // Numere seriale/de partida
       fGoodsSPNumber := (dmDB.IBCQueryJurnal.FieldByName('GOODS_SERIAL_TYPE_ID').AsInteger = cSYSS_GOODS_SERIAL_TYPE_Серийный_учет) or (dmDB.IBCQueryJurnal.FieldByName('GOODS_SERIAL_TYPE_ID').AsInteger = cSYSS_GOODS_SERIAL_TYPE_Партийный_учет);
     end;
   end;
@@ -751,7 +751,7 @@ end;
 
 procedure Tframe26AktSpisania.SetupQtyFields;
 begin
-     // Кол-во
+     // Cantitate
   TcxCalcEditProperties(cxGridDBCol_QTY.Properties).DisplayFormat := QtyDisplayFormat;
   cxGridDBCol_QTY.Summary.FooterFormat := QtyDisplayFormat;
 end;

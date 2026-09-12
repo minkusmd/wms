@@ -1,6 +1,6 @@
 unit frame81SalaryUnit;
 
-// КАССА. Приходный кассовый ордер
+// CASA. Dispozitie de incasare
 // DocTypeID = 116
 // Frame Index = 1
 
@@ -130,10 +130,10 @@ var
 begin
     s := '';
     if cxGridCustomereTable.DataController.RecordCount > 0 then
-        s := 'Текущие записи будут удаленны!';
+        s := 'Inregistrarile curente vor fi sterse!';
 
-    if ShowAskDialog('Привести контрагентов',
-        'Вы хотите заполнить список всеми работниками из фирмы документа?', s) = mrYes then
+    if ShowAskDialog('Adauga contraagenti',
+        'Doriti sa completati lista cu toti angajatii din firma documentului?', s) = mrYes then
     begin
         if DoFillCustomersDB(dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger) then
         begin
@@ -375,7 +375,7 @@ begin
           // context from Docs
         if cxGridZap_DATA.Focused then
         begin
-               // Дата
+               // Data
             Result.Context := ffDate;
             Result.ValueDateTime := dmDB.IBCQueryDocs.FieldByName('DATA').AsDateTime;
         end
@@ -405,7 +405,7 @@ end;
 
 function Tframe81Salary.InitFrameID: integer;
 begin
-     // КАССА. Приходный кассовый ордер
+     // CASA. Dispozitie de incasare
     Result := 81;
 end;
 

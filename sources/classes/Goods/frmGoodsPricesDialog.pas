@@ -637,7 +637,7 @@ begin
   else
     Result := AddToExistingRecord();
   if not Result then
-    ShowErrorDialog(cMSG_GeneralError_Title, 'Не получилось! Видно не судьба.');
+    ShowErrorDialog(cMSG_GeneralError_Title, 'Nu a mers! Se vede ca nu era sa fie.');
 end;
 
 procedure TfrmGoodsPricesDlg.miPriceCalcPreset1Click(Sender: TObject);

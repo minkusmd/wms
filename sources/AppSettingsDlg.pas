@@ -208,37 +208,37 @@ procedure TfrmAppSettingsDialog.DisplayValues;
 var
   S: string;
 begin
-  // Общие
+  // Generale
   cbStartWithWindows.Checked := AppConfigStorage.BooleanValues.GetValue(cSETTINGS_AppAutoStart);
   cbSaveLastLogin.Checked := AppConfigStorage.BooleanValues.GetValue(cSETTINGS_AppSaveLastLogin, True);
 
-  // Вид
+  // Tip
   PrepareFontList;
-  cmbFontSize.ItemIndex := AppUserConfigStorage.IntValues.GetValue(cSETTINGS_UserFontSize, cAppDefaultFontIndex); // Размер шрифтов;
+  cmbFontSize.ItemIndex := AppUserConfigStorage.IntValues.GetValue(cSETTINGS_UserFontSize, cAppDefaultFontIndex); // Dimensiune fonturi;
   cbSaveFormPos.Checked := AppUserConfigStorage.BooleanValues.GetValue(cSETTINGS_UserSaveFormPos);
   cbSaveGridColumns.Checked := AppUserConfigStorage.BooleanValues.GetValue(cSETTINGS_UserSaveGridColumns);
   cbSaveMultiMonitorPos.Checked := AppUserConfigStorage.BooleanValues.GetValue(cSETTINGS_UserSaveMonitorPosition);
   cbSaveMultiMonitorPos.Enabled := Screen.MonitorCount > 1;
 
-  // Пользователь
+  // Utilizator
   edUserName.Text := SWNSecurityManager.LoggedUser.FullName;
   edUserPhone.Text := SWNSecurityManager.LoggedUser.Telefon;
   edUserEmail.Text := SWNSecurityManager.LoggedUser.EMail;
   edUserBirthDate.Text := FormatDateTime('dd mmmm yyyy', SWNSecurityManager.LoggedUser.BirthDay);
   edUserAddress.Text := SWNSecurityManager.LoggedUser.Address;
 
-  // Оповешения
-  // 1. Расходная накладная
+  // Notificari
+  // 1. Nakladnaia de iesire
   S := AppUserConfigStorage.TextValues.GetValue(cSOUND_РасходнаяНакладная, cSOUND_DefaultAudioTitle);
   if S <> cSOUND_DefaultAudioTitle then
     S := ReplaceFileExt(S, '');
   cmbSounds_Rashod.ItemIndex := cmbSounds_Rashod.Items.IndexOf(S);
-  // 2. Наряд на сборку
+  // 2. Naryad de asamblare
   S := AppUserConfigStorage.TextValues.GetValue(cSOUND_НарядНаСборку, cSOUND_DefaultAudioTitle);
   if S <> cSOUND_DefaultAudioTitle then
     S := ReplaceFileExt(S, '');
   cmbSounds_NareadSborka.ItemIndex := cmbSounds_Rashod.Items.IndexOf(S);
-  // 3. Web заказ
+  // 3. Comanda Web
   S := AppUserConfigStorage.TextValues.GetValue(cSOUND_WebZakaz, cSOUND_DefaultAudioTitle);
   if S <> cSOUND_DefaultAudioTitle then
     S := ReplaceFileExt(S, '');
@@ -391,28 +391,28 @@ procedure TfrmAppSettingsDialog.SaveValues;
 var
   S: string;
 begin
-  // Общие
+  // Generale
   AppConfigStorage.BooleanValues.SetValue(cSETTINGS_AppAutoStart, cbStartWithWindows.Checked);
   AppConfigStorage.BooleanValues.SetValue(cSETTINGS_AppSaveLastLogin, cbSaveLastLogin.Checked);
 
-  // Вид
-  AppUserConfigStorage.IntValues.SetValue(cSETTINGS_UserFontSize, cmbFontSize.ItemIndex); // Размер шрифтов;
+  // Tip
+  AppUserConfigStorage.IntValues.SetValue(cSETTINGS_UserFontSize, cmbFontSize.ItemIndex); // Dimensiune fonturi;
   AppUserConfigStorage.BooleanValues.SetValue(cSETTINGS_UserSaveFormPos, cbSaveFormPos.Checked);
   AppUserConfigStorage.BooleanValues.SetValue(cSETTINGS_UserSaveGridColumns, cbSaveGridColumns.Checked);
   AppUserConfigStorage.BooleanValues.SetValue(cSETTINGS_UserSaveMonitorPosition, cbSaveMultiMonitorPos.Checked);
 
-  // Оповешения
-  // 1. Расходная накладная
+  // Notificari
+  // 1. Nakladnaia de iesire
   S := cmbSounds_Rashod.Text;
   if S <> cSOUND_DefaultAudioTitle then
     S := S + '.wav';
   AppUserConfigStorage.TextValues.SetValue(cSOUND_РасходнаяНакладная, S);
-  // 2. Наряд на сборку
+  // 2. Naryad de asamblare
   S := cmbSounds_NareadSborka.Text;
   if S <> cSOUND_DefaultAudioTitle then
     S := S + '.wav';
   AppUserConfigStorage.TextValues.SetValue(cSOUND_НарядНаСборку, S);
-  // 3. Web заказ
+  // 3. Comanda Web
   S := cmbSounds_WebZakaz.Text;
   if S <> cSOUND_DefaultAudioTitle then
     S := S + '.wav';

@@ -75,7 +75,7 @@ begin
      try
         dialog.BurstMode:=True;
         dialog.OnBurstAddGoods:=WhenAddGoodsBurst;
-        if dialog.SelectGoods(fLastGoodsID,False,0,'Выберите товары для связывания с наименованием по накладной')
+        if dialog.SelectGoods(fLastGoodsID,False,0,'Selectati marfurile pentru legare cu denumirea din nakladnaia')
           then WhenAddGoodsBurst(dialog.GoodsID,dialog.GoodsTitle,tmpAdded,tmpCount);
      finally
         dialog.Free;
@@ -141,7 +141,7 @@ end;
 procedure TfmGoodsFromAcnt.bbRemoveGoodsClick(Sender: TObject);
 var Query :TIBCQuery;
 begin
-     if ShowAskDialog('Удаление ссылки', 'Удалить ссылку на товар?')=mrYes then
+     if ShowAskDialog('Stergere legatura', 'Stergeti legatura catre marfa?')=mrYes then
      begin
           Query := TIBCQuery.Create(nil);
           try

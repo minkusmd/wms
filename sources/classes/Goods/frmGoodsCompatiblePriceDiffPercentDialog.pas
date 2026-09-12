@@ -50,7 +50,7 @@ begin
      ErrorStr:='';
      Result:=False;
 
-     if fMasterDataSet.FieldByName('DIFFSUMPERCENT').IsNull then AddErrorToStr(ErrorStr,'Ценовая разница!');
+     if fMasterDataSet.FieldByName('DIFFSUMPERCENT').IsNull then AddErrorToStr(ErrorStr,'Diferenta de pret!');
 
      if ErrorStr=''
       then Result:=True
@@ -84,7 +84,7 @@ procedure TfrmGoodsCompatiblePriceDiffPercentDlg.Prepare;
 begin
      try
         fMasterDataSet.Edit;
-        dtDialogTitle.Text:=Format('Товар №%d',[fMasterDataSet.FieldByName('COMPATIBLE_GOODSID').AsInteger]);
+        dtDialogTitle.Text:=Format('Marfa nr.%d',[fMasterDataSet.FieldByName('COMPATIBLE_GOODSID').AsInteger]);
      except
         fMasterDataSet.Cancel;
         raise;

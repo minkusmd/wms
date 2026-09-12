@@ -13,27 +13,27 @@ implementation
 Uses StrUtils;
 
 const
-   Zero = 'zero ';  // название нуля
-   One = 'una ';    // единица "одна"
-   Two = 'două ';   // двойка "две"
+   Zero = 'zero ';  // numele zero-ului
+   One = 'una ';    // unitatea "una"
+   Two = 'două ';   // doi "doua"
    fAnd = 'şi ';
    fOne = 'un ';
 
-   Rubl:array[1..3,1..3] of String =   // массив имен рублей
+   Rubl:array[1..3,1..3] of String =   // matricea numelor rublelor
    (
     ('Leu ', 'Lei ', 'Lei '),       // MDL = 496
     ('Dolar ','Dolari ','Dolari '), // USD = 840
     ('Euro ', 'Euro ', 'Euro ')     // EURO = 976
    );
 
-   Cop: array[1..3,1..3]of String =          // массив имен копеек
+   Cop: array[1..3,1..3]of String =          // matricea numelor copeicilor
    (
     ('bani ','bani ','bani '),    // MDL = 496
     ('cent ','cenți ','cenți '),  // USD = 840
     ('cent ','cenți ','cenți ')   // EURO = 976
    );
 
-   NameNum: array[0..9, 1..4] of String =  //массив имён чисел
+   NameNum: array[0..9, 1..4] of String =  //matricea numelor cifrelor
    (
     ('','','',''),
     ('unu ',   'zece ',      'una sută ',   'unsprezece ' ),
@@ -47,16 +47,16 @@ const
     ('nouă ',  'nouăzeci ',  'nouă sute ',  'nouăsprezece ' )
    );
 
-   Ext: array[0..4, 1..3] of String =      // массив расшиений (тысячи, миллионы ...)
+   Ext: array[0..4, 1..3] of String =      // matricea extensiilor (mii, milioane ...)
    (
     ('','',''),
-    ('mie ', 'mii ', 'mii '),              // Тысячи
-    ('milion ', 'milioane ', 'milioane '), // Миллионы
-    ('miliard ','miliarde ','miliarde '),  // Миллиарды
-    ('trilion ','trilioane ','trilioane ') // Триллион
+    ('mie ', 'mii ', 'mii '),              // Mii
+    ('milion ', 'milioane ', 'milioane '), // Milioane
+    ('miliard ','miliarde ','miliarde '),  // Miliarde
+    ('trilion ','trilioane ','trilioane ') // Trilion
    );
 
-   Univer: array[1..9, 1..4] of Integer =  // массив окончаний
+   Univer: array[1..9, 1..4] of Integer =  // matricea terminatiilor
    (
     (1,2,2,2),
     (3,2,2,2),
@@ -82,7 +82,7 @@ end;
 
 
 function NumToSampl(N:  string): string;
-// преобразует число в пропись
+// transforma numarul in litere
 var
    k, i, i_indx: integer;
    number, string_num: string;
@@ -151,14 +151,14 @@ begin
 end;
 
 function DoubleChar(ch: string): string;
-// {Преобразует х в 0х}
+// {Transforma x in 0x}
 begin
      if Length(ch)=1 then Result:='0'+ch
      else Result:=ch;
 end;
 
 function MoneyToSampl(M: Currency; Tip: integer): string;
-// преобразует денежную сумму в пропись
+// transforma suma de bani in litere
 var
    Int_Part, idx, idxIP, idxRP: integer;
    Int_Str, Real_Part, Sampl: string;

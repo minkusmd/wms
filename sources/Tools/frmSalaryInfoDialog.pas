@@ -241,8 +241,8 @@ begin
         begin
              d1:=Format('%s %d',[FormatSettings.LongMonthNames[dialog.SourceMonth],dialog.SourceYear]);
              d2:=Format('%s %d',[FormatSettings.LongMonthNames[dialog.TargetMonth],dialog.TargetYear]);
-             S:=Format('Вы хотите скопировать из %s в %s ?',[d1,d2]);
-             if ShowAskDialog('Копирование данных',S)=mrYes then
+             S:=Format('Doriti sa copiati din %s in %s ?',[d1,d2]);
+             if ShowAskDialog('Copiere date',S)=mrYes then
              begin
                   if DoCopyDataDB(dialog.SourceYear,dialog.SourceMonth,dialog.TargetYear,dialog.TargetMonth) then
                   begin
@@ -292,7 +292,7 @@ end;
 
 procedure TfrmSalaryInfoDlg.ShowDeleteDialog;
 begin
-     if ShowAskDialog('Удалить запись',Format('Удалить информацию о зарплате для "%s"?',[IBCQuerySalary.FieldByName('CUSTOMER_NAME').AsString]))=mrYes then
+     if ShowAskDialog('Sterge inregistrarea',Format('Stergeti informatia despre salariu pentru "%s"?',[IBCQuerySalary.FieldByName('CUSTOMER_NAME').AsString]))=mrYes then
      begin
           IBCQuerySalary.UpdateTransaction.StartTransaction;
           try

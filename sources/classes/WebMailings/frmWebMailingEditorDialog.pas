@@ -115,11 +115,11 @@ begin
   ErrorStr := '';
 
   if fMasterDataSet.FieldByName('HEADER_TEXT').IsNull and fMasterDataSet.FieldByName('HEADER_IMAGE').IsNull then
-    AddErrorToStr(ErrorStr, 'Текст или картинка заголовка!');
+    AddErrorToStr(ErrorStr, 'Text sau imagine antet!');
   if cxGridContentTable.DataController.RecordCount = 0 then
-    AddErrorToStr(ErrorStr, 'Баннеры!');
+    AddErrorToStr(ErrorStr, 'Bannere!');
   if fMasterDataSet.FieldByName('FOOTER_TEXT').IsNull and fMasterDataSet.FieldByName('FOOTER_IMAGE').IsNull then
-    AddErrorToStr(ErrorStr, 'Текст или картинка подвала!');
+    AddErrorToStr(ErrorStr, 'Text sau imagine subsol!');
 
   if (ErrorStr = '') then
     Result := True
@@ -192,14 +192,14 @@ begin
   try
     if FCreateNew then
     begin
-      dtDialogTitle.Text := 'Создание новой рассылки';
+      dtDialogTitle.Text := 'Creare trimitere noua';
       fMasterDataSet.Insert;
       fMasterDataSet.FieldByName('FOOTER_TEXT').AsString :=
         'Daca nu mai doresti sa primesti acest newsletter, te rugam sa te <a href="http://www.fantastic.md/unsubscribe.aspx?tid=$TARGETUIC">dezabonezi</a>.';
     end
     else
     begin
-      dtDialogTitle.Text := 'Изменение записи';
+      dtDialogTitle.Text := 'Modificare inregistrare';
       fMasterDataSet.Edit;
     end;
     IBCQueryImages.Active := True;

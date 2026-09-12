@@ -156,7 +156,7 @@ end;
 
 procedure TfrmSelectSyssEditorWin.actBrandImageUpdate(Sender: TObject);
 begin
-  if (IBCQuerySYSS.FieldbyName('SYSSID').AsInteger=1) then  // производители
+  if (IBCQuerySYSS.FieldbyName('SYSSID').AsInteger=1) then  // producatori
     bbBrandImages.Visible := ivAlways
   else
     bbBrandImages.Visible := ivNever;

@@ -76,7 +76,7 @@ begin
           fRate:=n;
           Result:=True;
      end
-     else ShowErrorDialog(cMSG_GeneralInputError_Title,cMSG_GeneralInputError_Text,'Курс валюты!');
+     else ShowErrorDialog(cMSG_GeneralInputError_Title,cMSG_GeneralInputError_Text,'Cursul valutar!');
 end;
 
 procedure TfrmExchangeRateEditorDlg.SetRate(const Value: double);

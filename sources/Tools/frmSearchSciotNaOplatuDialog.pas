@@ -169,13 +169,13 @@ procedure TfrmSearchSciotNaOplatuDlg.DoPrihodDenegNaSceot;
 var
   dialog: TfrmMoneyIncomeDlg;
 begin
-     // Приход денег на счет
+     // Incasare bani in cont
   dialog := TfrmMoneyIncomeDlg.Create(Self, IBCQueryDocs, IBCDataSourceDocs);
   try
     dialog.SetCustomTitle('Document bancar', 'Intrare mijloace financiare in cont bancar');
 
     if dialog.ShowModal = mrOk then begin
-             // Приход денег на счет
+             // Incasare bani in cont
       if dmDB.CreateProhodDenegNaSciot(IBCQueryDocs.FieldByName('DOCID').AsInteger, dialog.CurrencyID, IBCQueryDocs.FieldByName('FLG_ACNT').AsInteger, dialog.Rate, dialog.SUMA) then begin
         IBCQueryDocs.Refresh;
         ShowInfoDialog('Incasare in cont', 'Documentul de incasare in cont bancar a fost creat cu succes!');
@@ -214,7 +214,7 @@ begin
   fRashod := False;
 
   if (cxGridTable.DataController.RecNo > 0) and (IBCQueryDocs.FieldByName('HAS_JURNAL_GOODS').AsInteger = 1) then begin
-    fPrihod := True;                // Приход денег на счет + Security
+    fPrihod := True;                // Incasare bani in cont + Security
     fRashod := IBCQueryDocs.FieldByName('FLG_PAID').AsInteger = 1;
   end;
 

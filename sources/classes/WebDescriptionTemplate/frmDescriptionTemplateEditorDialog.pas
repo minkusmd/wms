@@ -53,7 +53,7 @@ begin
   if fMasterDataSet.FieldByName('TITLE_ROM').IsNull or (fMasterDataSet.FieldByName('TITLE_ROM').AsString = '') then
     AddErrorToStr(ErrorStr, 'Denumirea!');
   if fMasterDataSet.FieldByName('TITLE_RUS').IsNull or (fMasterDataSet.FieldByName('TITLE_RUS').AsString = '') then
-    AddErrorToStr(ErrorStr, 'Название!');
+    AddErrorToStr(ErrorStr, 'Denumire!');
 
   if (ErrorStr = '') then
     Result := True

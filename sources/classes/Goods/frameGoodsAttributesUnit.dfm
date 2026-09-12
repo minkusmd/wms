@@ -62,6 +62,14 @@ object frameGoodsAttributes: TframeGoodsAttributes
       OptionsSelection.CellSelect = False
       OptionsView.ColumnAutoWidth = True
       OptionsView.GroupByBox = False
+      object cxGridAttrs_FILTERID: TcxGridDBColumn
+        Caption = 'Cod'
+        DataBinding.FieldName = 'FILTERID'
+        HeaderAlignmentHorz = taCenter
+        MinWidth = 50
+        Options.HorzSizing = False
+        Width = 50
+      end
       object cxGridAttrs_NAME_RO: TcxGridDBColumn
         Caption = 'Atribut'
         DataBinding.FieldName = 'FILTERNAME'
@@ -135,13 +143,19 @@ object frameGoodsAttributes: TframeGoodsAttributes
       '       COALESCE(f.FLG_FREE_VALUE, 0) AS FLG_FREE_VALUE,'
       '       t.ORDERNO, gf.ORDERNO AS VAL_ORDERNO,'
       '       gf.FILTERPARAMID, p.PARAM_VALUE, p.PARAM_VALUE_RUS,'
-      '       TRIM(p.PARAM_VALUE || '#39' '#39' || COALESCE(f.UOM_RO, '#39#39')) AS VALUE_RO_DISP,'
-      '       TRIM(p.PARAM_VALUE_RUS || '#39' '#39' || COALESCE(f.UOM_RU, '#39#39')) AS VALUE_RU_DISP'
+      
+        '       TRIM(p.PARAM_VALUE || '#39' '#39' || COALESCE(f.UOM_RO, '#39#39')) AS V' +
+        'ALUE_RO_DISP,'
+      
+        '       TRIM(p.PARAM_VALUE_RUS || '#39' '#39' || COALESCE(f.UOM_RU, '#39#39')) ' +
+        'AS VALUE_RU_DISP'
       '  FROM TS_GOODS_TYPE_FILTERS t'
       '  JOIN TS_FILTERS f ON f.FILTERID = t.FILTERID'
       '  LEFT JOIN TS_GOODS_FILTERS gf'
       '         ON gf.FILTERID = t.FILTERID AND gf.GOODSID = :gid'
-      '  LEFT JOIN TS_FILTER_PARAMS p ON p.FILTERPARAMID = gf.FILTERPARAMID'
+      
+        '  LEFT JOIN TS_FILTER_PARAMS p ON p.FILTERPARAMID = gf.FILTERPAR' +
+        'AMID'
       ' WHERE t.GOODSTYPEID = :gtid'
       ' ORDER BY t.ORDERNO, gf.ORDERNO')
     ReadOnly = True

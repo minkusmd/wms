@@ -115,7 +115,7 @@ begin
              edDiscount.Text:=Query.FieldByName('DISCOUNT').AsString;
              if Query.FieldByName('ERRORS').IsNull then
              begin
-                  mmInfo.Text:='Все отлично!';
+                  mmInfo.Text:='Totul e excelent!';
                   mmInfo.Font.Color:=clGreen;
                   btnApply.Enabled:=True;
              end

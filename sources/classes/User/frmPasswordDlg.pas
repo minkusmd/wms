@@ -144,7 +144,7 @@ begin
           if Assigned(FOnVerifyPassword) then
             FOnVerifyPassword(edPass.Text, PasswordOk);
           if Not PasswordOk then
-            AddErrorToStr(ErrorStr, 'Старый пароль не правильный!');
+            AddErrorToStr(ErrorStr, 'Parola veche nu este corecta!');
         end;
       end;
   end;

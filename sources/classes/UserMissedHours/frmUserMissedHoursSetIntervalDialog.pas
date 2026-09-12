@@ -59,7 +59,7 @@ begin
   Error := '';
 
   if VarIsNull(deEND.EditValue) or (TDateTime(deEND.EditValue) <= TDateTime(deSTART.EditValue)) then
-    AddErrorToStr(Error, 'Конец периода!');
+    AddErrorToStr(Error, 'Sfarsitul perioadei!');
 
   if Error = '' then
     Result := True

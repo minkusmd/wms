@@ -17,20 +17,20 @@ implementation
 
 procedure TSamsoniteParser.ParsePage(const PageContent: string);
 begin
-  // Здесь код для парсинга страницы
-  // Например, извлечение изображения с товаром
-  // Использование регулярных выражений или манипуляция с DOM
-  // Для примера, ищем ссылку на изображение
+  // Aici codul pentru parsarea paginii
+  // De exemplu, extragerea imaginii cu produsul
+  // Utilizarea expresiilor regulate sau manipularea DOM
+  // Ca exemplu, cautam legatura catre imagine
 
-  // Это просто пример - код нужно адаптировать под реальный HTML
-  // Пример может включать регулярные выражения или манипуляции с DOM
-  // Как это делается в исходном коде с использованием `HTMLDocument`
+  // Acesta e doar un exemplu - codul trebuie adaptat la HTML-ul real
+  // Exemplul poate include expresii regulate sau manipulari DOM
+  // Cum se face in codul sursa folosind `HTMLDocument`
 
-  // Вставьте ваш код парсинга страницы здесь
-  // Например, извлечь ссылку на изображение
+  // Introduceti aici codul vostru de parsare a paginii
+  // De exemplu, extrage legatura catre imagine
   if Pos('product-tile__image', PageContent) > 0 then
   begin
-    // Найдена ссылка на изображение, сохраняем его
+    // Legatura catre imagine gasita, o salvam
     SaveImageToPNG('https://samsonite.md/some-image.jpg', 'product_image.png');
   end;
 end;

@@ -1,6 +1,6 @@
 unit frame02CasaRKOUnit;
 
-// КАССА. Расходный кассовый ордер
+// CASA. Dispozitie de plata
 // DocTypeID = 117
 // Frame Index = 2
 
@@ -228,7 +228,7 @@ var
   b: Boolean;
 begin
   b := AppUserTempConfigStorage.BooleanValues.GetValue('RKO_CloseDocVerify');
-  if b or (ShowAskDialogVerification('Закрыть документ', 'Вы хотите закрыть документ?', 'Больше не спрашивать', '', b) =
+  if b or (ShowAskDialogVerification('Inchide documentul', 'Doriti sa inchideti documentul?', 'Nu mai intreba', '', b) =
     mrYes) then
   begin
     if b then
@@ -306,7 +306,7 @@ end;
 
 procedure Tframe02CasaRKO.DoOpenDocument;
 begin
-  if ShowAskDialog('Открыть документ', 'Вы хотите открыть документ?') = mrYes then
+  if ShowAskDialog('Deschide documentul', 'Doriti sa deschideti documentul?') = mrYes then
   begin
     if DoOpenDocumentDB(dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger) then
       dmDB.IBCQueryDocs.Refresh;
@@ -355,14 +355,14 @@ begin
           // context from Docs
     if cxGridCasaRKO_CT_NAME.Focused then
     begin
-               // Получатель
+               // Beneficiar
       Result.Context := ffCustomer;
       Result.ValueInt := dmDB.IBCQueryDocs.FieldByName('CT').AsInteger;
       Result.ValueStr := dmDB.IBCQueryDocs.FieldByName('CT_NAME').AsString;
     end
     else if cxGridCasaRKO_DATA.Focused then
     begin
-               // Дата
+               // Data
       Result.Context := ffDate;
       Result.ValueDateTime := dmDB.IBCQueryDocs.FieldByName('DATA').AsDateTime;
     end
@@ -392,7 +392,7 @@ end;
 
 function Tframe02CasaRKO.InitFrameID: integer;
 begin
-     // КАССА. Расходный кассовый ордер
+     // CASA. Dispozitie de plata
   Result := 2;
 end;
 

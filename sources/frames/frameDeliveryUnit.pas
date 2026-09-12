@@ -100,7 +100,7 @@ var
   dialog: TfrmScetFacturaNomerDlg;
 begin
   ReportOk := False;
-     // 1. imprimam "счет фактуры"
+     // 1. imprimam "facturi fiscale"
   ReportParams := TReportParamsList.Create;
   PrintEngine := TfrmPrintEngine.Create(Self);
   try

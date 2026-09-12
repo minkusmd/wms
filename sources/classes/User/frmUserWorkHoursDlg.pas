@@ -148,14 +148,14 @@ begin
         index]) or VarIsNull(cxGridTable.DataController.Values[i,
         cxGridTable_HOUREND.index]) then
         AddErrorToStr(ErrorStr, cxGridTable.DataController.Values[i,
-          cxGridTable_DAY.index] + ': Неверные значения для временни!')
+          cxGridTable_DAY.index] + ': Valori incorecte pentru timp!')
       else
       begin
         sh := cxGridTable.DataController.Values[i, cxGridTable_HOURSTART.index];
         eh := cxGridTable.DataController.Values[i, cxGridTable_HOUREND.index];
         if (sh >= eh) or (eh <= sh) then
           AddErrorToStr(ErrorStr, cxGridTable.DataController.Values[i,
-            cxGridTable_DAY.index] + ': Время пересекается!')
+            cxGridTable_DAY.index] + ': Timpul se suprapune!')
       end;
     end;
   end;
@@ -177,34 +177,34 @@ procedure TfrmUserWorkHoursDialog.CreateDaysOfTheWeek;
 var
   N: integer;
 begin
-  // Понедельник
+  // Luni
   N := cxGridTable.DataController.AppendRecord;
   cxGridTable.DataController.Values[N, cxGridTable_ENABLED.index] := True;
-  cxGridTable.DataController.Values[N, cxGridTable_DAY.index] := 'Понедельник';
-  // Вторник
+  cxGridTable.DataController.Values[N, cxGridTable_DAY.index] := 'Luni';
+  // Marti
   N := cxGridTable.DataController.AppendRecord;
   cxGridTable.DataController.Values[N, cxGridTable_ENABLED.index] := True;
-  cxGridTable.DataController.Values[N, cxGridTable_DAY.index] := 'Вторник';
-  // Среда
+  cxGridTable.DataController.Values[N, cxGridTable_DAY.index] := 'Marti';
+  // Miercuri
   N := cxGridTable.DataController.AppendRecord;
   cxGridTable.DataController.Values[N, cxGridTable_ENABLED.index] := True;
-  cxGridTable.DataController.Values[N, cxGridTable_DAY.index] := 'Среда';
-  // Четверг
+  cxGridTable.DataController.Values[N, cxGridTable_DAY.index] := 'Miercuri';
+  // Joi
   N := cxGridTable.DataController.AppendRecord;
   cxGridTable.DataController.Values[N, cxGridTable_ENABLED.index] := True;
-  cxGridTable.DataController.Values[N, cxGridTable_DAY.index] := 'Четверг';
-  // Пятница
+  cxGridTable.DataController.Values[N, cxGridTable_DAY.index] := 'Joi';
+  // Vineri
   N := cxGridTable.DataController.AppendRecord;
   cxGridTable.DataController.Values[N, cxGridTable_ENABLED.index] := True;
-  cxGridTable.DataController.Values[N, cxGridTable_DAY.index] := 'Пятница';
-  // Суббота
+  cxGridTable.DataController.Values[N, cxGridTable_DAY.index] := 'Vineri';
+  // Sambata
   N := cxGridTable.DataController.AppendRecord;
   cxGridTable.DataController.Values[N, cxGridTable_ENABLED.index] := True;
-  cxGridTable.DataController.Values[N, cxGridTable_DAY.index] := 'Суббота';
-  // Воскресенье
+  cxGridTable.DataController.Values[N, cxGridTable_DAY.index] := 'Sambata';
+  // Duminica
   N := cxGridTable.DataController.AppendRecord;
   cxGridTable.DataController.Values[N, cxGridTable_ENABLED.index] := false;
-  cxGridTable.DataController.Values[N, cxGridTable_DAY.index] := 'Воскресенье';
+  cxGridTable.DataController.Values[N, cxGridTable_DAY.index] := 'Duminica';
 
 end;
 
@@ -217,10 +217,10 @@ begin
     cxGridTable.DataController.Values[i, cxGridTable_HOURSTART.index] := '9';
     cxGridTable.DataController.Values[i, cxGridTable_HOUREND.index] := '19';
   end;
-  // Суббота
+  // Sambata
   cxGridTable.DataController.Values[5, cxGridTable_HOURSTART.index] := '10';
   cxGridTable.DataController.Values[5, cxGridTable_HOUREND.index] := '17';
-  // Воскресенье
+  // Duminica
   cxGridTable.DataController.Values[6, cxGridTable_HOURSTART.index] := '10';
   cxGridTable.DataController.Values[6, cxGridTable_HOUREND.index] := '17';
 

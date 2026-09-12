@@ -305,7 +305,7 @@ begin
     inherited;
 
 //    lbUSER_NAME.DataBinding.DataSource := fMasterDataSource;
-  // Общие
+  // Generale
 //    edPrefix.DataBinding.DataSource := fMasterDataSource;
     edName.DataBinding.DataSource := fMasterDataSource;
 //    teCustomerName.DataBinding.DataSource := fMasterDataSource;
@@ -313,19 +313,19 @@ begin
     cmbCustomerType.DataBinding.DataSource := fMasterDataSource;
     cmbCustomerStatus.DataBinding.DataSource := fMasterDataSource;
 
-  // Контакты
+  // Contacte
 //    cmbCity.DataBinding.DataSource := fMasterDataSource;
     cbRezident.DataBinding.DataSource := fMasterDataSource;
 //    mmAddress.DataBinding.DataSource := fMasterDataSource;
     deBIRTH_DATE.DataBinding.DataSource := fMasterDataSource;
     edWEBPAGE.DataBinding.DataSource := fMasterDataSource;
-  // Юридическое лицо
+  // Persoana juridica
     edChief.DataBinding.DataSource := fMasterDataSource;
     edAccountant.DataBinding.DataSource := fMasterDataSource;
     edIDEN.DataBinding.DataSource := fMasterDataSource;
     edVAT.DataBinding.DataSource := fMasterDataSource;
 //    mmADDRESS2.DataSource := fMasterDataSource;
-  // Цены
+  // Preturi
     cmbPriceColumn.DataBinding.DataSource := fMasterDataSource;
     cmbVAT.DataBinding.DataSource := fMasterDataSource;
 
@@ -672,9 +672,9 @@ begin
     fMasterDataSet.FieldByName('CUSTOMER_TYPE_ID').asInteger := GetParentTypeID(fParentID);
     if fMasterDataSet.FieldByName('CUSTOMER_TYPE_ID').asInteger = -1 then
         fMasterDataSet.FieldByName('CUSTOMER_TYPE_ID').asInteger := 4010;
-  // Клиенты Физические
+  // Clienti Fizice
     fMasterDataSet.FieldByName('CUSTOMER_STATUS_ID').asInteger := 4101;
-  // Обычный клиент
+  // Client obisnuit
     fMasterDataSet.FieldByName('CITY_ID').asInteger := 2000;
     fMasterDataSet.FieldByName('PRICECOLUMN').asInteger := 4;
     fMasterDataSet.FieldByName('VAT').asInteger := 20;

@@ -1216,17 +1216,22 @@ end;
 function TfrmGoodsBrowser.DBSetupPropertiesForGoodsSelection(const Data: TGoodsPropertySelectionData): Boolean;
 var
     Query: TIBCQuery;
+    QueryDeleteFilter: TIBCQuery;
+    QueryInsertFilter: TIBCQuery;
     i: Integer;
     S: string;
+    tmpGoodsID: Integer;
+    UpdateGoodsProps: Boolean;
 begin
     Result := False;
 
     Query := TIBCQuery.Create(Self);
+    QueryDeleteFilter := TIBCQuery.Create(Self);
+    QueryInsertFilter := TIBCQuery.Create(Self);
     try
         Query.Connection := dmDB.IBCConnection;
         Query.Transaction := dmDB.IBCTrDefaultUpdate;
         Query.AutoCommit := False;
-        Query.SQL.Add('UPDATE TS_GOODS SET');
 
         S := '';
 
@@ -1286,35 +1291,72 @@ begin
             S := S + 'UMID = :UMID';
         end;
 
-        Query.SQL.Add(S);
-        Query.SQL.Add(' WHERE GOODSID=:GOODSID');
+        UpdateGoodsProps := (S <> '');
+        if UpdateGoodsProps then
+        begin
+            Query.SQL.Add('UPDATE TS_GOODS SET');
+            Query.SQL.Add(S);
+            Query.SQL.Add(' WHERE GOODSID=:GOODSID');
 
-        if Data.Change_WebGoodsTypeID then
-            Query.ParamByName('WEBTYPEID').AsInteger := Data.Value_WebGoodsTypeID;
-        if Data.Change_VendorID then
-            Query.ParamByName('VENDORID').AsInteger := Data.Value_VendorID;
-        if Data.Change_BaseParam then
-            Query.ParamByName('BASE_PARAM').AsString := Data.Value_BaseParam;
-        if Data.Change_GoodsACNT then
-            Query.ParamByName('ACNTID').AsInteger := Data.Value_GoodsACNT;
-        if Data.Change_GoodsTypeID then
-            Query.ParamByName('GOODS_TYPE_ID').AsInteger := Data.Value_GoodsTypeID;
-        if Data.Change_TipEvidenta then
-            Query.ParamByName('SERIAL_TYPE_ID').AsInteger := Data.Value_TipEvidenta;
-        if Data.Change_UM then
-            Query.ParamByName('UMID').AsInteger := Data.Value_UM;
-        if Data.Change_PrefixName then
-            Query.ParamByName('PREFIX').AsString := Data.Value_PrefixName;
-        if Data.Change_Waranty then
-            Query.ParamByName('WARRANTY').AsString := Data.Value_Waranty;
+            if Data.Change_WebGoodsTypeID then
+                Query.ParamByName('WEBTYPEID').AsInteger := Data.Value_WebGoodsTypeID;
+            if Data.Change_VendorID then
+                Query.ParamByName('VENDORID').AsInteger := Data.Value_VendorID;
+            if Data.Change_BaseParam then
+                Query.ParamByName('BASE_PARAM').AsString := Data.Value_BaseParam;
+            if Data.Change_GoodsACNT then
+                Query.ParamByName('ACNTID').AsInteger := Data.Value_GoodsACNT;
+            if Data.Change_GoodsTypeID then
+                Query.ParamByName('GOODS_TYPE_ID').AsInteger := Data.Value_GoodsTypeID;
+            if Data.Change_TipEvidenta then
+                Query.ParamByName('SERIAL_TYPE_ID').AsInteger := Data.Value_TipEvidenta;
+            if Data.Change_UM then
+                Query.ParamByName('UMID').AsInteger := Data.Value_UM;
+            if Data.Change_PrefixName then
+                Query.ParamByName('PREFIX').AsString := Data.Value_PrefixName;
+            if Data.Change_Waranty then
+                Query.ParamByName('WARRANTY').AsString := Data.Value_Waranty;
+        end;
 
+        // Filtru/atribut de produs (TS_GOODS_DESCRIPTIONS): sters + reinserat, la fel ca in
+        // TfrmGoodsBrowser.bbChangeFiltersValueClick, ca sa ramana un singur rand per (GOODSID, FILTERID).
+        if Data.Change_FilterID then
+        begin
+            QueryDeleteFilter.Connection := dmDB.IBCConnection;
+            QueryDeleteFilter.Transaction := dmDB.IBCTrDefaultUpdate;
+            QueryDeleteFilter.AutoCommit := False;
+            QueryDeleteFilter.SQL.Text := 'DELETE FROM TS_GOODS_DESCRIPTIONS WHERE GOODSID=:GOODSID AND FILTERID=:FILTERID';
+
+            QueryInsertFilter.Connection := dmDB.IBCConnection;
+            QueryInsertFilter.Transaction := dmDB.IBCTrDefaultUpdate;
+            QueryInsertFilter.AutoCommit := False;
+            QueryInsertFilter.SQL.Add('INSERT INTO TS_GOODS_DESCRIPTIONS (GOODSID, FILTERID, FILTERPARAMID, FLG_GROUP, FLAGS)');
+            QueryInsertFilter.SQL.Add('VALUES (:GOODSID, :FILTERID, :FILTERPARAMID, 0, 1)');
+        end;
 
         try
             Query.Transaction.StartTransaction;
             for i := 0 to cxGridGoods_Table.Controller.SelectedRecordCount - 1 do
             begin
-                Query.ParamByName('GOODSID').AsInteger := cxGridGoods_Table.Controller.SelectedRecords[i].Values[cxGridGoods_GOODSID.Index];
-                Query.ExecSQL;
+                tmpGoodsID := cxGridGoods_Table.Controller.SelectedRecords[i].Values[cxGridGoods_GOODSID.Index];
+
+                if UpdateGoodsProps then
+                begin
+                    Query.ParamByName('GOODSID').AsInteger := tmpGoodsID;
+                    Query.ExecSQL;
+                end;
+
+                if Data.Change_FilterID then
+                begin
+                    QueryDeleteFilter.ParamByName('GOODSID').AsInteger := tmpGoodsID;
+                    QueryDeleteFilter.ParamByName('FILTERID').AsInteger := Data.Value_FilterID;
+                    QueryDeleteFilter.ExecSQL;
+
+                    QueryInsertFilter.ParamByName('GOODSID').AsInteger := tmpGoodsID;
+                    QueryInsertFilter.ParamByName('FILTERID').AsInteger := Data.Value_FilterID;
+                    QueryInsertFilter.ParamByName('FILTERPARAMID').AsInteger := Data.Value_FilterParamID;
+                    QueryInsertFilter.ExecSQL;
+                end;
             end;
             Query.Transaction.Commit;
             Result := True;
@@ -1330,6 +1372,8 @@ begin
 
     finally
         Query.Free;
+        QueryDeleteFilter.Free;
+        QueryInsertFilter.Free;
     end;
 end;
 

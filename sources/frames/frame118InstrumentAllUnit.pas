@@ -1,6 +1,6 @@
 unit frame118InstrumentAllUnit;
 {
-  ИНВЕНТАРИЗАЦИЯ. Инвентаризация
+  INVENTARIERE. Inventariere
   DocTypeID = 1968
   Frame Index = 118
 }

@@ -95,7 +95,7 @@ end;
 
 class function TfrxWebGoodsTypeSelector.GetDescription: String;
 begin
-     Result:='Выбор типа WEB товара';
+     Result:='Selectare tip produs WEB';
 end;
 
 function TfrxWebGoodsTypeSelector.GetListOfID: string;

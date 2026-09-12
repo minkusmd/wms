@@ -322,7 +322,7 @@ begin
 
      // Numarul de zecimale in QTY :
   qtyDigitsMode := AppUserTempConfigStorage.IntValues.GetValue(cSETTINGS_AppQtyDigits, cAppDefault_QtyDigits);
-     // Количество
+     // Cantitate
   TcxCalcEditProperties(cxGridGoods_QTY.Properties).DisplayFormat := cQTY_DigitsMask[qtyDigitsMode];
 end;
 

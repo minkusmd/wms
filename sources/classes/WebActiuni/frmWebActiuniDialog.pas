@@ -193,7 +193,7 @@ end;
 
 procedure TfrmWebActiuniDlg.bbGoodsDeleteAllClick(Sender: TObject);
 begin
-  if ShowAskDialog('Удаление товаров', 'Удалить все товары из списка?') = mrYes
+  if ShowAskDialog('Stergere marfa', 'Stergeti toate marfurile din lista?') = mrYes
     then
   begin
     DeleteAllGoods(IBCQueryActiuni.FieldByName('ACTIUNEID').AsInteger);
@@ -264,9 +264,9 @@ end;
 
 procedure TfrmWebActiuniDlg.DeleteActiune;
 begin
-  if ShowAskDialog('Удаление акции', Format('Вы хотите удалить акцию "%s"?',
+  if ShowAskDialog('Stergere actiune', Format('Doriti sa stergeti actiunea "%s"?',
     [IBCQueryActiuni.FieldByName('TITLE_RUS').AsString]),
-    'Будут удаленны все товары из списка!') = mrYes then
+    'Vor fi sterse toate marfurile din lista!') = mrYes then
   begin
     IBCQueryActiuni.Delete;
     fChanged := True;
@@ -303,8 +303,8 @@ procedure TfrmWebActiuniDlg.FormCloseQuery(Sender: TObject; var CanClose:
 begin
   if fChanged and (ModalResult <> mrOk) then
   begin
-    if (ShowAskDialog('Данные изменены',
-      'Данные были изменены. Вы хотите выйти без сохранение?') <> mrYes) then
+    if (ShowAskDialog('Datele au fost modificate',
+      'Datele au fost modificate. Doriti sa iesiti fara salvare?') <> mrYes) then
       CanClose := False;
   end;
 end;
@@ -337,7 +337,7 @@ procedure TfrmWebActiuniDlg.Prepare;
 begin
   fLastGoodsID := 0;
 
-  dtDialogTitle.Title := Format('Веб-акции для фирмы "%s"',
+  dtDialogTitle.Title := Format('Actiuni Web pentru firma "%s"',
     [dmDB.CurrentFirmaName]);
 
   IBCTrUpdate.StartTransaction;
@@ -438,11 +438,11 @@ begin
     dialog.OnBurstAddGoods := WhenBurstAddGoods;
     dialog.BurstMode := True;
     if dialog.SelectGoods(fLastGoodsID, True, 0,
-      'Выбор товара или папки для акции') then
+      'Selectare marfa sau folder pentru actiune') then
     begin
       if (dialog.GoodsIsFolder) then
       begin
-        if ShowAskDialog('Папка', 'Вы хотите добавить все товары из папки?') =
+        if ShowAskDialog('Folder', 'Doriti sa adaugati toata marfa din folder?') =
           mrYes then
           AddGoodsFromFolder(dialog.GoodsID);
       end

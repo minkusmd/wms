@@ -91,7 +91,7 @@ begin
 
      fMasterDataSet.UpdateTransaction.StartTransaction;
      try
-        dtDialogTitle.Text:='Изменение акта';
+        dtDialogTitle.Text:='Modificare act';
         fMasterDataSet.Edit;
         beCreatedBy.Text := fMasterDataSet.FieldByName('CREATED_BY_NAME').AsString;
      except
@@ -104,7 +104,7 @@ procedure Tfrm57ActEditorDlg.SetupSecurityItems;
 begin
   inherited;
   if Not SWNSecurityManager.UserHasSecurityFlag(2002) then
-     beCreatedBy.Visible:=false;  //2002 - Изменить пользователя
+     beCreatedBy.Visible:=false;  //2002 - Modificare utilizator
 end;
 
 

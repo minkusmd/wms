@@ -162,7 +162,7 @@ begin
   // dialog := TfrmCustomersDlg.Create(Self);
   // try
   // dialog.CustomFilter:=[cfCustomers, cfVendors, cfDiler];
-  // if dialog.SelectCustomer(FCustomerID, False, 0, 'Выбор контрагента для анализа прайса') then
+  // if dialog.SelectCustomer(FCustomerID, False, 0, 'Selectare contraagent pentru analiza preturilor') then
   // begin
   // FCustomerID := dialog.CustomerID;
   // beSourceProgressFirma.Text := dialog.CustomerTitle;
@@ -189,7 +189,7 @@ begin
   // end
   // else
   // begin
-  // ShowErrorDialog(cMSG_GeneralInputError_Title,cMSG_GeneralInputError_Text,'Не заполнены входные параметры! Клиент и дата!');
+  // ShowErrorDialog(cMSG_GeneralInputError_Title,cMSG_GeneralInputError_Text,'Nu sunt completati parametrii de intrare! Client si data!');
   // end;
 end;
 
@@ -288,7 +288,7 @@ begin
 
         if goodsList.Count>0 then
         begin
-             if ShowAskDialog('Вставка из нового прайс-листа',Format('Вы хотите вставить %d товаров из нового прайс-листа?',[goodsList.Count]))=mrYes then
+             if ShowAskDialog('Inserare din noua lista de preturi',Format('Doriti sa inserati %d marfuri din noua lista de preturi?',[goodsList.Count]))=mrYes then
              begin
                   IBCQueryNewGoods.DisableControls;
                   try
@@ -319,7 +319,7 @@ begin
                   end;
              end;
         end
-        else ShowErrorDialog('Ошибка','Нет товаров!');
+        else ShowErrorDialog('Eroare','Nu sunt produse!');
      finally
         goodsList.Free;
      end;end;
@@ -341,7 +341,7 @@ begin
 
         if goodsList.Count>0 then
         begin
-             if ShowAskDialog('Вставка из старого прайс-листа',Format('Вы хотите вставить %d товаров из старого прайс-листа?',[goodsList.Count]))=mrYes then
+             if ShowAskDialog('Inserare din vechea lista de preturi',Format('Doriti sa inserati %d marfuri din vechea lista de preturi?',[goodsList.Count]))=mrYes then
              begin
                   IBCQueryOldGoods.DisableControls;
                   try
@@ -372,7 +372,7 @@ begin
                   end;
              end;
         end
-        else ShowErrorDialog('Ошибка','Нет товаров!');
+        else ShowErrorDialog('Eroare','Nu sunt produse!');
      finally
         goodsList.Free;
      end;
@@ -500,14 +500,14 @@ var data:TStringList;
 begin
      Result:=nil;
      // Ultra price list structure
-     // 0. Код
-     // 1. Наименование
-     // 2. Кол-во
-     // 3. Гар
-     // 4. ЦенаА, MDL [1]
-     // 5. ЦенаА, USD [2]
+     // 0. Cod
+     // 1. Denumire
+     // 2. Cantitate
+     // 3. Gar
+     // 4. Pret A, MDL [1]
+     // 5. Pret A, USD [2]
      // 6. <empty>
-     // 7. ЦенаD, USD [3]
+     // 7. Pret D, USD [3]
 
      case PriceColumn of
      2: priceColumnIndex:=5;
@@ -564,7 +564,7 @@ begin
         GetDataFromXLSText(SourceText, dataText);
         for i := 0 to dataText.Count-1 do
         begin
-             goodsItem:=GetGoodsData_Ultra(dataText[i], 3); // 3 colonita: "ЦенаD, USD"
+             goodsItem:=GetGoodsData_Ultra(dataText[i], 3); // 3 colonita: "Pret D, USD"
              if Assigned(goodsItem) then GoodsList.Add(goodsItem);
         end;
      finally

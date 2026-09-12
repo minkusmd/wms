@@ -55,7 +55,7 @@ begin
   Error := '';
 
   if VarIsNull(lcbOperator.EditValue) or (lcbOperator.EditValue <= 0) then
-    AddErrorToStr(Error, 'Оператор NPSC!');
+    AddErrorToStr(Error, 'Operator NPSC!');
 
   if Error = '' then
     Result := True
@@ -83,7 +83,7 @@ end;
 
 procedure TfrmGoodsSendGoodsToNPSCDlg.SetGoodsQty(const Qty: Integer);
 begin
-  lbInfo.Caption := Format('Всего товаров: %d', [Qty]);
+  lbInfo.Caption := Format('Total marfuri: %d', [Qty]);
 end;
 
 end.

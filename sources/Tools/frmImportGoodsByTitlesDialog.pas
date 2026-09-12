@@ -167,7 +167,7 @@ type
 
 procedure TfrmImportGoodsByTitlesDlg.bbCheckForeignCodeClick(Sender: TObject);
 begin
-  if ShowAskDialog('Проверка по коду производителя', 'Вы хотите поверить товары на существование по коду производителя?') = mrYes then
+  if ShowAskDialog('Verificare dupa codul producatorului', 'Doriti sa verificati existenta marfurilor dupa codul producatorului?') = mrYes then
     VerifyGoodsByForeignCode;
 end;
 
@@ -438,7 +438,7 @@ begin
 //    if not IBCDataSourceGoods.DataSet.FieldByName('VENDOR_ID').IsNull then
 //      syssEditor.SYSSID := IBCDataSourceGoods.DataSet.FieldByName('VENDOR_ID').AsInteger;
 
-    syssEditor.SetDefaultGroup(1); // Производители
+    syssEditor.SetDefaultGroup(1); // Producatori
     syssEditor.ShowModal;
     IBCQueryVendors.Refresh;
   finally
@@ -657,7 +657,7 @@ var
   end;
 
 begin
-  if ShowAskDialog('Вставка из прайса ФОКСТРОТ', 'Колонка 1+2+3 -> Название товара'#13#10'Колонка 4 -> код производителя.'#13#10#13#10'Вы хотите вставить данные?') <> mrYes then
+  if ShowAskDialog('Inserare din lista de preturi FOKSTROT', 'Coloana 1+2+3 -> Denumirea marfii'#13#10'Coloana 4 -> codul producatorului.'#13#10#13#10'Doriti sa inserati datele?') <> mrYes then
     Exit;
 
   // rearanjam datele din price Foxtrot
@@ -708,7 +708,7 @@ var
   end;
 
 begin
-  if ShowAskDialog('Вставка из прайса NIPPON', 'Колонка 1 -> код производителя, 2 - > Название товара'#13#10'Вы хотите вставить данные?') <> mrYes then
+  if ShowAskDialog('Inserare din lista de preturi NIPPON', 'Coloana 1 -> codul producatorului, 2 - > Denumirea marfii'#13#10'Doriti sa inserati datele?') <> mrYes then
     Exit;
 
   List := TStringList.Create;

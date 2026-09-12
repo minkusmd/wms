@@ -1,6 +1,6 @@
 unit frame37ServiceDispatcherUnit;
 {
- СЕРВИС - Диспетчер сервиса
+ SERVICE - Dispecer service
 }
 
 interface
@@ -100,18 +100,18 @@ type
   private
     { Private declarations }
 
-    // Переработка
+    // Prelucrare
     procedure WhenPererabotkaSelectionChanged;
     procedure ShowAcceptPererabotkaDialog(const IncidentID:Integer);
     function AcceptGoodsFromPererabotkaDB(const IncidentID,InginersGroupID:Integer):Boolean;
 
-    // Ожидание на ремонт
+    // Asteptare pentru reparatie
     procedure WaitingIncidentSelectionChanged;
     procedure ShowWaitingIncidentPropsDialog;
     procedure ShowWaitingIncidentRunDialog(const IncidentID:Integer);
     function RunWaitingIncident(const IncidentID,TargetUserID:integer; const FinishDate:TDateTime):Boolean;
 
-    // Инциденты в работе
+    // Incidente in lucru
 
   protected
     { Protected declarations }
@@ -200,9 +200,9 @@ procedure Tframe37ServiceDispatcher.cxGridWait_DAYS_LEFTGetDisplayText(Sender: T
 begin
      if Not VarIsNull(ARecord.Values[cxGridWait_DAYS_LEFT.Index]) then
      begin
-          if ARecord.Values[cxGridWait_DAYS_LEFT.Index]<0 then AText:='Просрочен'
+          if ARecord.Values[cxGridWait_DAYS_LEFT.Index]<0 then AText:='Intarziat'
           else
-          if ARecord.Values[cxGridWait_DAYS_LEFT.Index]=0 then AText:='Сегодня'
+          if ARecord.Values[cxGridWait_DAYS_LEFT.Index]=0 then AText:='Astazi'
      end;
 end;
 
@@ -256,7 +256,7 @@ end;
 
 function Tframe37ServiceDispatcher.InitFrameID: integer;
 begin
-     Result:=37; // СЕРВИС - Диспетчер сервиса
+     Result:=37; // SERVICE - Dispecer service
 end;
 
 procedure Tframe37ServiceDispatcher.ReadFrameStates;

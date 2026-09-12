@@ -1,15 +1,26 @@
 inherited frame93Tender: Tframe93Tender
-  Font.Height = -15
-  PixelsPerInch = 120
+  Width = 631
+  Height = 427
+  Margins.Left = 4
+  Margins.Top = 4
+  Margins.Right = 4
+  Margins.Bottom = 4
+  Font.Height = -12
+  ExplicitWidth = 631
+  ExplicitHeight = 427
   object cxGridBRK: TcxGrid
     Left = 0
     Top = 0
-    Width = 986
-    Height = 250
+    Width = 631
+    Height = 93
+    Margins.Left = 2
+    Margins.Top = 2
+    Margins.Right = 2
+    Margins.Bottom = 2
     Align = alClient
     Font.Charset = RUSSIAN_CHARSET
     Font.Color = clWindowText
-    Font.Height = -12
+    Font.Height = -10
     Font.Name = 'Segoe UI'
     Font.Style = []
     ParentFont = False
@@ -39,9 +50,6 @@ inherited frame93Tender: Tframe93Tender
       OnCellDblClick = cxGridBRKDBTableCellDblClick
       OnCustomDrawCell = cxGridBRKDBTableCustomDrawCell
       DataController.KeyFieldNames = 'DOCID'
-      FilterRow.SeparatorWidth = 8
-      FixedDataRows.SeparatorWidth = 8
-      NewItemRow.SeparatorWidth = 8
       OptionsBehavior.CellHints = True
       OptionsBehavior.IncSearch = True
       OptionsBehavior.ImmediateEditor = False
@@ -51,16 +59,11 @@ inherited frame93Tender: Tframe93Tender
       OptionsData.Inserting = False
       OptionsSelection.InvertSelect = False
       OptionsView.CellEndEllipsis = True
-      OptionsView.NavigatorOffset = 63
       OptionsView.NoDataToDisplayInfoText = '<'#1053#1077#1090' '#1079#1072#1087#1080#1089#1077#1081'>'
       OptionsView.ScrollBars = ssVertical
       OptionsView.ColumnAutoWidth = True
-      OptionsView.FixedColumnSeparatorWidth = 3
       OptionsView.GridLineColor = 13750737
       OptionsView.GroupRowStyle = grsOffice11
-      Preview.LeftIndent = 25
-      Preview.RightIndent = 6
-      RowLayout.MinValueWidth = 100
       Styles.GroupByBox = dmAdditions.cxStyle_GridGroup
       Styles.Header = dmAdditions.cxStyle_GridHeader
       Styles.Inactive = dmAdditions.cxStyle_GirdContentInactive
@@ -74,26 +77,27 @@ inherited frame93Tender: Tframe93Tender
             ImageIndex = 1
             Value = '1'
           end>
-        MinWidth = 24
+        MinWidth = 19
         Options.Editing = False
         Options.Focusing = False
         Options.HorzSizing = False
         Options.Moving = False
         Options.ShowCaption = False
         Options.Sorting = False
-        Width = 24
+        Width = 19
       end
       object cxGridBRKDBTableDocID: TcxGridDBColumn
         Caption = 'Cod'
         DataBinding.FieldName = 'DOCID'
         HeaderAlignmentHorz = taCenter
-        MinWidth = 60
+        MinWidth = 48
         Options.HorzSizing = False
-        Width = 60
+        Width = 48
       end
       object cxGridBRKDB_CREATED_DATE: TcxGridDBColumn
         Caption = 'Data crearii'
         DataBinding.FieldName = 'CREATED_DATE'
+        MinWidth = 16
         SortIndex = 0
         SortOrder = soAscending
       end
@@ -102,22 +106,22 @@ inherited frame93Tender: Tframe93Tender
         DataBinding.FieldName = 'DATA'
         OnGetDisplayText = cxGridBRKDBTableDataGetDisplayText
         HeaderAlignmentHorz = taCenter
-        MinWidth = 100
+        MinWidth = 80
         Options.HorzSizing = False
-        Width = 100
+        Width = 80
       end
       object cxGridBRKDB_DTDEP_NAME: TcxGridDBColumn
         Caption = 'Depozit'
         DataBinding.FieldName = 'DTDEP_NAME'
-        MinWidth = 60
-        Width = 100
+        MinWidth = 48
+        Width = 80
       end
       object cxGridBRKDB_CT_NAME: TcxGridDBColumn
         Caption = 'Client'
         DataBinding.FieldName = 'CT_NAME'
-        MinWidth = 140
+        MinWidth = 112
         Styles.Content = dmAdditions.cxStyle_GridColumnBOLD
-        Width = 140
+        Width = 112
       end
       object cxGridBRKDBTableSuma: TcxGridDBColumn
         Caption = 'Suma'
@@ -125,9 +129,9 @@ inherited frame93Tender: Tframe93Tender
         PropertiesClassName = 'TcxCurrencyEditProperties'
         Properties.DisplayFormat = '0.00'
         HeaderAlignmentHorz = taCenter
-        MinWidth = 80
+        MinWidth = 64
         Options.HorzSizing = False
-        Width = 80
+        Width = 64
       end
       object cxGridBRKDB_CURRENCY_NAME: TcxGridDBColumn
         Caption = 'Valuta'
@@ -135,9 +139,9 @@ inherited frame93Tender: Tframe93Tender
         PropertiesClassName = 'TcxLabelProperties'
         Properties.Alignment.Horz = taCenter
         HeaderAlignmentHorz = taCenter
-        MinWidth = 50
+        MinWidth = 40
         Options.HorzSizing = False
-        Width = 50
+        Width = 40
       end
       object cxGridBRKDBTableVAT: TcxGridDBColumn
         Caption = 'TVA'
@@ -145,10 +149,10 @@ inherited frame93Tender: Tframe93Tender
         PropertiesClassName = 'TcxCurrencyEditProperties'
         Properties.DisplayFormat = '0.00'
         HeaderAlignmentHorz = taCenter
-        MinWidth = 70
+        MinWidth = 56
         Options.HorzSizing = False
         Options.Sorting = False
-        Width = 70
+        Width = 56
       end
       object cxGridBRKDBTableRate: TcxGridDBColumn
         Caption = 'Rata'
@@ -156,18 +160,18 @@ inherited frame93Tender: Tframe93Tender
         PropertiesClassName = 'TcxCurrencyEditProperties'
         Properties.DisplayFormat = '0.00'
         HeaderAlignmentHorz = taCenter
-        MinWidth = 60
+        MinWidth = 48
         Options.HorzSizing = False
-        Width = 60
+        Width = 48
       end
       object cxGridBRKDBTableParentDocID: TcxGridDBColumn
         Caption = #1050#1086#1076' '#1088#1086#1076'.'
         DataBinding.FieldName = 'PARENTDOCID'
         Visible = False
         HeaderAlignmentHorz = taCenter
-        MinWidth = 70
+        MinWidth = 56
         Options.HorzSizing = False
-        Width = 70
+        Width = 56
       end
       object cxGridBRKDB_RATEUSD: TcxGridDBColumn
         Caption = 'Rata $'
@@ -175,9 +179,9 @@ inherited frame93Tender: Tframe93Tender
         PropertiesClassName = 'TcxCurrencyEditProperties'
         Properties.DisplayFormat = '0.00'
         HeaderAlignmentHorz = taCenter
-        MinWidth = 60
+        MinWidth = 48
         Options.HorzSizing = False
-        Width = 60
+        Width = 48
       end
       object cxGridBRK_FLG_ACNT: TcxGridDBColumn
         Caption = 'Cntb'
@@ -186,58 +190,62 @@ inherited frame93Tender: Tframe93Tender
         Properties.ValueChecked = 1
         Properties.ValueUnchecked = 0
         HeaderAlignmentHorz = taCenter
-        MinWidth = 40
+        MinWidth = 32
         Options.HorzSizing = False
-        Width = 40
+        Width = 32
       end
       object cxGridBRKDB_CREATED_BY_NAME: TcxGridDBColumn
         Caption = 'Utilizator'
         DataBinding.FieldName = 'CREATED_BY_NAME'
-        MinWidth = 80
-        Width = 100
+        MinWidth = 64
+        Width = 80
       end
       object cxGridBRKDB_DT: TcxGridDBColumn
         DataBinding.FieldName = 'DT'
         Visible = False
+        MinWidth = 16
         VisibleForCustomization = False
       end
       object cxGridBRKDB_CT: TcxGridDBColumn
         DataBinding.FieldName = 'CT'
         Visible = False
+        MinWidth = 16
         VisibleForCustomization = False
       end
       object cxGridBRK_FLG_CLOSED: TcxGridDBColumn
         DataBinding.FieldName = 'FLG_CLOSED'
         Visible = False
+        MinWidth = 16
         VisibleForCustomization = False
       end
       object cxGridBRKDB_dtsc_name: TcxGridDBColumn
         Caption = 'subcont 1'
         DataBinding.FieldName = 'dtsc_name'
-        MinWidth = 100
+        MinWidth = 80
         Options.HorzSizing = False
-        Width = 100
+        Width = 80
       end
       object cxGridBRKDB_CTSC_NAME: TcxGridDBColumn
         Caption = 'subsconto 2'
         DataBinding.FieldName = 'ctsc_name'
         Visible = False
-        MinWidth = 100
+        MinWidth = 80
         Options.HorzSizing = False
         VisibleForCustomization = False
-        Width = 100
+        Width = 80
       end
       object cxGridBRKDB_STATE_NAME: TcxGridDBColumn
         Caption = 'Statut'
         DataBinding.FieldName = 'STATE_NAME'
         HeaderAlignmentHorz = taCenter
-        Width = 80
+        MinWidth = 16
+        Width = 64
       end
       object cxGridBRKDBTableColumn2: TcxGridDBColumn
         Caption = 'doc.p.'
         DataBinding.FieldName = 'PARENTDOCID'
         HeaderAlignmentHorz = taCenter
-        MinWidth = 80
+        MinWidth = 64
         Options.HorzSizing = False
       end
     end
@@ -247,22 +255,30 @@ inherited frame93Tender: Tframe93Tender
   end
   object pnBottom: TPanel
     Left = 0
-    Top = 260
-    Width = 986
-    Height = 408
+    Top = 101
+    Width = 631
+    Height = 326
+    Margins.Left = 2
+    Margins.Top = 2
+    Margins.Right = 2
+    Margins.Bottom = 2
     Align = alBottom
     BevelOuter = bvNone
     TabOrder = 0
     object cxPageControlComplect: TcxPageControl
       Left = 0
       Top = 0
-      Width = 986
-      Height = 408
+      Width = 631
+      Height = 326
+      Margins.Left = 2
+      Margins.Top = 2
+      Margins.Right = 2
+      Margins.Bottom = 2
       Align = alClient
       Focusable = False
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
-      Font.Height = -12
+      Font.Height = -10
       Font.Name = 'Segoe UI'
       Font.Style = []
       ParentFont = False
@@ -270,28 +286,43 @@ inherited frame93Tender: Tframe93Tender
       Properties.ActivePage = tbsGoods
       Properties.CustomButtons.Buttons = <>
       Properties.TabPosition = tpBottom
-      ClientRectBottom = 379
+      ClientRectBottom = 302
       ClientRectLeft = 4
-      ClientRectRight = 982
+      ClientRectRight = 627
       ClientRectTop = 4
       object tbsGoods: TcxTabSheet
+        Margins.Left = 2
+        Margins.Top = 2
+        Margins.Right = 2
+        Margins.Bottom = 2
         Caption = 'Produse (&1)'
         ImageIndex = 0
+        ExplicitLeft = 3
+        ExplicitTop = 3
+        ExplicitWidth = 625
+        ExplicitHeight = 300
         object cxGridComponents: TcxGrid
           Left = 0
-          Top = 34
-          Width = 978
-          Height = 341
+          Top = 30
+          Width = 623
+          Height = 268
+          Margins.Left = 2
+          Margins.Top = 2
+          Margins.Right = 2
+          Margins.Bottom = 2
           Align = alClient
           Font.Charset = RUSSIAN_CHARSET
           Font.Color = clWindowText
-          Font.Height = -12
+          Font.Height = -10
           Font.Name = 'Segoe UI'
           Font.Style = []
           ParentFont = False
           TabOrder = 1
           LookAndFeel.NativeStyle = True
           LookAndFeel.SkinName = ''
+          ExplicitTop = 27
+          ExplicitWidth = 625
+          ExplicitHeight = 273
           object cxGridComponentsTable: TcxGridDBTableView
             OnKeyDown = cxGridComponentsTableKeyDown
             Navigator.Buttons.First.Visible = True
@@ -331,114 +362,121 @@ inherited frame93Tender: Tframe93Tender
                 FieldName = 'SUMA'
                 Column = cxGridComponentsTableSUMA
               end>
-            FilterRow.SeparatorWidth = 8
-            FixedDataRows.SeparatorWidth = 8
-            NewItemRow.SeparatorWidth = 8
             OptionsBehavior.IncSearch = True
             OptionsCustomize.ColumnsQuickCustomization = True
             OptionsData.Deleting = False
             OptionsData.Editing = False
             OptionsData.Inserting = False
             OptionsSelection.InvertSelect = False
-            OptionsView.NavigatorOffset = 63
             OptionsView.NoDataToDisplayInfoText = '<'#1053#1077#1090' '#1079#1072#1087#1080#1089#1077#1081'>'
             OptionsView.ScrollBars = ssVertical
             OptionsView.ColumnAutoWidth = True
-            OptionsView.FixedColumnSeparatorWidth = 3
             OptionsView.Footer = True
             OptionsView.GridLineColor = 13750737
             OptionsView.GroupByBox = False
             OptionsView.Indicator = True
-            Preview.LeftIndent = 25
-            Preview.RightIndent = 6
-            RowLayout.MinValueWidth = 100
             Styles.Header = dmAdditions.cxStyle_GridHeader
             Styles.Inactive = dmAdditions.cxStyle_GirdContentInactive
             object cxGridComponentsTableUID: TcxGridDBColumn
               DataBinding.FieldName = 'UID'
               Visible = False
+              MinWidth = 16
             end
             object cxGridComponentsTableDOCID: TcxGridDBColumn
               DataBinding.FieldName = 'DOCID'
               Visible = False
+              MinWidth = 16
             end
             object cxGridComponentsTableCPV: TcxGridDBColumn
               DataBinding.FieldName = 'CPV'
               HeaderAlignmentHorz = taCenter
-              Width = 62
+              MinWidth = 16
+              Width = 50
             end
             object cxGridComponentsTableDENUMIREA_BUNULUI: TcxGridDBColumn
               Caption = 'Denumirea bunului'
               DataBinding.FieldName = 'DENUMIREA_BUNULUI'
               HeaderAlignmentHorz = taCenter
-              Width = 143
+              MinWidth = 16
+              Width = 114
             end
             object cxGridComponentsTableFDA_SPECIFICATION: TcxGridDBColumn
               Caption = 'FDA'
               DataBinding.FieldName = 'FDA_SPECIFICATION'
               HeaderAlignmentHorz = taCenter
-              Width = 197
+              MinWidth = 16
+              Width = 158
             end
             object cxGridComponentsTableGOODSID: TcxGridDBColumn
               Caption = 'Cod'
               DataBinding.FieldName = 'GOODSID'
               HeaderAlignmentHorz = taCenter
-              Width = 38
+              MinWidth = 16
+              Width = 30
             end
             object cxGridComponentsTableGOODS_NAME: TcxGridDBColumn
               Caption = 'Produs'
               DataBinding.FieldName = 'GOODS_NAME'
               HeaderAlignmentHorz = taCenter
-              Width = 182
+              MinWidth = 16
+              Width = 146
             end
             object cxGridComponentsTableCOUNTRY_NAME: TcxGridDBColumn
               Caption = 'Tara de origine'
               DataBinding.FieldName = 'COUNTRY_NAME'
               HeaderAlignmentHorz = taCenter
-              Width = 77
+              MinWidth = 16
+              Width = 62
             end
             object cxGridComponentsTableMANUFACTURER: TcxGridDBColumn
               Caption = 'Producator'
               DataBinding.FieldName = 'MANUFACTURER'
               HeaderAlignmentHorz = taCenter
-              Width = 83
+              MinWidth = 16
+              Width = 66
             end
             object cxGridComponentsTableWARANTY: TcxGridDBColumn
               Caption = 'Garantie'
               DataBinding.FieldName = 'WARANTY'
               HeaderAlignmentHorz = taCenter
-              Width = 66
+              MinWidth = 16
+              Width = 53
             end
             object cxGridComponentsTableSTANDARD: TcxGridDBColumn
               Caption = 'Standarde'
               DataBinding.FieldName = 'STANDARD'
               HeaderAlignmentHorz = taCenter
-              Width = 62
+              MinWidth = 16
+              Width = 50
             end
             object cxGridComponentsTableQTY: TcxGridDBColumn
               Caption = 'Cant'
               DataBinding.FieldName = 'QTY'
               PropertiesClassName = 'TcxCalcEditProperties'
               HeaderAlignmentHorz = taCenter
-              Width = 49
+              MinWidth = 16
+              Width = 39
             end
             object cxGridComponentsTablePRICE: TcxGridDBColumn
               Caption = 'Pret'
               DataBinding.FieldName = 'PRICE'
               PropertiesClassName = 'TcxCalcEditProperties'
               HeaderAlignmentHorz = taCenter
-              Width = 68
+              MinWidth = 16
+              Width = 54
             end
             object cxGridComponentsTableSUMA: TcxGridDBColumn
               Caption = 'Suma'
               DataBinding.FieldName = 'SUMA'
               PropertiesClassName = 'TcxCalcEditProperties'
               HeaderAlignmentHorz = taCenter
-              Width = 74
+              MinWidth = 16
+              Width = 59
             end
             object cxGridComponentsTableVAT: TcxGridDBColumn
               DataBinding.FieldName = 'VAT'
               Visible = False
+              MinWidth = 16
             end
           end
           object cxGridLevel: TcxGridLevel
@@ -448,27 +486,45 @@ inherited frame93Tender: Tframe93Tender
         object DockControlGoods: TdxBarDockControl
           Left = 0
           Top = 0
-          Width = 978
-          Height = 34
+          Width = 623
+          Height = 30
+          Margins.Left = 2
+          Margins.Top = 2
+          Margins.Right = 2
+          Margins.Bottom = 2
           Align = dalTop
           BarManager = dxBarManager
           SunkenBorder = True
           UseOwnSunkenBorder = True
+          ExplicitWidth = 625
+          ExplicitHeight = 34
         end
       end
       object tbsKitContent: TcxTabSheet
+        Margins.Left = 2
+        Margins.Top = 2
+        Margins.Right = 2
+        Margins.Bottom = 2
         Caption = 'Complectatie (&2)'
         ImageIndex = 1
+        ExplicitLeft = 3
+        ExplicitTop = 3
+        ExplicitWidth = 625
+        ExplicitHeight = 300
         object cxGridComplect: TcxGrid
           Left = 0
-          Top = 34
-          Width = 978
-          Height = 341
+          Top = 30
+          Width = 623
+          Height = 268
+          Margins.Left = 2
+          Margins.Top = 2
+          Margins.Right = 2
+          Margins.Bottom = 2
           Align = alClient
           TabOrder = 1
-          ExplicitTop = 30
-          ExplicitWidth = 1115
-          ExplicitHeight = 348
+          ExplicitTop = 27
+          ExplicitWidth = 625
+          ExplicitHeight = 273
           object cxGridComplectTable: TcxGridDBTableView
             OnKeyDown = cxGridComplectTableKeyDown
             Navigator.Buttons.First.Visible = True
@@ -510,9 +566,6 @@ inherited frame93Tender: Tframe93Tender
                 Kind = skSum
                 Column = cxGridComplect_QTY
               end>
-            FilterRow.SeparatorWidth = 8
-            FixedDataRows.SeparatorWidth = 8
-            NewItemRow.SeparatorWidth = 8
             OptionsBehavior.IncSearch = True
             OptionsCustomize.ColumnsQuickCustomization = True
             OptionsData.Deleting = False
@@ -520,18 +573,13 @@ inherited frame93Tender: Tframe93Tender
             OptionsData.Inserting = False
             OptionsSelection.InvertSelect = False
             OptionsView.CellEndEllipsis = True
-            OptionsView.NavigatorOffset = 63
             OptionsView.NoDataToDisplayInfoText = '<'#1053#1077#1090' '#1079#1072#1087#1080#1089#1077#1081'>'
             OptionsView.ScrollBars = ssVertical
             OptionsView.ColumnAutoWidth = True
-            OptionsView.FixedColumnSeparatorWidth = 3
             OptionsView.Footer = True
             OptionsView.GridLineColor = 13750737
             OptionsView.GroupByBox = False
             OptionsView.Indicator = True
-            Preview.LeftIndent = 25
-            Preview.RightIndent = 6
-            RowLayout.MinValueWidth = 100
             Styles.Header = dmAdditions.cxStyle_GridHeader
             Styles.Inactive = dmAdditions.cxStyle_GirdContentInactive
             object cxGridComplect_GOODSID: TcxGridDBColumn
@@ -539,15 +587,15 @@ inherited frame93Tender: Tframe93Tender
               DataBinding.FieldName = 'GOODSID'
               FooterAlignmentHorz = taRightJustify
               HeaderAlignmentHorz = taCenter
-              MinWidth = 60
+              MinWidth = 48
               Options.HorzSizing = False
-              Width = 60
+              Width = 48
             end
             object cxGridComplect_IMG: TcxGridDBColumn
               DataBinding.FieldName = 'GOODS_TYPE_ID'
               PropertiesClassName = 'TcxImageComboBoxProperties'
               Properties.Items = <>
-              MinWidth = 24
+              MinWidth = 19
               Options.Editing = False
               Options.Focusing = False
               Options.IncSearch = False
@@ -555,7 +603,7 @@ inherited frame93Tender: Tframe93Tender
               Options.HorzSizing = False
               Options.Moving = False
               Options.ShowCaption = False
-              Width = 24
+              Width = 19
             end
             object cxGridComplect_FLG_SUPPLIER_PROMO: TcxGridDBColumn
               Caption = 'P'
@@ -569,14 +617,16 @@ inherited frame93Tender: Tframe93Tender
                   Value = '1'
                 end>
               HeaderAlignmentHorz = taCenter
+              MinWidth = 16
               Options.Focusing = False
               Options.HorzSizing = False
-              Width = 20
+              Width = 16
             end
             object cxGridComplect_GOODS_NAME: TcxGridDBColumn
               Caption = 'Produs'
               DataBinding.FieldName = 'GOODS_NAME'
-              Width = 200
+              MinWidth = 16
+              Width = 160
             end
             object cxGridComplect_QTY: TcxGridDBColumn
               Caption = 'Cant'
@@ -585,10 +635,10 @@ inherited frame93Tender: Tframe93Tender
               OnGetDisplayText = cxGridComplect_QTYGetDisplayText
               FooterAlignmentHorz = taRightJustify
               HeaderAlignmentHorz = taCenter
-              MinWidth = 60
+              MinWidth = 48
               Options.Focusing = False
               Options.HorzSizing = False
-              Width = 60
+              Width = 48
             end
             object cxGridComplect_UM_NAME: TcxGridDBColumn
               Caption = 'UM'
@@ -596,10 +646,10 @@ inherited frame93Tender: Tframe93Tender
               PropertiesClassName = 'TcxLabelProperties'
               Properties.Alignment.Horz = taCenter
               HeaderAlignmentHorz = taCenter
-              MinWidth = 40
+              MinWidth = 32
               Options.HorzSizing = False
               Options.Sorting = False
-              Width = 40
+              Width = 32
             end
             object cxGridComplect_PRICE: TcxGridDBColumn
               Caption = 'Pret'
@@ -607,9 +657,9 @@ inherited frame93Tender: Tframe93Tender
               PropertiesClassName = 'TcxCurrencyEditProperties'
               Properties.DisplayFormat = '0.00'
               HeaderAlignmentHorz = taCenter
-              MinWidth = 70
+              MinWidth = 56
               Options.HorzSizing = False
-              Width = 70
+              Width = 56
             end
             object cxGridComplect_SUMA: TcxGridDBColumn
               Caption = 'Suma'
@@ -618,10 +668,10 @@ inherited frame93Tender: Tframe93Tender
               Properties.DisplayFormat = '0.00'
               FooterAlignmentHorz = taRightJustify
               HeaderAlignmentHorz = taCenter
-              MinWidth = 80
+              MinWidth = 64
               Options.HorzSizing = False
               Styles.Footer = dmAdditions.cxStyle_MoneyCounter_Total
-              Width = 80
+              Width = 64
             end
             object cxGridComplect_SUMAVAT: TcxGridDBColumn
               Caption = 'TVA'
@@ -630,9 +680,9 @@ inherited frame93Tender: Tframe93Tender
               Properties.DisplayFormat = '#,##0.00'
               FooterAlignmentHorz = taRightJustify
               HeaderAlignmentHorz = taCenter
-              MinWidth = 70
+              MinWidth = 56
               Options.HorzSizing = False
-              Width = 70
+              Width = 56
             end
             object cxGridComplect_FLG_ACNT: TcxGridDBColumn
               Caption = 'Cnt'
@@ -641,18 +691,18 @@ inherited frame93Tender: Tframe93Tender
               Properties.ValueChecked = 1
               Properties.ValueUnchecked = 0
               HeaderAlignmentHorz = taCenter
-              MinWidth = 50
+              MinWidth = 40
               Options.HorzSizing = False
-              Width = 50
+              Width = 40
             end
             object cxGridComplect_WARRANTY: TcxGridDBColumn
               Caption = #1043#1072#1088
               DataBinding.FieldName = 'WARRANTY'
               Visible = False
               HeaderAlignmentHorz = taCenter
-              MinWidth = 40
+              MinWidth = 32
               Options.HorzSizing = False
-              Width = 40
+              Width = 32
             end
             object cxGridComplect_STOCK_QTY: TcxGridDBColumn
               Caption = 'Sold'
@@ -660,7 +710,7 @@ inherited frame93Tender: Tframe93Tender
               PropertiesClassName = 'TcxCalcEditProperties'
               OnGetDisplayText = cxGridComplect_QTYGetDisplayText
               HeaderAlignmentHorz = taCenter
-              MinWidth = 80
+              MinWidth = 64
               Options.HorzSizing = False
             end
             object cxGridComplect_FLG_ACTIVE: TcxGridDBColumn
@@ -670,9 +720,9 @@ inherited frame93Tender: Tframe93Tender
               Properties.ValueChecked = 1
               Properties.ValueUnchecked = 0
               HeaderAlignmentHorz = taCenter
-              MinWidth = 40
+              MinWidth = 32
               Options.HorzSizing = False
-              Width = 40
+              Width = 32
             end
             object cxGridComplect_FLG_READY: TcxGridDBColumn
               Caption = #1043#1086#1090#1086#1074
@@ -682,29 +732,30 @@ inherited frame93Tender: Tframe93Tender
               Properties.ValueUnchecked = 0
               Visible = False
               HeaderAlignmentHorz = taCenter
-              MinWidth = 40
+              MinWidth = 32
               Options.HorzSizing = False
               VisibleForCustomization = False
-              Width = 40
+              Width = 32
             end
             object cxGridComplect_GOODS_ACNT_ID: TcxGridDBColumn
               AlternateCaption = #1050#1086#1076' '#1087#1086' '#1073#1091#1093#1075#1072#1083#1090#1077#1088#1080#1080
               Caption = 'Cod factura'
               DataBinding.FieldName = 'GOODS_ACNT_ID'
               HeaderAlignmentHorz = taCenter
-              MinWidth = 60
+              MinWidth = 48
               Options.HorzSizing = False
-              Width = 60
+              Width = 48
             end
             object cxGridComplect_GOODS_NAMEACNT: TcxGridDBColumn
               Caption = 'Denumirea factura'
               DataBinding.FieldName = 'GOODS_NAMEACNT'
-              MinWidth = 50
-              Width = 70
+              MinWidth = 40
+              Width = 56
             end
             object cxGridComplect_UMID: TcxGridDBColumn
               DataBinding.FieldName = 'UMID'
               Visible = False
+              MinWidth = 16
               VisibleForCustomization = False
             end
             object cxGridComplect_FLG_ADDON: TcxGridDBColumn
@@ -717,8 +768,9 @@ inherited frame93Tender: Tframe93Tender
                   ImageIndex = 1
                   Value = 1
                 end>
+              MinWidth = 16
               Options.HorzSizing = False
-              Width = 20
+              Width = 16
             end
           end
           object cxGridComplectLevel1: TcxGridLevel
@@ -728,30 +780,43 @@ inherited frame93Tender: Tframe93Tender
         object DockControlComplect: TdxBarDockControl
           Left = 0
           Top = 0
-          Width = 978
-          Height = 34
+          Width = 623
+          Height = 30
+          Margins.Left = 2
+          Margins.Top = 2
+          Margins.Right = 2
+          Margins.Bottom = 2
           Align = dalTop
           BarManager = dxBarManager
           SunkenBorder = True
           UseOwnSunkenBorder = True
+          ExplicitWidth = 625
+          ExplicitHeight = 34
         end
       end
     end
   end
   object cxSplitter: TcxSplitter
     Left = 0
-    Top = 250
-    Width = 986
-    Height = 10
+    Top = 93
+    Width = 631
+    Height = 8
+    Margins.Left = 2
+    Margins.Top = 2
+    Margins.Right = 2
+    Margins.Bottom = 2
     HotZoneClassName = 'TcxMediaPlayer9Style'
     AlignSplitter = salBottom
-    MinSize = 200
+    DragThreshold = 2
+    PositionAfterOpen = 24
+    MinSize = 160
     Control = pnBottom
+    ExplicitTop = 94
   end
   object dxBarManager: TdxBarManager
     Font.Charset = RUSSIAN_CHARSET
     Font.Color = clWindowText
-    Font.Height = -15
+    Font.Height = -12
     Font.Name = 'Segoe UI'
     Font.Style = []
     CanCustomize = False
@@ -783,7 +848,7 @@ inherited frame93Tender: Tframe93Tender
     UseSystemFont = False
     Left = 32
     Top = 68
-    PixelsPerInch = 120
+    PixelsPerInch = 96
     object dxBarManagerBar2: TdxBar
       AllowClose = False
       AllowCustomizing = False
@@ -1462,7 +1527,7 @@ inherited frame93Tender: Tframe93Tender
     OnPopup = dxPopupMenuRBKPopup
     Left = 120
     Top = 68
-    PixelsPerInch = 120
+    PixelsPerInch = 96
   end
   object cxGridPopupMenuBRK: TcxGridPopupMenu
     Grid = cxGridBRK
@@ -1515,7 +1580,7 @@ inherited frame93Tender: Tframe93Tender
     UseOwnFont = False
     Left = 500
     Top = 224
-    PixelsPerInch = 120
+    PixelsPerInch = 96
   end
   object dxBarPopupMenuCOMPLECT: TdxBarPopupMenu
     BarManager = dxBarManager
@@ -1544,7 +1609,7 @@ inherited frame93Tender: Tframe93Tender
     UseOwnFont = False
     Left = 144
     Top = 171
-    PixelsPerInch = 120
+    PixelsPerInch = 96
   end
   object cxGridPopupMenuCOMPLECT: TcxGridPopupMenu
     Grid = cxGridComplect

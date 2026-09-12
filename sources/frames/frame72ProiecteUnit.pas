@@ -1,6 +1,6 @@
 ﻿unit frame72ProiecteUnit;
 
-// СЧЕТА. Входные Счета
+// FACTURI. Facturi de intrare
 // DocTypeID = 3126
 // Frame Index = 72
 
@@ -118,7 +118,7 @@ end;
 
 procedure Tframe72Proiecte.DeleteRecord;
 begin
-  if ShowAskDialog(cMSG_DELETERECORD_DeleteDocument, Format('Удалить запись №%d?', [dmDB.IBCQueryDocs.FieldByName
+  if ShowAskDialog(cMSG_DELETERECORD_DeleteDocument, Format('Stergeti inregistrarea nr.%d?', [dmDB.IBCQueryDocs.FieldByName
     ('DOCID').asInteger])) = mrYes then
   begin
     dmDB.IBCQueryDocs.UpdateTransaction.StartTransaction;
@@ -273,7 +273,7 @@ end;
 
 procedure Tframe72Proiecte.SetupQtyFields;
 begin
-     // Кол-во
+     // Cantitate
 end;
 
 procedure Tframe72Proiecte.SetupSecurityItems;
@@ -319,7 +319,7 @@ begin
     = 1) then
   begin
     FLG_CLOSED := dmDB.IBCQueryDocs.FieldByName('FLG_CLOSED').AsInteger = 1;
-    fCreatePrihodRashod := (not FLG_CLOSED);     // Создать Приходную накладную
+    fCreatePrihodRashod := (not FLG_CLOSED);     // Creare Nakladnaia de intrare
   end;
      // popup menu
   bbDocComments.Enabled := fSECURITY_CanEdit;

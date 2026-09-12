@@ -50,7 +50,7 @@ uses DataModuleDB, SWNUtils, SWNDBErrors;
 
 procedure TfrmFirmsLocksLogDlg.bbClearLogClick(Sender: TObject);
 begin
-     if ShowAskDialog('Очистка журнала','Вы хотите удалить все записи из журнала?')=mrYes then
+     if ShowAskDialog('Curatare jurnal','Doriti sa stergeti toate inregistrarile din jurnal?')=mrYes then
      begin
           ClearLogDB;
           IBCQueryLog.Refresh;

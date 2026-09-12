@@ -76,7 +76,7 @@ begin
 
      if cbSpecialImage.Checked then
      begin
-          if deDATA_END.EditValue<deDATA_START.EditValue then AddErrorToStr(ErrorStr,'Дата окончания показа меньше чем дата начало показа!');
+          if deDATA_END.EditValue<deDATA_START.EditValue then AddErrorToStr(ErrorStr,'Data de sfarsit a afisarii este mai mica decat data de inceput a afisarii!');
      end;
 
      if ErrorStr='' then Result:=True

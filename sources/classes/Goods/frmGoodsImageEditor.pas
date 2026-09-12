@@ -72,7 +72,7 @@ end;
 
 procedure TfrmGoodsImageEditorDlg.DisplayImagePropertis;
 begin
-     lbImageSize.Caption:=Format('Размер картинки: %dx%d',[imgIMAGE.Picture.Width,imgIMAGE.Picture.Height]);
+     lbImageSize.Caption:=Format('Dimensiunea imaginii: %dx%d',[imgIMAGE.Picture.Width,imgIMAGE.Picture.Height]);
 end;
 
 procedure TfrmGoodsImageEditorDlg.GetData(const Stream: TMemoryStream);

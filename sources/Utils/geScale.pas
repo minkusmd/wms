@@ -7,9 +7,9 @@ procedure geAutoScale(MForm: TForm);
 
 implementation
 type
-  TFooClass = class(TControl); { необходимо выяснить защищенность }
+  TFooClass = class(TControl); { trebuie stabilit gradul de protectie }
 
-  { свойства Font }
+  { proprietatile Font }
 
 procedure geAutoScale(MForm: TForm);
 const
@@ -17,7 +17,7 @@ const
   cScreenWidth: integer = 800;
   cScreenHeight: integer = 600;
   cPixelsPerInch: integer = 96;
-  cFontHeight: integer = -11; {В режиме проектирование значение из Font.Height}
+  cFontHeight: integer = -11; {In modul de proiectare valoarea din Font.Height}
 
 var
 
@@ -26,14 +26,14 @@ var
 begin
 
   {
-  ВАЖНО!! : Установите в Инспекторе Объектов свойство Scaled TForm в FALSE.
+  IMPORTANT!! : Setati in Object Inspector proprietatea Scaled a TForm pe FALSE.
 
-  Следующая программа масштабирует форму так, чтобы она выглядела одинаково
-  внезависимости от размера экрана и пикселей на дюйм. Расположенный ниже
-  участок кода проверяет, отличается ли размер экрана во время выполнения
-  от размера во время проектирования. Если да, Scaled устанавливается в True
-  и компоненты снова масштабируются так, чтобы они выводились в той же
-  позиции экрана, что и во время проектирования.
+  Urmatorul cod scaleaza forma astfel incat aceasta sa arate identic
+  indiferent de dimensiunea ecranului si de pixelii per inch. Codul de mai jos
+  verifica daca dimensiunea ecranului in timpul executiei difera
+  de dimensiunea din timpul proiectarii. Daca da, Scaled este setat pe True
+  si componentele sunt scalate din nou astfel incat sa fie afisate in aceeasi
+  pozitie a ecranului ca si in timpul proiectarii.
   }
   if (Screen.width  > cScreenWidth) or (Screen.PixelsPerInch <>
     cPixelsPerInch) then
@@ -46,21 +46,21 @@ begin
   end;
 
   {
-  Этот код проверяет, отличается ли размер шрифта во времы выполнения от
-  размера во время проектирования. Если во время выполнения pixelsperinch
-  формы отличается от pixelsperinch во время проектирования, шрифты снова
-  масштабируются так, чтобы форма не отличалась от той, которая была во
-  время разработки. Масштабирование производится исходя из коэффициента,
-  получаемого путем деления значения font.height во время проектирования
-  на font.height во время выполнения. Font.size в этом случае работать не
-  будет, так как это может дать результат больший, чем текущие размеры
-  компонентов, при этом текст может оказаться за границами области компонента.
-  Например, форма создана при размерах экрана 800x600 с установленными
-  маленькими шрифтами, имеющими размер font.size = 8. Когда вы запускаете
-  в системе с 800x600 и большими шрифтами, font.size также будет равен 8,
-  но текст будет бОльшим чем при работе в системе с маленькими шрифтами.
-  Данное масштабирование позволяет иметь один и тот же размер шрифтов
-  при различных установках системы.
+  Acest cod verifica daca dimensiunea fontului in timpul executiei difera de
+  dimensiunea din timpul proiectarii. Daca in timpul executiei pixelsperinch
+  al formei difera de pixelsperinch din timpul proiectarii, fonturile sunt din nou
+  scalate astfel incat forma sa nu difere de cea care a fost in
+  timpul dezvoltarii. Scalarea se realizeaza pe baza unui coeficient,
+  obtinut prin impartirea valorii font.height din timpul proiectarii
+  la font.height din timpul executiei. Font.size in acest caz nu va
+  functiona, deoarece aceasta poate da un rezultat mai mare decat dimensiunile curente
+  ale componentelor, iar textul poate ajunge in afara limitelor zonei componentei.
+  De exemplu, forma a fost creata la dimensiunea ecranului 800x600 cu
+  fonturi mici setate, avand dimensiunea font.size = 8. Cand rulati
+  pe un sistem cu 800x600 si fonturi mari, font.size va fi de asemenea 8,
+  dar textul va fi mai mare decat la lucrul pe un sistem cu fonturi mici.
+  Aceasta scalare permite pastrarea aceleiasi dimensiuni a fonturilor
+  la diferite setari ale sistemului.
   }
 
   if (Screen.PixelsPerInch <> cPixelsPerInch) then

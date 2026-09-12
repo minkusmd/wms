@@ -110,8 +110,8 @@ begin
 //                       if (SWNSecurityManager.LoggedUser.IsInAdminGroup) then
                            ShowErrorDialog('Eroare!', Error.Message, SWNDatabaseErrors.FormatSWNException(SWNException), AException.Message);
 //                       else
-//                           ShowErrorDialog('Ошибка базы данных!', Error.Message, SWNDatabaseErrors.FormatSWNException(SWNException));
-                       //ShowErrorDialog('Ошибка базы данных!',Error.Message, AException.Message {SWNDatabaseErrors.FormatSWNException(SWNException)});
+//                           ShowErrorDialog('Eroare baza de date!', Error.Message, SWNDatabaseErrors.FormatSWNException(SWNException));
+                       //ShowErrorDialog('Eroare baza de date!',Error.Message, AException.Message {SWNDatabaseErrors.FormatSWNException(SWNException)});
                        Result:=True;
                     finally
                        SWNException.Free;
@@ -150,7 +150,7 @@ begin
      Error:=TSWNDBError.Create('Foreign key references are present for the record','Exista referinta pentru aceasta inregistrare!');
      fErrors.Add(Error);
 
-     // Internal: Счет фактуры
+     // Internal: Facturi fiscale
      Error:=TSWNDBError.Create('SYSERROR_SCETFACTURA','Eroare la eliberarea facturii!');
      fErrors.Add(Error);
 
@@ -218,7 +218,7 @@ begin
 
 //     if SWNSecurityManager.LoggedUser.IsSuperAdminUser then
 //     begin
-          //if SWNException.fExceptionID<>-1 then AddErrorToStr(Result,Format('ID ошибки: %d',[SWNException.fExceptionID]));
+          //if SWNException.fExceptionID<>-1 then AddErrorToStr(Result,Format('ID eroare: %d',[SWNException.fExceptionID]));
           AddErrorToStr(Result,'Eroare: '+SWNException.fException);
           if SWNException.fProcedureInfo<>'' then AddErrorToStr(Result,SWNException.fProcedureInfo);
           if SWNException.fTriggerInfo<>'' then AddErrorToStr(Result,SWNException.fTriggerInfo);
@@ -464,12 +464,12 @@ begin
      Result:='';
      if fHasLockRecordInfo then
      begin
-          Result:=Format('Пользователь: %s',[fLockedUserName]);
-          if (fLockedFirmaName<>'') then Result:=Result+#13#10+Format('Фирма: %s',[fLockedFirmaName])
+          Result:=Format('Utilizator: %s',[fLockedUserName]);
+          if (fLockedFirmaName<>'') then Result:=Result+#13#10+Format('Firma: %s',[fLockedFirmaName])
           else
           begin
-               if (fLockedProcess<>'') then Result:=Result+#13#10+Format('Программа: %s',[fLockedProcess]);
-               if (fLockedIPAddress<>'') then Result:=Result+#13#10+Format('IP адрес: %s',[fLockedIPAddress]);
+               if (fLockedProcess<>'') then Result:=Result+#13#10+Format('Programul: %s',[fLockedProcess]);
+               if (fLockedIPAddress<>'') then Result:=Result+#13#10+Format('Adresa IP: %s',[fLockedIPAddress]);
           end;
      end;
 

@@ -519,18 +519,18 @@ begin
     begin
 //    IBCQueryTree.UpdateTransaction.StartTransaction;
         try
-            // ѕолучить текущий узел
+            // Obtine nodul curent
             CurrentNode := cxDBTreeList.FocusedNode;
             cxDBTreeList.BeginUpdate;
             try
             if Assigned(CurrentNode) then
             begin
-            // ѕопробовать получить следующий узел на том же уровне
+            // Incearca sa obtii nodul urmator de pe acelasi nivel
                 NextNode := CurrentNode.GetNextSibling;
-            // ≈сли следующего узла нет, перейти к родительскому узлу
+            // Daca nu exista nodul urmator, treci la nodul parinte
                 if not Assigned(NextNode) then
                     NextNode := CurrentNode.Parent;
-            // ”далить текущий узел
+            // Sterge nodul curent
                 if not IBCQueryTree.UpdateTransaction.Active then
                 begin
                   IBCQueryTree.UpdateTransaction.StartTransaction;
@@ -539,7 +539,7 @@ begin
                 end;
 
                 //cxDBTreeList.DataController.DeleteFocused
-                // ”становить фокус на вычисленный узел (следующий или родительский)
+                // Seteaza focus pe nodul calculat (urmator sau parinte)
                 if Assigned(NextNode) then
                     cxDBTreeList.FocusedNode := NextNode;
             end;

@@ -5,12 +5,13 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   SWNBaseUnit,
-  Dialogs, DialogTitle, Menus, DB, IBC,
+  Dialogs, DialogTitle,
+  Menus, DB, IBC,
   cxDBEdit,
 
   StdCtrls, ExtCtrls,
   cxButtonEdit, cxButtons, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit,
-  cxMaskEdit, cxCheckBox, cxTextEdit;
+  cxMaskEdit, cxCheckBox, cxTextEdit, dxCoreGraphics;
 
 type
   TfrmCustomerAccountEditorDialog = class(TSWNMasteredFormClass)
@@ -25,6 +26,8 @@ type
     edAccountNumber: TcxDBMaskEdit;
     btnCancel: TcxButton;
     btnOk: TcxButton;
+    cbContCurent: TcxDBCheckBox;
+    procedure FormCreate(Sender: TObject);
     procedure beBankPropertiesButtonClick(Sender: TObject;
       AButtonIndex: Integer);
     procedure edAccountNumberPropertiesValidate(Sender: TObject; var DisplayValue: Variant; var ErrorText: TCaption; var Error: Boolean);
@@ -53,6 +56,12 @@ implementation
 uses SWNUtils, SWNConst, frmBanksBrowse;
 
 {$R *.dfm}
+
+procedure TfrmCustomerAccountEditorDialog.FormCreate(Sender: TObject);
+begin
+
+end;
+
 { TfrmCustomerAccountEditorDialog }
 
 procedure TfrmCustomerAccountEditorDialog.beBankPropertiesButtonClick
@@ -122,6 +131,7 @@ begin
   edAccountNumber.DataBinding.DataSource := fMasterDataSource;
   edAccountName.DataBinding.DataSource := fMasterDataSource;
   cbDefaultAccount.DataBinding.DataSource := fMasterDataSource;
+  cbContCurent.DataBinding.DataSource := fMasterDataSource;
 end;
 
 function TfrmCustomerAccountEditorDialog.IsFormDataPosted: Boolean;

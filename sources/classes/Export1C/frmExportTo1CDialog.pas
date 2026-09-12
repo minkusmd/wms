@@ -182,19 +182,19 @@ begin
     cxGridErrorsTable.DataController.DeleteRecord(0);
 
   try
-        // Поступления
+        // Intrari
     if cbPostuplenia.Checked then
       VerifyПоступления(DTList, CTList, Date1, Date2);
 
-        // Реализация: Счет-фактуры
+        // Realizare: Facturi fiscale
     if cbRealizatia_SF.Checked then
       VerifyРеализацияСчетфактуры(DTList, CTList, Date1, Date2);
 
-        // Реализация: Кассовые чеки
+        // Realizare: Bonuri de casa
     if cbRealizatia_Cek.Checked then
       VerifyРеализацияКассовыечеки(DTList, CTList, Date1, Date2);
 
-        // Перемещение
+        // Transfer
     if cbPeremeshenie.Checked then
       VerifyПеремещение(DTList, CTList, Date1, Date2);
   finally
@@ -222,12 +222,12 @@ begin
 
   if not (cbPostuplenia.Checked or cbRealizatia_SF.Checked or cbRealizatia_Cek.Checked
     or cbPeremeshenie.Checked) then
-    AddErrorToStr(ErrorStr, 'Выберите тип документа для экспорта!');
+    AddErrorToStr(ErrorStr, 'Selectati tipul documentului pentru export!');
 
   if cbDocList.Checked then
   begin
     if not ParseDocList then
-      AddErrorToStr(ErrorStr, 'Список документов!');
+      AddErrorToStr(ErrorStr, 'Lista documentelor!');
   end;
 
   if ErrorStr = '' then
@@ -312,7 +312,7 @@ begin
   node.SetAttributeNS('ТипВыгрузки', '', 'Ручная');
 
   Summary := TStringList.Create;
-  Summary.Add('Документы были экспортированны в файл.');
+  Summary.Add('Documentele au fost exportate in fisier.');
   Summary.Add('');
 
   DocList := TStringList.Create;
@@ -320,7 +320,7 @@ begin
   DocList.Duplicates := dupIgnore;
 
   try
-     // 1. Поступление товаров
+     // 1. Intrare marfa
     if cbPostuplenia.Checked then
     begin
       IBCQueryPrihod.Close;
@@ -335,7 +335,7 @@ begin
           IBCQueryPrihod.ParamByName('DOCLIST').Value := Null;
 
         IBCQueryPrihod.Open;
-        Summary.Add(Format('Поступление товаров: %d документов.', [Generate_Поступление_товаров
+        Summary.Add(Format('Intrare marfa: %d documente.', [Generate_Поступление_товаров
           (node, DocList)]));
 
       finally
@@ -345,12 +345,12 @@ begin
     pbProgress.Position := 1;
     Application.ProcessMessages;
 
-     // 2. Реализация товаров
+     // 2. Realizare marfa
     if cbRealizatia_SF.Checked or cbRealizatia_Cek.Checked then
     begin
       if cbRealizatia_SF.Checked then
       begin
-        // Счет-Фактуры
+        // Facturi fiscale
         IBCQuerySF.Close;
         try
           IBCQuerySF.ParamByName('DATA1').AsDate := dtpDataStart.Date;
@@ -365,7 +365,7 @@ begin
             // !!! for testing only
 
           IBCQuerySF.Open;
-          Summary.Add(Format('Счет-Фактуры: %d документов.', [Generate_Реализация_товаров1
+          Summary.Add(Format('Facturi fiscale: %d documente.', [Generate_Реализация_товаров1
             (node, DocList)]));
         finally
           IBCQuerySF.Close;
@@ -374,7 +374,7 @@ begin
 
       if cbRealizatia_Cek.Checked then
       begin
-               // Реализация по чекам
+               // Realizare pe bonuri
         IBCQueryReceipt.Close;
         try
           IBCQueryReceipt.ParamByName('DATA1').AsDate := dtpDataStart.Date;
@@ -389,7 +389,7 @@ begin
             // !!! for testing only
 
           IBCQueryReceipt.Open;
-          Summary.Add(Format('Реализация по чекам: %d документов.', [Generate_Реализация_товаров2
+          Summary.Add(Format('Realizare pe bonuri: %d documente.', [Generate_Реализация_товаров2
             (node, DocList)]));
         finally
           IBCQueryReceipt.Close;
@@ -401,7 +401,7 @@ begin
     Application.ProcessMessages;
 
 
-     // 3. Перемещение товаров
+     // 3. Transfer marfa
     if cbPeremeshenie.Checked then
     begin
       IBCQueryP.Close;
@@ -416,7 +416,7 @@ begin
           IBCQueryP.ParamByName('DOCLIST').Value := Null;
 
         IBCQueryP.Open;
-        Summary.Add(Format('Перемещение товаров: %d документов.', [Generate_Перемещение_товаров
+        Summary.Add(Format('Transfer marfa: %d documente.', [Generate_Перемещение_товаров
           (node, DocList)]));
       finally
         IBCQueryP.Close;
@@ -442,13 +442,13 @@ begin
       begin
         ShowNotExportedDos(DocList.CommaText, DTList, CTList);
 
-        if not cbTestOnly.Checked and (ShowAskDialog('Пометить документы',
-          'Пометить экспортированые документы в базе?' + #13#10 +
-          'Всего документов: ' + IntToStr(DocList.Count)) = mrYes) then
+        if not cbTestOnly.Checked and (ShowAskDialog('Marcheaza documentele',
+          'Marcati documentele exportate in baza de date?' + #13#10 +
+          'Total documente: ' + IntToStr(DocList.Count)) = mrYes) then
         begin
           if MarkDocumentsAsExported(DocList.CommaText) then
           begin
-            ShowInfoDialog('Пометить документы', 'Готово!');
+            ShowInfoDialog('Marcheaza documentele', 'Gata!');
           end;
         end;
       end;
@@ -549,7 +549,7 @@ begin
         node2.SetAttributeNS('Тип', '', 'СправочникВалюты');
         node2.SetAttributeNS('Код', '', '498');
         node2.SetAttributeNS('Наименование', '', 'MDL');
-        node2.SetAttributeNS('НаименованиеПолное', '', 'Молдавский лей');
+        node2.SetAttributeNS('НаименованиеПолное', '', 'Leu moldovenesc');
 
         node := node.AddChild('Товары');
         node.SetAttributeNS('Тип', '', 'ТабличнаяЧастьТовары');
@@ -613,7 +613,7 @@ begin
   if (fileName <> '') then
   begin
     XML.SaveToFile(fileName);
-    ShowInfoDialog('Готово', 'Остатки были экспортированны в файл.');
+    ShowInfoDialog('Готово', 'Stocurile au fost exportate in fisier.');
   end;
 end;
 
@@ -628,7 +628,7 @@ begin
       GenerateOstatkiFromDocID(N)
   end
   else
-    ShowErrorDialog('Ошибка!', 'Введите правильный номер документа.');
+    ShowErrorDialog('Eroare!', 'Introduceti numarul corect al documentului.');
 end;
 
 procedure TfrmExportTo1CDlg.GenerateOstatkiFromDocID(const DocID: integer);
@@ -705,7 +705,7 @@ begin
       node2.SetAttributeNS('Тип', '', 'СправочникВалюты');
       node2.SetAttributeNS('Код', '', '498');
       node2.SetAttributeNS('Наименование', '', 'MDL');
-      node2.SetAttributeNS('НаименованиеПолное', '', 'Молдавский лей');
+      node2.SetAttributeNS('НаименованиеПолное', '', 'Leu moldovenesc');
 
       node := node.AddChild('Товары');
       node.SetAttributeNS('Тип', '', 'ТабличнаяЧастьТовары');
@@ -775,7 +775,7 @@ begin
   if (fileName <> '') then
   begin
     XML.SaveToFile(fileName);
-    ShowInfoDialog('Готово', 'Остатки были экспортированны в файл "' + fileName + '".');
+    ShowInfoDialog('Готово', 'Stocurile au fost exportate in fisierul "' + fileName + '".');
   end;
 end;
 
@@ -1016,7 +1016,7 @@ begin
       node3.SetAttributeNS('Тип', '', 'СправочникВалюты');
       node3.SetAttributeNS('Код', '', '498');
       node3.SetAttributeNS('Наименование', '', 'MDL');
-      node3.SetAttributeNS('НаименованиеПолное', '', 'Молдавский лей');
+      node3.SetAttributeNS('НаименованиеПолное', '', 'Leu moldovenesc');
 
       node3 := node2.AddChild('Контрагент');
       node3.SetAttributeNS('Тип', '', 'СправочникКонтрагенты');
@@ -1031,9 +1031,9 @@ begin
       node3.SetAttributeNS('НеРезидент', '', IntToStr(FLG_NEREZIDENT));
       node3.SetAttributeNS('КодНДС', '', CT_VAT);
       if FLG_JURIDIC = 1 then
-        node3.SetAttributeNS('ВидКонтрагента', '', 'Юр. лицо')
+        node3.SetAttributeNS('ВидКонтрагента', '', 'Persoana juridica')
       else
-        node3.SetAttributeNS('ВидКонтрагента', '', 'Физ. лицо');
+        node3.SetAttributeNS('ВидКонтрагента', '', 'Persoana fizica');
 
       node4 := node3.AddChild('Родитель');
       node4.SetAttributeNS('Тип', '', 'СправочникКонтрагенты');
@@ -1218,7 +1218,7 @@ begin
       node3.SetAttributeNS('Тип', '', 'СправочникВалюты');
       node3.SetAttributeNS('Код', '', '498');
       node3.SetAttributeNS('Наименование', '', 'MDL');
-      node3.SetAttributeNS('НаименованиеПолное', '', 'Молдавский лей');
+      node3.SetAttributeNS('НаименованиеПолное', '', 'Leu moldovenesc');
 
       node3 := node2.AddChild('Контрагент');
       node3.SetAttributeNS('Тип', '', 'СправочникКонтрагенты');
@@ -1234,9 +1234,9 @@ begin
       node3.SetAttributeNS('КодНДС', '', CT_VAT);
 
       if FLG_JURIDIC = 1 then
-        node3.SetAttributeNS('ВидКонтрагента', '', 'Юр. лицо')
+        node3.SetAttributeNS('ВидКонтрагента', '', 'Persoana juridica')
       else
-        node3.SetAttributeNS('ВидКонтрагента', '', 'Физ. лицо');
+        node3.SetAttributeNS('ВидКонтрагента', '', 'Persoana fizica');
 
       node4 := node3.AddChild('Родитель');
       node4.SetAttributeNS('Тип', '', 'СправочникКонтрагенты');
@@ -1246,17 +1246,17 @@ begin
 
       dinNeuronInGama := false;
           {
-          // caz special: Realizarea Neuron spre Gama*, creaza un document aditional de Поступление a produselor in Gama*
+          // caz special: Realizarea Neuron spre Gama*, creaza un document aditional de Intrare a produselor in Gama*
           dinNeuronInGama:=(docDT=5213) and ((docCT=12057) OR (docCT=72699));
           node3_2:=nil;
 
           if (dinNeuronInGama) then
           begin
-               // verificam daca exista nodul pentru Поступление Товаров
+               // verificam daca exista nodul pentru Intrare Marfa
                nodePostuplenie:=Node.ChildNodes.FindNode('ДокументыПоступлениеТоваров');
                if (nodePostuplenie=nil) then
                begin
-                    // create node "Поступление Товаров"
+                    // create node "Intrare Marfa"
                     nodePostuplenie:=Node.AddChild('ДокументыПоступлениеТоваров');
                     nodePostuplenie.SetAttributeNS('Тип','','мДокументыПоступлениеТоваров');
                end;
@@ -1264,7 +1264,7 @@ begin
                IBCQueryPrinhodInfo.ParamByName('DT').AsInteger:=docCT;
                IBCQueryPrinhodInfo.ParamByName('CT').AsInteger:=docDT;
                IBCQueryPrinhodInfo.ExecSQL;
-               if IBCQueryPrinhodInfo.Eof then raise Exception.Create('Nu pot obtine informatia pespre contribuabili la momentul crearii "Поступление Товаров" din "Реализация товаров SF"!');
+               if IBCQueryPrinhodInfo.Eof then raise Exception.Create('Nu pot obtine informatia pespre contribuabili la momentul crearii "Intrare Marfa" din "Realizare marfa SF"!');
 
                // citim datele
                FirmaCod2:=IBCQueryPrinhodInfo.Fields[0].AsString;
@@ -1317,7 +1317,7 @@ begin
                node3.SetAttributeNS('Тип','','СправочникВалюты');
                node3.SetAttributeNS('Код','','498');
                node3.SetAttributeNS('Наименование','','MDL');
-               node3.SetAttributeNS('НаименованиеПолное','','Молдавский лей');
+               node3.SetAttributeNS('НаименованиеПолное','','Leu moldovenesc');
 
                node3:=node2_2.AddChild('Контрагент');
                node3.SetAttributeNS('Тип','','СправочникКонтрагенты');
@@ -1332,8 +1332,8 @@ begin
                node3.SetAttributeNS('НеРезидент','',IntToStr(FLG_NEREZIDENT2));
                node3.SetAttributeNS('КодНДС','',CT_VAT2);
                if FLG_JURIDIC2=1
-                  then node3.SetAttributeNS('ВидКонтрагента','','Юр. лицо')
-                  else node3.SetAttributeNS('ВидКонтрагента','','Физ. лицо');
+                  then node3.SetAttributeNS('ВидКонтрагента','','Persoana juridica')
+                  else node3.SetAttributeNS('ВидКонтрагента','','Persoana fizica');
 
                node4:=node3.AddChild('Родитель');
                node4.SetAttributeNS('Тип','','СправочникКонтрагенты');
@@ -1551,7 +1551,7 @@ begin
       node3.SetAttributeNS('Тип', '', 'СправочникВалюты');
       node3.SetAttributeNS('Код', '', '498');
       node3.SetAttributeNS('Наименование', '', 'MDL');
-      node3.SetAttributeNS('НаименованиеПолное', '', 'Молдавский лей');
+      node3.SetAttributeNS('НаименованиеПолное', '', 'Leu moldovenesc');
 
       node3 := node2.AddChild('Контрагент');
       node3.SetAttributeNS('Тип', '', 'СправочникКонтрагенты');
@@ -1566,7 +1566,7 @@ begin
       node3.SetAttributeNS('НеРезидент', '', IntToStr(FLG_NEREZIDENT));
       node3.SetAttributeNS('КодНДС', '', CT_VAT);
       //  implicit persoana care cumprara cu numerar este persoana fizica
-      node3.SetAttributeNS('ВидКонтрагента', '', 'Физ. лицо');
+      node3.SetAttributeNS('ВидКонтрагента', '', 'Persoana fizica');
 
       node4 := node3.AddChild('Родитель');
       node4.SetAttributeNS('Тип', '', 'СправочникКонтрагенты');
@@ -1737,9 +1737,9 @@ begin
       node3.SetAttributeNS('Тип', '', 'СправочникВалюты');
       node3.SetAttributeNS('Код', '', '498');
       node3.SetAttributeNS('Наименование', '', 'MDL');
-      node3.SetAttributeNS('НаименованиеПолное', '', 'Молдавский лей');
+      node3.SetAttributeNS('НаименованиеПолное', '', 'Leu moldovenesc');
 
-               // ----- Товары -------
+               // ----- Marfuri -------
       node3 := node2.AddChild('Товары');
       node3.SetAttributeNS('Тип', '', 'ТабличнаяЧастьТовары');
 
@@ -1882,7 +1882,7 @@ begin
   try
     dialog.DefaultExtension := 'xml';
     dialog.FileName := FileName;
-    dialog.Title := 'Выберите файл куда будут записанны данные...';
+    dialog.Title := 'Selectati fisierul unde vor fi scrise datele...';
     dialog.Options := dialog.Options + [fdoOverWritePrompt, fdoStrictFileTypes,
       fdoPathMustExist, fdoNoReadOnlyReturn, fdoDontAddToRecent];
     ft := dialog.FileTypes.Add;
@@ -2064,9 +2064,9 @@ begin
   end;
 
   if (noAcntCount > 0) or (zeroCount > 0) then
-    ShowErrorDialog('Ошибка!', 'Документ содержит ошибки.' + #13#10 +
-      'Товары без названия по накладным: ' + IntToStr(noAcntCount) + #13#10 +
-      'Товары с нулевой ценной: ' + IntToStr(zeroCount));
+    ShowErrorDialog('Eroare!', 'Documentul contine erori.' + #13#10 +
+      'Marfuri fara denumire pe nakladnie: ' + IntToStr(noAcntCount) + #13#10 +
+      'Marfuri cu pret zero: ' + IntToStr(zeroCount));
   Result := (noAcntCount = 0) and (zeroCount = 0);
 end;
 
@@ -2116,7 +2116,7 @@ begin
         := Query.Fields[4].AsString;
       // CREATED_BY_NAME
       cxGridErrorsTable.DataController.Values[N, cxGridErrors_ERROR.Index] :=
-        'Незакрытые счет-фактуры';
+        'Facturi fiscale neinchise';
       Query.Next;
     end;
     Query.Close;
@@ -2171,7 +2171,7 @@ begin
         := Query.Fields[4].AsString;
         // CREATED_BY_NAME
       cxGridErrorsTable.DataController.Values[N, cxGridErrors_ERROR.Index] :=
-        'Незакрытые приходы';
+        'Intrari neinchise';
       Query.Next;
     end;
     Query.Close;
@@ -2230,7 +2230,7 @@ begin
         := Query.FieldByName('CREATED_BY_NAME').AsString;
         // CREATED_BY_NAME
       cxGridErrorsTable.DataController.Values[N, cxGridErrors_ERROR.Index] :=
-        'Анулированные чеки';
+        'Bonuri anulate';
       Query.Next;
     end;
     Query.Close;
@@ -2287,9 +2287,9 @@ begin
         // CREATED_BY_NAME
       case Query.Fields[5].AsInteger of
         112:
-          groupTitle := 'Незакрытые счет-фактуры';
+          groupTitle := 'Facturi fiscale neinchise';
         2016:
-          groupTitle := 'Незакрытые "Товаро транспортные накладные"';
+          groupTitle := 'Nakladnie marfa-transport neinchise';
       end;
       cxGridErrorsTable.DataController.Values[N, cxGridErrors_ERROR.Index] := groupTitle;
       Query.Next;

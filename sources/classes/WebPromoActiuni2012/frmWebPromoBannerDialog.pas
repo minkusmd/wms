@@ -106,7 +106,7 @@ begin
      if IBCQueryBanner.FieldByName('FLG_GOTO_BRICKS').AsInteger=0 then
      begin
           if IBCQueryBanner.FieldByName('FLG_GOTO_BRICKS').IsNull or (IBCQueryBanner.FieldByName('NAV_URL').AsString='')
-            then AddErrorToStr(ErrorStr,'Другой адрес перехода!');
+            then AddErrorToStr(ErrorStr,'Alta adresa de redirectionare!');
      end;
 
      if ErrorStr='' then Result:=True
@@ -172,22 +172,22 @@ begin
 
   SynEdit2.Lines.Add('<div class="container">');
   SynEdit2.Lines.Add('<div class="row">');
-  SynEdit2.Lines.Add('<p><h2>Видео карты Nvidia GeForce 3080 /3090!</h2></p>');
+  SynEdit2.Lines.Add('<p><h2>Placi video Nvidia GeForce 3080 /3090!</h2></p>');
   SynEdit2.Lines.Add('<p>');
-  SynEdit2.Lines.Add('<ul><b>При покупке видеокарт Nvidia GeForce RTX 3080 / RTX 3090 в период акции, получаешь ключ активации 4-ёх игр:</b>');
+  SynEdit2.Lines.Add('<ul><b>La cumpararea placilor video Nvidia GeForce RTX 3080 / RTX 3090 in perioada actiunii, primesti cheie de activare pentru 4 jocuri:</b>');
   SynEdit2.Lines.Add('');
   SynEdit2.Lines.Add('<li>Ghostwire: Tokyo</li>');
   SynEdit2.Lines.Add('<li>DOOM Eternal</li>');
   SynEdit2.Lines.Add('</ul>');
-  SynEdit2.Lines.Add('<i><b>Стоимость игр = $129 USD </b>(Steam prices)</i>');
+  SynEdit2.Lines.Add('<i><b>Costul jocurilor = $129 USD </b>(Steam prices)</i>');
   SynEdit2.Lines.Add('</p>');
   SynEdit2.Lines.Add('<p>');
-  SynEdit2.Lines.Add('<ul><b>Условия акции:</b>');
-  SynEdit2.Lines.Add('<li>Предложение действительно только к товарам участвующих в акции.</li>');
-  SynEdit2.Lines.Add('<li>Период акции 21.07.2022 - 25.08.2022</li>');
-  SynEdit2.Lines.Add('<li>В акции участвуют только физические лица</li>');
-  SynEdit2.Lines.Add('<li>Действуйет акция 0% | 12 месяцев</li>');
-  SynEdit2.Lines.Add('<li>Срок кредита 12 мес</li>');
+  SynEdit2.Lines.Add('<ul><b>Conditiile actiunii:</b>');
+  SynEdit2.Lines.Add('<li>Oferta este valabila doar pentru produsele participante la actiune.</li>');
+  SynEdit2.Lines.Add('<li>Perioada actiunii 21.07.2022 - 25.08.2022</li>');
+  SynEdit2.Lines.Add('<li>La actiune participa doar persoanele fizice</li>');
+  SynEdit2.Lines.Add('<li>Actiunea 0% | 12 luni este valabila</li>');
+  SynEdit2.Lines.Add('<li>Termenul creditului 12 luni</li>');
   SynEdit2.Lines.Add('</ul>');
   SynEdit2.Lines.Add('</p>');
   SynEdit2.Lines.Add('');

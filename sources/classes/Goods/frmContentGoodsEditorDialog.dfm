@@ -123,7 +123,7 @@ object frmContentGoodsEditorDlg: TfrmContentGoodsEditorDlg
     Margins.Bottom = 5
     Align = alClient
     TabOrder = 1
-    Properties.ActivePage = tsSEO
+    Properties.ActivePage = tbsAttributes
     Properties.CustomButtons.Buttons = <>
     OnPageChanging = pcPageControlPageChanging
     ClientRectBottom = 458
@@ -1066,22 +1066,25 @@ object frmContentGoodsEditorDlg: TfrmContentGoodsEditorDlg
         end
         item
           UserDefine = [udPaintStyle]
-          UserPaintStyle = psCaptionGlyph
           Visible = True
           ItemName = 'bbSave'
         end
         item
           UserDefine = [udPaintStyle]
-          UserPaintStyle = psCaptionGlyph
           Visible = True
           ItemName = 'bbRefresh'
         end
         item
           BeginGroup = True
           UserDefine = [udPaintStyle]
-          UserPaintStyle = psCaptionGlyph
           Visible = True
           ItemName = 'bbDeleteImage'
+        end
+        item
+          UserDefine = [udPaintStyle]
+          UserPaintStyle = psCaptionGlyph
+          Visible = True
+          ItemName = 'bbDeleteAll'
         end
         item
           BeginGroup = True
@@ -1870,6 +1873,14 @@ object frmContentGoodsEditorDlg: TfrmContentGoodsEditorDlg
       Visible = ivAlways
       OnClick = dxBarButton9Click
     end
+    object bbDeleteAll: TdxBarButton
+      Caption = 'Sterge tot'
+      Category = 1
+      Hint = 'Sterge tot'
+      Visible = ivAlways
+      ImageIndex = 35
+      OnClick = bbDeleteAllClick
+    end
     object dxBarButton5: TdxBarButton
       Caption = 'Competeaza denumirea'
       Category = 2
@@ -2217,8 +2228,8 @@ object frmContentGoodsEditorDlg: TfrmContentGoodsEditorDlg
   end
   object ActionList1: TActionList
     Images = dmAdditions.cxImageList_SWN
-    Left = 432
-    Top = 184
+    Left = 364
+    Top = 132
     object actSaveImages: TAction
       Caption = 'Salveaza'
       OnExecute = actSaveImagesExecute

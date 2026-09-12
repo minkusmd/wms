@@ -111,15 +111,15 @@ const
      cSWNDBEventTypeNames:array[TSWNDBEventType] of String =
      (
       'Unknown',
-      'Расходная накладная',
-      'Наряд на сборку',
-      'Расход: комментарий',
-      'Сборка: комментарий',
-      'Перемещение: комментарий',
-      'Web Заказ',
-      'Заявка на финансирование',
-      'График доставки',
-      'Предварительные заказы'
+      'Nakladnaia de iesire',
+      'Naryad de asamblare',
+      'Iesire: comentariu',
+      'Asamblare: comentariu',
+      'Transfer: comentariu',
+      'Comanda Web',
+      'Cerere de finantare',
+      'Grafic de livrare',
+      'Comenzi preliminare'
      );
 
 

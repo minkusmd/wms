@@ -413,8 +413,8 @@ end;
 procedure TfrmDocTypesElementEditorDlg.SetFLG_SIGN(const Value: Boolean);
 begin
      // FLG_SIGN (1=[+]. 0=[-])
-     // 0 = Отрицательный (-)
-     // 1 - Положительный (+)
+     // 0 = Negativ (-)
+     // 1 - Pozitiv (+)
      cbFLG_SIGN.ItemIndex:=Ord(Value);
 end;
 

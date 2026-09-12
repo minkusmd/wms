@@ -59,9 +59,9 @@ begin
      Errors:='';
 
      if fMasterDataSet.FieldByName('GOODSID').IsNull or (fMasterDataSet.FieldByName('GOODSID').asInteger<=0)
-       then AddErrorToStr(Errors,'Наименование!');
+       then AddErrorToStr(Errors,'Denumire!');
      if fMasterDataSet.FieldByName('QTY').IsNull or (fMasterDataSet.FieldByName('QTY').AsFloat<=0)
-       then AddErrorToStr(Errors,'Количество!');
+       then AddErrorToStr(Errors,'Cantitate!');
 
      if (Errors='') then Result:=True
      else ShowErrorDialog(cMSG_GeneralInputError_Title,cMSG_GeneralInputError_Text,Errors);
@@ -90,14 +90,14 @@ begin
      try
         if FCreateNewRecord then
         begin
-             dtDialogTitle.Text:='Создание новой записи';
+             dtDialogTitle.Text:='Creare inregistrare noua';
              fMasterDataSet.Insert;
              fMasterDataSet.FieldByName('QTY').AsFloat:=0;
              fMasterDataSet.FieldByName('FLG_ACTIVE').AsInteger:=1;
         end
         else
         begin
-             dtDialogTitle.Text:='Изменение записи';
+             dtDialogTitle.Text:='Modificare inregistrare';
              fMasterDataSet.Edit;
              Self.ActiveControl:=ceQTY;
         end;
@@ -113,7 +113,7 @@ var dialog:TfrmGoodsBrowser;
 begin
      dialog:=TfrmGoodsBrowser.Create(Self);
      try
-        if dialog.SelectGoods(fMasterDataSet.FieldByName('GOODSID').asInteger,false,0,'Выберите товар для шаблона') then
+        if dialog.SelectGoods(fMasterDataSet.FieldByName('GOODSID').asInteger,false,0,'Selectati marfa pentru sablon') then
         begin
              beGoods.Text:=dialog.GoodsTitle;
              fMasterDataSet.FieldByName('GOODSID').AsInteger:=dialog.GoodsID;
@@ -133,7 +133,7 @@ var qtyDigitsMode:Integer;
 begin
      // Numarul de zecimale in QTY :
      qtyDigitsMode:=AppUserTempConfigStorage.IntValues.GetValue(cSETTINGS_AppQtyDigits,cAppDefault_QtyDigits);
-     // Товарные позиции: Кол-во
+     // Pozitii marfa: Cantitate
      TcxCalcEditProperties(ceQTY.Properties).DisplayFormat:=cQTY_DigitsMask[qtyDigitsMode];
 end;
 

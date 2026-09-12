@@ -1,6 +1,6 @@
 unit frame29RezervUnit;
 {
-  НАКЛАДНЫЕ. Резерв
+  NAKLADNIE. Rezerv
   DocTypeID = 108
   Frame Index = 29
 }
@@ -255,7 +255,7 @@ end;
 
 procedure Tframe29Rezerv.DeleteRecord;
 begin
-  if ShowAskDialog(cMSG_DELETERECORD_DeleteDocument, Format('Удалить запись номер %d?', [dmDB.IBCQueryDocs.FieldByName('DOCID').asInteger]))
+  if ShowAskDialog(cMSG_DELETERECORD_DeleteDocument, Format('Stergeti inregistrarea numarul %d?', [dmDB.IBCQueryDocs.FieldByName('DOCID').asInteger]))
     = mrYes then
   begin
     dmDB.IBCQueryDocs.UpdateTransaction.StartTransaction;
@@ -314,7 +314,7 @@ begin
 
   if cxGridComponentsTable.Site.Focused then
   begin
-          // context from Jurnal: Код + Наименование
+          // context from Jurnal: Cod + Denumire
     Result.Context := ffGoods;
     Result.ValueInt := dmDB.IBCQueryJurnal.FieldByName('GOODSID').AsInteger;
     Result.ValueStr := dmDB.IBCQueryJurnal.FieldByName('GOODS_NAME').AsString;
@@ -324,20 +324,20 @@ begin
               // context from Docs
     if cxGridRezervTable_CT_NAME.Focused then
     begin
-                   // Контрагент
+                   // Contraagent
       Result.Context := ffCustomer;
       Result.ValueInt := dmDB.IBCQueryDocs.FieldByName('CT').AsInteger;
       Result.ValueStr := dmDB.IBCQueryDocs.FieldByName('CT_NAME').AsString;
     end
     else if cxGridRezervTable_DATA.Focused then
     begin
-                       // Дата
+                       // Data
       Result.Context := ffDate;
       Result.ValueDateTime := dmDB.IBCQueryDocs.FieldByName('DATA').AsDateTime;
     end
     else if cxGridRezervTable_DTDEP_NAME.Focused then
     begin
-                           // Склад
+                           // Depozit
       Result.Context := ffStock;
       Result.ValueInt := dmDB.IBCQueryDocs.FieldByName('DTDEP').AsInteger;
       Result.ValueStr := dmDB.IBCQueryDocs.FieldByName('DTDEP_NAME').AsString;
@@ -371,12 +371,12 @@ begin
   if (cxGridRezervTable.DataController.RecNo > 0) then
   begin
 
-    fGoodsAdd := True; // New item for "Состав"+ Security
+    fGoodsAdd := True; // New item for "Componenta"+ Security
 
     if (cxGridComponentsTable.DataController.RecNo > 0) then
     begin
-      fGoodsEdit := True; // Modify "Состав" + Security
-      fGoodsDelete := True; // Delete "Состав" + Security
+      fGoodsEdit := True; // Modify "Componenta" + Security
+      fGoodsDelete := True; // Delete "Componenta" + Security
     end;
   end;
      // goods
@@ -387,7 +387,7 @@ end;
 
 function Tframe29Rezerv.InitFrameID: integer;
 begin
-  Result := 29; // НАКЛАДНЫЕ. Резерв
+  Result := 29; // NAKLADNIE. Rezerva
   SetupQtyFields;
 end;
 
@@ -451,7 +451,7 @@ procedure Tframe29Rezerv.ShowRemoveSelectedGoodsDialog;
 var
   S: WideString;
 begin
-  S := Format('Удалить товар' + #13#10 + '"%s"?', [dmDB.IBCQueryJurnal.FieldByName('GOODS_NAME').asString]);
+  S := Format('Sterge produsul' + #13#10 + '"%s"?', [dmDB.IBCQueryJurnal.FieldByName('GOODS_NAME').asString]);
   if ShowAskDialog(cMSG_DELETERECORD_DeleteDocument, S) = mrYes then
   begin
     dmDB.IBCQueryJurnal.UpdateTransaction.StartTransaction;
@@ -504,10 +504,10 @@ end;
 
 procedure Tframe29Rezerv.SetupQtyFields;
 begin
-     // Кол-во
+     // Cantitate
   TcxCalcEditProperties(cxGridDBCol_QTY.Properties).DisplayFormat := QtyDisplayFormat;
   cxGridDBCol_QTY.Summary.FooterFormat := QtyDisplayFormat;
-     // Остаток
+     // Stoc
   TcxCalcEditProperties(cxGridDBCol_STOCK_QTY.Properties).DisplayFormat := QtyDisplayFormat;
 end;
 

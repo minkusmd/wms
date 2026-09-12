@@ -53,7 +53,7 @@ begin
      ErrorStr:='';
      Result:=False;
 
-     if fMasterDataSet.FieldByName('TITLE').IsNull or (fMasterDataSet.FieldByName('TITLE').AsString='') then AddErrorToStr(ErrorStr,'Название группы!');
+     if fMasterDataSet.FieldByName('TITLE').IsNull or (fMasterDataSet.FieldByName('TITLE').AsString='') then AddErrorToStr(ErrorStr,'Denumirea grupului!');
 
      if ErrorStr='' then Result:=True
      else ShowErrorDialog(cMSG_GeneralInputError_Title,cMSG_GeneralInputError_Text,ErrorStr);
@@ -82,12 +82,12 @@ begin
      try
         if fCreateNewGroup then
         begin
-             dtDialogTitle.Text:='Создание новой группы';
+             dtDialogTitle.Text:='Creare grup nou';
              fMasterDataSet.Insert;
         end
         else
         begin
-             dtDialogTitle.Text:='Изменение записи';
+             dtDialogTitle.Text:='Modificare inregistrare';
              fMasterDataSet.Edit;
         end;
      except

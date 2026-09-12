@@ -70,15 +70,15 @@ begin
      Result:=False;
      Errors:='';
 
-     if (fMasterDataSet.FieldByName('CUSTOMERID').IsNull) or (fMasterDataSet.FieldByName('CUSTOMERID').AsInteger<=0) then AddErrorToStr(Errors,'Фирма!');
-     if (fMasterDataSet.FieldByName('FIRMA_COD').IsNull) or (Trim(fMasterDataSet.FieldByName('FIRMA_COD').AsString)='') then AddErrorToStr(Errors,'Код фирмы в 1С!');
-     if (fMasterDataSet.FieldByName('FIRMA_NAME').IsNull) or (Trim(fMasterDataSet.FieldByName('FIRMA_NAME').AsString)='') then AddErrorToStr(Errors,'Название фирмы в 1С!');
-     if (fMasterDataSet.FieldByName('SKLAD_COD').IsNull) or (Trim(fMasterDataSet.FieldByName('SKLAD_COD').AsString)='') then AddErrorToStr(Errors,'Код склада в 1С!');
-     if (fMasterDataSet.FieldByName('SKLAD_TITLE').IsNull) or (Trim(fMasterDataSet.FieldByName('SKLAD_TITLE').AsString)='') then AddErrorToStr(Errors,'Название склада в 1С!');
-     if (fMasterDataSet.FieldByName('SKLAD_TYPE').IsNull) or (Trim(fMasterDataSet.FieldByName('SKLAD_TYPE').AsString)='') then AddErrorToStr(Errors,'Тип склада!');
-     if (fMasterDataSet.FieldByName('PERS_FIZ_CODE').IsNull) or (Trim(fMasterDataSet.FieldByName('PERS_FIZ_CODE').AsString)='') then AddErrorToStr(Errors,'Код физ лица в 1С!');
-     if (fMasterDataSet.FieldByName('PERS_FIZ_TITLE').IsNull) or (Trim(fMasterDataSet.FieldByName('PERS_FIZ_TITLE').AsString)='') then AddErrorToStr(Errors,'Название физ лица в 1С!');
-     if (fMasterDataSet.FieldByName('DT').IsNull) or (fMasterDataSet.FieldByName('DT').AsInteger<=0) then AddErrorToStr(Errors,'Головная фирма!');
+     if (fMasterDataSet.FieldByName('CUSTOMERID').IsNull) or (fMasterDataSet.FieldByName('CUSTOMERID').AsInteger<=0) then AddErrorToStr(Errors,'Firma!');
+     if (fMasterDataSet.FieldByName('FIRMA_COD').IsNull) or (Trim(fMasterDataSet.FieldByName('FIRMA_COD').AsString)='') then AddErrorToStr(Errors,'Codul firmei in 1C!');
+     if (fMasterDataSet.FieldByName('FIRMA_NAME').IsNull) or (Trim(fMasterDataSet.FieldByName('FIRMA_NAME').AsString)='') then AddErrorToStr(Errors,'Denumirea firmei in 1C!');
+     if (fMasterDataSet.FieldByName('SKLAD_COD').IsNull) or (Trim(fMasterDataSet.FieldByName('SKLAD_COD').AsString)='') then AddErrorToStr(Errors,'Codul depozitului in 1C!');
+     if (fMasterDataSet.FieldByName('SKLAD_TITLE').IsNull) or (Trim(fMasterDataSet.FieldByName('SKLAD_TITLE').AsString)='') then AddErrorToStr(Errors,'Denumirea depozitului in 1C!');
+     if (fMasterDataSet.FieldByName('SKLAD_TYPE').IsNull) or (Trim(fMasterDataSet.FieldByName('SKLAD_TYPE').AsString)='') then AddErrorToStr(Errors,'Tipul depozitului!');
+     if (fMasterDataSet.FieldByName('PERS_FIZ_CODE').IsNull) or (Trim(fMasterDataSet.FieldByName('PERS_FIZ_CODE').AsString)='') then AddErrorToStr(Errors,'Codul persoanei fizice in 1C!');
+     if (fMasterDataSet.FieldByName('PERS_FIZ_TITLE').IsNull) or (Trim(fMasterDataSet.FieldByName('PERS_FIZ_TITLE').AsString)='') then AddErrorToStr(Errors,'Denumirea persoanei fizice in 1C!');
+     if (fMasterDataSet.FieldByName('DT').IsNull) or (fMasterDataSet.FieldByName('DT').AsInteger<=0) then AddErrorToStr(Errors,'Firma-mama!');
 
      if Errors='' then Result:=True
      else ShowErrorDialog(cMSG_GeneralInputError_Title,cMSG_GeneralInputError_Text,Errors);
@@ -114,13 +114,13 @@ begin
      try
         if fCreateNewRecord then
         begin
-             dtDialogTitle.Text:='Новая запись';
+             dtDialogTitle.Text:='Inregistrare noua';
              fMasterDataSet.Insert;
              IBCQueryFirms.FilterSQL:='NOT EXISTS(SELECT CUSTOMERID FROM TS_CUST_1C WHERE TS_CUST_1C.CUSTOMERID=TS_CUSTOMER.CUSTOMERID)';
         end
         else
         begin
-             dtDialogTitle.Text:='Изменение записи';
+             dtDialogTitle.Text:='Modificare inregistrare';
              fMasterDataSet.Edit;
         end;
 

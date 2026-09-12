@@ -303,7 +303,7 @@ begin
 
   cxGridAUFTable.DataController.DeleteSelection;
 
-  // Фирма по умолчанию
+  // Firma implicita
   if (cxGridUserFirmsTable.DataController.RecordCount = 1) and (fMasterDataSet.FieldByName('DEFAULT_DT').AsInteger = -1) then
   begin
     UserFirm := TUserFirmItem(GetUserFirmByID(cxGridUserFirmsTable.DataController.Values[0, cxGridUserFirms_FIRMAID.Index]));
@@ -446,22 +446,22 @@ begin
   Result := False;
   ErrorStr := '';
   if fMasterDataSet.FieldByName('FIRST_NAME').IsNull or (Trim(fMasterDataSet.FieldByName('FIRST_NAME').AsString) = '') then
-    AddErrorToStr(ErrorStr, 'Имя.');
+    AddErrorToStr(ErrorStr, 'Prenume.');
   if fMasterDataSet.FieldByName('LAST_NAME').IsNull or (Trim(fMasterDataSet.FieldByName('LAST_NAME').AsString) = '') then
-    AddErrorToStr(ErrorStr, 'Фамилия.');
+    AddErrorToStr(ErrorStr, 'Nume.');
   if fMasterDataSet.FieldByName('BIRTHDAY').IsNull then
-    AddErrorToStr(ErrorStr, 'Дата рождения.');
+    AddErrorToStr(ErrorStr, 'Data nasterii.');
   if fMasterDataSet.FieldByName('CITY_ID').IsNull then
-    AddErrorToStr(ErrorStr, 'Город проживания.');
+    AddErrorToStr(ErrorStr, 'Orasul de resedinta.');
 
   if fMasterDataSet.FieldByName('LOGIN_NAME').IsNull or (Trim(fMasterDataSet.FieldByName('LOGIN_NAME').AsString) = '') then
-    AddErrorToStr(ErrorStr, 'Имя учетной записи.');
+    AddErrorToStr(ErrorStr, 'Numele contului.');
 
   if fMasterDataSet.FieldByName('DEFAULT_DT').AsInteger = -1 then
-    AddErrorToStr(ErrorStr, 'Фирма по умолчанию.');
+    AddErrorToStr(ErrorStr, 'Firma implicita.');
 
   if (fMasterDataSet.FieldByName('USERTYPE_ID').IsNull) or (fMasterDataSet.FieldByName('USERTYPE_ID').AsInteger = -1) then
-    AddErrorToStr(ErrorStr, 'Тип пользователя!');
+    AddErrorToStr(ErrorStr, 'Tipul utilizatorului!');
 
   if ErrorStr = '' then
     Result := True
@@ -565,7 +565,7 @@ end;
 
 procedure TfrmUserSettingsDialog.DeleteFirmePeriod;
 begin
-  if ShowAskDialog('Удаление периода работы', Format('Удалить период в фирме "%s"?', [IBCQueryPeriods.FieldByName('DISPLAYNAME').AsString]))
+  if ShowAskDialog('Stergere perioada de lucru', Format('Stergeti perioada in firma "%s"?', [IBCQueryPeriods.FieldByName('DISPLAYNAME').AsString]))
     = mrYes then
     IBCQueryPeriods.Delete;
 end;
@@ -1161,7 +1161,7 @@ begin
         beCUSTOMER_DISPLAYNAME.Text := dialog.CustomerTitle;
       end
       else
-        ShowErrorDialog('Ошибка', 'Только контрагент со статусом "Сотрудники"!');
+        ShowErrorDialog('Eroare', 'Doar contrapartida cu statutul "Angajati"!');
     end;
   finally
     dialog.Free;
@@ -1224,12 +1224,12 @@ procedure TfrmUserSettingsDialog.WhenUserWorkWeekChanged(Sender: TObject);
 begin
   if fUserWorkWeek.Count = 0 then
   begin
-    lbUserWorkDaysInfo.Caption := 'Часы доступа и работы не заданны!';
+    lbUserWorkDaysInfo.Caption := 'Orele de acces si lucru nu sunt setate!';
     lbUserWorkDaysInfo.Font.Color := clGrayText;
   end
   else
   begin
-    lbUserWorkDaysInfo.Caption := Format('Рабочих дней: %d, всего часов: %d.', [fUserWorkWeek.Count, fUserWorkWeek.GetTotalWorkHours]);
+    lbUserWorkDaysInfo.Caption := Format('Zile lucratoare: %d, total ore: %d.', [fUserWorkWeek.Count, fUserWorkWeek.GetTotalWorkHours]);
     lbUserWorkDaysInfo.Font.Color := clWindowText;
   end;
 end;

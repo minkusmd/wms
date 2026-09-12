@@ -1,6 +1,6 @@
 unit frame53ARPPUnit;
 {
-  Акты. Реестр передачи документов
+  Acte. Registru de transmitere a documentelor
   DocTypeID = 1959
   Frame Index = 53
 }
@@ -247,7 +247,7 @@ end;
 
 procedure Tframe53ARPP.DeleteAttachment;
 begin
-  if ShowAskDialog('Удаление файла', Format('Вы хотите удалить файл "%s"?',
+  if ShowAskDialog('Stergere fisier', Format('Doriti sa stergeti fisierul "%s"?',
     [IBCQueryFiles.FieldByName('FILENAME').AsString])) = mrYes then
   begin
     IBCQueryFiles.UpdateTransaction.StartTransaction;
@@ -290,8 +290,8 @@ var
   b: Boolean;
 begin
   b := AppUserTempConfigStorage.BooleanValues.GetValue('PKO_CloseDocVerify');
-  if b or (ShowAskDialogVerification('Закрыть документ', 'Вы хотите закрыть документ?',
-    'Больше не спрашивать', '', b) = mrYes) then
+  if b or (ShowAskDialogVerification('Inchide documentul', 'Doriti sa inchideti documentul?',
+    'Nu mai intreba', '', b) = mrYes) then
   begin
     if b then
       AppUserTempConfigStorage.BooleanValues.SetValue('PKO_CloseDocVerify', b);
@@ -369,7 +369,7 @@ end;
 
 procedure Tframe53ARPP.DoOpenDocument;
 begin
-  if ShowAskDialog('Открыть документ', 'Вы открыть документ?') = mrYes then
+  if ShowAskDialog('Deschide documentul', 'Doriti sa deschideti documentul?') = mrYes then
   begin
     if DoOpenDocumentDB(dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger) then
       dmDB.IBCQueryDocs.Refresh;
@@ -449,7 +449,7 @@ begin
           // context from Docs
           if cxGridDocs_CT_NAME.Focused then
           begin
-               // Контрагент
+               // Contraagent
                Result.Context := ffCustomer;
                Result.ValueInt := dmDB.IBCQueryDocs.FieldByName('CT').AsInteger;
                Result.ValueStr := dmDB.IBCQueryDocs.FieldByName('CT_NAME').AsString;
@@ -457,7 +457,7 @@ begin
           else
               if cxGridDocs_DATA.Focused then
               begin
-                   // Дата
+                   // Data
                    Result.Context := ffDate;
                    Result.ValueDateTime := dmDB.IBCQueryDocs.FieldByName('DATA').AsDateTime;
               end;
@@ -487,7 +487,7 @@ end;
 
 function Tframe53ARPP.InitFrameID: integer;
 begin
-     // Акты: Реестр передачи документов
+     // Acte: Registru transmitere documente
      Result := 53;
      fLastFilePath := '';
 end;
@@ -529,7 +529,7 @@ var
   dir: String;
 begin
   dir := fLastFilePath;
-  if SelectDirectory('Выберите куда записать файл', '', dir) then
+  if SelectDirectory('Alegeti unde sa salvati fisierul', '', dir) then
   begin
     SaveFileFromDB(IBCQueryFiles.FieldByName('ATTID').AsInteger, dir);
     fLastFilePath := dir;

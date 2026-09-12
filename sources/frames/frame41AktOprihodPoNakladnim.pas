@@ -1,6 +1,6 @@
 unit frame41AktOprihodPoNakladnim;
 {
-  ИНВЕНТАРИЗАЦИЯ. Акт оприходования по накладным
+  INVENTARIERE. Act de intrare pe nakladnie
   DocTypeID = 1421
   Frame Index = 41
 }
@@ -138,7 +138,7 @@ uses DataModuleDB, DataModuleAdditions, IBCError,
 
 procedure Tframe41AktOprihodPoNakladnim.bbActionCloseDocClick(Sender: TObject);
 begin
-     if ShowAskDialog('Закрыть накладную','Вы хотите закрыть накладную?')=mrYes then
+     if ShowAskDialog('Inchide nakladnaia','Doriti sa inchideti nakladnaia?')=mrYes then
      begin
           if DoActionCloseDocument(dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger) then
           begin
@@ -149,7 +149,7 @@ end;
 
 procedure Tframe41AktOprihodPoNakladnim.bbActionOpenDocClick(Sender: TObject);
 begin
-     if ShowAskDialog('Открыть накладную','Вы хотите открыть накладную?')=mrYes then
+     if ShowAskDialog('Deschide nakladnaia','Doriti sa deschideti nakladnaia?')=mrYes then
      begin
           if DoActionOpenDocument(dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger) then
           begin
@@ -259,7 +259,7 @@ end;
 
 procedure Tframe41AktOprihodPoNakladnim.DeleteRecord;
 begin
-     if ShowAskDialog(cMSG_DELETERECORD_DeleteDocument,Format('Удалить запись номер %d?',[dmDB.IBCQueryDocs.FieldByName('DOCID').asInteger]))=mrYes then
+     if ShowAskDialog(cMSG_DELETERECORD_DeleteDocument,Format('Stergeti inregistrarea numarul %d?',[dmDB.IBCQueryDocs.FieldByName('DOCID').asInteger]))=mrYes then
      begin
           dmDB.IBCQueryDocs.UpdateTransaction.StartTransaction;
           try
@@ -277,8 +277,8 @@ end;
 procedure Tframe41AktOprihodPoNakladnim.DeleteSelectedGoods;
 var S:String;
 begin
-     S:='Удалить товар'+#13#10+dmDB.IBCQueryJurnal.FieldByName('GOODS_NAME').AsString+'?';
-     if ShowAskDialog('Удаление товара','Вы хотите удалить товар'+S)=mrYes then
+     S:='Sterge produsul'+#13#10+dmDB.IBCQueryJurnal.FieldByName('GOODS_NAME').AsString+'?';
+     if ShowAskDialog('Stergere produs','Doriti sa stergeti produsul'+S)=mrYes then
      begin
           dmDB.IBCQueryJurnal.UpdateTransaction.StartTransaction;
           try
@@ -389,7 +389,7 @@ begin
 
      if cxGridComponentsTable.Site.Focused then
      begin
-          // context from Jurnal: Код + Наименование
+          // context from Jurnal: Cod + Denumire
           Result.Context := ffGoods;
           Result.ValueInt := dmDB.IBCQueryJurnal.FieldByName('GOODSID').AsInteger;
           Result.ValueStr := dmDB.IBCQueryJurnal.FieldByName('GOODS_NAME').AsString;
@@ -400,14 +400,14 @@ begin
               // context from Docs
               if cxGridPTN_DATA.Focused then
               begin
-                   // Дата
+                   // Data
                    Result.Context := ffDate;
                    Result.ValueDateTime := dmDB.IBCQueryDocs.FieldByName('DATA').AsDateTime;
               end
               else
                   if cxGridPTN_DTDEP_NAME.Focused then
                   begin
-                       // Склад
+                       // Depozit
                        Result.Context := ffStock;
                        Result.ValueInt := dmDB.IBCQueryDocs.FieldByName('DTDEP').AsInteger;
                        Result.ValueStr := dmDB.IBCQueryDocs.FieldByName('DTDEP_NAME').AsString;
@@ -479,7 +479,7 @@ end;
 
 function Tframe41AktOprihodPoNakladnim.InitFrameID: integer;
 begin
-     Result:=41; // ИНВЕНТАРИЗАЦИЯ. Акт оприходования по накладным
+     Result:=41; // INVENTARIERE. Act de intrare pe nakladnie
      SetupQtyFields;
 end;
 
@@ -540,10 +540,10 @@ end;
 
 procedure Tframe41AktOprihodPoNakladnim.SetupQtyFields;
 begin
-     // Кол-во
+     // Cantitate
      TcxCalcEditProperties(cxGridDBCol_QTY.Properties).DisplayFormat:=QtyDisplayFormat;
      cxGridDBCol_QTY.Summary.FooterFormat:=QtyDisplayFormat;
-     // Остаток
+     // Stoc
      TcxCalcEditProperties(cxGridDBCol_STOCK_QTY.Properties).DisplayFormat:=QtyDisplayFormat;
 end;
 

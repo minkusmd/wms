@@ -1,18 +1,18 @@
 inherited frame24WebZakaz: Tframe24WebZakaz
   Width = 974
-  Height = 511
+  Height = 626
   Margins.Left = 3
   Margins.Top = 3
   Margins.Right = 3
   Margins.Bottom = 3
   Font.Height = -12
   ExplicitWidth = 974
-  ExplicitHeight = 511
+  ExplicitHeight = 626
   object cxGridWZ: TcxGrid
     Left = 0
     Top = 0
     Width = 974
-    Height = 308
+    Height = 380
     Margins.Left = 2
     Margins.Top = 2
     Margins.Right = 2
@@ -27,6 +27,7 @@ inherited frame24WebZakaz: Tframe24WebZakaz
     TabOrder = 0
     LookAndFeel.NativeStyle = True
     LookAndFeel.SkinName = ''
+    ExplicitTop = -4
     object cxGridWZTable: TcxGridDBTableView
       PopupMenu = dxBarPopupMenu
       OnKeyDown = cxGridWZTableKeyDown
@@ -228,9 +229,9 @@ inherited frame24WebZakaz: Tframe24WebZakaz
   end
   object pnBottom: TPanel
     Left = 0
-    Top = 316
+    Top = 388
     Width = 974
-    Height = 195
+    Height = 238
     Margins.Left = 2
     Margins.Top = 2
     Margins.Right = 2
@@ -242,7 +243,7 @@ inherited frame24WebZakaz: Tframe24WebZakaz
       Left = 0
       Top = 30
       Width = 974
-      Height = 165
+      Height = 208
       Margins.Left = 2
       Margins.Top = 2
       Margins.Right = 2
@@ -257,6 +258,8 @@ inherited frame24WebZakaz: Tframe24WebZakaz
       TabOrder = 1
       LookAndFeel.NativeStyle = True
       LookAndFeel.SkinName = ''
+      ExplicitTop = 34
+      ExplicitHeight = 165
       object cxGridComponentsTable: TcxGridDBTableView
         PopupMenu = dxBarPopupMenuJurnal
         OnKeyDown = cxGridComponentsTableKeyDown
@@ -556,7 +559,7 @@ inherited frame24WebZakaz: Tframe24WebZakaz
   end
   object cxSplitter1: TcxSplitter
     Left = 0
-    Top = 308
+    Top = 380
     Width = 974
     Height = 8
     Margins.Left = 2
@@ -569,6 +572,7 @@ inherited frame24WebZakaz: Tframe24WebZakaz
     PositionAfterOpen = 19
     MinSize = 192
     Control = pnBottom
+    ExplicitTop = 308
   end
   object dxBarManager: TdxBarManager
     Font.Charset = DEFAULT_CHARSET

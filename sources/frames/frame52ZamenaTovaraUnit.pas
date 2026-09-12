@@ -1,6 +1,6 @@
 unit frame52ZamenaTovaraUnit;
 {
-  СЕРВИС. Замена товара у поставщика
+  SERVICE. Inlocuire marfa la furnizor
   DocTypeID = 1945
   Frame Index = 52
 }
@@ -224,7 +224,7 @@ begin
   // verificam
   if IBCQueryGoods.FieldByName('NR_ACT_PRIMIRE').IsNull or (Trim(IBCQueryGoods.FieldByName('NR_ACT_PRIMIRE').AsString) = '') or IBCQueryGoods.FieldByName('NR_ACT_ZACEOT').IsNull or (Trim(IBCQueryGoods.FieldByName('NR_ACT_ZACEOT').AsString) = '') then
   begin
-    ShowErrorDialog('Зачет в баланс по гарантии', 'Для выбранного товара не указанны:'#13#10'1. Номер акта или инцидента приема товара'#13#10'или'#13#10'2. Номер акта или инцидента зачета в баланс');
+    ShowErrorDialog('Trecere in bilant pe garantie', 'Pentru marfa selectata nu sunt indicate:'#13#10'1. Numarul actului sau incidentului de primire a marfii'#13#10'sau'#13#10'2. Numarul actului sau incidentului de trecere in bilant');
     Exit;
   end;
 
@@ -238,7 +238,7 @@ begin
     if Dialog.ShowModal = mrOk then
     begin
       if DoCreateGoodsDocZBPG_DB(Dialog.FirmaID, Dialog.CustomerDocID, dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger, Dialog.CustomerID, IBCQueryGoods.FieldByName('DT_GOODSID').AsInteger, Dialog.CurrencyID, Dialog.CurrencyRate, Dialog.Suma, IBCQueryGoods.FieldByName('DT_IDENT').AsString) then
-        ShowInfoDialog('Зачет в баланс по гарантии', 'Документ создан!');
+        ShowInfoDialog('Trecere in bilant pe garantie', 'Document creat!');
     end;
   finally
     Dialog.Free;
@@ -331,7 +331,7 @@ end;
 
 procedure Tframe52ZamenaTovara.DeleteGoods;
 begin
-  if ShowAskDialog(cMSG_DELETERECORD_DeleteGoods, Format('Удалить %s?', [IBCQueryGoods.FieldByName('DT_GOODS_TITLE').AsString])) = mrYes then
+  if ShowAskDialog(cMSG_DELETERECORD_DeleteGoods, Format('Stergeti %s?', [IBCQueryGoods.FieldByName('DT_GOODS_TITLE').AsString])) = mrYes then
   begin
     IBCQueryGoods.UpdateTransaction.StartTransaction;
     try
@@ -350,7 +350,7 @@ end;
 
 procedure Tframe52ZamenaTovara.DeleteRecord;
 begin
-  if ShowAskDialog(cMSG_DELETERECORD_DeleteDocument, Format('Удалить запись номер %d?', [dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger])) = mrYes then
+  if ShowAskDialog(cMSG_DELETERECORD_DeleteDocument, Format('Stergeti inregistrarea numarul %d?', [dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger])) = mrYes then
   begin
     dmDB.IBCQueryDocs.UpdateTransaction.StartTransaction;
     try
@@ -369,7 +369,7 @@ end;
 
 procedure Tframe52ZamenaTovara.DoCloseDocument;
 begin
-  if ShowAskDialog('Закрытие документа', 'Вы хотите закрыть документ?') = mrYes then
+  if ShowAskDialog('Inchidere document', 'Doriti sa inchideti documentul?') = mrYes then
   begin
     if CloseDocumentDB(dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger) then
       dmDB.IBCQueryDocs.Refresh;
@@ -489,7 +489,7 @@ end;
 
 procedure Tframe52ZamenaTovara.DoOpenDocument;
 begin
-  if ShowAskDialog('Открыть документ', 'Вы хотите открыть документ?') = mrYes then
+  if ShowAskDialog('Deschide documentul', 'Doriti sa deschideti documentul?') = mrYes then
   begin
     if OpenDocumentDB(dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger) then
       dmDB.IBCQueryDocs.Refresh;
@@ -511,7 +511,7 @@ begin
     // context from Docs
     if cxGrid_CT_NAME.Focused then
     begin
-      // Контрагент
+      // Contraagent
       Result.Context := ffCustomer;
       Result.ValueInt := dmDB.IBCQueryDocs.FieldByName('CT').AsInteger;
       Result.ValueStr := dmDB.IBCQueryDocs.FieldByName('CT_NAME').AsString;
@@ -574,7 +574,7 @@ end;
 
 function Tframe52ZamenaTovara.InitFrameID: integer;
 begin
-  // СЕРВИС. Замена товара у поставщика
+  // SERVICE. Inlocuire marfa la furnizor
   Result := 52;
 end;
 
@@ -672,7 +672,7 @@ end;
 
 procedure Tframe52ZamenaTovara.SetupSecurityItems;
 begin
-  // Замена товара в гарантии
+  // Inlocuire produs in garantie
   fSECURITY_CanView := SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_СЕРВИС_ЗТВГ_Просмотр);
   fSECURITY_CanNew := SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_СЕРВИС_ЗТВГ_Создать) or SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_СЕРВИС_ПВСВ_Создать);
   fSECURITY_CanEdit := SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_СЕРВИС_ЗТВГ_Изменить) or SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_СЕРВИС_ПВСВ_Изменить);
@@ -694,7 +694,7 @@ begin
     bbGoodsDelete.Visible := ivNever;
 
   if not fSECURITY_CanEdit and fSECURITY_CanView then
-    bbGoodsEdit.Caption := 'Смотреть';
+    bbGoodsEdit.Caption := 'Vizualizare';
 
   if dxBarManager1Bar1.ItemLinks.VisibleItemCount = 0 then
   begin

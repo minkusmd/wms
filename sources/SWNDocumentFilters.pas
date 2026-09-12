@@ -20,20 +20,20 @@ type
   TFrameDocumentDateFilter =
   (
    fdfNone,            // Not used
-   fdfToday,           // Сегодня
-   fdfLast2days,        // за 2 дня
-   fdfLast7days,       // За 7 дней
-   fdfCurrentWeek,     // Текущая неделя
-   fdfLast2weeks,      // 2 недели
-   fdfCurrentMonth,    // Текущий месяц
-   fdfIQuarter,        // I Квартал
-   fdfIIQuarter,       // II Квартал
-   fdfIIIQuarter,      // III Квартал
-   fdfIVQuarter,       // IV Квартал
-   fdfFirstHalfYear,   // I Полугодие
-   fdfSecondHalfYear,  // II Полугодие
-   fdfCurrentYear,     // Год
-   fdfAll              // Все
+   fdfToday,           // Astazi
+   fdfLast2days,        // cu 2 zile inainte
+   fdfLast7days,       // Ultimele 7 zile
+   fdfCurrentWeek,     // Saptamana curenta
+   fdfLast2weeks,      // 2 saptamani
+   fdfCurrentMonth,    // Luna curenta
+   fdfIQuarter,        // Trimestrul I
+   fdfIIQuarter,       // Trimestrul II
+   fdfIIIQuarter,      // Trimestrul III
+   fdfIVQuarter,       // Trimestrul IV
+   fdfFirstHalfYear,   // Semestrul I
+   fdfSecondHalfYear,  // Semestrul II
+   fdfCurrentYear,     // An
+   fdfAll              // Toate
   );
 
   TFrameDocumentDateFilterSet = set of TFrameDocumentDateFilter;

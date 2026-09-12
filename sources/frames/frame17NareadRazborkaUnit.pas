@@ -1,6 +1,6 @@
 unit frame17NareadRazborkaUnit;
 
-// СБОРКА. Наряд на разборку
+// ASAMBLARE. Naryad de dezasamblare
 // DocTypeID = 1249
 // Frame Index = 17
 
@@ -244,10 +244,10 @@ begin
      N:=IBCQueryJurnalKit.FieldByName('GOODS_SERIAL_TYPE_ID').AsInteger;
 
      if (N=cSYSS_GOODS_SERIAL_TYPE_Серийный_учет)
-      then ShowSetupSerialNumbersForItemDialog(viewOnly)  // Серийный учет
+      then ShowSetupSerialNumbersForItemDialog(viewOnly)  // Evidenta seriala
       else
       if (N=cSYSS_GOODS_SERIAL_TYPE_Партийный_учет)
-       then ShowSetupPartNumbersForItemDialog(viewOnly); // Партийный учет
+       then ShowSetupPartNumbersForItemDialog(viewOnly); // Evidenta pe partizi
 end;
 
 function Tframe17NareadRazborka.CreateKitBySerialNumber:Boolean;
@@ -667,7 +667,7 @@ begin
 
      if cxGridComponentsTable.Site.Focused then
      begin
-          // context from Jurnal: Код + Наименование
+          // context from Jurnal: Cod + Denumire
           Result.Context := ffGoods;
           Result.ValueInt := IBCQueryJurnalLocal.FieldByName('GOODSID').AsInteger;
           Result.ValueStr := IBCQueryJurnalLocal.FieldByName('GOODS_NAME').AsString;
@@ -678,7 +678,7 @@ begin
               // context from Docs
               if cxGridRazborkaTableCtName.Focused then
               begin
-                   // Контрагент
+                   // Contraagent
                    Result.Context := ffCustomer;
                    Result.ValueInt := dmDB.IBCQueryDocs.FieldByName('CT').AsInteger;
                    Result.ValueStr := dmDB.IBCQueryDocs.FieldByName('CT_NAME').AsString;
@@ -686,14 +686,14 @@ begin
               else
                   if cxGridRazborka_DATA.Focused then
                   begin
-                       // Дата
+                       // Data
                        Result.Context := ffDate;
                        Result.ValueDateTime := dmDB.IBCQueryDocs.FieldByName('DATA').AsDateTime;
                   end
                   else
                       if cxGridRazborkaTableWarehouse.Focused then
                       begin
-                           // Склад
+                           // Depozit
                            Result.Context := ffStock;
                            Result.ValueInt := dmDB.IBCQueryDocs.FieldByName('DTDEP').AsInteger;
                            Result.ValueStr := dmDB.IBCQueryDocs.FieldByName('DTDEP_NAME').AsString;
@@ -718,7 +718,7 @@ end;
 
 function Tframe17NareadRazborka.InitFrameID: integer;
 begin
-     Result:=17; // СБОРКА - Наряд на разборку
+     Result:=17; // ASAMBLARE - Naryad de dezasamblare
      SetupQtyFields;
 end;
 
@@ -756,19 +756,19 @@ begin
           if (cxGridComponentsTable.DataController.RecNo>0)
              and (dmdb.IsKit(IBCQueryJurnalLocal.FieldByName('GOODS_TYPE_ID').AsInteger)) then
           begin
-               fKitAdd:=Not FLG_CLOSED; // Добавить товар
+               fKitAdd:=Not FLG_CLOSED; // Adauga produs
 
                if cxGridComplectTable.DataController.RecNo>0 then
                begin
-                    fKitEdit:=Not FLG_CLOSED;   // Изменить товар
-                    fKitRemove:=Not FLG_CLOSED; // Удалить товар
+                    fKitEdit:=Not FLG_CLOSED;   // Modifica marfa
+                    fKitRemove:=Not FLG_CLOSED; // Sterge marfa
 
-                    fSerialParts:=(IBCQueryJurnalKit.FieldByName('GOODS_SERIAL_TYPE_ID').AsInteger=cSYSS_GOODS_SERIAL_TYPE_Серийный_учет) OR // Серийный учет
-                                 (IBCQueryJurnalKit.FieldByName('GOODS_SERIAL_TYPE_ID').AsInteger=cSYSS_GOODS_SERIAL_TYPE_Партийный_учет);  // Партийный учет
+                    fSerialParts:=(IBCQueryJurnalKit.FieldByName('GOODS_SERIAL_TYPE_ID').AsInteger=cSYSS_GOODS_SERIAL_TYPE_Серийный_учет) OR // Evidenta seriala
+                                 (IBCQueryJurnalKit.FieldByName('GOODS_SERIAL_TYPE_ID').AsInteger=cSYSS_GOODS_SERIAL_TYPE_Партийный_учет);  // Evidenta pe partizi
                end;
           end;
      end;
-     // Комплектация
+     // Configurare set
      bbAddGoodsComplect.Enabled:=fKitAdd;
      bbModifyGoodsComplect.Enabled:=fKitEdit;
      bbRemoveGoodsComplect.Enabled:=fKitRemove;
@@ -792,21 +792,21 @@ begin
      begin
           FLG_CLOSED:=dmDB.IBCQueryDocs.FieldByName('FLG_CLOSED').AsInteger=1;
 
-          fAdd:=(Not FLG_CLOSED); // Добавить комплект + Security
+          fAdd:=(Not FLG_CLOSED); // Adauga set + Security
 
           if cxGridComponentsTable.DataController.RecNo>0 then
           begin
-               // Состав
-               fEdit:=(Not FLG_CLOSED); // Изменить комплект + Security
-               fRemove:=(Not FLG_CLOSED); // Удалить комплект + Security
+               // Componenta
+               fEdit:=(Not FLG_CLOSED); // Modifica setul + Security
+               fRemove:=(Not FLG_CLOSED); // Sterge setul + Security
 
                fKit:=dmDB.IsKit(IBCQueryJurnalLocal.FieldByName('GOODS_TYPE_ID').AsInteger);
-               fSerial:=(IBCQueryJurnalLocal.FieldByName('GOODS_SERIAL_TYPE_ID').AsInteger=cSYSS_GOODS_SERIAL_TYPE_Серийный_учет); // Серийный учет
+               fSerial:=(IBCQueryJurnalLocal.FieldByName('GOODS_SERIAL_TYPE_ID').AsInteger=cSYSS_GOODS_SERIAL_TYPE_Серийный_учет); // Evidenta seriala
           end;
      end;
      // tabs
      tbsKitContent.TabVisible:=fKit;
-     // Состав
+     // Componenta
      bbAddGoods.Enabled:=fAdd;
      bbModifyGoods.Enabled:=fEdit;
      bbRemoveGoods.Enabled:=fRemove;
@@ -857,15 +857,15 @@ end;
 
 procedure Tframe17NareadRazborka.SetupQtyFields;
 begin
-     // Состав: Кол-во
+     // Componenta: Cantitate
      TcxCalcEditProperties(cxGridDBCol_QTY.Properties).DisplayFormat:=QtyDisplayFormat;
      cxGridDBCol_QTY.Summary.FooterFormat:=QtyDisplayFormat;
-     // Состав: Остаток
+     // Componenta: Stoc
      TcxCalcEditProperties(cxGridDBCol_STOCK_QTY.Properties).DisplayFormat:=QtyDisplayFormat;
-     // Комплектация: Кол-во
+     // Configurare set: Cantitate
      TcxCalcEditProperties(cxGridComplect_QTY.Properties).DisplayFormat:=QtyDisplayFormat;
      cxGridComplect_QTY.Summary.FooterFormat:=QtyDisplayFormat;
-     // Комплектация: Остаток
+     // Configurare set: Stoc
      TcxCalcEditProperties(cxGridComplect_STOCK_QTY.Properties).DisplayFormat:=QtyDisplayFormat;
 end;
 
@@ -1006,10 +1006,10 @@ begin
      if (cxGridRazborkaTable.DataController.RecNo>0) and (dmDB.IBCQueryDocs.FieldByName('HAS_JURNAL_GOODS').AsInteger=1) then
      begin
           FLG_SHIP:=dmDB.IBCQueryDocs.FieldByName('FLG_SHIP').AsInteger=1;
-          fDisassembled:=(Not FLG_SHIP); // Комплекты разобранны + Security
+          fDisassembled:=(Not FLG_SHIP); // Seturile sunt dezasamblate + Security
      end;
      // popup
-     bbKitsDisassembled.Enabled:=fDisassembled; // Комплекты разобранны
+     bbKitsDisassembled.Enabled:=fDisassembled; // Seturile dezasamblate
 end;
 
 procedure Tframe17NareadRazborka.WhenGoodsComplectGridFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord,

@@ -1,6 +1,6 @@
 unit frame32ServiceRequestsWarrantyUnit;
 {
-  СЕРВИС. Заявки на гарантийный ремонт
+  SERVICE. Cereri de reparatie in garantie
   DocTypeID = 125
   Frame Index = 32
 }
@@ -439,7 +439,7 @@ begin
     if not fCanDeleteDoc or (dmDB.IBCQueryDocs.FieldByName('FLG_CLOSED').AsInteger = 1) then
         Exit;
 
-    if ShowAskDialog('Удаление записи', Format('Вы хотите удалить заявку на гарантийный ремонт №%d?', [dmDB.IBCQueryDocs.FieldByName
+    if ShowAskDialog('Stergere inregistrare', Format('Doriti sa stergeti cererea de reparatie in garantie nr.%d?', [dmDB.IBCQueryDocs.FieldByName
         ('DOCID').AsInteger])) <> mrYes then
         Exit;
 
@@ -462,7 +462,7 @@ var
     Query: TIBCQuery;
 begin
     Result := False;
-    if ShowAskDialog('Закрыть документ', 'Вы хотите закрыть документ?') <> mrYes then
+    if ShowAskDialog('Inchide documentul', 'Doriti sa inchideti documentul?') <> mrYes then
         Exit;
 
     Query := TIBCQuery.Create(Self);
@@ -582,7 +582,7 @@ var
     Query: TIBCQuery;
 begin
     Result := False;
-    if ShowAskDialog('Открыть документ', 'Вы хотите открыть документ?') <> mrYes then
+    if ShowAskDialog('Deschide documentul', 'Doriti sa deschideti documentul?') <> mrYes then
         Exit;
 
     Query := TIBCQuery.Create(Self);
@@ -675,7 +675,7 @@ end;
 
 procedure Tframe32ServiceRequestsWarranty.bbDeleteFileClick(Sender: TObject);
 begin
-    if ShowAskDialog('Удаление файла', Format('Вы хотите удалить файл "%s"?', [IBCQueryFiles.FieldByName('FILENAME').AsString]))
+    if ShowAskDialog('Stergere fisier', Format('Doriti sa stergeti fisierul "%s"?', [IBCQueryFiles.FieldByName('FILENAME').AsString]))
         = mrYes then
     begin
         IBCQueryFiles.UpdateTransaction.StartTransaction;
@@ -769,7 +769,7 @@ begin
 
     if cxGridGoodsTable.Site.Focused then
     begin
-          // context from Jurnal: Код + Наименование
+          // context from Jurnal: Cod + Denumire
         Result.Context := ffGoods;
         Result.ValueInt := dmDB.IBCQueryJurnal.FieldByName('GOODSID').AsInteger;
         Result.ValueStr := dmDB.IBCQueryJurnal.FieldByName('GOODS_NAME').AsString;
@@ -779,14 +779,14 @@ begin
               // context from Docs
         if cxGridNPNCol_CT_NAME.Focused then
         begin
-                   // Контрагент
+                   // Contraagent
             Result.Context := ffCustomer;
             Result.ValueInt := dmDB.IBCQueryDocs.FieldByName('CT').AsInteger;
             Result.ValueStr := dmDB.IBCQueryDocs.FieldByName('CT_NAME').AsString;
         end
         else if cxGridDocsTableData.Focused then
         begin
-                       // Дата
+                       // Data
             Result.Context := ffDate;
             Result.ValueDateTime := dmDB.IBCQueryDocs.FieldByName('DATA').AsDateTime;
         end;
@@ -827,13 +827,13 @@ begin
     if (cxGridDocsTable.DataController.RecNo > 0) then
     begin
         FLG_CLOSED := dmDB.IBCQueryDocs.FieldByName('FLG_CLOSED').AsInteger = 1;
-        fNew := not FLG_CLOSED; // Новый товар + Security
+        fNew := not FLG_CLOSED; // Produs nou + Security
 
         if (cxGridGoodsTable.DataController.RecNo > 0) then
         begin
-            fEdit := not FLG_CLOSED; // Изменить + Security
-            fDelete := not FLG_CLOSED; // Удалить + Security
-               // Серийные, Партий номера + Security
+            fEdit := not FLG_CLOSED; // Modifica + Security
+            fDelete := not FLG_CLOSED; // Sterge + Security
+               // Numere seriale, Partizi + Security
             fSerials := (dmDB.IBCQueryJurnal.FieldByName('GOODS_SERIAL_TYPE_ID').AsInteger =
                 cSYSS_GOODS_SERIAL_TYPE_Серийный_учет) or (dmDB.IBCQueryJurnal.FieldByName('GOODS_SERIAL_TYPE_ID').AsInteger
                 = cSYSS_GOODS_SERIAL_TYPE_Партийный_учет);
@@ -885,7 +885,7 @@ end;
 
 function Tframe32ServiceRequestsWarranty.InitFrameID: Integer;
 begin
-    Result := 32; // СЕРВИС - Заявки на гарантийный ремонт
+    Result := 32; // SERVICE - Cereri de reparatie in garantie
     dmDB.CreateGridImageColumnItems(cxGridDBCol_IMG);
 end;
 
@@ -994,15 +994,15 @@ begin
     if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_СЕРВИС_ЗНГРN_Открыть_документ) then
         bbOpenDoc.Visible := ivNever;
 
-     // Карточка товара
+     // Fisa produsului
     if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Справочники_Товары_Карточка_товара) or
         SWNSecurityManager.IsPartialAccessMode then
         bbGoodsInfoCard.Visible := ivNever;
-     // Изменить цены товара
+     // Modifica preturile marfii
     if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Справочники_Товары_Изменение_валюты_и_цены_товара)
         or SWNSecurityManager.IsPartialAccessMode then
         bbGoodsPrice.Visible := ivNever;
-     // Соответствие товара в других фирмах
+     // Corespondenta produsului in alte firme
     if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Справочники_Товары_Товары_из_других_фирм) then
         bbGoodsForeignCode.Visible := ivNever;
 
@@ -1033,7 +1033,7 @@ end;
 
 procedure Tframe32ServiceRequestsWarranty.ShowDeleteGoodsDialog;
 begin
-    if ShowAskDialog(cMSG_DELETERECORD_DeleteDocument, 'Удалить товар для ремонта "' + dmDB.IBCQueryJurnal.FieldByName
+    if ShowAskDialog(cMSG_DELETERECORD_DeleteDocument, 'Stergeti marfa pentru reparatie "' + dmDB.IBCQueryJurnal.FieldByName
         ('GOODS_NAME').AsString + '"?') = mrYes then
     begin
         dmDB.IBCQueryJurnal.UpdateTransaction.StartTransaction;
@@ -1113,7 +1113,7 @@ begin
 //  if not ProductDescriptionExists then
 //  begin
 //    ShowErrorDialog(cMSG_GeneralError_Title,
-//      'Не указан тип и номер документа на базе которого происходит прием товара. Смотрите раздел "Детальное описание".');
+//      'Nu este indicat tipul si numarul documentului in baza caruia are loc primirea marfii. Vedeti sectiunea "Descriere detaliata".');
 //    Exit;
 //  end;
 

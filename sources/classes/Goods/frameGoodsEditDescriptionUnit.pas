@@ -130,7 +130,7 @@ begin
         if not IBCDataSourceGOODS.DataSet.FieldByName('VENDOR_ID').IsNull then
             syssEditor.SYSSID := IBCDataSourceGOODS.DataSet.FieldByName('VENDOR_ID').AsInteger;
 
-        syssEditor.SetDefaultGroup(1); // Производители
+        syssEditor.SetDefaultGroup(1); // Producatori
         syssEditor.ShowModal;
         IBCQueryVendors.Refresh;
     finally

@@ -800,7 +800,7 @@ begin
 //              if S <> '' then
 //                S := S + ' OR ';
 //              S := S + Format('(GOODS_TYPE_ID NOT IN (%d,%d)) OR (FLG_FOLDER=1)', [cSYSS_GOODS_TYPE_Комплект,
-//                cSYSS_GOODS_TYPE_Комплект_услуг]);  // No Комплект
+//                cSYSS_GOODS_TYPE_Комплект_услуг]);  // No Set
 //            end;
 ////          gtfService:
 ////            begin
@@ -812,7 +812,7 @@ begin
 ////            begin
 ////              if S <> '' then
 ////                S := S + ' OR ';
-////              S := S + Format('(GOODS_TYPE_ID<>%d)', [cSYSS_GOODS_TYPE_Товары_для_сервиса]); // Товары NOT FOR сервиса
+////              S := S + Format('(GOODS_TYPE_ID<>%d)', [cSYSS_GOODS_TYPE_Товары_для_сервиса]); // Produse NOT FOR serviciu
 ////            end;
 //        end;
 
@@ -826,7 +826,7 @@ var
 begin
      // Numarul de zecimale in QTY :
   qtyDigitsMode := AppUserTempConfigStorage.IntValues.GetValue(cSETTINGS_AppQtyDigits, cAppDefault_QtyDigits);
-     // Товарные позиции: Кол-во
+     // Pozitii marfa: Cantitate
   TcxCalcEditProperties(edQTY.Properties).DisplayFormat := cQTY_DigitsMask[qtyDigitsMode];
 end;
 
@@ -935,7 +935,7 @@ begin
       fJurnalDataSet.FieldByName('WARANTY').asInteger := dialog.GoodsWarranty;
 
              // change price
-//           pentru Заявки на ремонт & гарантийный ремонт Pretul=0
+//           pentru Cereri de reparatie & reparatie in garantie Pretul=0
 //      if (dmdb.CurrentDocTypeID = 125) or (dmdb.CurrentDocTypeID = 124) then
 //        fJurnalDataSet.FieldByName('PRICE').AsFloat := 0
 //      else if dmdb.CurrentDocTypeID = 126 then
@@ -970,7 +970,7 @@ procedure TfrmAddItemsToTender.WhenFLG_ACTIVE_Changed(Sender: TObject);
 begin
   if fJurnalDataSet.State in dsEditModes then
     case dmDB.CurrentDocTypeID of
-     // 114 - Перемещение.
+     // 114 - Transfer.
       114:
         FLG_ACTIVE_Changed_Peremeshenie;
     end;

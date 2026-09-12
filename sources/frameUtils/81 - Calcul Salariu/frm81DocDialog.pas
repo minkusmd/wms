@@ -1,6 +1,6 @@
 unit frm81DocDialog;
 
-// Приходный кассовый ордер
+// Dispozitie de incasare
 // Dispozitie de incasare
 
 interface
@@ -144,15 +144,15 @@ begin
 
      // specific fields
    case dmDB.CurrentDocTypeID of
-      cDBID_DocType_КАССОВЫЕ_ОПЕРАЦИИ_ПКО: // Приходный кассовый ордер
+      cDBID_DocType_КАССОВЫЕ_ОПЕРАЦИИ_ПКО: // Dispozitie de incasare
          begin
             S_DT := 'Beneficiar!';
             S_DTSC := 'Analitica beneficiar!';
             S_CT := 'Platitor!';
             S_DTSC := 'Analitica platitor!';
          end;
-      cDBID_DocType_КАССОВЫЕ_ОПЕРАЦИИ_РКО,  // Расходный кассовый ордер
-      cDBID_DocType_ЗАРПЛАТА_ВЗ:    // Зарплата
+      cDBID_DocType_КАССОВЫЕ_ОПЕРАЦИИ_РКО,  // Dispozitie de plata
+      cDBID_DocType_ЗАРПЛАТА_ВЗ:    // Salariu
          begin
             S_DT := 'Platitor!';
             S_DTSC := 'Analitica platitor!';
@@ -251,7 +251,7 @@ procedure Tfrm81DocDlg.SetupSecurityItems;
 begin
    fSECURITY_CanSetupPastDate := SecurityFlagEnabled(cSecurityFlag_Можно_выставлят_обратную_дату);
 
-     // Контракт
+     // Contract
    fSECURITY_ALLOW_CONTRACT := SecurityFlagEnabled(cSecurityFlag_КО_ПКО_Показывать_Контракт);
    if not fSECURITY_ALLOW_CONTRACT then
    begin

@@ -120,25 +120,25 @@ begin
 
      with dmDB.IBCQueryDocs do
      begin
-          if FieldByName('DATA').IsNull then AddErrorToStr(ErrorStr,'Дата документа!')
+          if FieldByName('DATA').IsNull then AddErrorToStr(ErrorStr,'Data documentului!')
           else
           begin
-               if DateOf(FieldByName('DATA').asDateTime)<DateOf(NOW) then AddErrorToStr(ErrorStr,'Дата документа слишком стара!');
+               if DateOf(FieldByName('DATA').asDateTime)<DateOf(NOW) then AddErrorToStr(ErrorStr,'Data documentului este prea veche!');
           end;
 
-          if FieldByName('SC').IsNull then AddErrorToStr(ErrorStr,'Аналитика документа!');
+          if FieldByName('SC').IsNull then AddErrorToStr(ErrorStr,'Analitica documentului!');
 
-          if FieldByName('DT').IsNull or (FieldByName('DT').AsInteger=-1) then AddErrorToStr(ErrorStr,'Организация!');
-          if FieldByName('DTSC').IsNull then AddErrorToStr(ErrorStr,'Аналитика организации!');
+          if FieldByName('DT').IsNull or (FieldByName('DT').AsInteger=-1) then AddErrorToStr(ErrorStr,'Organizatia!');
+          if FieldByName('DTSC').IsNull then AddErrorToStr(ErrorStr,'Analitica organizatiei!');
 
-          if FieldByName('CT').IsNull or (FieldByName('CT').AsInteger=-1) then AddErrorToStr(ErrorStr,'Контрагент!');
-          if FieldByName('CTSC').IsNull then AddErrorToStr(ErrorStr,'Аналитика контрагента!');
+          if FieldByName('CT').IsNull or (FieldByName('CT').AsInteger=-1) then AddErrorToStr(ErrorStr,'Contraagent!');
+          if FieldByName('CTSC').IsNull then AddErrorToStr(ErrorStr,'Analitica partenerului!');
 
-          if FieldByName('DTDEP').IsNull or (FieldByName('DTDEP').AsInteger=-1) then AddErrorToStr(ErrorStr,'Склад!');
-          if FieldByName('CURRENCYID').IsNull then AddErrorToStr(ErrorStr,'Валюта!');
-          if FieldByName('RATE').IsNull or (FieldByName('RATE').AsFloat<1) then AddErrorToStr(ErrorStr,'Курс документа!')
+          if FieldByName('DTDEP').IsNull or (FieldByName('DTDEP').AsInteger=-1) then AddErrorToStr(ErrorStr,'Depozit!');
+          if FieldByName('CURRENCYID').IsNull then AddErrorToStr(ErrorStr,'Valuta!');
+          if FieldByName('RATE').IsNull or (FieldByName('RATE').AsFloat<1) then AddErrorToStr(ErrorStr,'Cursul documentului!')
           else
-          if (FieldByName('RATE').AsFloat<fRealRateValue) then AddErrorToStr(ErrorStr,'Курс документа занижен!')
+          if (FieldByName('RATE').AsFloat<fRealRateValue) then AddErrorToStr(ErrorStr,'Cursul documentului este subevaluat!')
      end;
 
      if ErrorStr='' then Result:=True
@@ -263,7 +263,7 @@ begin
      dialog:=TfrmCustomersDlg.Create(Self);
      try
         //dialog.CustomFilter:=dialog.CustomFilter-[cfCustomers];
-        if dialog.SelectCustomer(dmDB.IBCQueryDocs.FieldByName('CT').asInteger,False,0,'Выбор контрагента для Расходной накладной') then
+        if dialog.SelectCustomer(dmDB.IBCQueryDocs.FieldByName('CT').asInteger,False,0,'Selectare contraagent pentru Nakladnaia de iesire') then
         begin
              dmDB.IBCQueryDocs.FieldByName('CT').asInteger:=dialog.CustomerID;
              beCT_NAME.Text:=dialog.CustomerTitle;
@@ -279,7 +279,7 @@ begin
      dialog:=TfrmCustomersDlg.Create(Self);
      try
         dialog.CustomFilter:=[cfFirms,cfFranchises];
-        if dialog.SelectCustomer(dmDB.IBCQueryDocs.FieldByName('DT').asInteger,False,0,'Выбор организации для Расходной накладной') then
+        if dialog.SelectCustomer(dmDB.IBCQueryDocs.FieldByName('DT').asInteger,False,0,'Selectare organizatie pentru Nakladnaia de iesire') then
         begin
              dmDB.IBCQueryDocs.FieldByName('DT').asInteger:=dialog.CustomerID;
              beDT_NAME.Text:=dialog.CustomerTitle;

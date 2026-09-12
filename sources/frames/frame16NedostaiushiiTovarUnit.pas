@@ -151,7 +151,7 @@ end;
 
 function Tframe16NedostaiushiiTovar.InitFrameID: integer;
 begin
-     Result:=16; //  Недостающийся товар
+     Result:=16; //  Marfa lipsa
 end;
 
 procedure Tframe16NedostaiushiiTovar.ReadStockListDB(const ParentNode:TTreeNode);

@@ -1,6 +1,6 @@
 unit frame18SciotNaOplatuUnit;
 
-// СЧЕТА. Счета на оплату
+// FACTURI. Facturi de plata
 // DocTypeID = 101
 // Frame Index = 18
 
@@ -501,7 +501,7 @@ procedure Tframe18SciotNaOplatu.DoPrihodDenegNaSceot;
 var
   dialog: TfrmMoneyIncomeDlg;
 begin
-     // Приход денег на счет
+     // Incasare bani in cont
   dialog := TfrmMoneyIncomeDlg.Create(Self, dmDB.IBCQueryDocs, dmDB.IBCDataSourceDocs);
   try
     dialog.ShowBanknotesCounter := false;
@@ -510,7 +510,7 @@ begin
 
     if dialog.ShowModal = mrOk then
     begin
-             // Приход денег на счет
+             // Incasare bani in cont
       if dmDB.CreateProhodDenegNaSciot(dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger, dialog.CurrencyID, dmDB.IBCQueryDocs.FieldByName
         ('FLG_ACNT').AsInteger, dialog.Rate, dialog.SUMA) then
       begin
@@ -536,9 +536,9 @@ begin
   DocID := dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger;
 
   result := 0; // nothing done
-     // 1 - Расходная накладная была успешна создана
-     // 2 - Расходная накладная была успешна создана! Внимание! Наряд на сборку не сделан.
-     // 3 - Расходная накладная и Наряд на сборку были успешно созданны!
+     // 1 - Factura de iesire a fost creata cu succes
+     // 2 - Nakladnaia de iesire a fost creata cu succes! Atentie! Naryad de asamblare nu a fost creat.
+     // 3 - Nakladnaia de iesire si Naryad de asamblare au fost create cu succes!
   if dmDB.DocumentHasComplecte(DocID) then
   begin
     S := #13#10 + 'Atentie!' + #13#10 + 'In aceasta configuratie au fost gasite produse pentru asamblare!';
@@ -596,7 +596,7 @@ end;
 
 procedure Tframe18SciotNaOplatu.DoSozdatRashodServis;
 begin
-     // Создать "Расходную накладную на сервис"
+     // Creare "Nakladnaia de iesire pe service"
   if ShowAskDialog('Rezerva in service', 'Creez document "Rezerva: si "Asamblare"?') = mrYes then
   begin
     if dmDB.CreateRashodnaiaNakladnaiaServis_DB(dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger) then
@@ -670,7 +670,7 @@ end;
 
 function Tframe18SciotNaOplatu.InitFrameID: integer;
 begin
-     // СЧЕТА - Счета на оплату
+     // FACTURI - Facturi de plata
   result := 18;
   SetupQtyFields;
 end;
@@ -758,15 +758,15 @@ end;
 
 procedure Tframe18SciotNaOplatu.SetupQtyFields;
 begin
-     // Состав: Кол-во
+     // Componenta: Cantitate
   TcxCalcEditProperties(cxGridDBCol_QTY.Properties).DisplayFormat := QtyDisplayFormat;
   cxGridDBCol_QTY.Summary.FooterFormat := QtyDisplayFormat;
-     // Состав: Остаток
+     // Componenta: Stoc
   TcxCalcEditProperties(cxGridDBCol_STOCK_QTY.Properties).DisplayFormat := QtyDisplayFormat;
-     // Комплектация: Кол-во
+     // Configurare set: Cantitate
   TcxCalcEditProperties(cxGridComplect_QTY.Properties).DisplayFormat := QtyDisplayFormat;
   cxGridComplect_QTY.Summary.FooterFormat := QtyDisplayFormat;
-     // Комплектация: Остаток
+     // Configurare set: Stoc
   TcxCalcEditProperties(cxGridComplect_STOCK_QTY.Properties).DisplayFormat := QtyDisplayFormat;
 end;
 
@@ -775,16 +775,16 @@ begin
   fSec_View := SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_СЧЕТА_СНО_Просмотр);
   fSec_Edit := SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_СЧЕТА_СНО_Изменить);
 
-     // Создать "Расходную накладную"
+     // Creare "Nakladnaia de iesire"
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_НАКЛАДНЫЕ_РНОУ_Создать) then
     bbAction_CreateRashod.Visible := ivNever;
-     // Создать "Расходную накладную на сервис"
+     // Creare "Nakladnaia de iesire pe service"
 //     if Not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_НАКЛАДНЫЕ_ВТ_Новый) then bbAction_RashodService.Visible:=ivNever;
-     // Приход денег на счет
+     // Incasare bani in cont
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_БО_ПДНС_Создать) then
     bbAction_PrihodDenegNaScet.Visible := ivNever;
 
-     // Карточка товара
+     // Fisa produsului
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Справочники_Товары_Карточка_товара) or SWNSecurityManager.IsPartialAccessMode
     then
   begin
@@ -792,7 +792,7 @@ begin
     bbGoodsInfoCard_Complect.Visible := ivNever;
   end;
 
-     // Изменить цены товара
+     // Modifica preturile marfii
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Справочники_Товары_Изменение_валюты_и_цены_товара) or
     SWNSecurityManager.IsPartialAccessMode then
   begin
@@ -800,7 +800,7 @@ begin
     bbGoodsPrice_Complect.Visible := ivNever;
   end;
 
-     // Соответствие товара в других фирмах
+     // Corespondenta produsului in alte firme
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Справочники_Товары_Товары_из_других_фирм) then
   begin
     bbGoodsForeignCode_Components.Visible := ivNever;
@@ -839,9 +839,9 @@ begin
   begin
     FLG_INVOICE := dmDB.IBCQueryDocs.FieldByName('FLG_INVOICE').AsInteger = 1;
           // popup actions
-    fAction1 := True;                // Приход денег на счет + Security
-    fAction2 := (not FLG_INVOICE);   // Создать "Расходную накладную" + Security
-    fAction3 := (not FLG_INVOICE);   // Создать "Расходную накладную на сервис" + Security
+    fAction1 := True;                // Incasare bani in cont + Security
+    fAction2 := (not FLG_INVOICE);   // Creare "Nakladnaia de iesire" + Security
+    fAction3 := (not FLG_INVOICE);   // Creare "Nakladnaia de iesire pe service" + Security
     fGotoParent := not dmDB.IBCQueryDocs.FieldByName('PARENTDOCID').IsNull;
   end;
      // popup menu

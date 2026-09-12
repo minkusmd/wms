@@ -172,7 +172,7 @@ end;
 
 procedure TfrmProcuriBrowserDlg.DeleteSelectedProcura;
 begin
-  if ShowAskDialog('Удаление Доверенности', 'Вы хотите удалить доверенность на имя "' + IBCQueryPROCURA.FieldByName('DELEGAT').AsString +
+  if ShowAskDialog('Stergere Procura', 'Doriti sa stergeti procura pe numele "' + IBCQueryPROCURA.FieldByName('DELEGAT').AsString +
     '"?') = mrYes then
   begin
     try
@@ -242,7 +242,7 @@ begin
   if Not FAllowSelect then
   begin
     btnOk.Visible := False;
-    btnCancel.Caption := 'Закрыть';
+    btnCancel.Caption := 'Inchide';
   end;
 
   if fCustomerIDGroup <> -1 then

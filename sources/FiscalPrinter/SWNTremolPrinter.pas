@@ -98,7 +98,7 @@ begin
       ServSockConnectionFailed:
         ShowMessage('When the server can not connect to the fiscal device');
       ServTCPAuth:
-        ShowMessage('Wrong device ÒCP password');
+        ShowMessage('Wrong device TCP password');
       ServWaitOtherClientCmdProcessingTimeOut:
         ShowMessage('Proccessing of other clients command is taking too long');
       FPException:

@@ -76,11 +76,11 @@ begin
   Result := False;
 
   if fMasterDataSet.FieldByName('TITLE').IsNull or (fMasterDataSet.FieldByName('TITLE').AsString = '') then
-    AddErrorToStr(Errors, 'Название цели!');
+    AddErrorToStr(Errors, 'Denumirea obiectivului!');
   if fMasterDataSet.FieldByName('FLG_ENABLED').IsNull then
-    AddErrorToStr(Errors, 'Доступен!');
+    AddErrorToStr(Errors, 'Disponibil!');
   if fMasterDataSet.FieldByName('ESTIMATED_HOURS').IsNull or (fMasterDataSet.FieldByName('ESTIMATED_HOURS').AsInteger <= 0) then
-    AddErrorToStr(Errors, 'Время на выполнение!');
+    AddErrorToStr(Errors, 'Timp pentru executare!');
 
   if Errors = '' then
     Result := true
@@ -128,7 +128,7 @@ begin
   fMasterDataSet.UpdateTransaction.StartTransaction;
   if fCreateNewScop then
   begin
-    dtDialogTitle.Text := 'Создание новой цели';
+    dtDialogTitle.Text := 'Creare obiectiv nou';
     fMasterDataSet.Insert;
     fMasterDataSet.FieldByName('PARENTID').AsInteger := fParentID;
     fMasterDataSet.FieldByName('FLG_FOLDER').AsInteger := 0;
@@ -139,7 +139,7 @@ begin
   end
   else
   begin
-    dtDialogTitle.Text := 'Изменение цели';
+    dtDialogTitle.Text := 'Modificare obiectiv';
     fMasterDataSet.Edit;
   end;
 end;

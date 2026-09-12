@@ -96,7 +96,7 @@ begin
   if fMasterDataSet.FieldByName('TITLE').IsNull or (Trim(fMasterDataSet.FieldByName('TITLE').asString) = '') then
     AddErrorToStr(ErrorStr, 'Denumirea mapei');
   if fMasterDataSet.FieldByName('TITLE_RUS').IsNull or (Trim(fMasterDataSet.FieldByName('TITLE_RUS').asString) = '') then
-    AddErrorToStr(ErrorStr, 'Название папки');
+    AddErrorToStr(ErrorStr, 'Denumirea folderului');
 
   if fMasterDataSet.FieldByName('REWRITE_URL_ROM').IsNull or (Trim(fMasterDataSet.FieldByName('REWRITE_URL_ROM').asString) = '') then
     AddErrorToStr(ErrorStr, 'SEO ROM');

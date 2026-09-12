@@ -393,7 +393,7 @@ var qtyDigitsMode:Integer;
 begin
      // Numarul de zecimale in QTY :
      qtyDigitsMode:=AppUserTempConfigStorage.IntValues.GetValue(cSETTINGS_AppQtyDigits,cAppDefault_QtyDigits);
-     // Товарные позиции: Кол-во
+     // Pozitii marfa: Cantitate
      TcxCalcEditProperties(cxGridDBCol_QTY.Properties).DisplayFormat:=cQTY_DigitsMask[qtyDigitsMode];
      cxGridDBCol_QTY.Summary.FooterFormat:=cQTY_DigitsMask[qtyDigitsMode];
 end;

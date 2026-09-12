@@ -3,12 +3,48 @@ unit frmWorkStationsSetupDialog;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics, Vcl.Controls,
-  Vcl.Forms, Vcl.Dialogs, SWNBaseUnit, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxStyles,
-  cxCustomData, cxFilter, cxData, cxDataStorage, cxEdit, cxNavigator, Data.DB, cxDBData, cxImageComboBox,
-  cxCheckBox, DBAccess, IBC, MemDS, dxBar, cxClasses, cxGridLevel, cxGridCustomTableView, cxGridTableView,
-  cxGridDBTableView, cxGridCustomView, cxGrid, Vcl.ExtCtrls, Vcl.StdCtrls, DialogTitle,
-  cxDataControllerConditionalFormattingRulesManagerDialog, dxDateRanges, dxScrollbarAnnotations;
+  Winapi.Windows,
+  Winapi.Messages,
+  System.SysUtils,
+  System.Variants,
+  System.Classes,
+  Vcl.Graphics,
+  Vcl.Controls,
+  Vcl.Forms,
+  Vcl.Dialogs,
+  SWNBaseUnit,
+  cxGraphics,
+  cxControls,
+  cxLookAndFeels,
+  cxLookAndFeelPainters,
+  cxStyles,
+  cxCustomData,
+  cxFilter,
+  cxData,
+  cxDataStorage,
+  cxEdit,
+  cxNavigator,
+  Data.DB,
+  cxDBData,
+  cxImageComboBox,
+  cxCheckBox,
+  DBAccess,
+  IBC,
+  MemDS,
+  dxBar,
+  cxClasses,
+  cxGridLevel,
+  cxGridCustomTableView,
+  cxGridTableView,
+  cxGridDBTableView,
+  cxGridCustomView,
+  cxGrid,
+  Vcl.ExtCtrls,
+  Vcl.StdCtrls,
+  DialogTitle,
+  cxDataControllerConditionalFormattingRulesManagerDialog,
+  dxDateRanges,
+  dxScrollbarAnnotations;
 
 type
   TfrmWorkStationsSetupDlg = class(TSWNCustomForm)
@@ -33,8 +69,8 @@ type
     cxGridWSTable_FIRMA_NAME: TcxGridDBColumn;
     cxGridWSTable_DESCRIPTION: TcxGridDBColumn;
     cxGridWSTable_CREATED_DATE: TcxGridDBColumn;
-    procedure cxGridWSTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord,
-      AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
+    procedure cxGridWSTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord:
+      TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
     procedure bbDeleteClick(Sender: TObject);
     procedure bbNewClick(Sender: TObject);
     procedure bbEditClick(Sender: TObject);
@@ -53,15 +89,19 @@ implementation
 {$R *.dfm}
 
 uses
-  DataModuleAdditions, DataModuleDB, SWNUtils, SWNConst, SWNDBErrors, frmWorkStationEditDialog;
+  DataModuleAdditions,
+  DataModuleDB,
+  SWNUtils,
+  SWNConst,
+  SWNDBErrors,
+  frmWorkStationEditDialog;
 
 { TfrmWorkStationsSetupDlg }
 
 procedure TfrmWorkStationsSetupDlg.bbDeleteClick(Sender: TObject);
 begin
-  if ShowAskDialog('Sterge statia de lucru',
-    Format('Stergeti calculatorul "%s" din subdiviziunea "%s" ?',
-    [IBCQueryWS.FieldByName('COMPUTER_NAME').AsString, IBCQueryWS.FieldByName('FIRMA_NAME').AsString])) <> mrYes then
+  if ShowAskDialog('Sterge statia de lucru', Format('Stergeti calculatorul "%s" din subdiviziunea "%s" ?', [IBCQueryWS.FieldByName
+    ('COMPUTER_NAME').AsString, IBCQueryWS.FieldByName('FIRMA_NAME').AsString])) <> mrYes then
     Exit;
 
   IBCQueryWS.UpdateTransaction.StartTransaction;
@@ -104,8 +144,8 @@ begin
   end;
 end;
 
-procedure TfrmWorkStationsSetupDlg.cxGridWSTableFocusedRecordChanged(Sender: TcxCustomGridTableView;
-  APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
+procedure TfrmWorkStationsSetupDlg.cxGridWSTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord,
+  AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
 begin
   SelectionChanged;
 end;
@@ -128,3 +168,4 @@ begin
 end;
 
 end.
+

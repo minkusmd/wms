@@ -55,7 +55,7 @@ var ErrorStr:String;
 begin
      Result:=False;
 
-     if IBCQueryImage.FieldByName('IMAGE').IsNull then AddErrorToStr(ErrorStr,'Фото сертификата!');
+     if IBCQueryImage.FieldByName('IMAGE').IsNull then AddErrorToStr(ErrorStr,'Fotografia certificatului!');
 
      if ErrorStr='' then Result:=True
      else ShowErrorDialog(cMSG_GeneralError_Title,cMSG_GeneralInputError_Text,ErrorStr);

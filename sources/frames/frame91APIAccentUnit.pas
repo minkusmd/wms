@@ -1,6 +1,6 @@
 ﻿unit frame91APIAccentUnit;
 {
-  ИНВЕНТАРИЗАЦИЯ. Инвентаризация
+  INVENTARIERE. Inventariere
   DocTypeID = 1968
   Frame Index = 80
 }
@@ -46,6 +46,57 @@ type
         TagNameRom: string;
         SortOrder: string;
         TransactdionID: integer;
+    end;
+
+    // Baza pentru firele de lucru Accent: conexiune proprie la baza (TIBCConnection nu e
+    // thread-safe, dmDB.IBCConnection nu se foloseste din fir), progres si jurnal prin Queue.
+    // Firele descendente fac commit la fiecare cCommitBatch produse.
+    TAccentDBThread = class(TThread)
+    private
+        FOnLog: TProc<string>;
+        FOnProgress: TProc<Integer, Integer>;
+        FErrors: TStringList;
+    protected
+        FConnection: TIBCConnection;
+        FSelectSQL: string;
+        FProcessedCount: Integer;
+        FErrorMessage: string;
+        procedure Log(AMessage: string);
+        procedure AddError(AMessage: string);
+        procedure Progress(APosition, AMax: Integer);
+    public
+        constructor Create(ASourceConnection: TIBCConnection; const ASelectSQL: string);
+        destructor Destroy; override;
+        property OnLog: TProc<string> write FOnLog;
+        property OnProgress: TProc<Integer, Integer> write FOnProgress;
+        property ProcessedCount: Integer read FProcessedCount;
+        property ErrorMessage: string read FErrorMessage;
+        // erorile pe produs / imagine; se citesc dupa terminarea firului
+        property Errors: TStringList read FErrors;
+    end;
+
+    // Imaginile Accent de pe FTP -> ts_goods_image
+    TAccentImagesThread = class(TAccentDBThread)
+    private
+        FSavedImagesCount: Integer;
+        procedure ConvertToPng(ASource, ADest: TStream);
+    protected
+        procedure Execute; override;
+    public
+        property SavedImagesCount: Integer read FSavedImagesCount;
+    end;
+
+    // Caracteristicile Accent (API hardproperty) -> tapi_accent_products_properties
+    TAccentPropertiesThread = class(TAccentDBThread)
+    private
+        FGuid: string;
+        FSavedPropertiesCount: Integer;
+        procedure ParseProperties(const AJSON: string; AList: TList<TProductPropertyRecord>);
+    protected
+        procedure Execute; override;
+    public
+        constructor Create(ASourceConnection: TIBCConnection; const ASelectSQL, AGuid: string);
+        property SavedPropertiesCount: Integer read FSavedPropertiesCount;
     end;
 
     Tframe91APIAccent = class(TSWNBaseFrame)
@@ -162,19 +213,20 @@ type
         myApiAccent: TApiAccent;
         GUID: string;
         JSONBody: string;
-        ProductPropertiesList: TList<TProductPropertyRecord>;
-
-        procedure ClearProcutPropertiesList;
+        FImagesThread: TAccentImagesThread;
+        FLoadImagesCaption: string;
+        FPropertiesThread: TAccentPropertiesThread;
+        FLoadCaracteristicsCaption: string;
+        procedure ImagesThreadTerminate(Sender: TObject);
+        procedure PropertiesThreadTerminate(Sender: TObject);
+        procedure ShowWorkerProgress(APosition, AMax: Integer);
+        procedure StopWorkerThreads;
 
         procedure ConnectToAccent;
         procedure GetAccentImages;
         procedure GetCatalogItems;
         procedure ParseCatalog;
-        procedure ConvertImageToPNGEx(const ASourceFileName, ADestFileName: string);
-        procedure ShowPropertiesTab;
-        procedure GetApiAccentProperties(InternalID: integer);
         function GetGoodsID(CustomerID: Integer; GoodsCode: string): Integer;
-        procedure ParseAccentProperties;
         procedure LoadGridDataFromFile(const FileName: string);
         procedure SaveGridDataToFile(const FileName: string);
     protected    { Protected declarations }
@@ -195,7 +247,7 @@ type
 
         procedure AddSelecteditemstoWEbPromotion;
         procedure SetupDefaultFocus; override;
-        procedure SaveDescriptionToDB(Connection: TIBCConnection);
+        procedure SaveDescriptionToDB;
 // TODO: EnsureTodayGuid
 ////        procedure ConnectToAccent(out AGuid: string); // implementare concretă
 ////        function FetchGuidFromApi(out AGuid: string): Boolean;
@@ -212,6 +264,13 @@ uses
     WebpHelpers, Winapi.GDIPOBJ, Vcl.Imaging.jpeg, System.IOUtils, libwebp,
     Vcl.Imaging.GIFImg, Vcl.WebpImage, Vcl.Clipbrd, uSelectPromotionDialog,
     AccentGuidRepo;
+
+const
+    cCommitBatch = 10;
+    cMaxErrorsShown = 20;
+    cAccentFtpHost = '195.22.237.108';
+    cAccentFtpImagesPath = '/aeimages/';
+    cAccentApiUrl = 'http://b2brestful.accent.md:8090';
 
 procedure Tframe91APIAccent.AddSelecteditemstoWEbPromotion;
 var
@@ -302,9 +361,8 @@ end;
 
 procedure Tframe91APIAccent.btnLoadCaracteristicsClick(Sender: TObject);
 begin
-//    ConnectToAccent(GUID);
-    ShowPropertiesTab;
-    SaveDescriptionToDB(dmdb.IBCConnection);
+    cxPageControl2.ActivePage := tbsProperties;
+    SaveDescriptionToDB;
 end;
 
 procedure Tframe91APIAccent.btnStartClick(Sender: TObject);
@@ -454,13 +512,6 @@ begin
     inherited;
     cxPageControl2.ActivePage := tsImages;
     GetAccentImages;
-end;
-
-procedure Tframe91APIAccent.ClearProcutPropertiesList;
-begin
-    if Assigned(ProductPropertiesList) then
-        for var j := 0 to ProductPropertiesList.Count - 1 do
-            ProductPropertiesList.Delete(j);
 end;
 
 // TODO: ConnectToAccent
@@ -700,6 +751,8 @@ end;
 
 procedure Tframe91APIAccent.DoFrameHide;
 begin
+    StopWorkerThreads;
+
      // inchidem sursele de date externe conform "GetExternalDataSourceTypes"
     IBCQueryPriceCategories.Close;
     IBCQueryCurrencyUSD.Close;
@@ -717,9 +770,6 @@ begin
     if Assigned(myApiAccent) then
         FreeAndNil(myApiAccent);
 
-    if Assigned(ProductPropertiesList) then
-        ProductPropertiesList.Free;
-
     inherited;
 end;
 
@@ -731,8 +781,6 @@ begin
 //  IBCQueryGoods.Open;
 
     myApiAccent := TApiAccent.Create(dmdb.IBCConnection, dmdb.GetCurrencyExchangeValue(840, True), false);
-
-    ProductPropertiesList := TList<TProductPropertyRecord>.Create;
 end;
 
 procedure Tframe91APIAccent.DoSyncSaveRecord(AIndex: integer);
@@ -783,52 +831,73 @@ begin
 //     IBCQueryGoods.Refresh;
 end;
 
-procedure Tframe91APIAccent.SaveDescriptionToDB(Connection: TIBCConnection);
-var
-    q: TIBCSQL;
+procedure Tframe91APIAccent.SaveDescriptionToDB;
 begin
-    q := TIBCSQL.Create(nil);
-    try
-        q.Transaction := IBCTrLocal;
-        IBCTrLocal.StartTransaction;
-        q.SQL.Add('insert into tapi_accent_products_properties (id, hardcode, property_code, property_name_rus, property_name_rom,');
-        q.SQL.Add('property_value, property_parent_code, web_visible, description,');
-        q.SQL.Add('description_rom, tag_name, tag_name_rus, tag_name_rom, sort_order,');
-        q.SQL.Add('transactionid)');
-        q.SQL.Add('values (:id, :hardcode, :property_code, :property_name_rus, :property_name_rom, :property_value, :property_parent_code,');
-        q.SQL.Add(':web_visible, :description, :description_rom, :tag_name, :tag_name_rus, :tag_name_rom, :sort_order,');
-        q.SQL.Add(':transactionid)');
-        q.Prepare;
-
-        for var I := 0 to ProductPropertiesList.Count - 1 do
-        begin
-            q.ParamByName('id').AsString := ProductPropertiesList[I].id.ToString;
-            q.ParamByName('hardcode').AsString := ProductPropertiesList[I].hardcode.ToString;
-            q.ParamByName('property_code').AsString := ProductPropertiesList[I].PropertyCode;
-            q.ParamByName('property_name_rus').AsString := ProductPropertiesList[I].PropertyNameRus;
-            q.ParamByName('property_name_rom').AsString := ProductPropertiesList[I].PropertyNameRom;
-            q.ParamByName('property_value').AsString := ProductPropertiesList[I].PropertyValue;
-            q.ParamByName('property_parent_code').AsString := ProductPropertiesList[I].PropertyParentCode;
-            q.ParamByName('web_visible').AsString := ProductPropertiesList[I].WebVisible;
-            q.ParamByName('description').AsString := ProductPropertiesList[I].Description;
-            q.ParamByName('description_rom').AsString := ProductPropertiesList[I].DescriptionRom;
-            q.ParamByName('tag_name').AsString := ProductPropertiesList[I].TagName;
-            q.ParamByName('tag_name_rus').AsString := ProductPropertiesList[I].TagNameRus;
-            q.ParamByName('tag_name_rom').AsString := ProductPropertiesList[I].TagNameRom;
-            q.ParamByName('sort_order').AsString := ProductPropertiesList[I].SortOrder;
-            q.ParamByName('transactionid').AsString := ProductPropertiesList[I].TransactdionID.ToString;
-
-            try
-                q.Execute;
-            except
-                on E: Exception do
-                    raise;
-            end;
-        end;
-        ibctrLocal.Commit;
-    finally
-        q.Free;
+    // a doua apasare in timpul descarcarii = oprire; produsele procesate deja raman salvate
+    if Assigned(FPropertiesThread) then
+    begin
+        FPropertiesThread.Terminate;
+        btnLoadCaracteristics.Enabled := False;
+        Exit;
     end;
+
+    // ambele fire folosesc cxProgressBar2 - nu le pornim in paralel
+    if Assigned(FImagesThread) then
+    begin
+        ShowMessage('Se descarca imaginile. Asteptati finalizarea sau opriti descarcarea.');
+        Exit;
+    end;
+
+    ConnectToAccent;
+
+    IBCQueryProperties.Close;
+    IBCQueryProperties.Open;
+    cxProgressBar2.Position := 0;
+
+    FPropertiesThread := TAccentPropertiesThread.Create(dmdb.IBCConnection, IBCQueryProperties.SQL.Text, GUID);
+    FPropertiesThread.OnProgress := ShowWorkerProgress;
+    FPropertiesThread.OnTerminate := PropertiesThreadTerminate;
+
+    FLoadCaracteristicsCaption := btnLoadCaracteristics.Caption;
+    btnLoadCaracteristics.Caption := 'Stop';
+    FPropertiesThread.Start;
+end;
+
+procedure Tframe91APIAccent.PropertiesThreadTerminate(Sender: TObject);
+var
+    Thread: TAccentPropertiesThread;
+    Msg: string;
+begin
+    Thread := Sender as TAccentPropertiesThread;
+    FPropertiesThread := nil;
+
+    btnLoadCaracteristics.Caption := FLoadCaracteristicsCaption;
+    btnLoadCaracteristics.Enabled := True;
+
+    Msg := Format('Caracteristici: produse procesate %d, caracteristici salvate %d, erori %d',
+        [Thread.ProcessedCount, Thread.SavedPropertiesCount, Thread.Errors.Count]);
+    if Thread.ErrorMessage <> '' then
+        Msg := Msg + sLineBreak + 'Eroare: ' + Thread.ErrorMessage;
+    if Thread.FatalException is Exception then
+        Msg := Msg + sLineBreak + 'Eroare: ' + Exception(Thread.FatalException).Message;
+    for var I := 0 to Thread.Errors.Count - 1 do
+    begin
+        if I = cMaxErrorsShown then
+        begin
+            Msg := Msg + sLineBreak + '...';
+            Break;
+        end;
+        Msg := Msg + sLineBreak + Thread.Errors[I];
+    end;
+
+    // firul nu poate fi eliberat din propriul OnTerminate (WaitFor s-ar bloca);
+    // mesajul se afiseaza tot dupa, ca firul sa nu ramana blocat in Synchronize
+    TThread.ForceQueue(nil,
+        procedure
+        begin
+            Thread.Free;
+            ShowMessage(Msg);
+        end);
 end;
 
 procedure Tframe91APIAccent.SaveFrameStates;
@@ -847,10 +916,7 @@ end;
 
 procedure Tframe91APIAccent.SetupSecurityItems;
 begin
-//   fSECURITY_CanView := True;
-//   fSECURITY_CanNew := True;
-//   fSECURITY_CanEdit := True;
-//   fSECURITY_CanDelete := True;
+
 end;
 
 procedure Tframe91APIAccent.GeneratePriceList(PriceCategoryID: Integer);
@@ -976,120 +1042,546 @@ begin
     end;
 end;
 
-procedure Tframe91APIAccent.GetAccentImages;
-var
-    ImageFileNameList: TSTringlist;
-    GoodsID: Integer;
-    idFTP: TIdFTP;
-    ms: TMemoryStream;
-    ibcsql: TIBCSQL;
-    trUpdate: TIBCTransaction;
+{ TAccentDBThread }
+
+constructor TAccentDBThread.Create(ASourceConnection: TIBCConnection; const ASelectSQL: string);
 begin
-    ImageFileNameList := TSTringList.Create;
-    ibcsql := Tibcsql.Create(nil);
-    trUpdate := TIBCTransaction.Create(nil);
-    idFTP := TidFTP.Create(nil);
+    inherited Create(True);
+    FreeOnTerminate := False;
+    FSelectSQL := ASelectSQL;
+    FErrors := TStringList.Create;
 
-    trUpdate.DefaultConnection := dmdb.IBCConnection;
-    ibcsql.transaction := trUpdate;
-    IBCQueryImages.Close;
-    IBCQueryImages.Open;
-    memo1.Lines.Clear;
-//  ibcqueryImages.First;
-    try
-//    idFTP.Disconnect;
-        idFTP.Host := '195.22.237.108';
-        idFTP.Username := 'anonymous';
-    // IdFTP1.Password := 'a@fantastic.md';
-        idFTP.Passive := True;
-        idFTP.Connect;
-        trUpdate.StartTransaction;
+    // copie a parametrilor conexiunii principale, fara evenimentele ei (ating dmDB / UI)
+    FConnection := TIBCConnection.Create(nil);
+    FConnection.Assign(ASourceConnection);
+    FConnection.LoginPrompt := False;
+    FConnection.ConnectDialog := nil;
+    FConnection.OnError := nil;
+    FConnection.OnLogin := nil;
+    FConnection.BeforeConnect := nil;
+    FConnection.AfterConnect := nil;
+    FConnection.BeforeDisconnect := nil;
+    FConnection.AfterDisconnect := nil;
+end;
 
-        ibcsql.sql.add('insert into ts_goods_image (goodsid, image, flg_need2recreate)');
-        ibcsql.sql.add('values (:goodsid, :image, :flg_need2recreate)');
-        ibcsql.Prepare;
+destructor TAccentDBThread.Destroy;
+begin
+    inherited;    // asteapta terminarea firului
+    FConnection.Free;
+    FErrors.Free;
+end;
 
-        while not ibcqueryimages.eof do
-        begin
-            ImageFileNameList.CommaText := ibcqueryimages.FieldByName('imageslist').AsString;
-            GoodsID := ibcqueryimages.FieldByName('goodsid').AsInteger;
-            ibcsql.AutoCommit := false;
-            for var j := 0 to ImageFileNameList.Count - 1 do
+procedure TAccentDBThread.Log(AMessage: string);
+begin
+    if Assigned(FOnLog) then
+        Queue(
+            procedure
             begin
-                ms := TMemoryStream.Create;
-                try
-                    try
-                        idFTP.Get('/aeimages/' + ImageFileNameList[j], ms);
-                        ms.Position := 0;
-                        cxImage1.Picture.LoadFromStream(ms);
-                        cxImage1.Picture.SaveToFile('tmp.jpg');
-                        ConvertImageToPngEx('tmp.jpg', 'tmp.png');
+                FOnLog(AMessage);
+            end);
+end;
 
-                        ibcsql.ParamByName('goodsid').AsInteger := GoodsID;
-//            TBlobField(ibcsql.ParamByName('image')).LoadFromFile('tmp.png');
-                        ibcsql.ParamByName('image').LoadFromFile('tmp.png', ftBlob);
-                        ibcsql.ParamByName('flg_need2recreate').Asinteger := 1;
-                        ibcsql.Execute;
-                    except
-                        memo1.lines.add('GoodsID: ' + GoodsID.ToString + '  Path: /aeimages/' + ImageFileNameList[j]);
-                        Continue;
-                    end;
+procedure TAccentDBThread.AddError(AMessage: string);
+begin
+    FErrors.Add(AMessage);
+    Log(AMessage);
+end;
 
-                    Application.ProcessMessages;
-                finally
-                    ms.Free;
-                end;
-            end;
-            ibcqueryimages.Next;
-        end;
-        trUpdate.Commit;
+procedure TAccentDBThread.Progress(APosition, AMax: Integer);
+begin
+    if Assigned(FOnProgress) then
+        Queue(
+            procedure
+            begin
+                FOnProgress(APosition, AMax);
+            end);
+end;
+
+{ TAccentImagesThread }
+
+// Converteste imaginea in PNG fara controale VCL si fara fisiere temporare.
+// TBitmap.Assign si TPngImage.Assign(TBitmap) lucreaza prin handle-uri GDI (GetDIBits),
+// fara TCanvas, deci pot fi apelate din firul secundar.
+procedure TAccentImagesThread.ConvertToPng(ASource, ADest: TStream);
+var
+    Signature: array[0..3] of Byte;
+    Graphic: TGraphic;
+    Bitmap: TBitmap;
+    Png: TPngImage;
+begin
+    FillChar(Signature, SizeOf(Signature), 0);
+    ASource.Position := 0;
+    ASource.Read(Signature, SizeOf(Signature));
+    ASource.Position := 0;
+
+    // PNG - se salveaza asa cum a venit
+    if (Signature[0] = $89) and (Signature[1] = $50) and (Signature[2] = $4E) and (Signature[3] = $47) then
+    begin
+        ADest.CopyFrom(ASource, 0);
+        Exit;
+    end;
+
+    if (Signature[0] = $FF) and (Signature[1] = $D8) then
+        Graphic := TJPEGImage.Create
+    else if (Signature[0] = Ord('G')) and (Signature[1] = Ord('I')) and (Signature[2] = Ord('F')) then
+        Graphic := TGIFImage.Create
+    else if (Signature[0] = Ord('B')) and (Signature[1] = Ord('M')) then
+        Graphic := TBitmap.Create
+    else
+        raise Exception.CreateFmt('Format de imagine nesuportat (%.2x %.2x %.2x %.2x)', [Signature[0], Signature[1], Signature[2], Signature[3]]);
+
+    Bitmap := TBitmap.Create;
+    Png := TPngImage.Create;
+    try
+        Graphic.LoadFromStream(ASource);
+        Bitmap.Assign(Graphic);
+        Png.Assign(Bitmap);
+        Png.SaveToStream(ADest);
     finally
-        ibcsql.Free;
-        trUpdate.Free;
-        ImageFileNameList.Free;
-        idFTP.Free;
+        Png.Free;
+        Bitmap.Free;
+        Graphic.Free;
     end;
 end;
 
-procedure Tframe91APIAccent.ConvertImageToPNGEx(const ASourceFileName, ADestFileName: string);
+procedure TAccentImagesThread.Execute;
 var
-    Image: TGraphic;
-    PNGImage: TPngImage;
-//  MemoryStream: TMemoryStream;
+    Items: TList<TPair<Integer, string>>;
+    ImageFileNameList: TStringList;
+    msSource: TMemoryStream;
+    msPng: TMemoryStream;
+    trUpdate: TIBCTransaction;
+    qImages: TIBCQuery;
+    ibcsql: TIBCSQL;
+    idFTP: TIdFTP;
+    GoodsID: Integer;
+    FileName: string;
 begin
-    Image := nil;
-    PNGImage := nil;
-//  MemoryStream := nil;
+    NameThreadForDebugging('AccentImages');
 
+    Items := TList<TPair<Integer, string>>.Create;
+    ImageFileNameList := TStringList.Create;
+    msSource := TMemoryStream.Create;
+    msPng := TMemoryStream.Create;
+    trUpdate := TIBCTransaction.Create(nil);
+    qImages := TIBCQuery.Create(nil);
+    ibcsql := TIBCSQL.Create(nil);
+    idFTP := TIdFTP.Create(nil);
     try
-    // Create appropriate TGraphic based on the file extension
-        if SameText(ExtractFileExt(ASourceFileName), '.jpg') or SameText(ExtractFileExt(ASourceFileName), '.jpeg') then
-            Image := TJPEGImage.Create
-        else if SameText(ExtractFileExt(ASourceFileName), '.gif') then
-            Image := TGIFImage.Create
-//    else if SameText(ExtractFileExt(ASourceFileName), '.webp') then
-//      Image := TWebPImage.Create
-        else if SameText(ExtractFileExt(ASourceFileName), '.bmp') then
-            Image := TBitmap.Create
-        else
-            raise Exception.CreateFmt('Unsupported file extension: %s', [ExtractFileExt(ASourceFileName)]);
+        try
+            FConnection.Connect;
+            trUpdate.DefaultConnection := FConnection;
 
-    // Load image from file
-        Image.LoadFromFile(ASourceFileName);
+            // lista produselor fara imagini se citeste integral, ca sa nu tinem cursorul
+            // deschis peste commit-urile de mai jos
+            qImages.Connection := FConnection;
+            qImages.Transaction := trUpdate;
+            qImages.SQL.Text := FSelectSQL;
+            trUpdate.StartTransaction;
+            qImages.Open;
+            while not qImages.Eof do
+            begin
+                Items.Add(TPair<Integer, string>.Create(qImages.FieldByName('goodsid').AsInteger, qImages.FieldByName('imageslist').AsString));
+                qImages.Next;
+            end;
+            qImages.Close;
+            trUpdate.Commit;
 
-    // Create PNG image and assign loaded image to it
-        PNGImage := TPngImage.CreateBlank(COLOR_RGB, 8, Image.Width, Image.Height);
-        PNGImage.Canvas.Draw(0, 0, Image);
-        PNGImage.SaveToFile('tmp.png');
-    // Save PNG image to file using a TMemoryStream
-//    MemoryStream := TMemoryStream.Create;
-//    PNGImage.SaveToStream(MemoryStream);
-//    MemoryStream.SaveToFile(ADestFileName);
+            Progress(0, Items.Count);
+            Log(Format('Produse fara imagini: %d', [Items.Count]));
+
+            idFTP.Host := cAccentFtpHost;
+            idFTP.Username := 'anonymous';
+            idFTP.Passive := True;
+            idFTP.ConnectTimeout := 30000;
+            idFTP.ReadTimeout := 60000;
+            idFTP.Connect;
+
+            ibcsql.Connection := FConnection;
+            ibcsql.Transaction := trUpdate;
+            ibcsql.AutoCommit := False;
+            ibcsql.SQL.Add('insert into ts_goods_image (goodsid, image, flg_need2recreate)');
+            ibcsql.SQL.Add('values (:goodsid, :image, :flg_need2recreate)');
+
+            for var I := 0 to Items.Count - 1 do
+            begin
+                if Terminated then
+                    Break;
+
+                if not trUpdate.Active then
+                    trUpdate.StartTransaction;
+                if not ibcsql.Prepared then
+                    ibcsql.Prepare;
+
+                GoodsID := Items[I].Key;
+                ImageFileNameList.CommaText := Items[I].Value;
+                for var j := 0 to ImageFileNameList.Count - 1 do
+                begin
+                    FileName := cAccentFtpImagesPath + ImageFileNameList[j];
+                    try
+                        if not idFTP.Connected then
+                            idFTP.Connect;
+                        msSource.Clear;
+                        idFTP.Get(FileName, msSource);
+                        msPng.Clear;
+                        ConvertToPng(msSource, msPng);
+                        msPng.Position := 0;
+
+                        ibcsql.ParamByName('goodsid').AsInteger := GoodsID;
+                        ibcsql.ParamByName('image').LoadFromStream(msPng, ftBlob);
+                        ibcsql.ParamByName('flg_need2recreate').AsInteger := 1;
+                        ibcsql.Execute;
+                        Inc(FSavedImagesCount);
+                    except
+                        on E: Exception do
+                            AddError('GoodsID: ' + GoodsID.ToString + '  Path: ' + FileName + '  ' + E.Message);
+                    end;
+                end;
+
+                Inc(FProcessedCount);
+                if FProcessedCount mod cCommitBatch = 0 then
+                    trUpdate.Commit;
+                Progress(FProcessedCount, Items.Count);
+            end;
+
+            // restul sub cCommitBatch; la Stop produsele deja procesate raman salvate
+            if trUpdate.Active then
+                trUpdate.Commit;
+        except
+            on E: Exception do
+            begin
+                FErrorMessage := E.Message;
+                try
+                    if trUpdate.Active then
+                        trUpdate.Rollback;
+                except
+                    // conexiunea poate fi deja cazuta
+                end;
+            end;
+        end;
     finally
-        Image.Free;
-        PNGImage.Free;
-//    MemoryStream.Free;
+        try
+            if idFTP.Connected then
+                idFTP.Disconnect;
+        except
+            // conexiunea FTP poate fi deja cazuta
+        end;
+        idFTP.Free;
+        ibcsql.Free;
+        qImages.Free;
+        trUpdate.Free;
+        msPng.Free;
+        msSource.Free;
+        ImageFileNameList.Free;
+        Items.Free;
+        FConnection.Disconnect;
     end;
+end;
+
+{ TAccentPropertiesThread }
+
+constructor TAccentPropertiesThread.Create(ASourceConnection: TIBCConnection; const ASelectSQL, AGuid: string);
+begin
+    inherited Create(ASourceConnection, ASelectSQL);
+    FGuid := AGuid;
+end;
+
+procedure TAccentPropertiesThread.ParseProperties(const AJSON: string; AList: TList<TProductPropertyRecord>);
+var
+    JSONValue: TJSONValue;
+    Item: TJSONValue;
+    Pair: TJSONPair;
+    PropertyName: string;
+    Rec: TProductPropertyRecord;
+begin
+    AList.Clear;
+    JSONValue := TJSONObject.ParseJSONValue(AJSON);
+    try
+        if not (JSONValue is TJSONArray) then
+            raise Exception.Create('Raspuns API neasteptat: ' + Copy(AJSON, 1, 200));
+
+        for Item in TJSONArray(JSONValue) do
+        begin
+            if not (Item is TJSONObject) then
+                Continue;
+
+            // fiecare caracteristica de la zero - campurile lipsa nu se preiau de la cea precedenta
+            Rec := Default(TProductPropertyRecord);
+            for var j := 0 to TJSONObject(Item).Count - 1 do
+            begin
+                Pair := TJSONObject(Item).Pairs[j];
+                PropertyName := Pair.JsonString.Value;
+
+                if SameText(PropertyName, 'id') then
+                    Rec.Id := Pair.JsonValue.Value.ToInteger
+                else if SameText(PropertyName, 'hardcode') then
+                    Rec.Hardcode := Pair.JsonValue.Value.ToInteger
+                else if SameText(PropertyName, 'propertyNameRus') then
+                    Rec.PropertyNameRus := Pair.JsonValue.Value
+                else if SameText(PropertyName, 'propertyNameRom') then
+                    Rec.PropertyNameRom := Pair.JsonValue.Value
+                else if SameText(PropertyName, 'propertyValue') then
+                    Rec.PropertyValue := Pair.JsonValue.Value
+                else if SameText(PropertyName, 'propertyParentCode') then
+                    Rec.PropertyParentCode := Pair.JsonValue.Value
+                else if SameText(PropertyName, 'WebVisible') then
+                    Rec.WebVisible := Pair.JsonValue.Value
+                else if SameText(PropertyName, 'Description') then
+                    Rec.Description := Pair.JsonValue.Value
+                else if SameText(PropertyName, 'DescriptionRom') then
+                    Rec.DescriptionRom := Pair.JsonValue.Value
+                else if SameText(PropertyName, 'TagName') then
+                    Rec.TagName := Pair.JsonValue.Value
+                else if SameText(PropertyName, 'TagNameRus') then
+                    Rec.TagNameRus := Pair.JsonValue.Value
+                else if SameText(PropertyName, 'TagNameRom') then
+                    Rec.TagNameRom := Pair.JsonValue.Value
+                else if SameText(PropertyName, 'sortOrder') then
+                    Rec.SortOrder := Pair.JsonValue.Value
+                else if SameText(PropertyName, 'transactionid') then
+                    Rec.TransactdionID := StrToIntDef(Pair.JsonValue.Value, -1);
+            end;
+            AList.Add(Rec);
+        end;
+    finally
+        JSONValue.Free;
+    end;
+end;
+
+procedure TAccentPropertiesThread.Execute;
+const
+    cProductSavepoint = 'ACCENT_PRODUCT';
+var
+    Items: TList<Integer>;
+    Properties: TList<TProductPropertyRecord>;
+    trUpdate: TIBCTransaction;
+    qProducts: TIBCQuery;
+    ibcsql: TIBCSQL;
+    idHTTP: TIdHTTP;
+    Request: TStringStream;
+    InternalID: Integer;
+    JSON: string;
+begin
+    NameThreadForDebugging('AccentProperties');
+
+    Items := TList<Integer>.Create;
+    Properties := TList<TProductPropertyRecord>.Create;
+    trUpdate := TIBCTransaction.Create(nil);
+    qProducts := TIBCQuery.Create(nil);
+    ibcsql := TIBCSQL.Create(nil);
+    idHTTP := TIdHTTP.Create(nil);
+    Request := TStringStream.Create('');
+    try
+        try
+            FConnection.Connect;
+            trUpdate.DefaultConnection := FConnection;
+
+            // lista produselor se citeste integral, ca sa nu tinem cursorul deschis peste commit-uri
+            qProducts.Connection := FConnection;
+            qProducts.Transaction := trUpdate;
+            qProducts.SQL.Text := FSelectSQL;
+            trUpdate.StartTransaction;
+            qProducts.Open;
+            while not qProducts.Eof do
+            begin
+                Items.Add(qProducts.FieldByName('internalid').AsInteger);
+                qProducts.Next;
+            end;
+            qProducts.Close;
+            trUpdate.Commit;
+
+            Progress(0, Items.Count);
+
+            idHTTP.Request.UserAgent := 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36';
+            idHTTP.Request.Accept := 'application/json, text/javascript, */*; q=0.01';
+            idHTTP.Request.ContentType := 'application/json; charset=UTF-8';
+            idHTTP.Request.CharSet := 'utf-8';
+            idHTTP.ConnectTimeout := 30000;
+            idHTTP.ReadTimeout := 60000;
+
+            ibcsql.Connection := FConnection;
+            ibcsql.Transaction := trUpdate;
+            ibcsql.AutoCommit := False;
+            ibcsql.SQL.Add('insert into tapi_accent_products_properties (id, hardcode, property_code, property_name_rus, property_name_rom,');
+            ibcsql.SQL.Add('property_value, property_parent_code, web_visible, description,');
+            ibcsql.SQL.Add('description_rom, tag_name, tag_name_rus, tag_name_rom, sort_order,');
+            ibcsql.SQL.Add('transactionid)');
+            ibcsql.SQL.Add('values (:id, :hardcode, :property_code, :property_name_rus, :property_name_rom, :property_value, :property_parent_code,');
+            ibcsql.SQL.Add(':web_visible, :description, :description_rom, :tag_name, :tag_name_rus, :tag_name_rom, :sort_order,');
+            ibcsql.SQL.Add(':transactionid)');
+
+            for var I := 0 to Items.Count - 1 do
+            begin
+                if Terminated then
+                    Break;
+
+                if not trUpdate.Active then
+                    trUpdate.StartTransaction;
+                if not ibcsql.Prepared then
+                    ibcsql.Prepare;
+
+                InternalID := Items[I];
+                try
+                    Request.Position := 0;
+                    JSON := idHTTP.Post(cAccentApiUrl + '/hardproperty/' + FGuid + '/productid/' + InternalID.ToString, Request);
+                    ParseProperties(JSON, Properties);
+
+                    // caracteristicile unui produs se salveaza toate sau niciuna
+                    trUpdate.StartSavepoint(cProductSavepoint);
+                    try
+                        for var P in Properties do
+                        begin
+                            ibcsql.ParamByName('id').AsString := P.Id.ToString;
+                            ibcsql.ParamByName('hardcode').AsString := P.Hardcode.ToString;
+                            ibcsql.ParamByName('property_code').AsString := P.PropertyCode;
+                            ibcsql.ParamByName('property_name_rus').AsString := P.PropertyNameRus;
+                            ibcsql.ParamByName('property_name_rom').AsString := P.PropertyNameRom;
+                            ibcsql.ParamByName('property_value').AsString := P.PropertyValue;
+                            ibcsql.ParamByName('property_parent_code').AsString := P.PropertyParentCode;
+                            ibcsql.ParamByName('web_visible').AsString := P.WebVisible;
+                            ibcsql.ParamByName('description').AsString := P.Description;
+                            ibcsql.ParamByName('description_rom').AsString := P.DescriptionRom;
+                            ibcsql.ParamByName('tag_name').AsString := P.TagName;
+                            ibcsql.ParamByName('tag_name_rus').AsString := P.TagNameRus;
+                            ibcsql.ParamByName('tag_name_rom').AsString := P.TagNameRom;
+                            ibcsql.ParamByName('sort_order').AsString := P.SortOrder;
+                            ibcsql.ParamByName('transactionid').AsString := P.TransactdionID.ToString;
+                            ibcsql.Execute;
+                        end;
+                        trUpdate.ReleaseSavepoint(cProductSavepoint);
+                    except
+                        trUpdate.RollbackSavepoint(cProductSavepoint);
+                        raise;
+                    end;
+                    Inc(FSavedPropertiesCount, Properties.Count);
+                except
+                    on E: Exception do
+                        AddError('InternalID: ' + InternalID.ToString + '  ' + E.Message);
+                end;
+
+                Inc(FProcessedCount);
+                if FProcessedCount mod cCommitBatch = 0 then
+                    trUpdate.Commit;
+                Progress(FProcessedCount, Items.Count);
+            end;
+
+            // restul sub cCommitBatch; la Stop produsele deja procesate raman salvate
+            if trUpdate.Active then
+                trUpdate.Commit;
+        except
+            on E: Exception do
+            begin
+                FErrorMessage := E.Message;
+                try
+                    if trUpdate.Active then
+                        trUpdate.Rollback;
+                except
+                    // conexiunea poate fi deja cazuta
+                end;
+            end;
+        end;
+    finally
+        Request.Free;
+        idHTTP.Free;
+        ibcsql.Free;
+        qProducts.Free;
+        trUpdate.Free;
+        Properties.Free;
+        Items.Free;
+        FConnection.Disconnect;
+    end;
+end;
+
+{ Tframe91APIAccent - imagini }
+
+procedure Tframe91APIAccent.GetAccentImages;
+begin
+    // a doua apasare in timpul descarcarii = oprire; produsele procesate deja raman salvate
+    if Assigned(FImagesThread) then
+    begin
+        FImagesThread.Terminate;
+        btnLoadImages.Enabled := False;
+        Memo1.Lines.Add('Oprire solicitata...');
+        Exit;
+    end;
+
+    // ambele fire folosesc cxProgressBar2 - nu le pornim in paralel
+    if Assigned(FPropertiesThread) then
+    begin
+        ShowMessage('Se descarca caracteristicile. Asteptati finalizarea sau opriti descarcarea.');
+        Exit;
+    end;
+
+    IBCQueryImages.Close;
+    IBCQueryImages.Open;
+    Memo1.Lines.Clear;
+    cxProgressBar2.Position := 0;
+
+    FImagesThread := TAccentImagesThread.Create(dmdb.IBCConnection, IBCQueryImages.SQL.Text);
+    FImagesThread.OnLog :=
+        procedure(AMessage: string)
+        begin
+            Memo1.Lines.Add(AMessage);
+        end;
+    FImagesThread.OnProgress := ShowWorkerProgress;
+    FImagesThread.OnTerminate := ImagesThreadTerminate;
+
+    FLoadImagesCaption := btnLoadImages.Caption;
+    btnLoadImages.Caption := 'Stop';
+    FImagesThread.Start;
+end;
+
+procedure Tframe91APIAccent.ImagesThreadTerminate(Sender: TObject);
+var
+    Thread: TAccentImagesThread;
+begin
+    Thread := Sender as TAccentImagesThread;
+    FImagesThread := nil;
+
+    if Thread.ErrorMessage <> '' then
+        Memo1.Lines.Add('Eroare: ' + Thread.ErrorMessage);
+    if Thread.FatalException is Exception then
+        Memo1.Lines.Add('Eroare: ' + Exception(Thread.FatalException).Message);
+    Memo1.Lines.Add(Format('Gata. Produse procesate: %d, imagini salvate: %d', [Thread.ProcessedCount, Thread.SavedImagesCount]));
+
+    btnLoadImages.Caption := FLoadImagesCaption;
+    btnLoadImages.Enabled := True;
+
+    // raman in lista doar produsele care inca nu au imagini
+    IBCQueryImages.Close;
+    IBCQueryImages.Open;
+
+    // firul nu poate fi eliberat din propriul OnTerminate (WaitFor s-ar bloca) - il eliberam dupa
+    TThread.ForceQueue(nil,
+        procedure
+        begin
+            Thread.Free;
+        end);
+end;
+
+procedure Tframe91APIAccent.ShowWorkerProgress(APosition, AMax: Integer);
+begin
+    cxProgressBar2.Properties.Max := AMax;
+    cxProgressBar2.Position := APosition;
+end;
+
+procedure Tframe91APIAccent.StopWorkerThreads;
+
+    procedure StopThread(AThread: TThread);
+    begin
+        if not Assigned(AThread) then
+            Exit;
+        AThread.OnTerminate := nil;
+        AThread.Terminate;
+        AThread.WaitFor;
+        AThread.Free;
+    end;
+
+begin
+    StopThread(FImagesThread);
+    FImagesThread := nil;
+    StopThread(FPropertiesThread);
+    FPropertiesThread := nil;
 end;
 
 procedure Tframe91APIAccent.cxGrid1TableView1StylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
@@ -1098,44 +1590,6 @@ begin
     if ARecord.Values[cxGrid1TableView1_COST.Index] >= ARecord.Values[cxGrid1TableView1_PRICE7.Index] then
     begin
         AStyle := dmAdditions.cxStyle_GoodsOutOfStock;
-    end;
-end;
-
-procedure Tframe91APIAccent.ShowPropertiesTab;
-begin
-    cxPageControl2.ActivePage := tbsProperties;
-  // clear
-    ClearProcutPropertiesList;
-
-    if IBCQueryProperties.Active then
-        IBCQueryProperties.Refresh
-    else
-        IBCQueryProperties.Open;
-
-    while not IBCQueryProperties.Eof do
-    begin
-        GetApiAccentProperties(IBCQueryProperties.FieldByName('internalid').AsInteger);
-        ParseAccentProperties;
-        IBCQueryProperties.Next;
-    end;
-end;
-
-procedure Tframe91APIAccent.GetApiAccentProperties(InternalID: integer);
-var
-    s: string;
-    Req_Json: TStream;
-begin
-    Req_Json := TStringStream.Create(s);
-    Req_Json.Position := 0;
-    try
-        IdHTTP1.Request.UserAgent := 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36';
-        IdHTTP1.Request.Accept := 'application/json, text/javascript, */*; q=0.01';
-        IdHTTP1.Request.ContentType := 'application/json; charset=UTF-8';
-        IdHTTP1.Request.CharSet := 'utf-8';
-
-        JSONBody := IdHTTP1.Post('http://b2brestful.accent.md:8090/hardproperty/' + guid + '/productid/' + InternalID.ToString, Req_Json);
-    finally
-        Req_Json.Free;
     end;
 end;
 
@@ -1152,64 +1606,6 @@ begin
         result := q.fieldbyname('goodsid').AsInteger;
     finally
         q.Free;
-    end;
-end;
-
-procedure Tframe91APIAccent.ParseAccentProperties;
-var
-    JSONArray: TJSONArray;
-    LJsonValue: TJSONValue;
-    AProduct: TJSONObject;
-    aPair: TJSONPair;
-    PropertyName: string;
-    PropertyValue: string;
-    s: string;
-    ProductProperty: TProductPropertyRecord;
-begin
-    JSONArray := TJSONArray.Create;
-    JSONArray := TJSONArray(TJSONObject.ParseJSONValue(JSONBody));
-
-    for LJsonValue in JSONArray do
-    begin
-        Application.ProcessMessages;
-        AProduct := TJSONObject(LJsonValue);
-        for var j := 0 to AProduct.Count - 1 do
-        begin
-            aPair := AProduct.Pairs[j];
-            PropertyName := aPair.JsonString.Value;
-
-            if PropertyName.ToLower = 'id'.ToLower then
-                ProductProperty.Id := aPair.JsonValue.Value.ToInteger;
-            if PropertyName.ToLower = 'hardcode'.ToLower then
-                ProductProperty.Hardcode := aPair.JsonValue.Value.ToInteger;
-            if PropertyName.ToLower = 'propertyNameRus'.ToLower then
-                ProductProperty.PropertyNameRus := aPair.JsonValue.Value;
-            if PropertyName.ToLower = 'propertyNameRom'.ToLower then
-                ProductProperty.PropertyNameRom := aPair.JsonValue.Value;
-            if PropertyName.ToLower = 'propertyValue'.ToLower then
-                ProductProperty.PropertyValue := aPair.JsonValue.Value;
-            if PropertyName.ToLower = 'propertyParentCode'.ToLower then
-                ProductProperty.PropertyParentCode := aPair.JsonValue.Value;
-            if PropertyName.ToLower = 'WebVisible'.ToLower then
-                ProductProperty.WebVisible := aPair.JsonValue.Value;
-            if PropertyName.ToLower = 'Description'.ToLower then
-                ProductProperty.Description := aPair.JsonValue.Value;
-            if PropertyName.ToLower = 'DescriptionRom'.ToLower then
-                ProductProperty.DescriptionRom := aPair.JsonValue.Value;
-            if PropertyName.ToLower = 'TagName'.ToLower then
-                ProductProperty.TagName := aPair.JsonValue.Value;
-            if PropertyName.ToLower = 'TagNameRus'.ToLower then
-                ProductProperty.TagNameRus := aPair.JsonValue.Value;
-            if PropertyName.ToLower = 'TagNameRom'.ToLower then
-                ProductProperty.TagNameRom := aPair.JsonValue.Value;
-            if PropertyName.ToLower = 'sortOrder'.ToLower then
-                ProductProperty.SortOrder := aPair.JsonValue.Value;
-            if PropertyName.ToLower = 'transactionid'.ToLower then
-                ProductProperty.TransactdionID := StrToIntDef(aPair.JsonValue.Value, -1);
-        end;
-
-        ProductPropertiesList.Add(ProductProperty);
-
     end;
 end;
 

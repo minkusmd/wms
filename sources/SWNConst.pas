@@ -45,7 +45,7 @@ const
   cAPP_Title = 'iC Gestionarea stocurilor';
   cAPP_Version = 'v. %s';
   cAPP_User = 'Utilizator: %s';
-  cAPP_Server = 'Server: %s на %s%s';
+  cAPP_Server = 'Server: %s pe %s%s';
 
   cDATABASE_DBName = 'SW';
   cDATABASE_ConnectionServerDefault = '192.168.106.254';

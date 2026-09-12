@@ -1,6 +1,6 @@
 unit frame21ZarplataUnit;
 {
-  ЗАРПЛАТА. Выдача зарплата
+  SALARIU. Plata salariului
   DocTypeID = 118
   Frame Index = 21
 }
@@ -356,14 +356,14 @@ begin
           // context from Docs
     if cxGridZ_CT_NAME.Focused then
     begin
-               // Получатель
+               // Beneficiar
       Result.Context := ffCustomer;
       Result.ValueInt := dmDB.IBCQueryDocs.FieldByName('CT').AsInteger;
       Result.ValueStr := dmDB.IBCQueryDocs.FieldByName('CT_NAME').AsString;
     end
     else if cxGridZ_DATA.Focused then
     begin
-                   // Дата
+                   // Data
       Result.Context := ffDate;
       Result.ValueDateTime := dmDB.IBCQueryDocs.FieldByName('DATA').AsDateTime;
     end;
@@ -393,7 +393,7 @@ end;
 
 function Tframe21Zarplata.InitFrameID: Integer;
 begin
-  Result := 21; // ЗАРПЛАТА. Выдача зарплата
+  Result := 21; // SALARIU. Plata salariului
 end;
 
 procedure Tframe21Zarplata.ModifyRecord;

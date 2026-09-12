@@ -1,6 +1,6 @@
 unit frame57ActDeficienteUnit;
 {
-  Акты. Акты технической экспертизы
+  Acte. Acte de expertiza tehnica
   DocTypeID = 1994
   Frame Index = 57
 }
@@ -177,8 +177,8 @@ end;
 procedure Tframe57ActDeficiente.bbAproveClick(Sender: TObject);
 var Query: TIBCQuery;
 begin
-     if ShowAskDialog('Утверждение акта',
-                      Format('Вы хотите утвердить акт №%s?',[IBC_ACTC.FieldByName('ACTNO').AsString]))<>mrYes then Exit;
+     if ShowAskDialog('Aprobare act',
+                      Format('Doriti sa aprobati actul nr.%s?',[IBC_ACTC.FieldByName('ACTNO').AsString]))<>mrYes then Exit;
 
      Query := TIBCQuery.Create(Self);
      try
@@ -244,7 +244,7 @@ begin
         dialog.Panel1.Enabled := false;
         dialog.Panel2.Enabled := false;
         dialog.btnOK.Visible:=False;
-        dialog.btnCancel.Caption:='Закрыть';
+        dialog.btnCancel.Caption:='Inchide';
         dialog.ShowModal;
      finally
         dialog.Free;
@@ -349,7 +349,7 @@ end;
 
 procedure Tframe57ActDeficiente.DeleteAct;
 begin
-     if ShowAskDialog('Удаление записи', Format('Вы хотите удалить акт № %d?',[IBC_ACTC.FieldByName('DOCID').AsInteger])) <> mrYes then Exit;
+     if ShowAskDialog('Stergere inregistrare', Format('Doriti sa stergeti actul nr. %d?',[IBC_ACTC.FieldByName('DOCID').AsInteger])) <> mrYes then Exit;
 
      IBC_ACTC.UpdateTransaction.StartTransaction;
      try
@@ -389,8 +389,8 @@ var
 begin
 
   b := AppUserTempConfigStorage.BooleanValues.GetValue('PKO_CloseDocVerify');
-  if b or (ShowAskDialogVerification('Закрыть документ', 'Вы хотите закрыть документ?',
-    'Больше не спрашивать', '', b) = mrYes) then
+  if b or (ShowAskDialogVerification('Inchide documentul', 'Doriti sa inchideti documentul?',
+    'Nu mai intreba', '', b) = mrYes) then
   begin
     if b then
       AppUserTempConfigStorage.BooleanValues.SetValue('PKO_CloseDocVerify', b);
@@ -466,7 +466,7 @@ end;
 
 procedure Tframe57ActDeficiente.DoOpenDocument;
 begin
-  if ShowAskDialog('Открыть документ', 'Вы хптите открыть документ?') = mrYes then
+  if ShowAskDialog('Deschide documentul', 'Doriti sa deschideti documentul?') = mrYes then
   begin
     if DoOpenDocumentDB(dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger) then
       dmDB.IBCQueryDocs.Refresh;
@@ -553,7 +553,7 @@ end;
 
 function Tframe57ActDeficiente.InitFrameID: integer;
 begin
-     // Акты. Акты технической экспертизы
+     // Acte. Acte de expertiza tehnica
      Result := 57;
 end;
 
@@ -651,12 +651,12 @@ begin
   fSECURITY_CanEdit := SWNSecurityManager.UserHasSecurityFlag(1996);
   fSECURITY_CanDelete := SWNSecurityManager.UserHasSecurityFlag(1997);
 
-  if Not SWNSecurityManager.UserHasSecurityFlag(1999) then   // закрыть документ
+  if Not SWNSecurityManager.UserHasSecurityFlag(1999) then   // inchide documentul
     bbCloseDoc.Visible := ivNever;
-  if Not SWNSecurityManager.UserHasSecurityFlag(2000) then   // открыть документ
+  if Not SWNSecurityManager.UserHasSecurityFlag(2000) then   // deschide documentul
     bbOpenDoc.Visible := ivNever;
 
-  if Not SWNSecurityManager.UserHasSecurityFlag(2001) then // удвердить акт
+  if Not SWNSecurityManager.UserHasSecurityFlag(2001) then // aproba actul
     bbAprove.Visible := ivNever;
 
 end;

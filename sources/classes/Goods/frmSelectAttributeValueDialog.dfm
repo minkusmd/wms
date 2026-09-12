@@ -38,7 +38,7 @@ object frmSelectAttributeValueDlg: TfrmSelectAttributeValueDlg
   end
   object cxGridVal: TcxGrid
     Left = 8
-    Top = 72
+    Top = 70
     Width = 724
     Height = 300
     Anchors = [akLeft, akTop, akRight, akBottom]

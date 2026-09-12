@@ -63,14 +63,14 @@ begin
   if Key = VK_F5 then
   begin
     IBCQueryWebGoods.FieldByName('META_TITLE_RO').AsString := IBCQueryWebGoods.FieldByName('NAME_RO').AsString + ' in Moldova, comanda cu livrare rapida';
-    IBCQueryWebGoods.FieldByName('META_TITLE_RU').AsString := IBCQueryWebGoods.FieldByName('NAME_RU').AsString + ' в Молдове, купить с быстрой доставкой';
+    IBCQueryWebGoods.FieldByName('META_TITLE_RU').AsString := IBCQueryWebGoods.FieldByName('NAME_RU').AsString + ' in Moldova, cumparati cu livrare rapida';
 
     IBCQueryWebGoods.FieldByName('META_DESC_RO').AsString := 'Cumpara ' + IBCQueryWebGoods.FieldByName('NAME_RO').AsString +
                     ' in Moldova la cel mai mic pret. ' +IBCQueryWebGoods.FieldByName('NAME_RO').AsString +
                     ' in Chisinau si Moldova pe credit, livrare rapida. Garantie';
-    IBCQueryWebGoods.FieldByName('META_DESC_RU').AsString := 'Купить ' + IBCQueryWebGoods.FieldByName('NAME_RU').AsString +
-                    ' в Молдове по низкой цене! ' +IBCQueryWebGoods.FieldByName('NAME_RU').AsString +
-                    ' в Кишиневе – продажа в кредит, быстрая доставка. Гарантия';
+    IBCQueryWebGoods.FieldByName('META_DESC_RU').AsString := 'Cumparati ' + IBCQueryWebGoods.FieldByName('NAME_RU').AsString +
+                    ' in Moldova la pret mic! ' +IBCQueryWebGoods.FieldByName('NAME_RU').AsString +
+                    ' in Chisinau - vanzare in credit, livrare rapida. Garantie';
 
     IBCQueryWebGoods.FieldByName('META_KEY_RO').AsString := IBCQueryWebGoods.FieldByName('NAME_RO').AsString.Replace(' ', ', ');
     IBCQueryWebGoods.FieldByName('META_KEY_RU').AsString := IBCQueryWebGoods.FieldByName('NAME_RU').AsString.Replace(' ', ', ');

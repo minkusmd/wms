@@ -1,6 +1,6 @@
 unit frame51ZaiavkaCreditUnit;
 {
-  WEB. 1791 - Заявка на финансирование
+  WEB. 1791 - Cerere de finantare
   DocTypeID = 1791
   Frame Index = 51
 }
@@ -359,7 +359,7 @@ begin
 
   if cxGridComponentsTable.Site.Focused then
   begin
-          // context from Jurnal: Код + Наименование
+          // context from Jurnal: Cod + Denumire
     Result.Context := ffGoods;
     Result.ValueInt := dmDB.IBCQueryJurnal.FieldByName('GOODSID').AsInteger;
     Result.ValueStr := dmDB.IBCQueryJurnal.FieldByName('GOODS_NAME').AsString;
@@ -369,14 +369,14 @@ begin
               // context from Docs
     if cxGridWZ_CT_NAME.Focused then
     begin
-                   // Контрагент
+                   // Contraagent
       Result.Context := ffCustomer;
       Result.ValueInt := dmDB.IBCQueryDocs.FieldByName('CT').AsInteger;
       Result.ValueStr := dmDB.IBCQueryDocs.FieldByName('CT_NAME').AsString;
     end
     else if cxGridWZ_DATA.Focused then
     begin
-                       // Дата
+                       // Data
       Result.Context := ffDate;
       Result.ValueDateTime := dmDB.IBCQueryDocs.FieldByName('DATA').AsDateTime;
     end
@@ -407,7 +407,7 @@ end;
 
 function Tframe51ZaiavkaCredit.InitFrameID: integer;
 begin
-  Result := 51; // WEB. Заявка на финансирование
+  Result := 51; // WEB. Cerere de finantare
   dmDB.CreateGridImageColumnItems(cxGridDBCol_IMG);
 end;
 

@@ -93,14 +93,14 @@ begin
 
         if fCreateNewCity then
         begin
-             dtDialogTitle.Text:='Добавление нового города';
+             dtDialogTitle.Text:='Adaugare oras nou';
              fMasterDataSet.Insert;
              fMasterDataSet.FieldByName('FIRMAID').AsInteger:=dmDB.CurrentFirma;
              fMasterDataSet.FieldByName('CITYID').AsInteger:=2000;
         end
         else
         begin
-             dtDialogTitle.Text:='Изменение информации';
+             dtDialogTitle.Text:='Modificare informatie';
              fMasterDataSet.Edit;
         end;
 

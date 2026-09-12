@@ -75,16 +75,16 @@ begin
   Errors := '';
 
   if fMasterDataSet.FieldByName('SYS_TITLE').IsNull or (fMasterDataSet.FieldByName('SYS_TITLE').AsString = '') then
-    AddErrorToStr(Errors, 'Системное название!');
+    AddErrorToStr(Errors, 'Denumirea de sistem!');
 
   if fMasterDataSet.FieldByName('TITLE_ROM').IsNull or (fMasterDataSet.FieldByName('TITLE_ROM').AsString = '') then
-    AddErrorToStr(Errors, 'Название кнопки на румынском!');
+    AddErrorToStr(Errors, 'Denumirea butonului in romana!');
 
   if fMasterDataSet.FieldByName('TITLE_RUS').IsNull or (fMasterDataSet.FieldByName('TITLE_RUS').AsString = '') then
-    AddErrorToStr(Errors, 'Название кнопки на русском!');
+    AddErrorToStr(Errors, 'Denumirea butonului in rusa!');
 
   if fMasterDataSet.FieldByName('NAV_URL').IsNull or (fMasterDataSet.FieldByName('NAV_URL').AsString = '') then
-    AddErrorToStr(Errors, 'Адрес Web страницы!')
+    AddErrorToStr(Errors, 'Adresa paginii Web!')
   else
   begin
     // detect absolute url
@@ -101,7 +101,7 @@ begin
   end;
 
   if fMasterDataSet.FieldByName('STYLE_INDEX').IsNull or (fMasterDataSet.FieldByName('STYLE_INDEX').AsInteger = 0) then
-    AddErrorToStr(Errors, 'Стиль кнопки!');
+    AddErrorToStr(Errors, 'Stilul butonului!');
 
   if Errors = '' then
     Result := True
@@ -141,7 +141,7 @@ begin
   try
     if fCreateNewButton then
     begin
-      dtDialogTitle.Text := 'Создание новой кнопки';
+      dtDialogTitle.Text := 'Creare buton nou';
       fMasterDataSet.Insert;
       fMasterDataSet.FieldByName('FLG_ACTIVE').AsInteger := 0;
       fMasterDataSet.FieldByName('FLG_USE_FILTERS').AsInteger := 1;
@@ -151,7 +151,7 @@ begin
     end
     else
     begin
-      dtDialogTitle.Text := 'Изменение данных';
+      dtDialogTitle.Text := 'Modificare date';
       beCUSTOM_FILTER.Text := fMasterDataSet.FieldByName('CUSTOM_FILTER_TITLE_RUS').AsString;
       cmbStyle.ItemIndex := fMasterDataSet.FieldByName('STYLE_INDEX').AsInteger - 1;
       fMasterDataSet.Edit;

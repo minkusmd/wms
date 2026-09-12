@@ -70,7 +70,7 @@ end;
 
 procedure TfrmGoodsImagesEditorDialog.bbRemoveClick(Sender: TObject);
 begin
-  if ShowAskDialog('Удаление картинки', 'Удалить картинку?') = mrYes then
+  if ShowAskDialog('Stergere imagine', 'Stergeti imaginea?') = mrYes then
     IBCQueryGoodsImages.Delete;
 end;
 

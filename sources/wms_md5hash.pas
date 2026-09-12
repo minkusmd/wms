@@ -5,11 +5,11 @@ interface
 uses Windows, SysUtils, Classes;
 
 type
-  { Тип TMD5Digest используется для получения
-    результата функций вычисления хеш-суммы.
-    Содержимое записи можно использовать
-    как набор из 4 целых чисел, или как
-    массив из 16 байт }
+  { Tipul TMD5Digest este folosit pentru obtinerea
+    rezultatului functiilor de calcul al sumei hash.
+    Continutul inregistrarii poate fi folosit
+    ca un set de 4 numere intregi, sau ca
+    un array de 16 octeti }
   PMD5Digest = ^TMD5Digest;
   TMD5Digest = record
     case Integer of
@@ -17,22 +17,22 @@ type
       1: (v: array[0..15] of Byte);
   end;
 
-  // вычисление хеш-суммы для строки
+  // calcul hash pentru sir
 function MD5String(const S: string): TMD5Digest;
 
-// вычисление хеш-суммы для файла
+// calcul hash pentru fisier
 function MD5File(const FileName: string): TMD5Digest;
 
-// вычисление хеш-суммы для содержиого потока Stream
+// calcul hash pentru continutul fluxului Stream
 function MD5Stream(const Stream: TStream): TMD5Digest;
 
-// вычисление хеш-суммы для произвольного буфера
+// calcul hash pentru buffer arbitrar
 function MD5Buffer(const Buffer; Size: Integer): TMD5Digest;
 
-// преобразование хеш-суммы в строку из шестнадцатеричных цифр
+// conversia hash-ului in sir de cifre hexazecimale
 function MD5DigestToStr(const Digest: TMD5Digest): string;
 
-// сравнение двух хеш-сумм
+// comparare a doua hash-uri
 function MD5DigestCompare(const Digest1, Digest2: TMD5Digest): Boolean;
 
 implementation

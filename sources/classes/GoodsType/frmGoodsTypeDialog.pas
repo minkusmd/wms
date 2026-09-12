@@ -260,7 +260,7 @@ end;
 procedure TfrmGoodsTypeDlg.bbSearchClick(Sender: TObject);
 begin
   if fInSearch then begin
-    bbSearch.Caption := 'Поиск';
+    bbSearch.Caption := 'Cautare';
     fInSearch := False;
     IBCQueryGoodsType.Active := False;
     IBCQueryGoodsType.FilterSQL := '';

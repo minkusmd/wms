@@ -138,7 +138,7 @@ begin
   //
   SavePlace := IBCQueryHistoryCash.GetBookmark;
   try
-    CurrencyRate := Dialogs.InputBox('Изменить курс документа', 'Курс USD', IBCQueryHistoryCash.FieldByName('CURRENT_USD_RATE').AsString);
+    CurrencyRate := Dialogs.InputBox('Modifica cursul documentului', 'Curs USD', IBCQueryHistoryCash.FieldByName('CURRENT_USD_RATE').AsString);
     dmdb.ExecuteQuery('execute procedure sp_update_doc_rate (:docid, :rateusd)', [IBCQueryHistoryCash.FieldByName
       ('DOCID').AsInteger, StrToFloat(CurrencyRate)]);
     IBCQueryHistoryCash.Refresh;

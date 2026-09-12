@@ -85,7 +85,7 @@ begin
   ErrorStr := '';
 
   if IBCQueryNotify.FieldByName('CHECK_DATE').IsNull then
-    AddErrorToStr(ErrorStr, 'Дата проверки!');
+    AddErrorToStr(ErrorStr, 'Data verificarii!');
 
   if ErrorStr = '' then
     Result := True
@@ -112,7 +112,7 @@ begin
   try
     if CheckIsCustomerIsEmployer then
     begin
-      dtDialogTitle.Text := 'Закрытая информация';
+      dtDialogTitle.Text := 'Informatie inchisa';
       edDEBTS.Text := dtDialogTitle.Text;
       Label3.Enabled := False;
       deCHECK_DATE.Enabled := False;
@@ -126,7 +126,7 @@ begin
 
       if fReadOnly then
       begin
-        dtDialogTitle.Text := 'У контрагента нет долгов на момент!';
+        dtDialogTitle.Text := 'Contraagentul nu are datorii la moment!';
       end
       else
       begin
@@ -134,7 +134,7 @@ begin
         if (IBCQueryNotify.Eof) then
         begin
           // Create new record
-          dtDialogTitle.Text := 'Создание нового напоминания';
+          dtDialogTitle.Text := 'Creare reamintire noua';
           IBCQueryNotify.Insert;
           IBCQueryNotify.FieldByName('CUSTOMERID').AsInteger := FCustomerID;
           IBCQueryNotify.FieldByName('SECONDARY_USERID').Value := null;
@@ -143,7 +143,7 @@ begin
         else
         begin
           // Modify
-          dtDialogTitle.Text := 'Изменение напоминания';
+          dtDialogTitle.Text := 'Modificare reamintire';
           IBCQueryNotify.Edit;
         end;
         IBCQueryUsers.Active := True;
@@ -181,7 +181,7 @@ procedure TfrmCustomerNotifyDebtsDlg.SetCustomerDebtsValues(const SumaCash, Suma
   const CustomerTitle: String);
 begin
   edCUSTOMER.Text := CustomerTitle;
-  edDEBTS.Text := Format('Наличные: $(%2.2f), безналичные: MDL(%2.2f)', [SumaCash, SumaTransfer]);
+  edDEBTS.Text := Format('Numerar: $(%2.2f), fara numerar: MDL(%2.2f)', [SumaCash, SumaTransfer]);
   if (SumaCash < 0) or (SumaTransfer < 0) then
   begin
     // datorii
@@ -194,7 +194,7 @@ begin
     fReadOnly := True;
     edDEBTS.Style.TextColor := clGrayText;
     btnOk.Visible := False;
-    btnCancel.Caption := 'Закрыть';
+    btnCancel.Caption := 'Inchide';
     Label3.Enabled := False;
     deCHECK_DATE.Enabled := False;
     Label4.Enabled := False;

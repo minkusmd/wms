@@ -92,12 +92,12 @@ begin
   ErrorStr := '';
 
   if fMasterDataSet.FieldByName('TITLE').IsNull or (fMasterDataSet.FieldByName('TITLE').AsWideString = '') then
-    AddErrorToStr(ErrorStr, 'Название группы!');
+    AddErrorToStr(ErrorStr, 'Denumirea grupului!');
 
   if cbNeedEditor.Checked then
   begin
     if fMasterDataSet.FieldByName('VALUE_STR').IsNull or (fMasterDataSet.FieldByName('VALUE_STR').AsWideString = '') then
-      AddErrorToStr(ErrorStr, 'Название дополнительного поля!');
+      AddErrorToStr(ErrorStr, 'Denumirea campului suplimentar!');
   end;
 
   if cbNeedValue.Checked then
@@ -105,7 +105,7 @@ begin
     if rbMastered.Checked then
     begin
       if fMasterDataSet.FieldByName('VALUE_INT').IsNull then
-        AddErrorToStr(ErrorStr, 'Мастер группа!');
+        AddErrorToStr(ErrorStr, 'Grup master!');
     end;
   end;
 
@@ -168,14 +168,14 @@ begin
   try
     if FCreateNewGroup then
     begin
-      dtDialogTitle.Text := 'Создание новой группы';
+      dtDialogTitle.Text := 'Creare grup nou';
 
       fMasterDataSet.Append;
       fMasterDataSet.FieldByName('PARENTID').AsInteger := 0;
     end
     else
     begin
-      dtDialogTitle.Text := 'Изменение записи';
+      dtDialogTitle.Text := 'Modificare inregistrare';
       fMasterDataSet.Edit;
 
       if fMasterDataSet.FieldByName('VALUE_INT_TYPE').AsInteger > 0 then
