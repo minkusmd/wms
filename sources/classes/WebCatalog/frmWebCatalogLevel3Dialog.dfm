@@ -186,6 +186,31 @@ object frmWebCatalogLevel3Dlg: TfrmWebCatalogLevel3Dlg
           ParentFont = False
           WordWrap = True
         end
+        object lbVirtualFilter: TLabel
+          Left = 245
+          Top = 430
+          Width = 280
+          Height = 45
+          AutoSize = False
+          Caption = 
+            'Mapele virtuale se administreaza din butonul "Mape virtuale..." ' +
+            'al catalogului.'
+          WordWrap = True
+        end
+        object lbURL_RO: TLabel
+          Left = 245
+          Top = 480
+          Width = 200
+          Height = 15
+          Caption = 'Link RO (doar pentru grupa dinamica)'
+        end
+        object lbURL_RU: TLabel
+          Left = 245
+          Top = 528
+          Width = 40
+          Height = 15
+          Caption = 'Link RU'
+        end
         object edREWRITE_URL_RUS: TcxDBTextEdit
           Left = 259
           Top = 130
@@ -414,17 +439,6 @@ object frmWebCatalogLevel3Dlg: TfrmWebCatalogLevel3Dlg
           Style.TransparentBorder = False
           TabOrder = 20
         end
-        object lbVirtualFilter: TLabel
-          Left = 245
-          Top = 430
-          Width = 280
-          Height = 45
-          AutoSize = False
-          Caption =
-            'Mapele virtuale se administreaza din butonul "Mape virtuale..." ' +
-            'al catalogului.'
-          WordWrap = True
-        end
         object imgBIG_IMAGE: TcxDBImage
           Left = 27
           Top = 338
@@ -463,32 +477,18 @@ object frmWebCatalogLevel3Dlg: TfrmWebCatalogLevel3Dlg
           Style.TransparentBorder = False
           TabOrder = 1
         end
-        object lbURL_RO: TLabel
-          Left = 245
-          Top = 480
-          Width = 255
-          Height = 15
-          Caption = 'Link RO (doar pentru grupa dinamica)'
-        end
         object teURL_RO: TcxDBTextEdit
           Left = 245
           Top = 499
           DataBinding.DataField = 'URL_RO'
-          TabOrder = 30
+          TabOrder = 21
           Width = 255
-        end
-        object lbURL_RU: TLabel
-          Left = 245
-          Top = 528
-          Width = 255
-          Height = 15
-          Caption = 'Link RU'
         end
         object teURL_RU: TcxDBTextEdit
           Left = 245
           Top = 547
           DataBinding.DataField = 'URL_RU'
-          TabOrder = 31
+          TabOrder = 22
           Width = 255
         end
         object cbFLG_ENABLED: TcxDBCheckBox
@@ -631,8 +631,6 @@ object frmWebCatalogLevel3Dlg: TfrmWebCatalogLevel3Dlg
             object tbArticleRO: TcxTabSheet
               Caption = 'SEO Footer content Romana'
               ImageIndex = 0
-              ExplicitLeft = 5
-              ExplicitTop = 24
               object cxDBMemo1: TcxDBMemo
                 Left = 3
                 Top = 3
@@ -646,6 +644,10 @@ object frmWebCatalogLevel3Dlg: TfrmWebCatalogLevel3Dlg
             object tsArticleRU: TcxTabSheet
               Caption = 'Seo Footer content Russian'
               ImageIndex = 1
+              ExplicitLeft = 0
+              ExplicitTop = 0
+              ExplicitWidth = 0
+              ExplicitHeight = 0
               object cxDBMemo2: TcxDBMemo
                 Left = 2
                 Top = 3

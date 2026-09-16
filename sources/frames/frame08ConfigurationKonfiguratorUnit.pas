@@ -189,7 +189,6 @@ type
     cxGridComponentsDBTableView1SUMA: TcxGridDBColumn;
     bbLibrareSubMenu: TdxBarSubItem;
     bbLivrareRepublica: TdxBarButton;
-    cxTabSheet1: TcxTabSheet;
         procedure bbGoodsNewClick(Sender: TObject);
         procedure cxGridComponentsTableStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
         procedure bbGoodsModifyClick(Sender: TObject);

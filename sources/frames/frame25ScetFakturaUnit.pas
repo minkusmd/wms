@@ -368,6 +368,7 @@ type
     // e-Factura prin API (sources\classes\EFactura)
     function EFacturaStatus: Integer;
     procedure EFacturaSync(const AProposeClose: Boolean);
+    function EFacturaWarnings: string;
 // TODO: SaveFileFromDB
 //  procedure SaveFileFromDB(const AttID: integer; const FilePath: string);
   protected
@@ -2805,6 +2806,7 @@ var
   Manager: TEFacturaManager;
   R: TEFacturaSendResult;
   Force, Sent: Boolean;
+  Details, Warnings: string;
 begin
   R := Default(TEFacturaSendResult);
   Force := False;
@@ -2819,9 +2821,15 @@ begin
       Exit;
     Force := True;
   end
-  else if ShowAskDialog('e-Factura', 'Trimiteti factura in e-Factura?',
-    'Factura apare nesemnata la "Facturi noi"; semnarea se face in e-Factura.') <> mrYes then
-    Exit;
+  else
+  begin
+    Details := 'Factura apare nesemnata la "Facturi noi"; semnarea se face in e-Factura.';
+    Warnings := EFacturaWarnings;
+    if Warnings <> '' then
+      Details := 'ATENTIE:' + #13#10 + Warnings + #13#10#13#10 + Details;
+    if ShowAskDialog('e-Factura', 'Trimiteti factura in e-Factura?', Details) <> mrYes then
+      Exit;
+  end;
 
   Sent := False;
   Manager := TEFacturaManager.Create(dmDB.IBCConnection);
@@ -2959,5 +2967,24 @@ begin
   InvoiceSelectionChanged;
 end;
 
+function Tframe25ScetFaktura.EFacturaWarnings: string;
+var
+  Manager: TEFacturaManager;
+begin
+  // verificarile in Registrul fiscal sunt informative - o eroare aici nu opreste trimiterea
+  Manager := TEFacturaManager.Create(dmDB.IBCConnection);
+  Screen.Cursor := crHourGlass;
+  try
+    try
+      Result := Manager.CheckBeforeSend(dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger);
+    except
+      on E: Exception do
+        Result := 'Verificarea in Registrul fiscal nu a reusit: ' + E.Message;
+    end;
+  finally
+    Screen.Cursor := crDefault;
+    Manager.Free;
+  end;
+end;
 end.
 

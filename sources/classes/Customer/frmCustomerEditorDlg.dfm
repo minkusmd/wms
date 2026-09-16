@@ -157,12 +157,18 @@ object frmCustomerEditorDialog: TfrmCustomerEditorDialog
         Caption = 'Cod TVA'
         Transparent = True
       end
-      object SpeedButton1: TSpeedButton
+      object btnGetSFSData: TSpeedButton
         Left = 396
         Top = 103
         Width = 25
         Height = 24
+        Hint = 
+          'Date din Registrul fiscal (e-Factura): denumire, cod TVA, contur' +
+          'i IBAN'
         Caption = '&H'
+        ParentShowHint = False
+        ShowHint = True
+        OnClick = btnGetSFSDataClick
       end
       object cmbCustomerType: TcxDBLookupComboBox
         Left = 508
@@ -270,6 +276,9 @@ object frmCustomerEditorDialog: TfrmCustomerEditorDialog
               Left = 208
               Top = 40
               PixelsPerInch = 96
+              inherited dxBarManager1Bar1: TdxBar
+                Visible = True
+              end
             end
           end
         end
@@ -293,6 +302,9 @@ object frmCustomerEditorDialog: TfrmCustomerEditorDialog
             end
             inherited dxBarManager1: TdxBarManager
               PixelsPerInch = 96
+              inherited dxBarManager1Bar1: TdxBar
+                Visible = True
+              end
             end
             inherited IBCQueryCustomerPhones: TIBCQuery
               CachedUpdates = True
@@ -340,6 +352,9 @@ object frmCustomerEditorDialog: TfrmCustomerEditorDialog
             end
             inherited dxBarManager1: TdxBarManager
               PixelsPerInch = 96
+              inherited dxBarManager1Bar1: TdxBar
+                Visible = True
+              end
             end
           end
         end
@@ -365,6 +380,9 @@ object frmCustomerEditorDialog: TfrmCustomerEditorDialog
               Left = 296
               Top = 24
               PixelsPerInch = 96
+              inherited dxBarManager1Bar1: TdxBar
+                Visible = True
+              end
             end
             inherited IBCQueryCustomerEMail: TIBCQuery
               Top = 72

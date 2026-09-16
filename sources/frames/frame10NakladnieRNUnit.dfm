@@ -842,6 +842,10 @@ inherited frame10NakladnieRN: Tframe10NakladnieRN
         Margins.Right = 2
         Margins.Bottom = 2
         Caption = 'cashback (&3)'
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         object cxGrid1: TcxGrid
           Left = 0
           Top = 0

@@ -57,6 +57,8 @@ type
     procedure ReadSentInvoice(AInvoiceID: Integer; out AApiId, ASeria, ANumber, AFacturaNo: string;
       out AFirmaID: Integer);
     procedure SetNumber(AInvoiceID: Integer; const ASeria, ANumber: string; AInvoiceStatus: Integer);
+    // pentru interogari in Registrul fiscal: firma preferata sau prima firma configurata
+    function LookupClient(APreferFirmaID: Integer): TEFacturaApiClient;
   public
     // AClient (optional, trece in proprietatea managerului) - in locul credentialelor
     // din TS_API_CONFIG, pentru teste sau servicii fara acces la configurare
@@ -70,6 +72,13 @@ type
     function SyncInvoice(AInvoiceID: Integer): TEFacturaSyncResult;
     procedure CancelInvoice(AInvoiceID: Integer; const AComment: string);
     function GetInvoicePdf(AInvoiceID: Integer): TBytes;
+    // Datele firmei din Registrul fiscal: denumire, adresa juridica, cod TVA, IBAN-uri.
+    function GetCompanyInfo(const AIDNO: string; APreferFirmaID: Integer; out ATaxpayer: TEFacturaTaxpayer;
+      out AAccounts: TEFacturaBankAccounts): Boolean;
+    // Adauga in TS_CUST_ACCOUNTS IBAN-urile care lipsesc; intoarce cate s-au adaugat.
+    function ImportBankAccounts(ACustomerID: Integer; const AAccounts: TEFacturaBankAccounts): Integer;
+    // Avertismente inainte de trimitere (Registrul fiscal); '' daca nu e nimic de semnalat.
+    function CheckBeforeSend(ADocID: Integer): string;
     // clientul folosit la ultima operatie (diagnostic: LastRequest / LastResponse)
     property Client: TEFacturaApiClient read FClient;
   end;
@@ -372,4 +381,192 @@ begin
   Result := ClientForFirma(FirmaID).GetInvoicePdf(Seria, Number);
 end;
 
+function TEFacturaManager.LookupClient(APreferFirmaID: Integer): TEFacturaApiClient;
+var
+  Q: TIBCQuery;
+  FirmaID: Integer;
+begin
+  if FFixedClient or (FClient <> nil) then
+    Exit(FClient);
+
+  // orice utilizator API poate citi Registrul fiscal; preferam firma curenta
+  FirmaID := 0;
+  Q := NewQuery;
+  try
+    Q.SQL.Text := 'SELECT U.API_CODE FROM TS_API_CONFIG U' +
+      ' WHERE U.API_CODE STARTING WITH :PREFIX AND U.PARAM_NAME = ''USERNAME'' AND U.FLG_ACTIVE = 1' +
+      '   AND COALESCE(U.PARAM_VALUE, '''') <> ''''' +
+      '   AND EXISTS (SELECT 1 FROM TS_API_CONFIG P WHERE P.API_CODE = U.API_CODE AND P.PARAM_NAME = ''PASSWORD''' +
+      '               AND P.FLG_ACTIVE = 1 AND COALESCE(P.PARAM_VALUE, '''') <> '''')' +
+      ' ORDER BY IIF(U.API_CODE = :PREFERRED, 0, 1), U.API_CODE';
+    Q.ParamByName('PREFIX').AsString := cEFacturaApiCodePrefix;
+    Q.ParamByName('PREFERRED').AsString := ApiCodeForFirma(APreferFirmaID);
+    Q.Open;
+    while (FirmaID = 0) and not Q.Eof do
+    begin
+      FirmaID := StrToIntDef(Copy(Trim(Q.FieldByName('API_CODE').AsString), Length(cEFacturaApiCodePrefix) + 1,
+        MaxInt), 0);
+      Q.Next;
+    end;
+  finally
+    Q.Free;
+  end;
+  if FirmaID = 0 then
+    raise EEFacturaApiError.Create('Nu exista nicio firma cu credentiale e-Factura ' +
+      '(API_CODE = EFACTURA_<cod firma> in Setari > Configurari API).');
+  Result := ClientForFirma(FirmaID);
+end;
+
+function TEFacturaManager.GetCompanyInfo(const AIDNO: string; APreferFirmaID: Integer;
+  out ATaxpayer: TEFacturaTaxpayer; out AAccounts: TEFacturaBankAccounts): Boolean;
+var
+  Api: TEFacturaApiClient;
+begin
+  AAccounts := nil;
+  Api := LookupClient(APreferFirmaID);
+  Result := Api.GetTaxpayer(Trim(AIDNO), ATaxpayer);
+  if Result then
+    AAccounts := Api.GetBankAccounts(Trim(AIDNO));
+end;
+
+function TEFacturaManager.ImportBankAccounts(ACustomerID: Integer; const AAccounts: TEFacturaBankAccounts): Integer;
+// ACCOUNTNUMBER = IBAN, ca la conturile introduse manual. Banca = codul filialei din
+// Registrul fiscal (TS_BANKS.BANKACCOUNT); lipsa se adauga, cele existente nu se modifica.
+// Primul cont adaugat devine implicit doar daca clientul nu are inca unul implicit.
+var
+  Q: TIBCQuery;
+  Tr: TIBCTransaction;
+  Acc: TEFacturaBankAccount;
+  HasDefault: Boolean;
+begin
+  Result := 0;
+  Tr := TIBCTransaction.Create(nil);
+  Q := NewQuery;
+  try
+    Tr.DefaultConnection := FConnection;
+    Q.AutoCommit := False;
+    Q.Transaction := Tr;
+    Tr.StartTransaction;
+    try
+      Q.SQL.Text := 'SELECT COUNT(*) FROM TS_CUST_ACCOUNTS WHERE CUSTOMERID = :CUSTOMERID AND DEFAULT_ACCOUNT = 1';
+      Q.ParamByName('CUSTOMERID').AsInteger := ACustomerID;
+      Q.Open;
+      HasDefault := Q.Fields[0].AsInteger > 0;
+      Q.Close;
+
+      for Acc in AAccounts do
+      begin
+        if (Trim(Acc.AccountNumber) = '') or (Trim(Acc.BranchCode) = '') then
+          Continue;
+
+        Q.SQL.Text := 'INSERT INTO TS_BANKS (BANKACCOUNT, BANKNAME)' +
+          ' SELECT :BANK1, :BANKNAME FROM RDB$DATABASE' +
+          ' WHERE NOT EXISTS (SELECT 1 FROM TS_BANKS B WHERE B.BANKACCOUNT = :BANK2)';
+        Q.ParamByName('BANK1').AsString := Trim(Acc.BranchCode);
+        Q.ParamByName('BANK2').AsString := Trim(Acc.BranchCode);
+        Q.ParamByName('BANKNAME').AsString := Copy(Trim(Acc.BranchTitle), 1, 255);
+        Q.ExecSQL;
+
+        Q.SQL.Text := 'INSERT INTO TS_CUST_ACCOUNTS (CUSTOMERID, ACCOUNTNUMBER, ACCOUNTNAME, BANKACCOUNT,' +
+          ' DEFAULT_ACCOUNT, IBAN)' +
+          ' SELECT :CUST1, :IBAN1, :ACCOUNTNAME, :BANKACCOUNT, :DEFAULT_ACCOUNT, :IBAN2 FROM RDB$DATABASE' +
+          ' WHERE NOT EXISTS (SELECT 1 FROM TS_CUST_ACCOUNTS A WHERE A.CUSTOMERID = :CUST2 AND A.ACCOUNTNUMBER = :IBAN3)';
+        Q.ParamByName('CUST1').AsInteger := ACustomerID;
+        Q.ParamByName('CUST2').AsInteger := ACustomerID;
+        Q.ParamByName('IBAN1').AsString := Trim(Acc.AccountNumber);
+        Q.ParamByName('IBAN2').AsString := Trim(Acc.AccountNumber);
+        Q.ParamByName('IBAN3').AsString := Trim(Acc.AccountNumber);
+        Q.ParamByName('ACCOUNTNAME').AsString := Copy(Trim(Acc.BranchTitle), 1, 60);
+        Q.ParamByName('BANKACCOUNT').AsString := Trim(Acc.BranchCode);
+        if HasDefault then
+          Q.ParamByName('DEFAULT_ACCOUNT').AsInteger := 0
+        else
+          Q.ParamByName('DEFAULT_ACCOUNT').AsInteger := 1;
+        Q.ExecSQL;
+        if Q.RowsAffected > 0 then
+        begin
+          Inc(Result);
+          HasDefault := True;
+        end;
+      end;
+      Tr.Commit;
+    except
+      Tr.Rollback;
+      raise;
+    end;
+  finally
+    Q.Free;
+    Tr.Free;
+  end;
+end;
+
+function TEFacturaManager.CheckBeforeSend(ADocID: Integer): string;
+// Informativ, nu blocheaza trimiterea: e-Factura accepta si IBAN-uri introduse manual
+// sau cumparatori care nu folosesc sistemul (ciclul scurt, cu tipar).
+var
+  Q: TIBCQuery;
+  Api: TEFacturaApiClient;
+  W: TStringList;
+  FirmaID: Integer;
+  SupplierIDNO, BuyerIDNO, SupplierAccount: string;
+  Vat: Double;
+  Supplier, Buyer: TEFacturaTaxpayer;
+  Accounts: TEFacturaBankAccounts;
+  Acc: TEFacturaBankAccount;
+  Registered: Boolean;
+begin
+  Q := NewQuery;
+  try
+    Q.SQL.Text := 'SELECT D.DT,' +
+      ' (SELECT CI.IDEN_NUMBER FROM TS_CUST_INFO CI WHERE CI.CUSTOMERID = D.DT) DT_IDNO,' +
+      ' (SELECT CI.IDEN_NUMBER FROM TS_CUST_INFO CI WHERE CI.CUSTOMERID = D.CT) CT_IDNO,' +
+      ' (SELECT FIRST 1 DR.DT_CD FROM TDB_DOCS_RECHIZITE DR WHERE DR.DOCID = D.DOCID) DT_ACCOUNT,' +
+      ' (SELECT SUM(P.SUMAVAT) FROM GET_GOODS_FOR_RECEIPT(D.DOCID) P) SUMAVAT' +
+      ' FROM TDB_DOCS D WHERE D.DOCID = :DOCID';
+    Q.ParamByName('DOCID').AsInteger := ADocID;
+    Q.Open;
+    if Q.IsEmpty then
+      raise EEFacturaApiError.CreateFmt('Documentul #%d nu exista.', [ADocID]);
+    FirmaID := Q.FieldByName('DT').AsInteger;
+    SupplierIDNO := Trim(Q.FieldByName('DT_IDNO').AsString);
+    BuyerIDNO := Trim(Q.FieldByName('CT_IDNO').AsString);
+    SupplierAccount := Trim(Q.FieldByName('DT_ACCOUNT').AsString);
+    Vat := Q.FieldByName('SUMAVAT').AsFloat;
+  finally
+    Q.Free;
+  end;
+
+  Api := ClientForFirma(FirmaID);
+  W := TStringList.Create;
+  try
+    if (SupplierIDNO <> '') and Api.GetTaxpayer(SupplierIDNO, Supplier) then
+    begin
+      if (Supplier.CodTVA = '') and (Abs(Vat) >= 0.01) then
+        W.Add(Format('Furnizorul nu este platitor de TVA (fara cod TVA in Registrul fiscal), dar factura are ' +
+          'TVA de %.2f lei.', [Vat]));
+      Accounts := Api.GetBankAccounts(SupplierIDNO);
+      Registered := False;
+      for Acc in Accounts do
+        if SameText(Trim(Acc.AccountNumber), SupplierAccount) then
+          Registered := True;
+      if Length(Accounts) = 0 then
+        W.Add('Furnizorul nu are niciun cont bancar inregistrat in Registrul fiscal.')
+      else if SupplierAccount = '' then
+        W.Add('Documentul nu are indicat contul bancar al furnizorului.')
+      else if not Registered then
+        W.Add('Contul furnizorului ' + SupplierAccount + ' nu este inregistrat in Registrul fiscal.');
+    end;
+
+    if BuyerIDNO <> '' then
+    begin
+      if not Api.GetTaxpayer(BuyerIDNO, Buyer) or not Buyer.ExistInTaxRegistry then
+        W.Add('Cumparatorul (IDNO ' + BuyerIDNO + ') nu a fost gasit in Registrul fiscal.')
+      else if not Buyer.IsEFacturaActor then
+        W.Add('Cumparatorul nu foloseste e-Factura: factura se va tipari si semna olograf (ciclul scurt).');
+    end;
+    Result := Trim(W.Text);
+  finally
+    W.Free;
+  end;
+end;
 end.

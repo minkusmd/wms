@@ -161,18 +161,19 @@ var
   q: TIBCQuery;
     s: string;
 begin
-    s := fMasterDataSet.FieldByName('TITLE').AsString;
-
+    MasterDataSet.Edit;
+    s := trim(fMasterDataSet.FieldByName('TITLE').AsString);
     s := StringReplace(S, ',', '-', [rfReplaceAll, rfIgnoreCase]);
     s := StringReplace(S, ' ', '-', [rfReplaceAll, rfIgnoreCase]);
     s := StringReplace(S, '/', '-', [rfReplaceAll, rfIgnoreCase]);
     s := String(BestFit(AnsiString(s)));
     fMasterDataSet.FieldByName('REWRITE_URL_ROM').AsString := S.ToLower;
-    fMasterDataSet.FieldByName('REWRITE_URL_RUS').AsString := S.ToLower;
-//    s := fMasterDataSet.FieldByName('TITLE_RUS').AsString;
-//    s := StringReplace(S, ', ', ' ', [rfReplaceAll, rfIgnoreCase]);
-//    s := StringReplace(S, ' ', '-', [rfReplaceAll, rfIgnoreCase]);
-//    s := StringReplace(S, '/', '-', [rfReplaceAll, rfIgnoreCase]);
+
+    s := trim(fMasterDataSet.FieldByName('TITLE_RUS').AsString);
+    s := StringReplace(S, ', ', ' ', [rfReplaceAll, rfIgnoreCase]);
+    s := StringReplace(S, ' ', '-', [rfReplaceAll, rfIgnoreCase]);
+    s := StringReplace(S, '/', '-', [rfReplaceAll, rfIgnoreCase]);
+    fMasterDataSet.FieldByName('REWRITE_URL_RUS').AsString := TranslitRus2Lat(s.ToLower);
 
    MasterDataSet.Post;
 

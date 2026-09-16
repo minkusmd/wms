@@ -1936,6 +1936,11 @@ begin
                dmdb.IBCQueryDocs.FieldByName('ct_name').AsString + #10  +
                dmDB.IBCQueryDocs.FieldByName('PHONELIST').AsString + #10 + #10;
     qDelivery.sql.text := 'select * from VW_TDB_DOCS_DELIVERY where docid = :docid';
+    qDelivery.Open;
+    s := s + #10 +
+        qDelivery.FieldByName('DELIVERY_ADDRESS').AsString + ' ' + qDelivery.FieldByName('district_name').AsString + ' ' +
+        qDelivery.FieldByName('city_name').AsString + ' ' +
+        qDelivery.FieldByName('DELIVERY_DATE').AsString + #10;
 
     try
         q.SQL.Add('SELECT str FROM GET_SUPPLIER_GOODS_BY_DOCID(:DOCID, TRUE)');

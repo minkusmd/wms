@@ -76,7 +76,7 @@ type
     cxLabel8: TLabel;
     cxLabel10: TLabel;
     cxLabel11: TLabel;
-    SpeedButton1: TSpeedButton;
+    btnGetSFSData: TSpeedButton;
     cbRezident: TcxDBCheckBox;
     edChief: TcxDBTextEdit;
     edAccountant: TcxDBTextEdit;
@@ -94,6 +94,7 @@ type
             var Error: Boolean);
         procedure cxButton2Click(Sender: TObject);
     procedure btnDeleteSufixClick(Sender: TObject);
+        procedure btnGetSFSDataClick(Sender: TObject);
     private    { Private declarations }
         fCreateNewRecord: Boolean;
         fCustomerID: Integer;
@@ -133,7 +134,8 @@ type
 implementation
 
 uses
-    SWNUtils, SWNConst, SWNSecurityFlags, SWNSecurity, frmCustomerCommentsV2Dialog, DataModuleDB, SWNDBErrors;
+    SWNUtils, SWNConst, SWNSecurityFlags, SWNSecurity, frmCustomerCommentsV2Dialog, DataModuleDB, SWNDBErrors,
+    System.StrUtils, EFacturaApiClient, EFacturaManager;
 
 {$R *.dfm}
 { TfrmCustomerEditorDialog }
@@ -779,6 +781,148 @@ begin
     end;
     frameCustomerPhones1.IBCQueryCustomerPhones.Close;
     frameCustomerEvents1.IBCQueryCustomerEvents.Close;
+end;
+
+{ Denumirea din Registrul fiscal in forma folosita in WMS: '"PRIME STORE" S.R.L.' -> 'PRIME STORE SRL'. }
+function RegistryNameToWMS(const AName: string): string;
+begin
+  Result := StringReplace(StringReplace(AName, '"', '', [rfReplaceAll]), '''', '', [rfReplaceAll]);
+  Result := UpperCase(Trim(Result));
+  Result := StringReplace(Result, 'S.R.L.', 'SRL', [rfReplaceAll]);
+  Result := StringReplace(Result, 'S.R.L', 'SRL', [rfReplaceAll]);
+  Result := StringReplace(Result, 'S.A.', 'SA', [rfReplaceAll]);
+  while Pos('  ', Result) > 0 do
+    Result := StringReplace(Result, '  ', ' ', [rfReplaceAll]);
+end;
+
+{ Datele clientului din Registrul fiscal (SFS), prin API-ul e-Factura: denumire, adresa
+  juridica, cod TVA si conturile IBAN inregistrate. Denumirea (doar daca lipseste) si codul
+  TVA se completeaza in fisa si se salveaza cu OK; IBAN-urile lipsa se adauga direct in
+  TS_CUST_ACCOUNTS, doar pentru clientii deja salvati (conturile au FK spre client). Adresa
+  ramane de comparat manual: in WMS adresele sunt structurate (tara/oras/sector), iar
+  Registrul o da ca text. }
+procedure TfrmCustomerEditorDialog.btnGetSFSDataClick(Sender: TObject);
+var
+  Manager: TEFacturaManager;
+  Taxpayer: TEFacturaTaxpayer;
+  Accounts: TEFacturaBankAccounts;
+  Acc: TEFacturaBankAccount;
+  Q: TIBCQuery;
+  IDNO, Info, Existing, NewAccounts, Changes: string;
+  NewCount, Added: Integer;
+  SetVat, SetName: Boolean;
+begin
+  IDNO := Trim(fMasterDataSet.FieldByName('IDEN_NUMBER').AsString);
+  if IDNO = '' then
+  begin
+    ShowErrorDialog('e-Factura', 'Indicati codul fiscal (IDNO) al clientului.');
+    Exit;
+  end;
+
+  Manager := TEFacturaManager.Create(dmDB.IBCConnection);
+  try
+    try
+      Screen.Cursor := crHourGlass;
+      try
+        if not Manager.GetCompanyInfo(IDNO, dmDB.CurrentFirma, Taxpayer, Accounts) then
+        begin
+          Screen.Cursor := crDefault;
+          ShowInfoDialog('Date din e-Factura', 'Codul fiscal ' + IDNO + ' nu a fost gasit in Registrul fiscal.');
+          Exit;
+        end;
+      finally
+        Screen.Cursor := crDefault;
+      end;
+    except
+      on E: Exception do
+      begin
+        ShowErrorDialog('e-Factura', E.Message);
+        Exit;
+      end;
+    end;
+
+    // conturile deja existente in fisa clientului
+    Existing := '|';
+    if not fCreateNewRecord then
+    begin
+      Q := TIBCQuery.Create(nil);
+      try
+        Q.Connection := dmDB.IBCConnection;
+        Q.SQL.Text := 'SELECT ACCOUNTNUMBER FROM TS_CUST_ACCOUNTS WHERE CUSTOMERID = :CUSTOMERID';
+        Q.ParamByName('CUSTOMERID').AsInteger := fMasterDataSet.FieldByName('CUSTOMERID').AsInteger;
+        Q.Open;
+        while not Q.Eof do
+        begin
+          Existing := Existing + UpperCase(Trim(Q.Fields[0].AsString)) + '|';
+          Q.Next;
+        end;
+      finally
+        Q.Free;
+      end;
+    end;
+
+    Info := 'Denumire: ' + Taxpayer.Name + #13#10 +
+      'Adresa juridica: ' + Taxpayer.Address + #13#10 +
+      'Cod TVA: ' + IfThen(Taxpayer.CodTVA = '', '- (neplatitor de TVA)', Taxpayer.CodTVA) + #13#10 +
+      'Foloseste e-Factura: ' + IfThen(Taxpayer.IsEFacturaActor, 'da', 'nu') + #13#10 +
+      'Conturi IBAN in Registrul fiscal: ' + IntToStr(Length(Accounts));
+    NewAccounts := '';
+    NewCount := 0;
+    for Acc in Accounts do
+    begin
+      Info := Info + #13#10 + '   ' + Acc.AccountNumber + ' - ' + Acc.BranchTitle;
+      if Pos('|' + UpperCase(Trim(Acc.AccountNumber)) + '|', Existing) = 0 then
+      begin
+        NewAccounts := NewAccounts + #13#10 + '   ' + Acc.AccountNumber;
+        Inc(NewCount);
+      end;
+    end;
+
+    SetVat := (Taxpayer.CodTVA <> '') and (Trim(fMasterDataSet.FieldByName('VAT_NUMBER').AsString) <> Taxpayer.CodTVA);
+    SetName := (Trim(Taxpayer.Name) <> '') and (Trim(fMasterDataSet.FieldByName('NAME').AsString) = '');
+    Changes := '';
+    if SetName then
+      Changes := Changes + #13#10 + '- denumirea: ' + RegistryNameToWMS(Taxpayer.Name);
+    if SetVat then
+      Changes := Changes + #13#10 + '- codul TVA: ' + Taxpayer.CodTVA;
+    if (NewCount > 0) and not fCreateNewRecord then
+      Changes := Changes + #13#10 + Format('- %d cont(uri) IBAN noi:', [NewCount]) + NewAccounts;
+
+    if fReadOnly or (Changes = '') then
+    begin
+      if (NewCount > 0) and fCreateNewRecord then
+        Info := Info + #13#10#13#10 + 'Conturile IBAN se pot adauga dupa salvarea clientului.'
+      else if not fReadOnly then
+        Info := Info + #13#10#13#10 + 'Denumirea, codul TVA si conturile din fisa corespund Registrului fiscal.';
+      ShowInfoDialog('Date din e-Factura', Info);
+      Exit;
+    end;
+
+    if ShowAskDialog('Date din e-Factura', Info, 'Completati in fisa clientului:' + Changes) <> mrYes then
+      Exit;
+
+    if (SetName or SetVat) and not (fMasterDataSet.State in dsEditModes) then
+      fMasterDataSet.Edit;
+    if SetName then
+      fMasterDataSet.FieldByName('NAME').AsString := RegistryNameToWMS(Taxpayer.Name);
+    if SetVat then
+    begin
+      fMasterDataSet.FieldByName('VAT_NUMBER').AsString := Taxpayer.CodTVA;
+    end;
+    if (NewCount > 0) and not fCreateNewRecord then
+    begin
+      try
+        Added := Manager.ImportBankAccounts(fMasterDataSet.FieldByName('CUSTOMERID').AsInteger, Accounts);
+        ShowInfoDialog('Date din e-Factura', Format('Au fost adaugate %d conturi IBAN.', [Added]));
+      except
+        on E: Exception do
+          if not ProcessSWNError(E) then
+            ShowErrorDialog('e-Factura', E.Message);
+      end;
+    end;
+  finally
+    Manager.Free;
+  end;
 end;
 
 end.

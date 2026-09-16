@@ -372,7 +372,7 @@ uses
   SWNTypes, SWNUtils, SWNValueStorageUnit, frm82SelectLivrareUnit, frmActiuneTVAInapoiDialog,
   frmAddGoodsToSupplierOrderDlgUnit, frmApplyActiuneCodeDialog, frmApplyPromoCodeDialog, frmBringGoodsDialog,
   frmCalcProfitabilityContractDialog, frmCalcProfitabilityDialog, frmDocumentDeleteDialog, frmDocumentTreeUnit,
-  frmGoodsForeignCodeDialog, frmMoneyIncomeDialog, frmOtgruzkaDialog, frmPrintEngineWindow, frmProduseCuReducereDialog,
+  frmGoodsForeignCodeDialog, frmSupplierPickupListDialog, frmMoneyIncomeDialog, frmOtgruzkaDialog, frmPrintEngineWindow, frmProduseCuReducereDialog,
   frmRNDocDialog, frmSelectGoodsSupplierUnit, frmSelectGoodsToAddDialog, frmSelectPartNumbersDialog,
   frmSelectPhoneNumberUnit, frmSelectSNDialog, uChangeUser,
   Vcl.Clipbrd;
@@ -690,19 +690,22 @@ begin
   ShowRemoveGoodsDialog;
 end;
 
+// Ridicarea marfii de la furnizor pentru linia curenta a comenzii
+// (TDB_SUPPLIER_PICKUP, lista "Ridicari de la furnizori"):
+// - fara ridicari -> TfrmGoodsForeignCodeDlg (furnizorul cu stoc) + confirmare
+//   (intermediar, locul ridicarii, cantitatea - implicit QTY din comanda);
+// - exista deja -> se deschide ridicarea / lista ridicarilor liniei pentru
+//   verificare si modificare (data, cantitate, furnizori) sau ridicare noua.
 procedure Tframe10NakladnieRN.bbSelectSupplierClick(Sender: TObject);
-
 begin
-  var d:=TfrmGoodsForeignCodeDlg.Create(self);
-  try
-    d.GoodsID := dmdb.IBCQueryJurnal.FieldByName('GOODSID').AsInteger;
-    if d.ShowModal=mrOK then
-    begin
-       dmdb.AddToAchizitii(d.GoodsID, dmdb.IBCQueryJurnal.fieldByname('QTY').AsInteger, d.SupplierID);
-    end;
-  finally
-    d.Free;
-  end;
+  if dmdb.IBCQueryJurnal.IsEmpty then
+    Exit;
+
+  ShowSupplierPickupsForOrderLine(Self,
+    dmdb.IBCQueryDocs.FieldByName('DOCID').AsInteger,
+    dmdb.IBCQueryJurnal.FieldByName('DTDEP').AsInteger,
+    dmdb.IBCQueryJurnal.FieldByName('GOODSID').AsInteger,
+    dmdb.IBCQueryJurnal.FieldByName('QTY').AsInteger);
 end;
 
 procedure Tframe10NakladnieRN.bbShowSerialDialogClick(Sender: TObject);

@@ -379,7 +379,6 @@ inherited frame129VinzarePrinPartener: Tframe129VinzarePrinPartener
     PositionAfterOpen = 15
     MinSize = 102
     Control = pnBottom
-    ExplicitWidth = 8
   end
   object pnBottom: TPanel
     Left = 0
@@ -1006,10 +1005,6 @@ inherited frame129VinzarePrinPartener: Tframe129VinzarePrinPartener
         Margins.Bottom = 2
         Caption = 'livrari (&4)'
         ImageIndex = 2
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         inline frameDelivery1: TframeDelivery
           Left = 0
           Top = 0

@@ -72,6 +72,20 @@ object frameSipCustomerCallsHistory: TframeSipCustomerCallsHistory
         MinWidth = 25
         Width = 125
       end
+      object cxGrid1DBTableView1CALL_STATE_NAME: TcxGridDBColumn
+        Caption = 'Stare'
+        DataBinding.FieldName = 'CALL_STATE_NAME'
+        HeaderAlignmentHorz = taCenter
+        MinWidth = 25
+        Width = 110
+      end
+      object cxGrid1DBTableView1ANSWERED_BY: TcxGridDBColumn
+        Caption = 'Preluat de'
+        DataBinding.FieldName = 'ANSWERED_BY'
+        HeaderAlignmentHorz = taCenter
+        MinWidth = 25
+        Width = 150
+      end
       object cxGrid1DBTableView1SOURCEID: TcxGridDBColumn
         Caption = 'Telefon'
         DataBinding.FieldName = 'SOURCEID'
@@ -113,6 +127,17 @@ object frameSipCustomerCallsHistory: TframeSipCustomerCallsHistory
     Connection = dmDB.IBCConnection
     SQL.Strings = (
       'select p.data, P.CALLTYPEID, PH.DURATION,'
+      '       case P.call_stateid'
+      '         when 0 then ''In curs'''
+      '         when 1 then ''Preluat'''
+      '         when 2 then iif(P.calltypeid = 0, ''Pierdut'', ''Fara raspuns'')'
+      '         when 3 then ''Preluat de coleg'''
+      '         when 4 then ''Respins'''
+      '         when 5 then ''Neterminat'''
+      '       end CALL_STATE_NAME,'
+      '       (select lu.full_name from ts_phone_calls_history l'
+      '          join ts_users lu on lu.userid = l.userid'
+      '         where l.callid = P.linked_callid) ANSWERED_BY,'
       '       (select FULL_NAME'
       '        from TS_USERS'
       

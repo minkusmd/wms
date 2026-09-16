@@ -294,6 +294,8 @@ type
     dxBarButton5: TdxBarButton;
     bbGrupeProduseAnaliza: TdxBarButton;
     bbAutoTransport: TdxBarButton;
+    bbSupplierPickups: TdxBarButton;
+    bbSupplierOrderRules: TdxBarButton;
     bbPlanVinzari: TdxBarButton;
     bbRegistrulBancar: TdxBarButton;
     bbChangeCustomerName: TdxBarButton;
@@ -479,6 +481,8 @@ type
     procedure bbGrupeProduseAnalizaClick(Sender: TObject);
     procedure dxStatusBarPanels2DblClick(Sender: TObject);
     procedure bbAutoTransportClick(Sender: TObject);
+    procedure bbSupplierPickupsClick(Sender: TObject);
+    procedure bbSupplierOrderRulesClick(Sender: TObject);
     procedure bbPlanVinzariClick(Sender: TObject);
     procedure bbRegistrulBancarClick(Sender: TObject);
     procedure bbPricePolicyClick(Sender: TObject);
@@ -872,6 +876,8 @@ uses
   frmSyssEditorWindow,
   frmToolsNewGoodsDialog,
   frmTransportUnit,
+  frmSupplierPickupListDialog,
+  frmSupplierOrderRulesDialog,
   frmUMDlg,
   frmUserActivityMonitorDialog,
   frmUserGroupsDlg,
@@ -1070,6 +1076,30 @@ var
   dialog: TfrmTransportDlg;
 begin
   dialog := TfrmTransportDlg.Create(Self, dmDB.IBCConnection);
+  try
+    dialog.ShowModal;
+  finally
+    dialog.Free;
+  end;
+end;
+
+procedure TfrmMainForm.bbSupplierPickupsClick(Sender: TObject);
+var
+  dialog: TfrmSupplierPickupListDlg;
+begin
+  dialog := TfrmSupplierPickupListDlg.Create(Self);
+  try
+    dialog.ShowModal;
+  finally
+    dialog.Free;
+  end;
+end;
+
+procedure TfrmMainForm.bbSupplierOrderRulesClick(Sender: TObject);
+var
+  dialog: TfrmSupplierOrderRulesDlg;
+begin
+  dialog := TfrmSupplierOrderRulesDlg.Create(Self);
   try
     dialog.ShowModal;
   finally
@@ -3997,6 +4027,8 @@ begin
     bbMCC.Visible := ivNever;
     bbWorkStations.Visible := ivNever;
     bbAutoTransport.Visible := ivNever;
+    bbSupplierPickups.Visible := ivNever;
+    bbSupplierOrderRules.Visible := ivNever;
     bbSYSS.Visible := ivNever;
     bbRegistrulBancar.Visible := ivNever;
     bbCreateNewVersion.Visible := ivNever;

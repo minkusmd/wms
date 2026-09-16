@@ -1,4 +1,4 @@
-﻿unit frmGoodsForeignCodeDialog;
+﻿unit  frmGoodsForeignCodeDialog;
 
 interface
 
@@ -219,6 +219,20 @@ TfrmGoodsForeignCodeDlg = class(TSWNCustomForm)
     bbCopyToPartner: TdxBarButton;
     TV1_DIF01: TcxGridDBBandedColumn;
     TV1_PRICE_CREDIT0: TcxGridDBBandedColumn;
+    TV1_P1_MDL: TcxGridDBBandedColumn;
+    TV1_P1_USD: TcxGridDBBandedColumn;
+    TV1_P2_MDL: TcxGridDBBandedColumn;
+    TV1_P2_USD: TcxGridDBBandedColumn;
+    TV1_P3_MDL: TcxGridDBBandedColumn;
+    TV1_P3_USD: TcxGridDBBandedColumn;
+    TV1_P4_MDL: TcxGridDBBandedColumn;
+    TV1_P4_USD: TcxGridDBBandedColumn;
+    TV1_P5_MDL: TcxGridDBBandedColumn;
+    TV1_P5_USD: TcxGridDBBandedColumn;
+    TV1_P6_MDL: TcxGridDBBandedColumn;
+    TV1_P6_USD: TcxGridDBBandedColumn;
+    TV1_P7_MDL: TcxGridDBBandedColumn;
+    TV1_P7_USD: TcxGridDBBandedColumn;
     procedure cxGridForeignTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord:
       TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
     procedure bbForeignNewClick(Sender: TObject);
@@ -260,6 +274,7 @@ TfrmGoodsForeignCodeDlg = class(TSWNCustomForm)
     FUltraApiPassword: string;
     FUltraConfigLoaded: Boolean;
     procedure ReadGoodsInfo;
+    procedure HideLegacyPriceColumns;
     procedure SelectionChanged;
     procedure ShowAddNewCodeDialog;
     procedure ShowModifyCodeDialog;
@@ -942,6 +957,30 @@ begin
   begin
     AppUserConfigStorage.GridColumns.ReadGridStructure(cxGridForeignDBBandedTableView1);
   end;
+  HideLegacyPriceColumns;
+end;
+
+// Preturile se afiseaza pe benzi (Web, Promo, RRP, Calc, Discount, Diler,
+// Indicativ): sus pret MDL + valuta, jos pret USD + valuta (campurile Pn_MDL /
+// Pn_USD din IBCQueryForeign). Coloanele vechi raman pentru expresii si calcule
+// (ex. [Indicativ, MDL] in tv1_PriceIndicativ, GetLowestPrice7RowIndex), dar
+// ascunse - si dupa ce se restaureaza structura grilei salvata de utilizator.
+procedure TfrmGoodsForeignCodeDlg.HideLegacyPriceColumns;
+begin
+  TV1_PRICE1.Visible := False;
+  TV1_CURRENCY1ID.Visible := False;
+  TV1_PRICE2.Visible := False;
+  TV1_CURRENCY2ID.Visible := False;
+  TV1_PRICE3.Visible := False;
+  TV1_CURRENCY3ID.Visible := False;
+  TV1_PRICE4.Visible := False;
+  TV1_PRICE5.Visible := False;
+  TV1_CURRENCY5ID.Visible := False;
+  TV1_PRICE6.Visible := False;
+  TV1_CURRENCY6ID.Visible := False;
+  TV1_PRICE7.Visible := False;
+  TV1_CURRENCY7ID.Visible := False;
+  TV1_PRICE7_LEI.Visible := False;
 end;
 
 function TfrmGoodsForeignCodeDlg.GetLowestPrice7RowIndex(Sender: TcxGridDBBandedTableView): Integer;
@@ -2047,8 +2086,6 @@ end;
 
 procedure TfrmGoodsForeignCodeDlg.SetupSecurityItems;
 begin
-  cxGridForeignDBBandedTableView1.Bands[0].Width := 582;
-  cxGridForeignDBBandedTableView1.Bands[1].Width := 609;
   if not SecurityFlagEnabled(cSecurityFlag_Справочники_Клиенты_Текущие_долги_контрагента) then
   begin
     bbDebts.Visible := ivNever;
@@ -2071,8 +2108,10 @@ begin
     TV1_PERCENT47.Visible := false;
     TV1_DIFF47.Visible := false;
     TV1_MARGIN01.Visible := false;
-    cxGridForeignDBBandedTableView1.Bands[0].Width := 900;
-    cxGridForeignDBBandedTableView1.Bands[1].Width := 500;
+    // banda "Indicativ" (pretul de achizitie) si marjele fata de el
+    cxGridForeignDBBandedTableView1.Bands[7].Visible := False;
+    TV1_P7_MDL.Visible := False;
+    TV1_P7_USD.Visible := False;
   end;
 
   if not SecurityFlagEnabled(cSecurityFlag_Справочники_НТУП_Modificare) then

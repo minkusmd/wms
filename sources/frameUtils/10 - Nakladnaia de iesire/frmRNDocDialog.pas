@@ -47,6 +47,13 @@ type
     lcbDocumentState: TcxDBLookupComboBox;
     cmbImageState: TcxDBImageComboBox;
     frameDelivery: TframeDocsDelivery;
+    lblSecDocument: TLabel;
+    lblSecParti: TLabel;
+    lblSecValuta: TLabel;
+    bvParti: TBevel;
+    bvValuta: TBevel;
+    lbAnalytics: TLabel;
+    lbRate: TLabel;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure lcbCURRENCYPropertiesEditValueChanged(Sender: TObject);
     procedure FormCreate(Sender: TObject);

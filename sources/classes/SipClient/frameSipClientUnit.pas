@@ -84,6 +84,25 @@ uses
 const
   WM_REENABLE = WM_USER + $101;
 
+  { CALL_STATEID in TS_PHONE_CALLS_HISTORY (vezi DB Model\phone_calls_state.sql).
+    Starea 3 (preluat de coleg) o pune procedura SP_PHONE_CALL_SET_STATE prin
+    corelarea cu apelul preluat de alt operator din grup. }
+  cCallState_InProgress = 0;
+  cCallState_Answered = 1;
+  cCallState_Missed = 2;
+  cCallState_AnsweredElsewhere = 3;
+  cCallState_Rejected = 4;
+
+  { lista de apeluri pentru o baza fara coloanele de stare (DDL-ul
+    phone_calls_state.sql inca nerulat) - altfel aplicatia n-ar porni }
+  cCallHistorySqlLegacy =
+    'select ch.nickname, ch.customerid, ch.docid, ch.phonenumber, ch.calltypeid, ' +
+    '       ch.data, ch.userid, ch.callid, ' +
+    '       iif(exists (select callid from ts_phone_calls_register zz where zz.callid = ch.callid), 1, 0) FLG_HAS_WAV ' +
+    'from TS_PHONE_CALLS_HISTORY ch ' +
+    'where ch.data >= (current_date - 1) ' +
+    'order by ch.data desc';
+
 type
   TSipInfo = record
     CallerID: string;
@@ -185,6 +204,9 @@ type
     cxGrid1DBTableView1_DOCID: TcxGridDBColumn;
     cxGrid1DBTableView1_CALLID: TcxGridDBColumn;
     cxGrid1DBTableView1_FLG_HAS_WAV: TcxGridDBColumn;
+    cxGrid1DBTableView1_CALL_STATE_NAME: TcxGridDBColumn;
+    cxGrid1DBTableView1_ANSWERED_BY: TcxGridDBColumn;
+    cxGrid1DBTableView1_CALL_STATEID: TcxGridDBColumn;
     cxGrid1Level1: TcxGridLevel;
     procedure SipClientRegistrationOk(Sender: TObject; const AAccount: ISipAccount);
     procedure SipClientRegistrationBye(Sender: TObject; const AAccount: ISipAccount);
@@ -238,6 +260,9 @@ type
     FStartCall: TDateTime;
     FSipMutex: THandle;
     FAlreadyRunning: Boolean;
+    FLineCallID: array[1..6] of Integer;    { CALLID din TS_PHONE_CALLS_HISTORY, per linie }
+    FLineAnswered: array[1..6] of Boolean;  { apelul a fost preluat (InviteOk / Raspunde) }
+    FLineRejected: array[1..6] of Boolean;  { operatorul a apasat "Ocupat" }
 
     procedure CloseCallerHistoryData;
     procedure ColorMemo(BackgroundColor, FontColor: Integer);
@@ -251,6 +276,9 @@ type
     procedure SaveRecord(const ACall: ISipCall);
     procedure SaveRecordedCall(ms: TMemoryStream; const ACall: ISipCall);
     procedure SelectNextAction;
+    function LineIndexOf(const ACall: ISipCall): Integer;
+    procedure BeginLineCall(const ALine, ACallID: Integer);
+    procedure SetCallState(const ACallID, AStateID: Integer);
   protected    { Protected declarations }
 //        PhoneThread: TPhoneSearchThread;
     procedure LoadSipAccountInfo;
@@ -548,6 +576,7 @@ begin
       lbDuration.Visible := True;
 
       AddToHistory(HistoryCallInfo);
+      BeginLineCall(FLineIndex, fCallID);
 
       if not Assigned(FRecorder) then
       begin
@@ -570,6 +599,7 @@ begin
       FLines[FLineIndex].AudioInDeviceID := AudioInDeviceNameToDeviceID(SipAudioInfo.waveInDevice);
       FLines[FLineIndex].AudioOutDeviceID := AudioOutDeviceNameToDeviceID(SipAudioInfo.waveOutDevice);
       sipclient.AnswerCall(FLines[FLineIndex]);
+      FLineAnswered[FLineIndex] := True;
 
     end;
   end;
@@ -647,7 +677,13 @@ begin
     IBCCallHistory.Close;
 
 //  IBCCallHistory.ParamByName('USERID').AsInteger := dmDB.CurrentUserID;
-  IBCCallHistory.Open;
+  try
+    IBCCallHistory.Open;
+  except
+    IBCCallHistory.Close;
+    IBCCallHistory.SQL.Text := cCallHistorySqlLegacy;
+    IBCCallHistory.Open;
+  end;
 
   RefreshLines;
 
@@ -668,12 +704,24 @@ end;
 
 procedure TframeSipClient.cxGrid1DBTableView1CustomDrawCell(Sender: TcxCustomGridTableView; ACanvas: TcxCanvas;
   AViewInfo: TcxGridTableDataCellViewInfo; var ADone: Boolean);
+var
+  v: Variant;
 begin
-//  if not VarIsNull(AViewInfo.GridRecord.Values[cxGrid1DBTableView1_FLG_HAS_WAV.Index]) then begin
-//    if AViewInfo.GridRecord.Values[cxGrid1DBTableView1_FLG_HAS_WAV.Index] = 1 then begin
-//      ACanvas.Font.Style := ACanvas.Font.Style + [fsBold];
-//    end;
-//  end;
+  // pierdut = rosu; preluat de coleg = gri; respins = maro
+  v := AViewInfo.GridRecord.Values[cxGrid1DBTableView1_CALL_STATEID.Index];
+  if VarIsNull(v) or VarIsEmpty(v) then
+    Exit;
+  case Integer(v) of
+    cCallState_Missed:
+      begin
+        ACanvas.Font.Color := clRed;
+        ACanvas.Font.Style := ACanvas.Font.Style + [fsBold];
+      end;
+    cCallState_AnsweredElsewhere:
+      ACanvas.Font.Color := clGrayText;
+    cCallState_Rejected:
+      ACanvas.Font.Color := clMaroon;
+  end;
 end;
 
 procedure TframeSipClient.cxGrid1DBTableView1DblClick(Sender: TObject);
@@ -790,6 +838,7 @@ begin
     else if (FLines[FLineIndex].State = csRinging) and (FLines[FLineIndex].CallType = ctIncoming) then
     begin
       HangUpBtn.Enabled := False;
+      FLineRejected[FLineIndex] := True;
       sipclient.SendBusy(FLines[FLineIndex]);
     end;
   end;
@@ -1015,12 +1064,33 @@ begin
 end;
 
 procedure TframeSipClient.SipClientBye(Sender: TObject; const ACall: ISipCall);
+var
+  i, callID, state: Integer;
 begin
+  // starea finala a apelului de pe linia lui: preluat / respins / pierdut.
+  // "Pierdut" poate deveni "preluat de coleg" in SP_PHONE_CALL_SET_STATE.
+  i := LineIndexOf(ACall);
+  callID := 0;
+  state := cCallState_Missed;
+  if i > 0 then
+  begin
+    callID := FLineCallID[i];
+    if FLineRejected[i] then
+      state := cCallState_Rejected
+    else if FLineAnswered[i] then
+      state := cCallState_Answered;
+    fCallID := callID; // SaveRecordedCall scrie WAV-ul pe acest CALLID
+  end;
+
   SaveRecord(ACall);
   CloseCallerHistoryData;
   FreeAndNil(FRingThread);
   SelectNextAction;
   ClearCall;
+
+  // dupa WAV, ca procedura de corelare sa vada inregistrarea
+  if callID > 0 then
+    SetCallState(callID, state);
 end;
 
 procedure TframeSipClient.SipClientDtmf(Sender: TObject; const ACall: ISipCall; const Dtmf: string);
@@ -1070,12 +1140,19 @@ begin
     HistoryCallInfo.NickName := fIdentifiedCustomer;
     HistoryCallInfo.CustomerID := fCustomerID;
     AddToHistory(HistoryCallInfo);
+    BeginLineCall(FreeLine, fCallID);
   end;
 end;
 
 procedure TframeSipClient.SipClientInviteOk(Sender: TObject; const ACall: ISipCall);
+var
+  i: Integer;
 begin
   FreeAndNil(FRingThread);
+
+  i := LineIndexOf(ACall);
+  if i > 0 then
+    FLineAnswered[i] := True;
 
   if not Assigned(FRecorder) then
     FRecorder := sipclient.CreateRecorder;
@@ -1312,16 +1389,76 @@ begin
     ms.Position := 0;
     for i := 1 to 6 do
     begin
+      // doar linia apelului incheiat; celelalte linii raman active
       if (FLines[i] = ACall) then
       begin
         SaveRecordedCall(ms, ACall);
+        FLines[i] := nil;
+        FDtmf[i] := '';
+        FLineCallID[i] := 0;
+        FLineAnswered[i] := False;
+        FLineRejected[i] := False;
       end;
-      FLines[i] := nil;
-      FDtmf[i] := '';
     end;
     RefreshLines;
   finally
     ms.Free;
+  end;
+end;
+
+function TframeSipClient.LineIndexOf(const ACall: ISipCall): Integer;
+var
+  i: Integer;
+begin
+  Result := 0;
+  for i := 1 to 6 do
+    if Assigned(FLines[i]) and (FLines[i] = ACall) then
+      Exit(i);
+end;
+
+procedure TframeSipClient.BeginLineCall(const ALine, ACallID: Integer);
+begin
+  FLineCallID[ALine] := ACallID;
+  FLineAnswered[ALine] := False;
+  FLineRejected[ALine] := False;
+end;
+
+// Scrie starea finala a apelului prin SP_PHONE_CALL_SET_STATE, care si
+// coreleaza "pierdut" cu apelul preluat de un coleg din grup (+/- 90 s).
+// O eroare aici nu trebuie sa blocheze inchiderea apelului: se arata in memo.
+procedure TframeSipClient.SetCallState(const ACallID, AStateID: Integer);
+var
+  q: TIBCQuery;
+  tr: TIBCTransaction;
+begin
+  if ACallID <= 0 then
+    Exit;
+
+  tr := TIBCTransaction.Create(nil);
+  q := TIBCQuery.Create(nil);
+  try
+    try
+      tr.DefaultConnection := dmDB.IBCConnection;
+      q.Connection := dmDB.IBCConnection;
+      q.Transaction := tr;
+      q.SQL.Text := 'EXECUTE PROCEDURE SP_PHONE_CALL_SET_STATE(:CALLID, :STATEID)';
+      q.ParamByName('CALLID').AsInteger := ACallID;
+      q.ParamByName('STATEID').AsInteger := AStateID;
+      tr.StartTransaction;
+      q.Execute;
+      tr.Commit;
+      IBCCallHistory.Refresh;
+    except
+      on E: Exception do
+      begin
+        if tr.Active then
+          tr.Rollback;
+        LineMemo.Lines.Add('Stare apel: ' + E.Message);
+      end;
+    end;
+  finally
+    q.Free;
+    tr.Free;
   end;
 end;
 

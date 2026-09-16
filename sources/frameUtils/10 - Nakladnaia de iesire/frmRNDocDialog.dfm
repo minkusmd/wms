@@ -56,81 +56,81 @@ object frmRNDocDlg: TfrmRNDocDlg
     ParentBackground = False
     TabOrder = 1
     object cxLabel5: TLabel
-      Left = 12
-      Top = 22
+      Left = 16
+      Top = 42
       Width = 82
       Height = 15
       Caption = 'Data document'
       Transparent = True
     end
     object Bevel1: TBevel
-      Left = 12
-      Top = 56
-      Width = 613
+      Left = 16
+      Top = 27
+      Width = 608
       Height = 4
       Shape = bsTopLine
     end
     object cxLabel1: TLabel
-      Left = 12
-      Top = 79
+      Left = 16
+      Top = 146
       Width = 74
       Height = 15
       Caption = 'Intreprinderea'
       Transparent = True
     end
     object cxLabel2: TLabel
-      Left = 12
-      Top = 157
+      Left = 16
+      Top = 206
       Width = 64
       Height = 15
       Caption = 'Cumparator'
       Transparent = True
     end
     object cxLabel3: TLabel
-      Left = 12
-      Top = 226
-      Width = 124
+      Left = 16
+      Top = 324
+      Width = 32
       Height = 15
-      Caption = 'Valuta si rata de schimb'
+      Caption = 'Valuta'
       Transparent = True
     end
     object cxLabel8: TLabel
-      Left = 10
-      Top = 302
+      Left = 16
+      Top = 364
       Width = 63
       Height = 15
       Caption = 'Comentariu'
       Transparent = True
     end
     object cxLabel6: TLabel
-      Left = 12
-      Top = 109
+      Left = 16
+      Top = 176
       Width = 40
       Height = 15
       Caption = 'Depozit'
       Transparent = True
     end
     object Label1: TLabel
-      Left = 231
-      Top = 225
+      Left = 356
+      Top = 324
       Width = 49
       Height = 15
       Caption = 'Curs USD'
       Transparent = True
     end
     object lbContractTitle: TLabel
-      Left = 12
-      Top = 187
+      Left = 16
+      Top = 236
       Width = 46
       Height = 15
       Caption = 'Contract'
       Transparent = True
     end
     object lbContractInfo: TLabel
-      Left = 413
-      Top = 145
-      Width = 210
-      Height = 30
+      Left = 132
+      Top = 259
+      Width = 358
+      Height = 15
       Caption = #1042#1085#1080#1084#1072#1085#1080#1077'! '#1041#1091#1076#1077#1090' '#1087#1088#1080#1084#1077#1085#1077#1085#1072' '#1074#1072#1083#1102#1090#1072' '#1080' '#1082#1086#1083#1086#1085#1082#1072' '#1094#1077#1085' '#1080#1079' '#1082#1086#1085#1090#1088#1072#1082#1090#1072'.'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clMaroon
@@ -139,18 +139,17 @@ object frmRNDocDlg: TfrmRNDocDlg
       Font.Style = []
       ParentFont = False
       Visible = False
-      WordWrap = True
     end
     object Label4: TLabel
-      Left = 10
-      Top = 262
+      Left = 16
+      Top = 72
       Width = 31
       Height = 15
       Caption = 'Statut'
       Transparent = True
     end
     object lblSecLivrare: TLabel
-      Left = 649
+      Left = 648
       Top = 8
       Width = 39
       Height = 15
@@ -164,25 +163,97 @@ object frmRNDocDlg: TfrmRNDocDlg
       Transparent = True
     end
     object bvLivrare: TBevel
-      Left = 649
+      Left = 648
       Top = 27
       Width = 460
       Height = 4
       Shape = bsTopLine
     end
+    object lblSecDocument: TLabel
+      Left = 16
+      Top = 8
+      Width = 59
+      Height = 15
+      Caption = 'Document'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -12
+      Font.Name = 'Segoe UI'
+      Font.Style = [fsBold]
+      ParentFont = False
+      Transparent = True
+    end
+    object lblSecParti: TLabel
+      Left = 16
+      Top = 112
+      Width = 26
+      Height = 15
+      Caption = 'Parti'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -12
+      Font.Name = 'Segoe UI'
+      Font.Style = [fsBold]
+      ParentFont = False
+      Transparent = True
+    end
+    object lblSecValuta: TLabel
+      Left = 16
+      Top = 290
+      Width = 71
+      Height = 15
+      Caption = 'Valuta si curs'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -12
+      Font.Name = 'Segoe UI'
+      Font.Style = [fsBold]
+      ParentFont = False
+      Transparent = True
+    end
+    object bvParti: TBevel
+      Left = 16
+      Top = 131
+      Width = 608
+      Height = 4
+      Shape = bsTopLine
+    end
+    object bvValuta: TBevel
+      Left = 16
+      Top = 309
+      Width = 608
+      Height = 4
+      Shape = bsTopLine
+    end
+    object lbAnalytics: TLabel
+      Left = 312
+      Top = 42
+      Width = 46
+      Height = 15
+      Caption = 'Analitica'
+      Transparent = True
+    end
+    object lbRate: TLabel
+      Left = 228
+      Top = 324
+      Width = 24
+      Height = 15
+      Caption = 'Curs'
+      Transparent = True
+    end
     object ceRATE: TcxDBCalcEdit
-      Left = 286
-      Top = 222
+      Left = 260
+      Top = 320
       DataBinding.DataField = 'RATE'
       DataBinding.DataSource = dmDB.IBCDataSourceDocs
       Properties.ImmediatePost = True
-      TabOrder = 9
-      Width = 62
+      TabOrder = 12
+      Width = 80
     end
     object lcbDTSC: TcxDBLookupComboBox
-      Left = 413
-      Top = 75
-      Hint = #1040#1085#1072#1083#1080#1090#1080#1082#1072' '#1086#1088#1075#1072#1085#1080#1079#1072#1094#1080#1080
+      Left = 440
+      Top = 142
+      Hint = 'Analitica 2 (analitica intreprinderii)'
       DataBinding.DataField = 'DTSC'
       DataBinding.DataSource = dmDB.IBCDataSourceDocs
       ParentShowHint = False
@@ -195,25 +266,25 @@ object frmRNDocDlg: TfrmRNDocDlg
       Properties.ListOptions.ShowHeader = False
       Properties.ListSource = dmDB.IBCDataSourceAnalitica
       ShowHint = True
-      TabOrder = 3
-      Width = 212
+      TabOrder = 7
+      Width = 184
     end
     object mmCOMMENTS: TcxDBMemo
-      Left = 106
-      Top = 299
+      Left = 132
+      Top = 360
       DataBinding.DataField = 'COMMENTS'
       DataBinding.DataSource = IBCDataSourceDocProps
       Properties.ReadOnly = True
       Properties.ScrollBars = ssVertical
-      Properties.VisibleLineCount = 7
-      TabOrder = 11
+      Properties.VisibleLineCount = 3
+      TabOrder = 14
       OnClick = mmCOMMENTSClick
       OnEnter = mmCOMMENTSClick
-      Width = 517
+      Width = 492
     end
     object deDATA: TcxDBDateEdit
-      Left = 108
-      Top = 18
+      Left = 132
+      Top = 38
       DataBinding.DataField = 'DATA'
       DataBinding.DataSource = dmDB.IBCDataSourceDocs
       Properties.DateButtons = [btnNow]
@@ -221,12 +292,12 @@ object frmRNDocDlg: TfrmRNDocDlg
       Properties.Kind = ckDateTime
       Properties.WeekNumbers = True
       TabOrder = 1
-      Width = 133
+      Width = 160
     end
     object cbFLG_ACNT: TcxDBCheckBox
-      Left = 564
-      Top = 215
-      Caption = 'Contab'
+      Left = 528
+      Top = 4
+      Caption = 'Contabilitate'
       DataBinding.DataField = 'FLG_ACNT'
       DataBinding.DataSource = dmDB.IBCDataSourceDocs
       Properties.Alignment = taLeftJustify
@@ -235,11 +306,11 @@ object frmRNDocDlg: TfrmRNDocDlg
       Properties.ValueChecked = 1
       Properties.ValueUnchecked = 0
       Properties.OnEditValueChanged = lcbCURRENCYPropertiesEditValueChanged
-      TabOrder = 8
+      TabOrder = 0
     end
     object lcbDTDEP: TcxDBLookupComboBox
-      Left = 108
-      Top = 105
+      Left = 132
+      Top = 172
       DataBinding.DataField = 'DTDEP'
       DataBinding.DataSource = dmDB.IBCDataSourceDocs
       Properties.DropDownListStyle = lsFixedList
@@ -259,12 +330,12 @@ object frmRNDocDlg: TfrmRNDocDlg
         end>
       Properties.ListOptions.ShowHeader = False
       Properties.ListSource = dmDB.IBCDataSourceStocks
-      TabOrder = 4
-      Width = 291
+      TabOrder = 8
+      Width = 300
     end
     object beDT_NAME: TcxButtonEdit
-      Left = 108
-      Top = 75
+      Left = 132
+      Top = 142
       Properties.Buttons = <
         item
           Default = True
@@ -309,13 +380,13 @@ object frmRNDocDlg: TfrmRNDocDlg
       Properties.ClickKey = 115
       Properties.ViewStyle = vsHideCursor
       Properties.OnButtonClick = beDT_NAMEPropertiesButtonClick
-      TabOrder = 2
+      TabOrder = 6
       Text = 'beDT_NAME'
-      Width = 291
+      Width = 300
     end
     object beCT_NAME: TcxButtonEdit
-      Left = 108
-      Top = 153
+      Left = 132
+      Top = 202
       Properties.Buttons = <
         item
           Default = True
@@ -360,22 +431,22 @@ object frmRNDocDlg: TfrmRNDocDlg
       Properties.ClickKey = 115
       Properties.ViewStyle = vsHideCursor
       Properties.OnButtonClick = beCT_NAMEPropertiesButtonClick
-      TabOrder = 5
+      TabOrder = 9
       Text = 'beCT_NAME'
-      Width = 291
+      Width = 492
     end
     object ceRATEUSD: TcxDBCalcEdit
-      Left = 354
-      Top = 222
+      Left = 412
+      Top = 320
       DataBinding.DataField = 'RATEUSD'
       DataBinding.DataSource = dmDB.IBCDataSourceDocs
       Properties.ImmediatePost = True
-      TabOrder = 10
-      Width = 57
+      TabOrder = 13
+      Width = 80
     end
     object lcbAnalytics: TcxDBLookupComboBox
-      Left = 260
-      Top = 17
+      Left = 376
+      Top = 38
       Hint = #1040#1085#1072#1083#1080#1090#1080#1082#1072' '#1076#1086#1082#1091#1084#1077#1085#1090#1072
       DataBinding.DataField = 'SC2'
       DataBinding.DataSource = dmDB.IBCDataSourceDocs
@@ -398,12 +469,12 @@ object frmRNDocDlg: TfrmRNDocDlg
       Properties.ListOptions.ShowHeader = False
       Properties.ListSource = dmDB.IBCDataSourceAnalytics
       ShowHint = True
-      TabOrder = 0
-      Width = 365
+      TabOrder = 2
+      Width = 248
     end
     object beContract: TcxButtonEdit
-      Left = 108
-      Top = 183
+      Left = 132
+      Top = 232
       Properties.BeepOnError = True
       Properties.Buttons = <
         item
@@ -423,12 +494,12 @@ object frmRNDocDlg: TfrmRNDocDlg
       Properties.IncrementalSearch = False
       Properties.ViewStyle = vsHideCursor
       Properties.OnButtonClick = beContractPropertiesButtonClick
-      TabOrder = 6
-      Width = 517
+      TabOrder = 10
+      Width = 492
     end
     object lcbCURRENCY: TcxDBLookupComboBox
-      Left = 142
-      Top = 222
+      Left = 132
+      Top = 320
       DataBinding.DataField = 'CURRENCYID'
       DataBinding.DataSource = dmDB.IBCDataSourceDocs
       Properties.DropDownListStyle = lsFixedList
@@ -443,12 +514,12 @@ object frmRNDocDlg: TfrmRNDocDlg
       Properties.ListOptions.ShowHeader = False
       Properties.ListSource = dmDB.IBCDataSourceCurrency
       Properties.OnEditValueChanged = lcbCURRENCYPropertiesEditValueChanged
-      TabOrder = 7
-      Width = 67
+      TabOrder = 11
+      Width = 80
     end
     object lcbDocumentState: TcxDBLookupComboBox
-      Left = 106
-      Top = 259
+      Left = 132
+      Top = 68
       DataBinding.DataField = 'STATEID'
       DataBinding.DataSource = dmDB.IBCDataSourceDocs
       Properties.DropDownWidth = 300
@@ -472,29 +543,30 @@ object frmRNDocDlg: TfrmRNDocDlg
         end>
       Properties.ListFieldIndex = 1
       Properties.ListSource = dmDB.IBCDataSourceDocTypeStates
-      TabOrder = 12
-      Width = 240
+      TabOrder = 4
+      Width = 160
     end
     object cmbImageState: TcxDBImageComboBox
-      Left = 352
-      Top = 258
+      Left = 312
+      Top = 68
       DataBinding.DataField = 'STATE_NAME'
       DataBinding.DataSource = dmDB.IBCDataSourceDocs
       Properties.Images = dmAdditions.ilStates
       Properties.ImmediatePost = True
       Properties.Items = <>
-      TabOrder = 13
-      Width = 271
+      TabOrder = 5
+      Width = 312
     end
     inline frameDelivery: TframeDocsDelivery
-      Left = 649
-      Top = 34
+      Left = 648
+      Top = 38
       Width = 460
-      Height = 280
-      TabOrder = 14
-      ExplicitLeft = 649
-      ExplicitTop = 34
+      Height = 376
+      TabOrder = 3
+      ExplicitLeft = 648
+      ExplicitTop = 38
       ExplicitWidth = 460
+      ExplicitHeight = 376
       inherited lbEmptyHint: TLabel
         Width = 460
         StyleElements = [seFont, seClient, seBorder]
@@ -502,7 +574,9 @@ object frmRNDocDlg: TfrmRNDocDlg
       end
       inherited cxDBVerticalGrid1: TcxDBVerticalGrid
         Width = 460
+        Height = 279
         ExplicitWidth = 460
+        ExplicitHeight = 279
         Version = 1
         inherited cxDBVerticalGrid1DOCID: TcxDBEditorRow
           ID = 0
@@ -566,8 +640,10 @@ object frmRNDocDlg: TfrmRNDocDlg
         end
       end
       inherited pnButtons: TPanel
+        Top = 339
         Width = 460
         StyleElements = [seFont, seClient, seBorder]
+        ExplicitTop = 339
         ExplicitWidth = 460
       end
       inherited IBCQueryDelivery: TIBCQuery
@@ -589,8 +665,8 @@ object frmRNDocDlg: TfrmRNDocDlg
     end
   end
   object btnOk: TButton
-    Left = 944
-    Top = 508
+    Left = 946
+    Top = 509
     Width = 90
     Height = 29
     Anchors = [akRight, akBottom]
@@ -601,7 +677,7 @@ object frmRNDocDlg: TfrmRNDocDlg
   end
   object btnCancel: TButton
     Left = 1042
-    Top = 508
+    Top = 509
     Width = 90
     Height = 29
     Anchors = [akRight, akBottom]

@@ -104,7 +104,6 @@ object frmMainForm: TfrmMainForm
     Align = alLeft
     BevelOuter = bvNone
     TabOrder = 1
-    ExplicitHeight = 361
     object SpeedButton1: TSpeedButton
       Left = 441
       Top = 1111
@@ -195,7 +194,6 @@ object frmMainForm: TfrmMainForm
       Height = 28
       Align = dalBottom
       BarManager = dxBarManagerMain
-      ExplicitTop = 379
     end
     inline frameSipClient1: TframeSipClient
       Left = 0
@@ -217,12 +215,13 @@ object frmMainForm: TfrmMainForm
       ParentColor = False
       ParentFont = False
       TabOrder = 3
-      ExplicitTop = 51
+      ExplicitTop = 451
       ExplicitWidth = 323
       ExplicitHeight = 310
       inherited Panel1: TPanel
         Width = 323
         Height = 181
+        StyleElements = [seFont, seClient, seBorder]
         ExplicitWidth = 323
         ExplicitHeight = 181
         inherited cxPageControl1: TcxPageControl
@@ -254,6 +253,7 @@ object frmMainForm: TfrmMainForm
         Width = 323
         Font.Charset = RUSSIAN_CHARSET
         ParentFont = False
+        StyleElements = [seFont, seClient, seBorder]
         ExplicitWidth = 323
         inherited SBtn1: TSpeedButton
           Font.Charset = RUSSIAN_CHARSET
@@ -265,6 +265,7 @@ object frmMainForm: TfrmMainForm
         end
         inherited LineMemo: TMemo
           Height = 46
+          StyleElements = [seFont, seClient, seBorder]
           ExplicitHeight = 46
         end
         inherited PhoneEdit: TcxTextEdit
@@ -2994,6 +2995,20 @@ object frmMainForm: TfrmMainForm
       Visible = ivAlways
       OnClick = bbAutoTransportClick
     end
+    object bbSupplierPickups: TdxBarButton
+      Caption = 'Ridicari de la furnizori'
+      Category = 0
+      Hint = 'Marfa de ridicat de la furnizori pentru comenzile clientilor'
+      Visible = ivAlways
+      OnClick = bbSupplierPickupsClick
+    end
+    object bbSupplierOrderRules: TdxBarButton
+      Caption = 'Reguli comanda prin intermediar'
+      Category = 0
+      Hint = 'Furnizori la care vedem stocul, dar comandam prin alt furnizor'
+      Visible = ivAlways
+      OnClick = bbSupplierOrderRulesClick
+    end
     object bbPlanVinzari: TdxBarButton
       Caption = 'Indeplinirea planului de vinzari'
       Category = 0
@@ -3526,6 +3541,14 @@ object frmMainForm: TfrmMainForm
         item
           Visible = True
           ItemName = 'bbAutoTransport'
+        end
+        item
+          Visible = True
+          ItemName = 'bbSupplierPickups'
+        end
+        item
+          Visible = True
+          ItemName = 'bbSupplierOrderRules'
         end
         item
           Visible = True

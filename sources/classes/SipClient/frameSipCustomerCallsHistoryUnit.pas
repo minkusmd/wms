@@ -17,6 +17,8 @@ type
     cxGrid1DBTableView1: TcxGridDBTableView;
     cxGrid1DBTableView1Column1: TcxGridDBColumn;
     cxGrid1DBTableView1DATA: TcxGridDBColumn;
+    cxGrid1DBTableView1CALL_STATE_NAME: TcxGridDBColumn;
+    cxGrid1DBTableView1ANSWERED_BY: TcxGridDBColumn;
     cxGrid1DBTableView1SOURCEID: TcxGridDBColumn;
     cxGrid1DBTableView1Column2: TcxGridDBColumn;
     cxGrid1DBTableView1WAV: TcxGridDBColumn;

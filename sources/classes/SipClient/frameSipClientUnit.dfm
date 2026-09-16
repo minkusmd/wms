@@ -147,6 +147,22 @@ object frameSipClient: TframeSipClient
               MinWidth = 35
               Width = 97
             end
+            object cxGrid1DBTableView1_CALL_STATE_NAME: TcxGridDBColumn
+              Caption = 'Stare'
+              DataBinding.FieldName = 'CALL_STATE_NAME'
+              HeaderAlignmentHorz = taCenter
+              MinWidth = 35
+              Options.Editing = False
+              Width = 90
+            end
+            object cxGrid1DBTableView1_ANSWERED_BY: TcxGridDBColumn
+              Caption = 'Preluat de'
+              DataBinding.FieldName = 'ANSWERED_BY'
+              HeaderAlignmentHorz = taCenter
+              MinWidth = 35
+              Options.Editing = False
+              Width = 90
+            end
             object cxGrid1DBTableView1_CUSTOMERID: TcxGridDBColumn
               Caption = 'Client'
               DataBinding.FieldName = 'CUSTOMERID'
@@ -184,6 +200,13 @@ object frameSipClient: TframeSipClient
               Visible = False
               HeaderAlignmentHorz = taCenter
               MinWidth = 35
+            end
+            object cxGrid1DBTableView1_CALL_STATEID: TcxGridDBColumn
+              DataBinding.FieldName = 'CALL_STATEID'
+              Visible = False
+              HeaderAlignmentHorz = taCenter
+              MinWidth = 35
+              VisibleForCustomization = False
             end
           end
           object cxGrid1Level1: TcxGridLevel
@@ -1375,14 +1398,23 @@ object frameSipClient: TframeSipClient
     Transaction = IBCTrSipSelect
     UpdateTransaction = IBCTrSipUpdate
     SQL.Strings = (
-      
-        'select ch.nickname, ch.customerid, ch.docid, ch.phonenumber, ch.' +
-        'calltypeid, '
-      '       ch.data, ch.userid, ch.callid,'
-      
-        'iif(exists (select callid from ts_phone_calls_register zz where ' +
-        'zz.callid=ch.callid),1,0) FLG_HAS_WAV'
-      'from TS_PHONE_CALLS_HISTORY  ch'
+      'select ch.nickname, ch.customerid, ch.docid, ch.phonenumber,'
+      '       ch.calltypeid, ch.data, ch.userid, ch.callid,'
+      '       iif(exists (select callid from ts_phone_calls_register zz'
+      '                   where zz.callid = ch.callid), 1, 0) FLG_HAS_WAV,'
+      '       ch.call_stateid,'
+      '       case ch.call_stateid'
+      '         when 0 then ''In curs'''
+      '         when 1 then ''Preluat'''
+      '         when 2 then iif(ch.calltypeid = 0, ''Pierdut'', ''Fara raspuns'')'
+      '         when 3 then ''Preluat de coleg'''
+      '         when 4 then ''Respins'''
+      '         when 5 then ''Neterminat'''
+      '       end CALL_STATE_NAME,'
+      '       (select lu.full_name from ts_phone_calls_history l'
+      '          join ts_users lu on lu.userid = l.userid'
+      '         where l.callid = ch.linked_callid) ANSWERED_BY'
+      'from TS_PHONE_CALLS_HISTORY ch'
       'where ch.data >= (current_date - 1)'
       'order by ch.data desc')
     Options.RequiredFields = False

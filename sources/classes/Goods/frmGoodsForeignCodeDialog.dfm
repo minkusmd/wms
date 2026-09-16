@@ -90,8 +90,36 @@ object frmGoodsForeignCodeDlg: TfrmGoodsForeignCodeDlg
             Width = 780
           end
           item
-            Caption = 'Preturi si valuta'
-            Width = 673
+            Caption = 'Web'
+            Width = 64
+          end
+          item
+            Caption = 'Promo'
+            Width = 64
+          end
+          item
+            Caption = 'RRP'
+            Width = 64
+          end
+          item
+            Caption = 'Calc'
+            Width = 64
+          end
+          item
+            Caption = 'Discount'
+            Width = 64
+          end
+          item
+            Caption = 'Diler'
+            Width = 64
+          end
+          item
+            Caption = 'Indicativ'
+            Width = 64
+          end
+          item
+            Caption = 'Marje'
+            Width = 300
           end>
         object TV1_GOODS_CODE: TcxGridDBBandedColumn
           AlternateCaption = 'Cod produs furnizor'
@@ -193,10 +221,11 @@ object frmGoodsForeignCodeDlg: TfrmGoodsForeignCodeDlg
           HeaderAlignmentHorz = taCenter
           MinWidth = 64
           Options.HorzSizing = False
+          Visible = False
           Width = 64
-          Position.BandIndex = 1
+          Position.BandIndex = 8
           Position.ColIndex = 0
-          Position.RowIndex = 0
+          Position.RowIndex = 2
         end
         object TV1_CURRENCY1ID: TcxGridDBBandedColumn
           Caption = 'V1'
@@ -204,10 +233,11 @@ object frmGoodsForeignCodeDlg: TfrmGoodsForeignCodeDlg
           HeaderAlignmentHorz = taCenter
           MinWidth = 64
           Options.HorzSizing = False
+          Visible = False
           Width = 64
-          Position.BandIndex = 1
-          Position.ColIndex = 0
-          Position.RowIndex = 1
+          Position.BandIndex = 8
+          Position.ColIndex = 1
+          Position.RowIndex = 2
         end
         object TV1_PRICE2: TcxGridDBBandedColumn
           Caption = 'Promo'
@@ -215,10 +245,11 @@ object frmGoodsForeignCodeDlg: TfrmGoodsForeignCodeDlg
           HeaderAlignmentHorz = taCenter
           MinWidth = 64
           Options.HorzSizing = False
+          Visible = False
           Width = 64
-          Position.BandIndex = 1
-          Position.ColIndex = 1
-          Position.RowIndex = 0
+          Position.BandIndex = 8
+          Position.ColIndex = 2
+          Position.RowIndex = 2
         end
         object TV1_CURRENCY2ID: TcxGridDBBandedColumn
           Caption = 'V2'
@@ -226,10 +257,11 @@ object frmGoodsForeignCodeDlg: TfrmGoodsForeignCodeDlg
           HeaderAlignmentHorz = taCenter
           MinWidth = 64
           Options.HorzSizing = False
+          Visible = False
           Width = 64
-          Position.BandIndex = 1
-          Position.ColIndex = 1
-          Position.RowIndex = 1
+          Position.BandIndex = 8
+          Position.ColIndex = 3
+          Position.RowIndex = 2
         end
         object TV1_PRICE3: TcxGridDBBandedColumn
           Caption = 'RRP'
@@ -237,10 +269,11 @@ object frmGoodsForeignCodeDlg: TfrmGoodsForeignCodeDlg
           HeaderAlignmentHorz = taCenter
           MinWidth = 64
           Options.HorzSizing = False
+          Visible = False
           Width = 64
-          Position.BandIndex = 1
-          Position.ColIndex = 2
-          Position.RowIndex = 0
+          Position.BandIndex = 8
+          Position.ColIndex = 4
+          Position.RowIndex = 2
         end
         object TV1_CURRENCY3ID: TcxGridDBBandedColumn
           Caption = 'V3'
@@ -248,10 +281,11 @@ object frmGoodsForeignCodeDlg: TfrmGoodsForeignCodeDlg
           HeaderAlignmentHorz = taCenter
           MinWidth = 64
           Options.HorzSizing = False
+          Visible = False
           Width = 64
-          Position.BandIndex = 1
-          Position.ColIndex = 2
-          Position.RowIndex = 1
+          Position.BandIndex = 8
+          Position.ColIndex = 5
+          Position.RowIndex = 2
         end
         object TV1_PRICE4: TcxGridDBBandedColumn
           Caption = 'V4'
@@ -259,10 +293,11 @@ object frmGoodsForeignCodeDlg: TfrmGoodsForeignCodeDlg
           HeaderAlignmentHorz = taCenter
           MinWidth = 80
           Options.HorzSizing = False
+          Visible = False
           Width = 80
-          Position.BandIndex = 1
-          Position.ColIndex = 3
-          Position.RowIndex = 1
+          Position.BandIndex = 8
+          Position.ColIndex = 6
+          Position.RowIndex = 2
         end
         object TV1_PRICE5: TcxGridDBBandedColumn
           Caption = 'Discount'
@@ -270,10 +305,11 @@ object frmGoodsForeignCodeDlg: TfrmGoodsForeignCodeDlg
           HeaderAlignmentHorz = taCenter
           MinWidth = 80
           Options.HorzSizing = False
+          Visible = False
           Width = 80
-          Position.BandIndex = 1
-          Position.ColIndex = 4
-          Position.RowIndex = 0
+          Position.BandIndex = 8
+          Position.ColIndex = 7
+          Position.RowIndex = 2
         end
         object TV1_MARGIN5: TcxGridDBBandedColumn
           Caption = 'M5'
@@ -282,8 +318,8 @@ object frmGoodsForeignCodeDlg: TfrmGoodsForeignCodeDlg
           MinWidth = 40
           Options.HorzSizing = False
           Width = 40
-          Position.BandIndex = 1
-          Position.ColIndex = 4
+          Position.BandIndex = 8
+          Position.ColIndex = 0
           Position.RowIndex = 1
         end
         object TV1_CURRENCY5ID: TcxGridDBBandedColumn
@@ -292,10 +328,11 @@ object frmGoodsForeignCodeDlg: TfrmGoodsForeignCodeDlg
           HeaderAlignmentHorz = taCenter
           MinWidth = 40
           Options.HorzSizing = False
+          Visible = False
           Width = 40
-          Position.BandIndex = 1
-          Position.ColIndex = 5
-          Position.RowIndex = 1
+          Position.BandIndex = 8
+          Position.ColIndex = 8
+          Position.RowIndex = 2
         end
         object TV1_PRICE6: TcxGridDBBandedColumn
           Caption = 'Diler'
@@ -303,10 +340,11 @@ object frmGoodsForeignCodeDlg: TfrmGoodsForeignCodeDlg
           HeaderAlignmentHorz = taCenter
           MinWidth = 80
           Options.HorzSizing = False
+          Visible = False
           Width = 80
-          Position.BandIndex = 1
-          Position.ColIndex = 5
-          Position.RowIndex = 0
+          Position.BandIndex = 8
+          Position.ColIndex = 9
+          Position.RowIndex = 2
         end
         object TV_MARGIN6: TcxGridDBBandedColumn
           Caption = 'M6'
@@ -315,8 +353,8 @@ object frmGoodsForeignCodeDlg: TfrmGoodsForeignCodeDlg
           MinWidth = 40
           Options.HorzSizing = False
           Width = 40
-          Position.BandIndex = 1
-          Position.ColIndex = 6
+          Position.BandIndex = 8
+          Position.ColIndex = 1
           Position.RowIndex = 1
         end
         object TV1_CURRENCY6ID: TcxGridDBBandedColumn
@@ -325,10 +363,11 @@ object frmGoodsForeignCodeDlg: TfrmGoodsForeignCodeDlg
           HeaderAlignmentHorz = taCenter
           MinWidth = 40
           Options.HorzSizing = False
+          Visible = False
           Width = 40
-          Position.BandIndex = 1
-          Position.ColIndex = 7
-          Position.RowIndex = 1
+          Position.BandIndex = 8
+          Position.ColIndex = 10
+          Position.RowIndex = 2
         end
         object TV1_PRICE7: TcxGridDBBandedColumn
           Caption = 'Indicativ'
@@ -339,25 +378,26 @@ object frmGoodsForeignCodeDlg: TfrmGoodsForeignCodeDlg
           Options.HorzSizing = False
           VisibleForCustomization = False
           VisibleForEditForm = bFalse
+          Visible = False
           Width = 64
-          Position.BandIndex = 1
-          Position.ColIndex = 7
-          Position.RowIndex = 0
+          Position.BandIndex = 8
+          Position.ColIndex = 11
+          Position.RowIndex = 2
         end
         object TV1_CURRENCY7ID: TcxGridDBBandedColumn
           Caption = 'V7'
           DataBinding.FieldName = 'CURRENCY7NAME'
           VisibleForExpressionEditor = bFalse
-          OnCustomDrawCell = TV1_CURRENCY7IDCustomDrawCell
           HeaderAlignmentHorz = taCenter
           MinWidth = 64
           Options.HorzSizing = False
           VisibleForCustomization = False
           VisibleForEditForm = bFalse
+          Visible = False
           Width = 64
-          Position.BandIndex = 1
-          Position.ColIndex = 10
-          Position.RowIndex = 1
+          Position.BandIndex = 8
+          Position.ColIndex = 12
+          Position.RowIndex = 2
         end
         object TV1_flg_min_purchaise_price: TcxGridDBBandedColumn
           Caption = '..'
@@ -377,8 +417,8 @@ object frmGoodsForeignCodeDlg: TfrmGoodsForeignCodeDlg
           MinWidth = 80
           Options.HorzSizing = False
           Width = 80
-          Position.BandIndex = 1
-          Position.ColIndex = 3
+          Position.BandIndex = 8
+          Position.ColIndex = 0
           Position.RowIndex = 0
         end
         object TV1_DIFF47: TcxGridDBBandedColumn
@@ -391,8 +431,8 @@ object frmGoodsForeignCodeDlg: TfrmGoodsForeignCodeDlg
           VisibleForCustomization = False
           VisibleForEditForm = bFalse
           Width = 60
-          Position.BandIndex = 1
-          Position.ColIndex = 8
+          Position.BandIndex = 8
+          Position.ColIndex = 2
           Position.RowIndex = 1
         end
         object TV1_PERCENT47: TcxGridDBBandedColumn
@@ -405,8 +445,8 @@ object frmGoodsForeignCodeDlg: TfrmGoodsForeignCodeDlg
           VisibleForCustomization = False
           VisibleForEditForm = bFalse
           Width = 60
-          Position.BandIndex = 1
-          Position.ColIndex = 9
+          Position.BandIndex = 8
+          Position.ColIndex = 3
           Position.RowIndex = 1
         end
         object TV1_PRICE7_LEI: TcxGridDBBandedColumn
@@ -418,10 +458,11 @@ object frmGoodsForeignCodeDlg: TfrmGoodsForeignCodeDlg
           Options.HorzSizing = False
           VisibleForCustomization = False
           VisibleForEditForm = bFalse
+          Visible = False
           Width = 120
-          Position.BandIndex = 1
-          Position.ColIndex = 6
-          Position.RowIndex = 0
+          Position.BandIndex = 8
+          Position.ColIndex = 13
+          Position.RowIndex = 2
         end
         object TV1_FLG_RRP: TcxGridDBBandedColumn
           Caption = 'RRP'
@@ -527,16 +568,16 @@ object frmGoodsForeignCodeDlg: TfrmGoodsForeignCodeDlg
           Caption = 'OP7'
           DataBinding.FieldName = 'ORD_PRICE7'
           Width = 45
-          Position.BandIndex = 1
-          Position.ColIndex = 8
+          Position.BandIndex = 8
+          Position.ColIndex = 1
           Position.RowIndex = 0
         end
         object cxGridForeignDBBandedTableView1Column2: TcxGridDBBandedColumn
           Caption = 'OV7'
           DataBinding.FieldName = 'ORD_CURRENCY7ID'
           Width = 80
-          Position.BandIndex = 1
-          Position.ColIndex = 11
+          Position.BandIndex = 8
+          Position.ColIndex = 4
           Position.RowIndex = 1
         end
         object TV1_DIF01: TcxGridDBBandedColumn
@@ -557,9 +598,228 @@ object frmGoodsForeignCodeDlg: TfrmGoodsForeignCodeDlg
           Options.Editing = False
           Options.HorzSizing = False
           Width = 64
-          Position.BandIndex = 1
-          Position.ColIndex = 9
+          Position.BandIndex = 8
+          Position.ColIndex = 2
           Position.RowIndex = 0
+        end
+        object TV1_P1_MDL: TcxGridDBBandedColumn
+          AlternateCaption = 'Web, pret MDL'
+          Caption = 'Pret MDL'
+          DataBinding.FieldName = 'P1_MDL'
+          PropertiesClassName = 'TcxCurrencyEditProperties'
+          Properties.Alignment.Horz = taRightJustify
+          Properties.DisplayFormat = ',0.00;-,0.00'
+          HeaderAlignmentHorz = taCenter
+          MinWidth = 64
+          Options.HorzSizing = False
+          Styles.Content = cxStyleBold
+          Width = 64
+          Position.BandIndex = 1
+          Position.ColIndex = 0
+          Position.RowIndex = 0
+        end
+        object TV1_P1_USD: TcxGridDBBandedColumn
+          AlternateCaption = 'Web, pret USD'
+          Caption = 'Pret USD'
+          DataBinding.FieldName = 'P1_USD'
+          PropertiesClassName = 'TcxCurrencyEditProperties'
+          Properties.Alignment.Horz = taRightJustify
+          Properties.DisplayFormat = ',0.00;-,0.00'
+          HeaderAlignmentHorz = taCenter
+          MinWidth = 64
+          Options.HorzSizing = False
+          Width = 64
+          Position.BandIndex = 1
+          Position.ColIndex = 0
+          Position.RowIndex = 1
+        end
+        object TV1_P2_MDL: TcxGridDBBandedColumn
+          AlternateCaption = 'Promo, pret MDL'
+          Caption = 'Pret MDL'
+          DataBinding.FieldName = 'P2_MDL'
+          PropertiesClassName = 'TcxCurrencyEditProperties'
+          Properties.Alignment.Horz = taRightJustify
+          Properties.DisplayFormat = ',0.00;-,0.00'
+          HeaderAlignmentHorz = taCenter
+          MinWidth = 64
+          Options.HorzSizing = False
+          Styles.Content = cxStyleBold
+          Width = 64
+          Position.BandIndex = 2
+          Position.ColIndex = 0
+          Position.RowIndex = 0
+        end
+        object TV1_P2_USD: TcxGridDBBandedColumn
+          AlternateCaption = 'Promo, pret USD'
+          Caption = 'Pret USD'
+          DataBinding.FieldName = 'P2_USD'
+          PropertiesClassName = 'TcxCurrencyEditProperties'
+          Properties.Alignment.Horz = taRightJustify
+          Properties.DisplayFormat = ',0.00;-,0.00'
+          HeaderAlignmentHorz = taCenter
+          MinWidth = 64
+          Options.HorzSizing = False
+          Width = 64
+          Position.BandIndex = 2
+          Position.ColIndex = 0
+          Position.RowIndex = 1
+        end
+        object TV1_P3_MDL: TcxGridDBBandedColumn
+          AlternateCaption = 'RRP, pret MDL'
+          Caption = 'Pret MDL'
+          DataBinding.FieldName = 'P3_MDL'
+          PropertiesClassName = 'TcxCurrencyEditProperties'
+          Properties.Alignment.Horz = taRightJustify
+          Properties.DisplayFormat = ',0.00;-,0.00'
+          HeaderAlignmentHorz = taCenter
+          MinWidth = 64
+          Options.HorzSizing = False
+          Styles.Content = cxStyleBold
+          Width = 64
+          Position.BandIndex = 3
+          Position.ColIndex = 0
+          Position.RowIndex = 0
+        end
+        object TV1_P3_USD: TcxGridDBBandedColumn
+          AlternateCaption = 'RRP, pret USD'
+          Caption = 'Pret USD'
+          DataBinding.FieldName = 'P3_USD'
+          PropertiesClassName = 'TcxCurrencyEditProperties'
+          Properties.Alignment.Horz = taRightJustify
+          Properties.DisplayFormat = ',0.00;-,0.00'
+          HeaderAlignmentHorz = taCenter
+          MinWidth = 64
+          Options.HorzSizing = False
+          Width = 64
+          Position.BandIndex = 3
+          Position.ColIndex = 0
+          Position.RowIndex = 1
+        end
+        object TV1_P4_MDL: TcxGridDBBandedColumn
+          AlternateCaption = 'Calc, pret MDL'
+          Caption = 'Pret MDL'
+          DataBinding.FieldName = 'P4_MDL'
+          PropertiesClassName = 'TcxCurrencyEditProperties'
+          Properties.Alignment.Horz = taRightJustify
+          Properties.DisplayFormat = ',0.00;-,0.00'
+          HeaderAlignmentHorz = taCenter
+          MinWidth = 64
+          Options.HorzSizing = False
+          Styles.Content = cxStyleBold
+          Width = 64
+          Position.BandIndex = 4
+          Position.ColIndex = 0
+          Position.RowIndex = 0
+        end
+        object TV1_P4_USD: TcxGridDBBandedColumn
+          AlternateCaption = 'Calc, pret USD'
+          Caption = 'Pret USD'
+          DataBinding.FieldName = 'P4_USD'
+          PropertiesClassName = 'TcxCurrencyEditProperties'
+          Properties.Alignment.Horz = taRightJustify
+          Properties.DisplayFormat = ',0.00;-,0.00'
+          HeaderAlignmentHorz = taCenter
+          MinWidth = 64
+          Options.HorzSizing = False
+          Width = 64
+          Position.BandIndex = 4
+          Position.ColIndex = 0
+          Position.RowIndex = 1
+        end
+        object TV1_P5_MDL: TcxGridDBBandedColumn
+          AlternateCaption = 'Discount, pret MDL'
+          Caption = 'Pret MDL'
+          DataBinding.FieldName = 'P5_MDL'
+          PropertiesClassName = 'TcxCurrencyEditProperties'
+          Properties.Alignment.Horz = taRightJustify
+          Properties.DisplayFormat = ',0.00;-,0.00'
+          HeaderAlignmentHorz = taCenter
+          MinWidth = 64
+          Options.HorzSizing = False
+          Styles.Content = cxStyleBold
+          Width = 64
+          Position.BandIndex = 5
+          Position.ColIndex = 0
+          Position.RowIndex = 0
+        end
+        object TV1_P5_USD: TcxGridDBBandedColumn
+          AlternateCaption = 'Discount, pret USD'
+          Caption = 'Pret USD'
+          DataBinding.FieldName = 'P5_USD'
+          PropertiesClassName = 'TcxCurrencyEditProperties'
+          Properties.Alignment.Horz = taRightJustify
+          Properties.DisplayFormat = ',0.00;-,0.00'
+          HeaderAlignmentHorz = taCenter
+          MinWidth = 64
+          Options.HorzSizing = False
+          Width = 64
+          Position.BandIndex = 5
+          Position.ColIndex = 0
+          Position.RowIndex = 1
+        end
+        object TV1_P6_MDL: TcxGridDBBandedColumn
+          AlternateCaption = 'Diler, pret MDL'
+          Caption = 'Pret MDL'
+          DataBinding.FieldName = 'P6_MDL'
+          PropertiesClassName = 'TcxCurrencyEditProperties'
+          Properties.Alignment.Horz = taRightJustify
+          Properties.DisplayFormat = ',0.00;-,0.00'
+          OnCustomDrawCell = TV1_CURRENCY7IDCustomDrawCell
+          HeaderAlignmentHorz = taCenter
+          MinWidth = 64
+          Options.HorzSizing = False
+          Styles.Content = cxStyleBold
+          Width = 64
+          Position.BandIndex = 6
+          Position.ColIndex = 0
+          Position.RowIndex = 0
+        end
+        object TV1_P6_USD: TcxGridDBBandedColumn
+          AlternateCaption = 'Diler, pret USD'
+          Caption = 'Pret USD'
+          DataBinding.FieldName = 'P6_USD'
+          PropertiesClassName = 'TcxCurrencyEditProperties'
+          Properties.Alignment.Horz = taRightJustify
+          Properties.DisplayFormat = ',0.00;-,0.00'
+          HeaderAlignmentHorz = taCenter
+          MinWidth = 64
+          Options.HorzSizing = False
+          Width = 64
+          Position.BandIndex = 6
+          Position.ColIndex = 0
+          Position.RowIndex = 1
+        end
+        object TV1_P7_MDL: TcxGridDBBandedColumn
+          AlternateCaption = 'Indicativ, pret MDL'
+          Caption = 'Pret MDL'
+          DataBinding.FieldName = 'P7_MDL'
+          PropertiesClassName = 'TcxCurrencyEditProperties'
+          Properties.Alignment.Horz = taRightJustify
+          Properties.DisplayFormat = ',0.00;-,0.00'
+          OnCustomDrawCell = TV1_CURRENCY7IDCustomDrawCell
+          HeaderAlignmentHorz = taCenter
+          MinWidth = 64
+          Options.HorzSizing = False
+          Styles.Content = cxStyleBold
+          Width = 64
+          Position.BandIndex = 7
+          Position.ColIndex = 0
+          Position.RowIndex = 0
+        end
+        object TV1_P7_USD: TcxGridDBBandedColumn
+          AlternateCaption = 'Indicativ, pret USD'
+          Caption = 'Pret USD'
+          DataBinding.FieldName = 'P7_USD'
+          PropertiesClassName = 'TcxCurrencyEditProperties'
+          Properties.Alignment.Horz = taRightJustify
+          Properties.DisplayFormat = ',0.00;-,0.00'
+          HeaderAlignmentHorz = taCenter
+          MinWidth = 64
+          Options.HorzSizing = False
+          Width = 64
+          Position.BandIndex = 7
+          Position.ColIndex = 0
+          Position.RowIndex = 1
         end
       end
       object cxGridForeignLevel1: TcxGridLevel
@@ -1359,6 +1619,34 @@ object frmGoodsForeignCodeDlg: TfrmGoodsForeignCodeDlg
       
         '  (select title from ts_currency where currencyid = currency7id)' +
         ' currency7Name'
+      '  , round(CONVERT_AMOUNT(V.PRICE1, V.CURRENCY1ID, 498), 2) P1_MDL'
+      '  , round(CONVERT_AMOUNT(V.PRICE1, V.CURRENCY1ID, 840), 2) P1_USD'
+      '  , iif(V.PRICE1 is null, null, ''MDL'') C1_MDL'
+      '  , iif(V.PRICE1 is null, null, ''USD'') C1_USD'
+      '  , round(CONVERT_AMOUNT(V.PRICE2, V.CURRENCY2ID, 498), 2) P2_MDL'
+      '  , round(CONVERT_AMOUNT(V.PRICE2, V.CURRENCY2ID, 840), 2) P2_USD'
+      '  , iif(V.PRICE2 is null, null, ''MDL'') C2_MDL'
+      '  , iif(V.PRICE2 is null, null, ''USD'') C2_USD'
+      '  , round(CONVERT_AMOUNT(V.PRICE3, V.CURRENCY3ID, 498), 2) P3_MDL'
+      '  , round(CONVERT_AMOUNT(V.PRICE3, V.CURRENCY3ID, 840), 2) P3_USD'
+      '  , iif(V.PRICE3 is null, null, ''MDL'') C3_MDL'
+      '  , iif(V.PRICE3 is null, null, ''USD'') C3_USD'
+      '  , round(CONVERT_AMOUNT(V.PRICE4, V.CURRENCY4ID, 498), 2) P4_MDL'
+      '  , round(CONVERT_AMOUNT(V.PRICE4, V.CURRENCY4ID, 840), 2) P4_USD'
+      '  , iif(V.PRICE4 is null, null, ''MDL'') C4_MDL'
+      '  , iif(V.PRICE4 is null, null, ''USD'') C4_USD'
+      '  , round(CONVERT_AMOUNT(V.PRICE5, V.CURRENCY5ID, 498), 2) P5_MDL'
+      '  , round(CONVERT_AMOUNT(V.PRICE5, V.CURRENCY5ID, 840), 2) P5_USD'
+      '  , iif(V.PRICE5 is null, null, ''MDL'') C5_MDL'
+      '  , iif(V.PRICE5 is null, null, ''USD'') C5_USD'
+      '  , round(CONVERT_AMOUNT(V.PRICE6, V.CURRENCY6ID, 498), 2) P6_MDL'
+      '  , round(CONVERT_AMOUNT(V.PRICE6, V.CURRENCY6ID, 840), 2) P6_USD'
+      '  , iif(V.PRICE6 is null, null, ''MDL'') C6_MDL'
+      '  , iif(V.PRICE6 is null, null, ''USD'') C6_USD'
+      '  , round(CONVERT_AMOUNT(V.PRICE7, V.CURRENCY7ID, 498), 2) P7_MDL'
+      '  , round(CONVERT_AMOUNT(V.PRICE7, V.CURRENCY7ID, 840), 2) P7_USD'
+      '  , iif(V.PRICE7 is null, null, ''MDL'') C7_MDL'
+      '  , iif(V.PRICE7 is null, null, ''USD'') C7_USD'
       'from GET_GOODS_FOREIGN(:GOODSID) v'
       'WHERE'
       '  CUSTOMERID = :CUSTOMERID AND GOODS_CODE = :GOODS_CODE'
@@ -1444,6 +1732,34 @@ object frmGoodsForeignCodeDlg: TfrmGoodsForeignCodeDlg
         '       (select TITLE from TS_CURRENCY where CURRENCYID = CURRENC' +
         'Y7ID) CURRENCY7NAME, CONVERT_AMOUNT(PRICE0, CURRENCY0ID, 498) PR' +
         'ICE0_LEI'
+      '  , round(CONVERT_AMOUNT(V.PRICE1, V.CURRENCY1ID, 498), 2) P1_MDL'
+      '  , round(CONVERT_AMOUNT(V.PRICE1, V.CURRENCY1ID, 840), 2) P1_USD'
+      '  , iif(V.PRICE1 is null, null, ''MDL'') C1_MDL'
+      '  , iif(V.PRICE1 is null, null, ''USD'') C1_USD'
+      '  , round(CONVERT_AMOUNT(V.PRICE2, V.CURRENCY2ID, 498), 2) P2_MDL'
+      '  , round(CONVERT_AMOUNT(V.PRICE2, V.CURRENCY2ID, 840), 2) P2_USD'
+      '  , iif(V.PRICE2 is null, null, ''MDL'') C2_MDL'
+      '  , iif(V.PRICE2 is null, null, ''USD'') C2_USD'
+      '  , round(CONVERT_AMOUNT(V.PRICE3, V.CURRENCY3ID, 498), 2) P3_MDL'
+      '  , round(CONVERT_AMOUNT(V.PRICE3, V.CURRENCY3ID, 840), 2) P3_USD'
+      '  , iif(V.PRICE3 is null, null, ''MDL'') C3_MDL'
+      '  , iif(V.PRICE3 is null, null, ''USD'') C3_USD'
+      '  , round(CONVERT_AMOUNT(V.PRICE4, V.CURRENCY4ID, 498), 2) P4_MDL'
+      '  , round(CONVERT_AMOUNT(V.PRICE4, V.CURRENCY4ID, 840), 2) P4_USD'
+      '  , iif(V.PRICE4 is null, null, ''MDL'') C4_MDL'
+      '  , iif(V.PRICE4 is null, null, ''USD'') C4_USD'
+      '  , round(CONVERT_AMOUNT(V.PRICE5, V.CURRENCY5ID, 498), 2) P5_MDL'
+      '  , round(CONVERT_AMOUNT(V.PRICE5, V.CURRENCY5ID, 840), 2) P5_USD'
+      '  , iif(V.PRICE5 is null, null, ''MDL'') C5_MDL'
+      '  , iif(V.PRICE5 is null, null, ''USD'') C5_USD'
+      '  , round(CONVERT_AMOUNT(V.PRICE6, V.CURRENCY6ID, 498), 2) P6_MDL'
+      '  , round(CONVERT_AMOUNT(V.PRICE6, V.CURRENCY6ID, 840), 2) P6_USD'
+      '  , iif(V.PRICE6 is null, null, ''MDL'') C6_MDL'
+      '  , iif(V.PRICE6 is null, null, ''USD'') C6_USD'
+      '  , round(CONVERT_AMOUNT(V.PRICE7, V.CURRENCY7ID, 498), 2) P7_MDL'
+      '  , round(CONVERT_AMOUNT(V.PRICE7, V.CURRENCY7ID, 840), 2) P7_USD'
+      '  , iif(V.PRICE7 is null, null, ''MDL'') C7_MDL'
+      '  , iif(V.PRICE7 is null, null, ''USD'') C7_USD'
       'from GET_GOODS_FOREIGN(:GOODSID) V'
       'order by FLG_IN_PRICE desc, PRICE0, PRICE7_LEI')
     RefreshOptions = [roAfterInsert, roAfterUpdate]
