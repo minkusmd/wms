@@ -2962,6 +2962,9 @@
     <DCCReference Include="frameUtils\78 - Pricelist\frmPricelistImportUnit.pas">
       <Form>frmPriceListImportDlg</Form>
     </DCCReference>
+    <DCCReference Include="frameUtils\78 - Pricelist\frmPricelistCurrencyUnit.pas">
+      <Form>frmPricelistCurrencyDlg</Form>
+    </DCCReference>
     <DCCReference Include="frameUtils\78 - Pricelist\frmAnalizePriceListUnit.pas">
       <Form>frmAnalizePriceListDlg</Form>
     </DCCReference>

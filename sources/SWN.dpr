@@ -624,6 +624,7 @@ uses
   frmOportunitatiDialog in 'frameUtils\77 - Oportunitati\frmOportunitatiDialog.pas' {frmOportunitatiDlg},
   frame78PriceListUnit in 'frames\frame78PriceListUnit.pas' {frame78PriceList: TFrame},
   frmPricelistImportUnit in 'frameUtils\78 - Pricelist\frmPricelistImportUnit.pas' {frmPriceListImportDlg},
+  frmPricelistCurrencyUnit in 'frameUtils\78 - Pricelist\frmPricelistCurrencyUnit.pas' {frmPricelistCurrencyDlg},
   frmAnalizePriceListUnit in 'frameUtils\78 - Pricelist\frmAnalizePriceListUnit.pas' {frmAnalizePriceListDlg},
   frmPrepareGoodsForImportUnit in 'frameUtils\79 - Analyze PriceList\frmPrepareGoodsForImportUnit.pas' {frmPrepareGoodsForImportDlg},
   frame80InventariereUnit in 'frames\frame80InventariereUnit.pas' {frame80Inventariere: TFrame},

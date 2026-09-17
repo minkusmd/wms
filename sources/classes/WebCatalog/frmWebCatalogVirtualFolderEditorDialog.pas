@@ -19,7 +19,7 @@ uses
     DialogTitle, SWNBaseUnit, cxGraphics, cxControls, cxLookAndFeels,
     cxLookAndFeelPainters, cxContainer, cxEdit, cxTextEdit, cxMaskEdit, cxDropDownEdit,
     cxCheckBox, cxDBEdit, cxImage, cxMemo, cxSpinEdit, cxButtons,
-    DB, DBAccess, IBC, MemDS;
+    DB, DBAccess, IBC, MemDS, Vcl.Menus;
 
 type
     TfrmWebCatalogVirtualFolderEditorDlg = class(TSWNMasteredFormClass)

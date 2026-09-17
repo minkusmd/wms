@@ -4,7 +4,7 @@ object frmWebCatalogVirtualFolderEditorDlg: TfrmWebCatalogVirtualFolderEditorDlg
   ActiveControl = edTITLE_ROM
   BorderStyle = bsDialog
   Caption = 'Mapa virtuala'
-  ClientHeight = 566
+  ClientHeight = 724
   ClientWidth = 792
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -12,12 +12,10 @@ object frmWebCatalogVirtualFolderEditorDlg: TfrmWebCatalogVirtualFolderEditorDlg
   Font.Height = -12
   Font.Name = 'Segoe UI'
   Font.Style = []
-  OldCreateOrder = False
   Position = poOwnerFormCenter
   DesignSize = (
     792
-    566)
-  PixelsPerInch = 96
+    724)
   TextHeight = 15
   object dtDialogTitle: TDialogTitle
     Left = 0
@@ -44,7 +42,7 @@ object frmWebCatalogVirtualFolderEditorDlg: TfrmWebCatalogVirtualFolderEditorDlg
     Left = 8
     Top = 72
     Width = 776
-    Height = 437
+    Height = 590
     Margins.Left = 8
     Margins.Top = 8
     Margins.Right = 8
@@ -55,84 +53,84 @@ object frmWebCatalogVirtualFolderEditorDlg: TfrmWebCatalogVirtualFolderEditorDlg
     object lbTITLE_ROM: TLabel
       Left = 12
       Top = 12
-      Width = 116
+      Width = 104
       Height = 15
       Caption = 'Denumire (romana)'
     end
     object lbTITLE_RUS: TLabel
       Left = 12
       Top = 62
-      Width = 100
+      Width = 85
       Height = 15
       Caption = 'Denumire (rusa)'
     end
     object lbH1_ROM: TLabel
       Left = 12
       Top = 112
-      Width = 128
+      Width = 114
       Height = 15
       Caption = 'H1 romana (optional)'
     end
     object lbH1_RUS: TLabel
       Left = 12
       Top = 162
-      Width = 112
+      Width = 95
       Height = 15
       Caption = 'H1 rusa (optional)'
     end
     object lbREWRITE_URL: TLabel
       Left = 12
       Top = 212
-      Width = 148
+      Width = 123
       Height = 15
       Caption = 'Adresa URL (litere mici)'
     end
     object lbFilter: TLabel
       Left = 12
-      Top = 262
-      Width = 52
+      Top = 280
+      Width = 37
       Height = 15
       Caption = 'Atribut'
     end
     object lbORDERNO: TLabel
       Left = 12
-      Top = 322
-      Width = 52
+      Top = 345
+      Width = 36
       Height = 15
       Caption = 'Ordine'
     end
     object lbMETA_TITLE_ROM: TLabel
-      Left = 300
-      Top = 322
-      Width = 108
+      Left = 12
+      Top = 440
+      Width = 102
       Height = 15
       Caption = 'Meta title (romana)'
     end
     object lbMETA_TITLE_RUS: TLabel
-      Left = 300
-      Top = 372
-      Width = 92
+      Left = 392
+      Top = 440
+      Width = 83
       Height = 15
       Caption = 'Meta title (rusa)'
     end
     object lbMETA_DESCRIPTION_ROM: TLabel
       Left = 12
-      Top = 372
-      Width = 140
+      Top = 490
+      Width = 122
       Height = 15
       Caption = 'Meta description (rom)'
     end
     object lbMETA_DESCRIPTION_RUS: TLabel
-      Left = 560
-      Top = 372
-      Width = 136
+      Left = 392
+      Top = 490
+      Width = 116
       Height = 15
       Caption = 'Meta description (rus)'
     end
     object lbImage: TLabel
       Left = 560
       Top = 12
-      Width = 168
+      Width = 114
       Height = 15
       Caption = 'Imagine tile (190x190)'
     end
@@ -142,10 +140,18 @@ object frmWebCatalogVirtualFolderEditorDlg: TfrmWebCatalogVirtualFolderEditorDlg
       Width = 200
       Height = 45
       AutoSize = False
-      Caption =
-        'Imaginea se poate adauga dupa prima salvare a mapei.'
+      Caption = 'Imaginea se poate adauga dupa prima salvare a mapei.'
       Visible = False
       WordWrap = True
+    end
+    object lbFilterValue: TLabel
+      Left = 12
+      Top = 305
+      Width = 400
+      Height = 17
+      AutoSize = False
+      Caption = '<nu este ales nici un atribut>'
+      ShowAccelChar = False
     end
     object edTITLE_ROM: TcxDBTextEdit
       Left = 12
@@ -191,88 +197,77 @@ object frmWebCatalogVirtualFolderEditorDlg: TfrmWebCatalogVirtualFolderEditorDlg
       TabOrder = 5
       OnClick = btnFillSlugClick
     end
-    object lbFilterValue: TLabel
-      Left = 12
-      Top = 287
-      Width = 400
-      Height = 17
-      AutoSize = False
-      Caption = '<nu este ales nici un atribut>'
-      ShowAccelChar = False
-    end
     object btnChooseFilter: TcxButton
       Left = 420
-      Top = 283
+      Top = 301
       Width = 112
       Height = 25
       Caption = 'Alege atribut'
-      TabOrder = 7
+      TabOrder = 6
       OnClick = btnChooseFilterClick
     end
     object edORDERNO: TcxDBSpinEdit
       Left = 12
-      Top = 341
+      Top = 364
       DataBinding.DataField = 'ORDERNO'
-      TabOrder = 8
+      TabOrder = 7
       Width = 100
     end
     object cbFLG_ENABLED: TcxDBCheckBox
-      Left = 130
-      Top = 341
+      Left = 140
+      Top = 364
       Caption = 'Mapa este activa'
       DataBinding.DataField = 'FLG_ENABLED'
       Properties.Alignment = taLeftJustify
       Properties.NullStyle = nssUnchecked
       Properties.ValueChecked = 1
       Properties.ValueUnchecked = 0
-      TabOrder = 9
+      TabOrder = 8
       Transparent = True
-      Width = 150
     end
     object cbFLG_TILE: TcxDBCheckBox
-      Left = 130
-      Top = 366
+      Left = 140
+      Top = 389
       Caption = 'Apare ca tile in categorie'
       DataBinding.DataField = 'FLG_TILE'
       Properties.Alignment = taLeftJustify
       Properties.NullStyle = nssUnchecked
       Properties.ValueChecked = 1
       Properties.ValueUnchecked = 0
-      TabOrder = 10
+      TabOrder = 9
       Transparent = True
-      Width = 170
     end
     object edMETA_TITLE_ROM: TcxDBTextEdit
-      Left = 300
-      Top = 341
+      Left = 12
+      Top = 459
       DataBinding.DataField = 'META_TITLE_ROM'
-      TabOrder = 11
-      Width = 232
+      TabOrder = 10
+      Width = 360
     end
     object edMETA_TITLE_RUS: TcxDBTextEdit
-      Left = 300
-      Top = 391
+      Left = 392
+      Top = 459
       DataBinding.DataField = 'META_TITLE_RUS'
-      TabOrder = 12
-      Width = 232
+      TabOrder = 11
+      Width = 360
     end
     object edMETA_DESCRIPTION_ROM: TcxDBMemo
       Left = 12
-      Top = 391
+      Top = 509
       DataBinding.DataField = 'META_DESCRIPTION_ROM'
       Properties.ScrollBars = ssVertical
-      TabOrder = 13
-      Height = 38
-      Width = 276
+      TabOrder = 12
+      Height = 60
+      Width = 360
     end
     object edMETA_DESCRIPTION_RUS: TcxDBMemo
-      Left = 560
-      Top = 391
+      Left = 392
+      Top = 509
       DataBinding.DataField = 'META_DESCRIPTION_RUS'
       Properties.ScrollBars = ssVertical
-      TabOrder = 14
-      Height = 38
-      Width = 200
+      TabOrder = 13
+      Height = 60
+      Width = 360
     end
     object imgBIG_IMAGE: TcxDBImage
       Left = 560
@@ -281,14 +276,14 @@ object frmWebCatalogVirtualFolderEditorDlg: TfrmWebCatalogVirtualFolderEditorDlg
       Properties.GraphicClassName = 'TdxPNGImage'
       Properties.ImmediatePost = True
       Properties.ShowFocusRect = False
-      TabOrder = 15
+      TabOrder = 14
       Height = 195
       Width = 200
     end
   end
   object btnOk: TButton
     Left = 583
-    Top = 525
+    Top = 678
     Width = 90
     Height = 29
     Anchors = [akRight, akBottom]
@@ -299,7 +294,7 @@ object frmWebCatalogVirtualFolderEditorDlg: TfrmWebCatalogVirtualFolderEditorDlg
   end
   object btnCancel: TButton
     Left = 685
-    Top = 525
+    Top = 678
     Width = 90
     Height = 29
     Anchors = [akRight, akBottom]
@@ -326,7 +321,9 @@ object frmWebCatalogVirtualFolderEditorDlg: TfrmWebCatalogVirtualFolderEditorDlg
       'WHERE'
       '  VIRTUALID = :Old_VIRTUALID')
     SQLRefresh.Strings = (
-      'SELECT VIRTUALID, IMAGE, BIG_IMAGE FROM TWEB_CATALOG_VIRTUAL_IMAGE'
+      
+        'SELECT VIRTUALID, IMAGE, BIG_IMAGE FROM TWEB_CATALOG_VIRTUAL_IMA' +
+        'GE'
       'WHERE'
       '  VIRTUALID = :VIRTUALID')
     SQLLock.Strings = (
@@ -341,6 +338,7 @@ object frmWebCatalogVirtualFolderEditorDlg: TfrmWebCatalogVirtualFolderEditorDlg
       'FROM TWEB_CATALOG_VIRTUAL_IMAGE'
       'WHERE VIRTUALID = :ID')
     Options.RequiredFields = False
+    LocalConstraints = False
     Left = 620
     Top = 300
     ParamData = <

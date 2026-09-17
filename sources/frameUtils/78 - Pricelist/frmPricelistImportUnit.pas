@@ -8,6 +8,7 @@ uses
   System.SysUtils,
   System.Variants,
   System.Classes,
+  System.Generics.Collections,
   Vcl.Graphics,
   Vcl.Controls,
   Vcl.Forms,
@@ -85,7 +86,8 @@ uses
   cxDBLookupEdit,
   cxDBLookupComboBox,
   dxSpreadSheetTypes,
-  dxUIAClasses;
+  dxUIAClasses,
+  frmImportPricelistErrorUnit;
 
 type
   TfrmPriceListImportDlg = class(TSWNBaseFormClass)
@@ -113,15 +115,13 @@ type
     dxStatusBar1: TdxStatusBar;
     IBCQueryCurrency: TIBCQuery;
     IBCDataSourceCurrency: TIBCDataSource;
-    bbCurrencyRRP: TdxBarButton;
-    dxBarButton2: TdxBarButton;
+    bbCurrencies: TdxBarButton;
     dxBarButton3: TdxBarButton;
     procedure dxWizardControl1ButtonClick(Sender: TObject; AKind: TdxWizardControlButtonKind; var AHandled: Boolean);
     procedure dxWizardControl1PageChanging(Sender: TObject; ANewPage: TdxWizardControlCustomPage; var AAllow: Boolean);
     procedure bbSaveClick(Sender: TObject);
     procedure bbOpenFileClick(Sender: TObject);
-    procedure bbCurrencyRRPClick(Sender: TObject);
-    procedure dxBarButton2Click(Sender: TObject);
+    procedure bbCurrenciesClick(Sender: TObject);
     procedure FormActivate(Sender: TObject);
     procedure dxBarButton3Click(Sender: TObject);
 
@@ -129,12 +129,27 @@ type
     { Private declarations }
     fPLID: Integer;
     FPriceCategoryID: Integer;
+    fCurrencyIDs: TDictionary<string, Integer>;
+    fCurrencyNames: TDictionary<Integer, string>;
+    fRRPCurrencyID: Integer;
+    fPurchaseCurrencyID: Integer;
     procedure SetPriceCategoryID(const Value: Integer);
-    procedure UpdateCurrencyName(AColumnIndex: Integer; DefaultCurrencyName: string);
+    procedure LoadCurrencies;
+    procedure LoadSupplierCurrencies;
+    procedure SaveSupplierCurrencies;
+    function CurrencySettingKey(const AColumnIndex: Integer): string;
+    function FindCurrencyID(const ACurrencyName: string; out ACurrencyID: Integer): Boolean;
+    function CellCurrencyID(const ACell: TdxSpreadSheetCell; const ADefaultID: Integer): Integer;
+    procedure FillCurrencyColumn(const AColumnIndex: Integer; const ACurrencyID: Integer; const AOverwrite: Boolean);
+    procedure ShowCurrenciesInStatusBar;
     procedure ImportJsonToDxSpreadSheet;
+    function ColumnTitle(const AColumnIndex: Integer): string;
+    function RowGoodsCode(const ARowIndex: Integer): string;
+    procedure MarkCellError(const ARowIndex, AColumnIndex: Integer);
+    procedure ShowErrors(const AErrors: TfrmImportPricelistErrorDlg);
   protected
     procedure PopulateSpreadSheet;
-    procedure AddToDB;
+    function AddToDB: Boolean;
     { Protected declarations }
     procedure Prepare; override;
     function IsFormDataPosted: Boolean; override;
@@ -145,6 +160,7 @@ type
     SupplierName: string;
     Mentiuni: string;
     property PriceCategoryID: Integer read FPriceCategoryID write SetPriceCategoryID;
+    destructor Destroy; override;
     { Public declarations }
   end;
 
@@ -156,7 +172,7 @@ uses
   SWNUtils,
   SWNValueStorageUnit,
   frmCustomersDlg,
-  frmImportPricelistErrorUnit,
+  frmPricelistCurrencyUnit,
   System.JSON,
   System.Math,
   System.UITypes,
@@ -164,9 +180,163 @@ uses
 
 {$R *.dfm}
 
-procedure TfrmPriceListImportDlg.bbCurrencyRRPClick(Sender: TObject);
+const
+  cColCurrencyRRP = 4;      // Val. Vinz. -> CURRENCY3ID
+  cColCurrencyPurchase = 6; // Val. 7     -> CURRENCY7ID + CURRENCY0ID
+  cDefaultRRPCurrencyID = 498;
+  cDefaultPurchaseCurrencyID = 840;
+
+procedure TfrmPriceListImportDlg.bbCurrenciesClick(Sender: TObject);
+var
+  dialog: TfrmPricelistCurrencyDlg;
 begin
-  UpdateCurrencyName(4, 'MDL');
+  dialog := TfrmPricelistCurrencyDlg.Create(Self, dmDB.IBCConnection);
+  try
+    dialog.RRPCurrencyID := fRRPCurrencyID;
+    dialog.PurchaseCurrencyID := fPurchaseCurrencyID;
+    dialog.OverwriteExisting := True;
+    if dialog.ShowModal <> mrOk then
+      Exit;
+
+    fRRPCurrencyID := dialog.RRPCurrencyID;
+    fPurchaseCurrencyID := dialog.PurchaseCurrencyID;
+    SaveSupplierCurrencies;
+
+    dxSpreadSheet1.BeginUpdate;
+    try
+      FillCurrencyColumn(cColCurrencyRRP, fRRPCurrencyID, dialog.OverwriteExisting);
+      FillCurrencyColumn(cColCurrencyPurchase, fPurchaseCurrencyID, dialog.OverwriteExisting);
+    finally
+      dxSpreadSheet1.EndUpdate;
+    end;
+    ShowCurrenciesInStatusBar;
+  finally
+    dialog.Free;
+  end;
+end;
+
+destructor TfrmPriceListImportDlg.Destroy;
+begin
+  fCurrencyIDs.Free;
+  fCurrencyNames.Free;
+  inherited;
+end;
+
+procedure TfrmPriceListImportDlg.LoadCurrencies;
+var
+  Key: string;
+begin
+  if not Assigned(fCurrencyIDs) then
+    fCurrencyIDs := TDictionary<string, Integer>.Create;
+  if not Assigned(fCurrencyNames) then
+    fCurrencyNames := TDictionary<Integer, string>.Create;
+  fCurrencyIDs.Clear;
+  fCurrencyNames.Clear;
+
+  IBCQueryCurrency.Close;
+  IBCQueryCurrency.Open;
+  try
+    while not IBCQueryCurrency.Eof do
+    begin
+      { in tabel se accepta atat denumirea (USD) cat si simbolul ($) }
+      Key := UpperCase(Trim(IBCQueryCurrency.FieldByName('TITLE').AsString));
+      if Key <> '' then
+        fCurrencyIDs.AddOrSetValue(Key, IBCQueryCurrency.FieldByName('CURRENCYID').AsInteger);
+      Key := UpperCase(Trim(IBCQueryCurrency.FieldByName('SHORTNAME').AsString));
+      if (Key <> '') and not fCurrencyIDs.ContainsKey(Key) then
+        fCurrencyIDs.Add(Key, IBCQueryCurrency.FieldByName('CURRENCYID').AsInteger);
+      fCurrencyNames.AddOrSetValue(IBCQueryCurrency.FieldByName('CURRENCYID').AsInteger,
+        Trim(IBCQueryCurrency.FieldByName('TITLE').AsString));
+      IBCQueryCurrency.Next;
+    end;
+  finally
+    IBCQueryCurrency.Close;
+  end;
+end;
+
+function TfrmPriceListImportDlg.CurrencySettingKey(const AColumnIndex: Integer): string;
+begin
+  Result := 'Supplier' + SupplierID.ToString + '_' + PriceCategoryID.ToString + '-' + AColumnIndex.ToString;
+end;
+
+procedure TfrmPriceListImportDlg.LoadSupplierCurrencies;
+var
+  SavedName: string;
+begin
+  fRRPCurrencyID := cDefaultRRPCurrencyID;
+  fPurchaseCurrencyID := cDefaultPurchaseCurrencyID;
+
+  { cheile raman cele vechi (coloana 4 / 6), ca sa nu se piarda setarile existente }
+  AppUserConfigStorage.OpenSection('SUPPLIER_IMPORT_PRICES');
+  try
+    SavedName := AppUserConfigStorage.TextValues.GetValue(CurrencySettingKey(cColCurrencyRRP), '');
+    if SavedName <> '' then
+      FindCurrencyID(SavedName, fRRPCurrencyID);
+    SavedName := AppUserConfigStorage.TextValues.GetValue(CurrencySettingKey(cColCurrencyPurchase), '');
+    if SavedName <> '' then
+      FindCurrencyID(SavedName, fPurchaseCurrencyID);
+  finally
+    AppUserConfigStorage.CloseSection;
+  end;
+end;
+
+procedure TfrmPriceListImportDlg.SaveSupplierCurrencies;
+begin
+  AppUserConfigStorage.OpenSection('SUPPLIER_IMPORT_PRICES');
+  try
+    AppUserConfigStorage.TextValues.SetValue(CurrencySettingKey(cColCurrencyRRP), fCurrencyNames[fRRPCurrencyID]);
+    AppUserConfigStorage.TextValues.SetValue(CurrencySettingKey(cColCurrencyPurchase), fCurrencyNames[fPurchaseCurrencyID]);
+  finally
+    AppUserConfigStorage.CloseSection;
+  end;
+end;
+
+function TfrmPriceListImportDlg.FindCurrencyID(const ACurrencyName: string; out ACurrencyID: Integer): Boolean;
+var
+  ID: Integer;
+begin
+  Result := fCurrencyIDs.TryGetValue(UpperCase(Trim(ACurrencyName)), ID);
+  if Result then
+    ACurrencyID := ID;
+end;
+
+{ Celula goala sau lipsa -> valuta aleasa pentru furnizor. Valorile necunoscute
+  sunt respinse inainte, in ValidateData. }
+function TfrmPriceListImportDlg.CellCurrencyID(const ACell: TdxSpreadSheetCell; const ADefaultID: Integer): Integer;
+begin
+  Result := ADefaultID;
+  if Assigned(ACell) and (Trim(ACell.DisplayText) <> '') then
+    FindCurrencyID(ACell.DisplayText, Result);
+end;
+
+procedure TfrmPriceListImportDlg.FillCurrencyColumn(const AColumnIndex: Integer; const ACurrencyID: Integer; const
+  AOverwrite: Boolean);
+var
+  ATable: TdxSpreadSheetTableView;
+  Cell: TdxSpreadSheetCell;
+  I: Integer;
+begin
+  ATable := dxSpreadSheet1.ActiveSheetAsTable;
+  for I := 1 to ATable.Rows.Count - 1 do
+  begin
+    { randurile fara cod de produs nu se importa - nu le completam }
+    if not Assigned(ATable.Cells[I, 0]) or (Trim(ATable.Cells[I, 0].DisplayText) = '') then
+      Continue;
+
+    Cell := ATable.Cells[I, AColumnIndex];
+    if not Assigned(Cell) then
+      Cell := ATable.CreateCell(I, AColumnIndex)
+    else if not AOverwrite and (Trim(Cell.DisplayText) <> '') then
+      Continue;
+    Cell.SetText(fCurrencyNames[ACurrencyID]);
+  end;
+end;
+
+procedure TfrmPriceListImportDlg.ShowCurrenciesInStatusBar;
+begin
+  if dxStatusBar1.Panels.Count > 0 then
+    dxStatusBar1.Panels[0].Text := Format('Valuta RRP: %s   |   Valuta pret intrare: %s',
+      [fCurrencyNames[fRRPCurrencyID], fCurrencyNames[fPurchaseCurrencyID]]);
 end;
 
 procedure TfrmPriceListImportDlg.bbOpenFileClick(Sender: TObject);
@@ -199,11 +369,6 @@ begin
   finally
     dialog.Free;
   end;
-end;
-
-procedure TfrmPriceListImportDlg.dxBarButton2Click(Sender: TObject);
-begin
-  UpdateCurrencyName(6, 'USD');
 end;
 
 procedure TfrmPriceListImportDlg.dxBarButton3Click(Sender: TObject);
@@ -387,10 +552,7 @@ begin
         cxProgressBar1.Properties.AnimationPath := cxapCycle;
         cxProgressBar1.Properties.AnimationSpeed := 5;
         if ValidateData then
-        begin
-          AddToDB;
-          AAllow := True;
-        end;
+          AAllow := AddToDB;
         cxProgressBar1.Properties.Marquee := False;
         cxProgressBar1.Visible := True;
       end;
@@ -541,21 +703,75 @@ begin
   cxDateEdit1.Date := Now;
 end;
 
-procedure TfrmPriceListImportDlg.AddToDB;
+function TfrmPriceListImportDlg.ColumnTitle(const AColumnIndex: Integer): string;
 var
   ATable: TdxSpreadSheetTableView;
-  ErrorStr: TStringList;
+begin
+  ATable := dxSpreadSheet1.ActiveSheetAsTable;
+  if Assigned(ATable.Cells[0, AColumnIndex]) then
+    Result := Trim(ATable.Cells[0, AColumnIndex].DisplayText)
+  else
+    Result := '';
+  if Result = '' then
+    Result := 'Coloana ' + (AColumnIndex + 1).ToString;
+end;
+
+function TfrmPriceListImportDlg.RowGoodsCode(const ARowIndex: Integer): string;
+var
+  ATable: TdxSpreadSheetTableView;
+begin
+  ATable := dxSpreadSheet1.ActiveSheetAsTable;
+  if Assigned(ATable.Cells[ARowIndex, 0]) then
+    Result := Trim(ATable.Cells[ARowIndex, 0].DisplayText)
+  else
+    Result := '';
+end;
+
+procedure TfrmPriceListImportDlg.MarkCellError(const ARowIndex, AColumnIndex: Integer);
+var
+  ATable: TdxSpreadSheetTableView;
+  Cell: TdxSpreadSheetCell;
+begin
+  ATable := dxSpreadSheet1.ActiveSheetAsTable;
+  Cell := ATable.Cells[ARowIndex, AColumnIndex];
+  if not Assigned(Cell) then
+    Cell := ATable.CreateCell(ARowIndex, AColumnIndex);
+  Cell.Style.Brush.BackgroundColor := clRed;
+  Cell.Style.Font.Color := clWhite;
+end;
+
+procedure TfrmPriceListImportDlg.ShowErrors(const AErrors: TfrmImportPricelistErrorDlg);
+var
+  Errors: TfrmImportPricelistErrorDlg;
+  ATable: TdxSpreadSheetTableView;
+begin
+  Errors := AErrors;
+  if Errors.ErrorCount = 0 then
+    Exit;
+  if (Errors.ShowModal = mrOk) and (Errors.SelectedRow >= 0) then
+  begin
+    ATable := dxSpreadSheet1.ActiveSheetAsTable;
+    ATable.Selection.SetFocused(Errors.SelectedColumn, Errors.SelectedRow, []);
+    ATable.MakeFocusedCellVisible;
+    dxSpreadSheet1.SetFocus;
+  end;
+end;
+
+function TfrmPriceListImportDlg.AddToDB: Boolean;
+var
+  ATable: TdxSpreadSheetTableView;
+  Errors: TfrmImportPricelistErrorDlg;
   ibcsql: TIBCSQL;
   Query: TIBCQuery;
   I: Integer;
-  len: Integer;
   s: string;
   supplier_goods_code: string;
 begin
+  Result := False;
    //  Populate ts_pricelist
   Query := TIBCQuery.Create(Self);
   ibcsql := TIBCSQL.Create(Self);
-  ErrorStr := TStringList.Create;
+  Errors := TfrmImportPricelistErrorDlg.Create(Self);
   try
     Query.Connection := dmDB.IBCConnection;
     Query.Transaction := IBCTrWrite;
@@ -630,7 +846,6 @@ begin
       IBCTrWrite.StartTransaction;
 
     ibcsql.Prepare;
-    ErrorStr.Clear;
     for I := 1 to ATable.Rows.Count - 1 do
     begin
       with ibcsql do
@@ -669,11 +884,7 @@ begin
         else
           ParamByName('PRICE3').Value := null;
 
-        if Assigned(ATable.Cells[I, 4]) then
-          ParamByName('CURRENCY3ID').AsString := iif(ATable.Cells[I, 4].DisplayText = '', '498', GetCurrencyID(ATable.Cells
-            [I, 4].DisplayText))
-        else
-          ParamByName('CURRENCY3ID').Value := null;
+        ParamByName('CURRENCY3ID').AsInteger := CellCurrencyID(ATable.Cells[I, cColCurrencyRRP], fRRPCurrencyID);
 
         if Assigned(ATable.Cells[I, 5]) then
           ParamByName('PRICE7').AsString := iif(stringreplace(ATable.Cells[I, 5].DisplayText, ' ', '', [rfReplaceAll]) =
@@ -681,18 +892,9 @@ begin
         else
           ParamByName('PRICE7').Value := null;
 
-        if Assigned(ATable.Cells[I, 6]) then
-        begin
-          ParamByName('CURRENCY7ID').AsString := iif(ATable.Cells[I, 6].DisplayText = '', '498', GetCurrencyID(ATable.Cells
-            [I, 6].DisplayText));
-          ParamByName('CURRENCY0ID').AsString := iif(ATable.Cells[I, 6].DisplayText = '', '498', GetCurrencyID(ATable.Cells
-            [I, 6].DisplayText));
-        end
-        else
-        begin
-          ParamByName('CURRENCY7ID').Value := null;
-          ParamByName('CURRENCY0ID').Value := null;
-        end;
+        { pretul de intrare (Pret 0) si Pret 7 au aceeasi valuta }
+        ParamByName('CURRENCY7ID').AsInteger := CellCurrencyID(ATable.Cells[I, cColCurrencyPurchase], fPurchaseCurrencyID);
+        ParamByName('CURRENCY0ID').AsInteger := ParamByName('CURRENCY7ID').AsInteger;
 
         if Assigned(ATable.Cells[I, 7]) then
           ParamByName('STOCK_QTY').AsString := ATable.Cells[I, 7].DisplayText;
@@ -748,37 +950,32 @@ begin
           Execute;
         except
           on e: Exception do
-          begin
-            if assigned(ATable.Cells[I, 0]) then
-              ErrorStr.Add(ATable.Cells[I, 0].DisplayText + #9 + e.Message);
-          end;
+            Errors.AddError('Import', I, RowGoodsCode(I), '', 0, e.Message);
         end;
         Application.ProcessMessages;
       end;
     end;
 
-    if ErrorStr.Count > 0 then
-    begin
-      MessageDlg('Codurile produselor cu eroare:'#13#10 + ErrorStr.Text, mtError, [mbOK], 0);
-      Clipboard.AsText := ErrorStr.Text;
-    end;
-
-    Query.ApplyUpdates;
-
     try
+      Query.ApplyUpdates;
       IBCTrWrite.Commit;
+      Result := True;
     except
-//      ShowMessage('SUPPLIER_GOODS_CODE = ' + ATable.Cells[I, 0].DisplayText);
-      MessageDlg('Codurile produselor cu eroare:'#13#10 + ErrorStr.Text, mtError, [mbOK], 0);
-      Clipboard.AsText := ErrorStr.Text;
-      IBCTrWrite.Rollback;
+      on e: Exception do
+      begin
+        if IBCTrWrite.Active then
+          IBCTrWrite.Rollback;
+        Errors.AddError('Salvare', -1, '', '', -1,
+          'Pricelistul nu a fost salvat, toate randurile au fost anulate: ' + e.Message);
+      end;
     end;
+
+    ShowErrors(Errors);
   finally
     ibcsql.Free;
     Query.Free;
-    ErrorStr.Free;
+    Errors.Free;
   end;
-
 end;
 
 procedure TfrmPriceListImportDlg.FormActivate(Sender: TObject);
@@ -793,6 +990,9 @@ begin
   PopulateSpreadSheet;
   dxWizardControlPage1.PageIndex := 0;
   teMentiuni.Text := Mentiuni;
+  LoadCurrencies;
+  LoadSupplierCurrencies;
+  ShowCurrenciesInStatusBar;
 end;
 
 procedure TfrmPriceListImportDlg.PrepareStep1;
@@ -807,113 +1007,70 @@ begin
   FPriceCategoryID := Value;
 end;
 
-procedure TfrmPriceListImportDlg.UpdateCurrencyName(AColumnIndex: Integer; DefaultCurrencyName: string);
-var
-  ATable: TdxSpreadSheetTableView;
-  Cell: TdxSpreadSheetCell;
-  CurrencyName: string;
-begin
-  // Save Default CurrencyName for Supplier
-  AppUserConfigStorage.OpenSection('SUPPLIER_IMPORT_PRICES');
-  try
-    DefaultCurrencyName := AppUserConfigStorage.TextValues.GetValue('Supplier' + SupplierID.ToString + '_' +
-      PriceCategoryID.ToString + '-' + AColumnIndex.ToString, 'MDL');
-    CurrencyName := InputBox('Valuta RRP', '(USD, MDL, EUR)', DefaultCurrencyName);
-    AppUserConfigStorage.TextValues.SetValue('Supplier' + SupplierID.ToString + '_' + PriceCategoryID.ToString + '-' +
-      AColumnIndex.ToString, CurrencyName);
-  finally
-    AppUserConfigStorage.CloseSection;
-  end;
-  // End of Save Default CurrencyName for Supplier
-
-
-  ATable := dxSpreadSheet1.ActiveSheetAsTable;
-  ATable.BeginUpdate;
-  for var I := 1 to ATable.Rows.Count - 1 do
-  begin
-    if not Assigned(ATable.Cells[I, AColumnIndex]) then
-    begin
-      Cell := ATable.CreateCell(I, AColumnIndex);
-    end
-    else
-    begin
-      Cell := ATable.Cells[I, AColumnIndex];
-    end;
-    Cell.SetTExt(CurrencyName);
-  end;
-  ATable.EndUpdate;
-end;
-
 function TfrmPriceListImportDlg.ValidateData: Boolean;
 var
   ATable: TdxSpreadSheetTableView;
+  Errors: TfrmImportPricelistErrorDlg;
   I: Integer;
   tmpPrice: string;
-  ErrorMsg: string;
+  CurrencyID: Integer;
 begin
-  Result := True;
-  ErrorMsg := '';
   ATable := dxSpreadSheet1.ActiveSheetAsTable;
-   //   verificam datele.
-   //   dxSpreadSheet1.BeginUpdate
-  ATable.BeginUpdate;
-  for I := 1 to ATable.Rows.Count - 1 do
-  begin
-    if (Assigned(ATable.Cells[I, 0])) and (ATable.Cells[I, 0].DisplayText = '') then
-    begin
-      ATable.Cells[I, 0].Style.Brush.BackgroundColor := clRed;
-      ATable.Cells[I, 0].Style.Brush.ForegroundColor := clWhite;
-      Result := False;
-      ErrorMsg := ErrorMsg + 'Nu este indicat codul produsului pentru in rindul: ' + I.ToString + #13#10;
-    end;
-
-    //  cell[i,5] -> Price7
-
-    if Assigned(ATable.Cells[I, 5]) and (StrToFloatDef(ATable.Cells[I, 5].AsString, -1) = -1) then
-    begin
-      tmpPrice := ATable.Cells[I, 5].AsString;
-      if tmpPrice <> '' then
-      begin
-        tmpPrice := StringReplace(tmpPrice, ',', '.', [rfReplaceAll, rfIgnoreCase]);
-        tmpPrice := StringReplace(tmpPrice, ' ', '', [rfReplaceAll, rfIgnoreCase]);
-        if (StrToFloatDef(tmpPrice, -1) <> -1) then
-        begin
-          ATable.Cells[I, 5].AsString := tmpPrice;
-        end
-        else
-        begin
-          // a omite marfa cu indicativ zero ?
-          ATable.Cells[I, 0].Style.Brush.BackgroundColor := clRed;
-          ATable.Cells[I, 0].Style.Brush.ForegroundColor := clWhite;
-          Result := False;
-          ErrorMsg := ErrorMsg + 'Pretul nu este corect la produsul din rindul: ' + I.ToString + #13#10;
-        end;
-      end
-      else
-      begin
-        ATable.Cells[I, 0].Style.Brush.BackgroundColor := clRed;
-        ATable.Cells[I, 0].Style.Brush.ForegroundColor := clWhite;
-        Result := False;
-        ErrorMsg := ErrorMsg + 'Pretul lipseste la produsul din rindul: ' + I.ToString + #13#10;
-      end;
-    end;
-    Application.ProcessMessages;
-  end;
-  ATable.EndUpdate;
-
-  if not Result then
-  begin
-    var dialog := TfrmImportPricelistErrorDlg.Create(Self);
+  Errors := TfrmImportPricelistErrorDlg.Create(Self);
+  try
+    ATable.BeginUpdate;
     try
-      dialog.MemoLog.Lines.Clear;
-      dialog.MemoLog.Lines.Add(ErrorMsg);
-      dialog.ShowModal;
-    finally
+      for I := 1 to ATable.Rows.Count - 1 do
+      begin
+        if Assigned(ATable.Cells[I, 0]) and (Trim(ATable.Cells[I, 0].DisplayText) = '') then
+        begin
+          MarkCellError(I, 0);
+          Errors.AddError('Validare', I, '', ColumnTitle(0), 0, 'Nu este indicat codul produsului');
+        end;
 
+        for var Col in [cColCurrencyRRP, cColCurrencyPurchase] do
+          if Assigned(ATable.Cells[I, Col]) and (Trim(ATable.Cells[I, Col].DisplayText) <> '') and
+            not FindCurrencyID(ATable.Cells[I, Col].DisplayText, CurrencyID) then
+          begin
+            MarkCellError(I, Col);
+            Errors.AddError('Validare', I, RowGoodsCode(I), ColumnTitle(Col), Col,
+              Format('Valuta necunoscuta "%s"', [ATable.Cells[I, Col].DisplayText]));
+          end;
+
+        // coloana 5 -> Price7
+        if Assigned(ATable.Cells[I, 5]) and (StrToFloatDef(ATable.Cells[I, 5].AsString, -1) = -1) then
+        begin
+          tmpPrice := ATable.Cells[I, 5].AsString;
+          if tmpPrice <> '' then
+          begin
+            tmpPrice := StringReplace(tmpPrice, ',', '.', [rfReplaceAll, rfIgnoreCase]);
+            tmpPrice := StringReplace(tmpPrice, ' ', '', [rfReplaceAll, rfIgnoreCase]);
+            if StrToFloatDef(tmpPrice, -1) <> -1 then
+              ATable.Cells[I, 5].AsString := tmpPrice
+            else
+            begin
+              MarkCellError(I, 5);
+              Errors.AddError('Validare', I, RowGoodsCode(I), ColumnTitle(5), 5,
+                Format('Pretul nu este corect: "%s"', [ATable.Cells[I, 5].AsString]));
+            end;
+          end
+          else
+          begin
+            MarkCellError(I, 5);
+            Errors.AddError('Validare', I, RowGoodsCode(I), ColumnTitle(5), 5, 'Pretul lipseste');
+          end;
+        end;
+        Application.ProcessMessages;
+      end;
+    finally
+      ATable.EndUpdate;
     end;
+
+    Result := Errors.ErrorCount = 0;
+    ShowErrors(Errors);
+  finally
+    Errors.Free;
   end;
-//        MessageDlg(ErrorMsg, mtError, [mbClose], 0)
 end;
 
 end.
-

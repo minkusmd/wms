@@ -238,11 +238,7 @@ object frmPriceListImportDlg: TfrmPriceListImportDlg
         item
           BeginGroup = True
           Visible = True
-          ItemName = 'bbCurrencyRRP'
-        end
-        item
-          Visible = True
-          ItemName = 'dxBarButton2'
+          ItemName = 'bbCurrencies'
         end
         item
           Visible = True
@@ -302,21 +298,13 @@ object frmPriceListImportDlg: TfrmPriceListImportDlg
         F68638FCD72E4607C39780BFF30035FCDFB92340180ABFF42800384074BA66F5
         D5071DAF2FB821E726207F00836854BD33FCF2A90000000049454E44AE426082}
     end
-    object bbCurrencyRRP: TdxBarButton
-      Caption = 'Valuta RRP'
+    object bbCurrencies: TdxBarButton
+      Caption = 'Valute'
       Category = 0
-      Hint = 'Valuta RRP'
+      Hint = 'Valuta RRP si valuta pretului de intrare'
       Visible = ivAlways
       ImageIndex = 49
-      OnClick = bbCurrencyRRPClick
-    end
-    object dxBarButton2: TdxBarButton
-      Caption = 'Valuta Indicativ'
-      Category = 0
-      Hint = 'Valuta Indicativ'
-      Visible = ivAlways
-      ImageIndex = 48
-      OnClick = dxBarButton2Click
+      OnClick = bbCurrenciesClick
     end
     object dxBarButton3: TdxBarButton
       Caption = 'Importa din JSON'
