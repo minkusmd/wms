@@ -4110,6 +4110,19 @@ object frmMainForm: TfrmMainForm
         item
           BeginGroup = True
           Visible = True
+          ItemName = 'bbDeals'
+        end
+        item
+          Visible = True
+          ItemName = 'bbDealOfCurrentDoc'
+        end
+        item
+          Visible = True
+          ItemName = 'bbDealPayments'
+        end
+        item
+          BeginGroup = True
+          Visible = True
           ItemName = 'bbActivityMonitor'
         end
         item
@@ -4122,6 +4135,27 @@ object frmMainForm: TfrmMainForm
           Visible = True
           ItemName = 'bbCloseBusinessDay'
         end>
+    end
+    object bbDeals: TdxBarButton
+      Caption = 'Deal-uri'
+      Category = 9
+      Hint = 'Lista deal-urilor (voronka de vanzari)'
+      Visible = ivAlways
+      OnClick = bbDealsClick
+    end
+    object bbDealPayments: TdxBarButton
+      Caption = 'Incasari nelegate de deal-uri'
+      Category = 9
+      Hint = 'Potrivirea automata si distribuirea incasarilor pe deal-uri'
+      Visible = ivAlways
+      OnClick = bbDealPaymentsClick
+    end
+    object bbDealOfCurrentDoc: TdxBarButton
+      Caption = 'Deal-ul documentului curent'
+      Category = 9
+      Hint = 'Fisa deal-ului din care face parte documentul selectat'
+      Visible = ivAlways
+      OnClick = bbDealOfCurrentDocClick
     end
     object bbOffer: TdxBarButton
       Caption = 'Oferta noua'

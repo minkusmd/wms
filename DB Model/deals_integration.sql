@@ -1,0 +1,1602 @@
+/* ============================================================================
+   DEALS - legarea documentelor de TDB_DEALS / TDB_DEAL_DOCS / TS_DEAL_STATES
+   NEURON Grup SRL, septembrie 2026
+
+   Tabelele TDB_DEALS, TDB_DEAL_DOCS, TS_DEAL_STATES si procedurile
+   SP_DEAL_GET_STATE_ID, SP_DEAL_CREATE_FROM_SITE_CART,
+   SP_DEAL_CREATE_FROM_FIN_REQUEST, SP_DEAL_CREATE_MANUAL_OFFER exista deja in
+   baza si NU sunt modificate aici. Scriptul adauga tot ce lipsea ca modulul sa
+   functioneze singur, indiferent cine creeaza documentul (WMS, site-ul PHP
+   sau procedurile SP_CREATE_*):
+
+   Algoritm (SP_DEAL_ATTACH_DOC, apelata din trigger la fiecare document nou):
+     1. documentul e deja intr-un deal -> nimic;
+     2. se urca pe TDB_DOCS.PARENTDOCID (max. 10 niveluri); primul stramos legat
+        de un deal da deal-ul -> documentul (si verigile nelegate) se leaga;
+     3. niciun stramos intr-un deal -> deal NOU, creat dupa tipul celui mai de
+        sus document "radacina" din lant:
+            134  Web-Order            -> SITE_CART_ORDER
+            1791 Cerere de finantare  -> FINANCE_REQUEST
+            115  Oferta               -> MANUAL_OFFER
+            101 / 107 fara oferta     -> DIRECT_SALE
+     4. documentele de plata (116/117/119/120/1199), facturile 112 si retururile
+        fara lant NU creeaza deal. O incasare (116/120) fara lant se leaga singura
+        doar daca platitorul are exact un deal deschis cu restul de plata = suma
+        (SP_DEAL_MATCH_PAYMENT); restul se distribuie manual din WMS, cu LINK_SUM.
+     5. SP_DEAL_RECALC_STATES recalculeaza cele 4 axe de stare.
+
+   Documente urmarite: 101, 107, 110, 112, 115, 116, 117, 119, 120, 126, 128,
+   134, 1199, 1791. Clientul deal-ului = TDB_DOCS.CT al documentului radacina.
+
+   Stari calculate automat:
+     PAY  - din sume: total = vanzari nete (107 - 110), altfel proforme;
+            platit = incasari (116 + 120) - restituiri (117 + 119 + 1199).
+            O plata legata de mai multe deal-uri: TDB_DEAL_DOCS.LINK_SUM = partea
+            acestui deal; LINK_SUM NULL = suma integrala a documentului.
+     PIPE - 134 -> WAITING_CHECK; 115/101 -> IN_WORK; 107 -> READY_TO_SHIP;
+            livrare in tranzit -> ON_DELIVERY; livrat -> DELIVERED;
+            toate documentele sterse -> CANCELLED_BY_SHOP.
+     DLV  - TDB_DOCS_DELIVERY pe un document al deal-ului -> PREPARING;
+            AWB / TRANSMIS_CURIER completat -> IN_TRANSIT. "Livrat" se pune
+            manual (nu exista un semn sigur in documente).
+     FIN  - 1791 in lant -> FIN_REQUESTED; restul manual.
+     Inchidere: PIPE_DELIVERED + (PAY_PAID sau FIN_DISBURSED) -> SUCCESS;
+                stare PIPE de anulare -> CANCEL.
+   O axa poate fi blocata la recalculare (TDB_DEALS.FLAGS: bit 0 PIPE, 1 PAY,
+   2 FIN, 3 DLV) - vezi SP_DEAL_SET_STATE / SP_DEAL_UNLOCK_AXIS.
+
+   V_DEAL_ANALYTICS e RESCRIS: versiunea veche lua semnul din bitul 4 al
+   TS_DOCTYPES.FLAGS, care da -1 la vanzare/proforma si +1 la retur/incasare,
+   deci restul de plata si marja ieseau gresite. Acum semnele sunt explicite pe
+   tip de document, iar sumele sunt in MDL (SUMA * RATE).
+   OP_COST_SUM / OP_MARGIN_SUM sunt NULL: in vanzarea operationala (107)
+   TDB_JURNAL.COST = pretul de vanzare, nu costul de achizitie, deci marja nu se
+   poate calcula de acolo. Profitul real il da SP_GET_PROFIT_BY_DOCID_WO_VAT
+   (~13 ms / document) - WMS il calculeaza doar in fisa unui deal.
+
+   SIGURANTA: triggerele de pe TDB_DOCS prind orice eroare (WHEN ANY) si o
+   scriu in TDB_DEAL_LOG - o problema in modulul deals NU blocheaza documentul.
+   Rutinele ruleaza cu SQL SECURITY DEFINER (Firebird 4+), deci utilizatorii
+   (WMS, WEBUSER) nu au nevoie de drepturi pe tabelele deals.
+
+   PUNERE IN PRODUCTIE:
+     1. ruleaza acest script (triggerele se creeaza INACTIVE la prima rulare;
+        la re-rulare starea lor activ/inactiv se pastreaza);
+     2. EXECUTE PROCEDURE SP_DEAL_BACKFILL('2026-01-01');  COMMIT;
+     3. verifica:  SELECT * FROM TDB_DEAL_LOG;  SELECT COUNT(*) FROM TDB_DEALS;
+     4. activeaza:
+            ALTER TRIGGER TDB_DOCS_AI_DEAL ACTIVE;
+            ALTER TRIGGER TDB_DOCS_AU_DEAL ACTIVE;
+            ALTER TRIGGER TDB_DOCS_DELIVERY_AIU_DEAL ACTIVE;
+            ALTER TRIGGER TWEB_TRANSACTION_AI_DEAL ACTIVE;
+            ALTER TRIGGER TDB_DOCS_PROPS_AIU_DEAL ACTIVE;
+        (pe o baza unde scriptul a mai fost rulat, triggerele NOI se creeaza ACTIVE)
+     5. ruleaza inca o data backfill-ul (prinde documentele aparute intre 2 si 4;
+        e idempotent).
+   Oprire de urgenta: ALTER TRIGGER ... INACTIVE pe cele trei triggere.
+
+   Script RE-RULABIL: nu sterge date.
+   ============================================================================ */
+
+SET TERM ^ ;
+
+/* --- 1. Coloana LINK_SUM + tabele noi --------------------------------------- */
+EXECUTE BLOCK AS
+BEGIN
+    IF (NOT EXISTS(SELECT 1 FROM RDB$RELATION_FIELDS
+                   WHERE TRIM(RDB$RELATION_NAME) = 'TDB_DEAL_DOCS'
+                     AND TRIM(RDB$FIELD_NAME) = 'LINK_SUM')) THEN
+        EXECUTE STATEMENT 'ALTER TABLE TDB_DEAL_DOCS ADD LINK_SUM DOUBLE PRECISION';
+
+    IF (NOT EXISTS(SELECT 1 FROM RDB$EXCEPTIONS
+                   WHERE TRIM(RDB$EXCEPTION_NAME) = 'E_DEAL')) THEN
+        EXECUTE STATEMENT 'CREATE EXCEPTION E_DEAL ''Eroare modul deals''';
+
+    IF (NOT EXISTS(SELECT 1 FROM RDB$RELATIONS
+                   WHERE TRIM(RDB$RELATION_NAME) = 'TDB_DEAL_HISTORY')) THEN
+        EXECUTE STATEMENT
+        'CREATE TABLE TDB_DEAL_HISTORY (
+             HIST_ID       BIGINT GENERATED BY DEFAULT AS IDENTITY NOT NULL,
+             DEAL_ID       BIGINT NOT NULL,
+             GROUP_CODE    VARCHAR(8) NOT NULL,
+             OLD_STATE_ID  INTEGER,
+             NEW_STATE_ID  INTEGER,
+             CHANGED_AT    TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+             CHANGED_BY    INTEGER,
+             SOURCE        VARCHAR(8) NOT NULL,
+             CONSTRAINT PK_TDB_DEAL_HISTORY PRIMARY KEY (HIST_ID),
+             CONSTRAINT FK_DEAL_HIST_DEAL FOREIGN KEY (DEAL_ID)
+                 REFERENCES TDB_DEALS (DEAL_ID) ON DELETE CASCADE
+         )';
+
+    IF (NOT EXISTS(SELECT 1 FROM RDB$RELATIONS
+                   WHERE TRIM(RDB$RELATION_NAME) = 'TS_DEAL_REASONS')) THEN
+        EXECUTE STATEMENT
+        'CREATE TABLE TS_DEAL_REASONS (
+             REASON_ID   INTEGER GENERATED BY DEFAULT AS IDENTITY NOT NULL,
+             GROUP_CODE  VARCHAR(8) NOT NULL,
+             CODE        VARCHAR(32) NOT NULL,
+             TITLE_RO    VARCHAR(100) NOT NULL,
+             TITLE_RU    VARCHAR(100),
+             PIPE_CODE   VARCHAR(32),
+             SORT_ORDER  INTEGER DEFAULT 0 NOT NULL,
+             IS_ACTIVE   SMALLINT DEFAULT 1 NOT NULL,
+             CONSTRAINT PK_TS_DEAL_REASONS PRIMARY KEY (REASON_ID),
+             CONSTRAINT UQ_TS_DEAL_REASONS_CODE UNIQUE (CODE)
+         )';
+
+    /* starile vechi ale documentelor (TDB_DOCS.STATEID) -> informatie in deal */
+    IF (NOT EXISTS(SELECT 1 FROM RDB$RELATIONS
+                   WHERE TRIM(RDB$RELATION_NAME) = 'TS_DEAL_STATE_MAP')) THEN
+        EXECUTE STATEMENT
+        'CREATE TABLE TS_DEAL_STATE_MAP (
+             OLD_STATEID   INTEGER NOT NULL,
+             REASON_CODE   VARCHAR(32),
+             CHANNEL_CODE  VARCHAR(32),
+             PIPE_CODE     VARCHAR(32),
+             FIN_CODE      VARCHAR(32),
+             CONSTRAINT PK_TS_DEAL_STATE_MAP PRIMARY KEY (OLD_STATEID)
+         )';
+
+    IF (NOT EXISTS(SELECT 1 FROM RDB$RELATION_FIELDS
+                   WHERE TRIM(RDB$RELATION_NAME) = 'TDB_DEALS'
+                     AND TRIM(RDB$FIELD_NAME) = 'CHANNEL_ID')) THEN
+        EXECUTE STATEMENT 'ALTER TABLE TDB_DEALS ADD CHANNEL_ID INTEGER';
+
+    IF (NOT EXISTS(SELECT 1 FROM RDB$RELATIONS
+                   WHERE TRIM(RDB$RELATION_NAME) = 'TDB_DEAL_LOG')) THEN
+        EXECUTE STATEMENT
+        'CREATE TABLE TDB_DEAL_LOG (
+             LOG_ID      BIGINT GENERATED BY DEFAULT AS IDENTITY NOT NULL,
+             LOG_AT      TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+             SOURCE      VARCHAR(32) NOT NULL,
+             DOCID       INTEGER,
+             DEAL_ID     BIGINT,
+             GDS_CODE    INTEGER,
+             SQL_STATE   VARCHAR(5),
+             MESSAGE     VARCHAR(1000),
+             CONSTRAINT PK_TDB_DEAL_LOG PRIMARY KEY (LOG_ID)
+         )';
+END^
+
+COMMIT^
+
+/* --- 2. Jurnalul de erori (tranzactie autonoma: ramane si la rollback) ------ */
+CREATE OR ALTER PROCEDURE SP_DEAL_LOG_ERROR (
+    A_SOURCE    VARCHAR(32),
+    A_DOCID     INTEGER,
+    A_DEAL_ID   BIGINT,
+    A_GDS_CODE  INTEGER,
+    A_SQL_STATE VARCHAR(5),
+    A_MESSAGE   VARCHAR(1000))
+SQL SECURITY DEFINER
+AS
+BEGIN
+    IN AUTONOMOUS TRANSACTION DO
+        INSERT INTO TDB_DEAL_LOG (SOURCE, DOCID, DEAL_ID, GDS_CODE, SQL_STATE, MESSAGE)
+        VALUES (:A_SOURCE, :A_DOCID, :A_DEAL_ID, :A_GDS_CODE, :A_SQL_STATE, :A_MESSAGE);
+    WHEN ANY DO
+    BEGIN
+        /* logul nu are voie sa strice nimic */
+    END
+END^
+
+/* --- 3. SP_DEAL_BIND_DOC: tipuri noi de legatura + LINK_SUM ----------------- */
+CREATE OR ALTER PROCEDURE SP_DEAL_BIND_DOC (
+    A_DEAL_ID   BIGINT,
+    A_DOCID     INTEGER,
+    A_LINK_TYPE VARCHAR(32) CHARACTER SET UTF8,
+    A_USER_ID   INTEGER,
+    A_LINK_SUM  DOUBLE PRECISION = NULL)
+RETURNS (
+    IS_INSERTED    SMALLINT,
+    USED_LINK_TYPE VARCHAR(32) CHARACTER SET UTF8)
+SQL SECURITY DEFINER
+AS
+DECLARE V_DOCTYPEID INTEGER;
+DECLARE V_DOC_OK SMALLINT;
+DECLARE V_LINK VARCHAR(32);
+BEGIN
+    SELECT d.DOCTYPEID,
+           CASE WHEN d.DELETED_DATE IS NULL THEN 1 ELSE 0 END
+    FROM TDB_DOCS d
+    WHERE d.DOCID = :A_DOCID
+    INTO :V_DOCTYPEID, :V_DOC_OK;
+
+    IF (V_DOC_OK IS NULL OR V_DOC_OK = 0) THEN
+    BEGIN
+        IS_INSERTED = 0;
+        USED_LINK_TYPE = NULL;
+        SUSPEND;
+        EXIT;
+    END
+
+    V_LINK = NULLIF(TRIM(:A_LINK_TYPE), '');
+
+    IF (V_LINK IS NULL) THEN
+        V_LINK = CASE V_DOCTYPEID
+                     WHEN 101  THEN 'DEAL_TO_PROFORMA'
+                     WHEN 107  THEN 'DEAL_TO_SALE'
+                     WHEN 110  THEN 'DEAL_TO_RETURN_CUST'
+                     WHEN 128  THEN 'DEAL_TO_RETURN_SVC'
+                     WHEN 126  THEN 'DEAL_TO_RETURN_SUPP'
+                     WHEN 115  THEN 'DEAL_TO_OFFER'
+                     WHEN 134  THEN 'DEAL_TO_WEBORDER'
+                     WHEN 1791 THEN 'DEAL_TO_FIN_REQUEST'
+                     WHEN 116  THEN 'DEAL_TO_CASHIN'
+                     WHEN 117  THEN 'DEAL_TO_CASHOUT'
+                     WHEN 120  THEN 'DEAL_TO_BANKIN'
+                     WHEN 119  THEN 'DEAL_TO_BANKOUT'
+                     WHEN 1199 THEN 'DEAL_TO_BANKOUT'
+                     WHEN 112  THEN 'DEAL_TO_ACC_SALE'
+                     WHEN 109  THEN 'DEAL_TO_ACC_IN'
+                     ELSE 'DEAL_TO_DOC'
+                 END;
+
+    USED_LINK_TYPE = V_LINK;
+
+    IF (EXISTS(SELECT 1 FROM TDB_DEAL_DOCS x
+               WHERE x.DEAL_ID = :A_DEAL_ID AND x.DOCID = :A_DOCID)) THEN
+    BEGIN
+        IF (A_LINK_SUM IS NOT NULL) THEN
+            UPDATE TDB_DEAL_DOCS SET LINK_SUM = :A_LINK_SUM
+            WHERE DEAL_ID = :A_DEAL_ID AND DOCID = :A_DOCID;
+        IS_INSERTED = 0;
+        SUSPEND;
+        EXIT;
+    END
+
+    INSERT INTO TDB_DEAL_DOCS (DEAL_ID, DOCID, LINK_TYPE, CREATED_AT, CREATED_BY, LINK_SUM)
+    VALUES (:A_DEAL_ID, :A_DOCID, :V_LINK, CURRENT_TIMESTAMP, :A_USER_ID, :A_LINK_SUM);
+
+    IS_INSERTED = 1;
+    SUSPEND;
+END^
+
+/* --- 4. Deal nou pentru vanzare / proforma directa -------------------------- */
+CREATE OR ALTER PROCEDURE SP_DEAL_CREATE_DIRECT_SALE (
+    A_SOURCE_REF   VARCHAR(64) CHARACTER SET UTF8,
+    A_CONTACTID    INTEGER,
+    A_CONTACT_NAME VARCHAR(120) CHARACTER SET UTF8,
+    A_PHONE        VARCHAR(40) CHARACTER SET UTF8,
+    A_EMAIL        VARCHAR(120) CHARACTER SET UTF8,
+    A_CURRENCYID   INTEGER,
+    A_OPERATOR_ID  INTEGER,
+    A_SHOP_ID      INTEGER)
+RETURNS (O_DEAL_ID BIGINT)
+SQL SECURITY DEFINER
+AS
+DECLARE V_PIPE INTEGER;
+DECLARE V_PAY  INTEGER;
+DECLARE V_FIN  INTEGER;
+DECLARE V_DLV  INTEGER;
+BEGIN
+    SELECT STATE_ID FROM SP_DEAL_GET_STATE_ID('PIPE_IN_WORK') INTO :V_PIPE;
+    SELECT STATE_ID FROM SP_DEAL_GET_STATE_ID('PAY_WAITING')  INTO :V_PAY;
+    SELECT STATE_ID FROM SP_DEAL_GET_STATE_ID('FIN_NONE')     INTO :V_FIN;
+    SELECT STATE_ID FROM SP_DEAL_GET_STATE_ID('DLV_NONE')     INTO :V_DLV;
+
+    INSERT INTO TDB_DEALS (
+        SOURCE_CODE, SOURCE_REF,
+        CONTACTID, CONTACT_NAME, PHONE, EMAIL,
+        PIPE_STATE_ID, PAY_STATE_ID, FIN_STATE_ID, DLV_STATE_ID,
+        CURRENCYID, OPERATOR_ID, SHOP_ID,
+        CREATED_AT, CREATED_BY
+    ) VALUES (
+        'DIRECT_SALE', :A_SOURCE_REF,
+        :A_CONTACTID, :A_CONTACT_NAME, :A_PHONE, :A_EMAIL,
+        :V_PIPE, :V_PAY, :V_FIN, :V_DLV,
+        COALESCE(:A_CURRENCYID, 498), :A_OPERATOR_ID, :A_SHOP_ID,
+        CURRENT_TIMESTAMP, :A_OPERATOR_ID
+    )
+    RETURNING DEAL_ID INTO :O_DEAL_ID;
+
+    SUSPEND;
+END^
+
+/* --- 5. Schimbarea unei stari + istoric -------------------------------------- */
+CREATE OR ALTER PROCEDURE SP_DEAL_APPLY_STATE (
+    A_DEAL_ID  BIGINT,
+    A_GROUP    VARCHAR(8),
+    A_STATE_ID INTEGER,
+    A_USER_ID  INTEGER,
+    A_SOURCE   VARCHAR(8))
+SQL SECURITY DEFINER
+AS
+DECLARE V_OLD INTEGER;
+BEGIN
+    IF (A_STATE_ID IS NULL) THEN EXIT;
+
+    SELECT CASE :A_GROUP
+               WHEN 'PIPE' THEN PIPE_STATE_ID
+               WHEN 'PAY'  THEN PAY_STATE_ID
+               WHEN 'FIN'  THEN FIN_STATE_ID
+               WHEN 'DLV'  THEN DLV_STATE_ID
+           END
+    FROM TDB_DEALS WHERE DEAL_ID = :A_DEAL_ID
+    INTO :V_OLD;
+
+    IF (V_OLD IS NOT DISTINCT FROM A_STATE_ID) THEN EXIT;
+
+    IF (A_GROUP = 'PIPE') THEN
+        UPDATE TDB_DEALS SET PIPE_STATE_ID = :A_STATE_ID, UPDATED_AT = CURRENT_TIMESTAMP,
+                             UPDATED_BY = :A_USER_ID WHERE DEAL_ID = :A_DEAL_ID;
+    ELSE IF (A_GROUP = 'PAY') THEN
+        UPDATE TDB_DEALS SET PAY_STATE_ID = :A_STATE_ID, UPDATED_AT = CURRENT_TIMESTAMP,
+                             UPDATED_BY = :A_USER_ID WHERE DEAL_ID = :A_DEAL_ID;
+    ELSE IF (A_GROUP = 'FIN') THEN
+        UPDATE TDB_DEALS SET FIN_STATE_ID = :A_STATE_ID, UPDATED_AT = CURRENT_TIMESTAMP,
+                             UPDATED_BY = :A_USER_ID WHERE DEAL_ID = :A_DEAL_ID;
+    ELSE IF (A_GROUP = 'DLV') THEN
+        UPDATE TDB_DEALS SET DLV_STATE_ID = :A_STATE_ID, UPDATED_AT = CURRENT_TIMESTAMP,
+                             UPDATED_BY = :A_USER_ID WHERE DEAL_ID = :A_DEAL_ID;
+    ELSE
+        EXIT;
+
+    INSERT INTO TDB_DEAL_HISTORY (DEAL_ID, GROUP_CODE, OLD_STATE_ID, NEW_STATE_ID, CHANGED_BY, SOURCE)
+    VALUES (:A_DEAL_ID, :A_GROUP, :V_OLD, :A_STATE_ID, :A_USER_ID, :A_SOURCE);
+END^
+
+/* --- 5b. Contactul real al comenzilor de pe site ------------------------------------ */
+/* Site-ul pune comanda pe clientul generic 286 "Persoana fizica"; numele, telefonul si
+   adresa reale stau in TWEB_TRANSACTION (checkout-ul din cos) sau in comentariile
+   documentului, TDB_DOCS_PROPS.COMMENTS ("Client: ...", "Telefon: ...", la "Cumpara acum").
+   Completeaza doar campurile goale (numele si cand e cel al clientului generic). */
+CREATE OR ALTER PROCEDURE SP_DEAL_SYNC_CONTACT (A_DEAL_ID BIGINT)
+SQL SECURITY DEFINER
+AS
+DECLARE V_CONTACTID INTEGER;
+DECLARE V_NAME VARCHAR(120);
+DECLARE V_PHONE VARCHAR(40);
+DECLARE V_ADDRESS VARCHAR(500);
+DECLARE N_NAME VARCHAR(255);
+DECLARE N_PHONE VARCHAR(255);
+DECLARE N_ADDRESS VARCHAR(255);
+DECLARE V_TEXT VARCHAR(4000);
+DECLARE V_UP VARCHAR(4000);
+DECLARE V_POS INTEGER;
+DECLARE V_END INTEGER;
+DECLARE V_PART VARCHAR(255);
+BEGIN
+    SELECT CONTACTID, CONTACT_NAME, PHONE, DELIVERY_ADDRESS FROM TDB_DEALS
+    WHERE DEAL_ID = :A_DEAL_ID
+    INTO :V_CONTACTID, :V_NAME, :V_PHONE, :V_ADDRESS;
+    IF (V_CONTACTID IS NULL) THEN EXIT;
+    IF (V_PHONE IS NOT NULL AND V_ADDRESS IS NOT NULL AND V_CONTACTID <> 286) THEN EXIT;
+
+    /* 1. checkout-ul din cos */
+    SELECT FIRST 1 NULLIF(TRIM(t.FULLNAME), ''), NULLIF(TRIM(t.PHONES), ''), NULLIF(TRIM(t.ADDRESS), '')
+    FROM TDB_DEAL_DOCS dd
+    JOIN TWEB_TRANSACTION t ON t.DOCID = dd.DOCID
+    WHERE dd.DEAL_ID = :A_DEAL_ID
+    ORDER BY dd.DOCID
+    INTO :N_NAME, :N_PHONE, :N_ADDRESS;
+
+    /* 2. comentariile Web-Order-ului ("Cumpara acum") */
+    IF (N_PHONE IS NULL OR N_NAME IS NULL) THEN
+    BEGIN
+        V_TEXT = NULL;
+        SELECT FIRST 1 CAST(SUBSTRING(pr.COMMENTS FROM 1 FOR 4000) AS VARCHAR(4000))
+        FROM TDB_DEAL_DOCS dd
+        JOIN TDB_DOCS d ON d.DOCID = dd.DOCID AND d.DOCTYPEID = 134
+        JOIN TDB_DOCS_PROPS pr ON pr.DOCID = dd.DOCID
+        WHERE dd.DEAL_ID = :A_DEAL_ID
+        ORDER BY dd.DOCID
+        INTO :V_TEXT;
+
+        IF (V_TEXT IS NOT NULL) THEN
+        BEGIN
+            V_UP = UPPER(V_TEXT);
+            IF (N_PHONE IS NULL) THEN
+            BEGIN
+                V_POS = POSITION('TELEFON: ' IN V_UP);
+                IF (V_POS > 0) THEN
+                BEGIN
+                    V_PART = SUBSTRING(V_TEXT FROM V_POS + 9 FOR 60);
+                    V_END = POSITION(ASCII_CHAR(10) IN V_PART);
+                    IF (V_END > 0) THEN V_PART = SUBSTRING(V_PART FROM 1 FOR V_END - 1);
+                    V_PART = TRIM(REPLACE(V_PART, ASCII_CHAR(13), ''));
+                    N_PHONE = NULLIF(V_PART, '');
+                END
+            END
+            IF (N_NAME IS NULL) THEN
+            BEGIN
+                V_POS = POSITION('CLIENT: ' IN V_UP);
+                IF (V_POS > 0) THEN
+                BEGIN
+                    V_PART = SUBSTRING(V_TEXT FROM V_POS + 8 FOR 120);
+                    V_END = POSITION(ASCII_CHAR(10) IN V_PART);
+                    IF (V_END > 0) THEN V_PART = SUBSTRING(V_PART FROM 1 FOR V_END - 1);
+                    V_PART = TRIM(REPLACE(V_PART, ASCII_CHAR(13), ''));
+                    N_NAME = NULLIF(V_PART, '');
+                END
+            END
+        END
+    END
+
+    UPDATE TDB_DEALS
+    SET PHONE = COALESCE(PHONE, LEFT(:N_PHONE, 40)),
+        DELIVERY_ADDRESS = COALESCE(DELIVERY_ADDRESS, LEFT(:N_ADDRESS, 500)),
+        CONTACT_NAME = CASE WHEN :N_NAME IS NOT NULL AND (CONTACT_NAME IS NULL OR CONTACTID = 286)
+                            THEN LEFT(:N_NAME, 120) ELSE CONTACT_NAME END
+    WHERE DEAL_ID = :A_DEAL_ID
+      AND (   (PHONE IS NULL AND :N_PHONE IS NOT NULL)
+           OR (DELIVERY_ADDRESS IS NULL AND :N_ADDRESS IS NOT NULL)
+           OR (:N_NAME IS NOT NULL AND (CONTACT_NAME IS NULL OR CONTACTID = 286)
+               AND CONTACT_NAME IS DISTINCT FROM LEFT(:N_NAME, 120)));
+END^
+
+/* completarea contactelor pentru deal-urile existente (idempotent) */
+CREATE OR ALTER PROCEDURE SP_DEAL_SYNC_CONTACTS_ALL
+RETURNS (N_DEALS INTEGER)
+SQL SECURITY DEFINER
+AS
+DECLARE V_DEAL BIGINT;
+BEGIN
+    N_DEALS = 0;
+    FOR SELECT DEAL_ID FROM TDB_DEALS
+        WHERE PHONE IS NULL OR DELIVERY_ADDRESS IS NULL OR CONTACTID = 286
+        INTO :V_DEAL
+    DO
+    BEGIN
+        EXECUTE PROCEDURE SP_DEAL_SYNC_CONTACT(:V_DEAL);
+        N_DEALS = N_DEALS + 1;
+    END
+END^
+
+/* --- 6. Recalcularea starilor unui deal --------------------------------------- */
+CREATE OR ALTER PROCEDURE SP_DEAL_RECALC_STATES (
+    A_DEAL_ID BIGINT,
+    A_USER_ID INTEGER = NULL)
+SQL SECURITY DEFINER
+AS
+DECLARE V_FLAGS INTEGER;
+DECLARE V_PIPE INTEGER;
+DECLARE V_PAY INTEGER;
+DECLARE V_FIN INTEGER;
+DECLARE V_DLV INTEGER;
+DECLARE V_CLOSED_AT TIMESTAMP;
+DECLARE V_CLOSED_RESULT VARCHAR(16);
+DECLARE V_PHONE VARCHAR(40);
+DECLARE V_ADDRESS VARCHAR(500);
+DECLARE V_PIPE_CODE VARCHAR(32);
+DECLARE V_PIPE_SORT INTEGER;
+DECLARE V_PIPE_FINAL SMALLINT;
+DECLARE V_PIPE_CANCEL SMALLINT;
+DECLARE V_PAY_CODE VARCHAR(32);
+DECLARE V_FIN_CODE VARCHAR(32);
+DECLARE V_DLV_CODE VARCHAR(32);
+DECLARE V_DLV_SORT INTEGER;
+DECLARE V_DLV_FINAL SMALLINT;
+DECLARE N_TOTAL INTEGER;
+DECLARE N_LIVE INTEGER;
+DECLARE N_WORK INTEGER;
+DECLARE N_SALE INTEGER;
+DECLARE N_FIN INTEGER;
+DECLARE S_SALE DOUBLE PRECISION;
+DECLARE S_PROFORMA DOUBLE PRECISION;
+DECLARE S_PAID DOUBLE PRECISION;
+DECLARE S_TOTAL DOUBLE PRECISION;
+DECLARE N_DLV_ROWS INTEGER;
+DECLARE N_DLV_SENT INTEGER;
+DECLARE V_NEW_CODE VARCHAR(32);
+DECLARE V_NEW_ID INTEGER;
+DECLARE V_NEW_SORT INTEGER;
+DECLARE V_NEW_PHONE VARCHAR(40);
+DECLARE V_NEW_ADDRESS VARCHAR(500);
+BEGIN
+    SELECT d.FLAGS, d.PIPE_STATE_ID, d.PAY_STATE_ID, d.FIN_STATE_ID, d.DLV_STATE_ID,
+           d.CLOSED_AT, d.CLOSED_RESULT, d.PHONE, d.DELIVERY_ADDRESS
+    FROM TDB_DEALS d WHERE d.DEAL_ID = :A_DEAL_ID
+    INTO :V_FLAGS, :V_PIPE, :V_PAY, :V_FIN, :V_DLV,
+         :V_CLOSED_AT, :V_CLOSED_RESULT, :V_PHONE, :V_ADDRESS;
+
+    IF (V_PIPE IS NULL) THEN EXIT;
+    V_FLAGS = COALESCE(V_FLAGS, 0);
+
+    /* documentele deal-ului */
+    SELECT COUNT(*),
+           SUM(CASE WHEN d.DELETED_DATE IS NULL THEN 1 ELSE 0 END),
+           SUM(CASE WHEN d.DELETED_DATE IS NULL AND d.DOCTYPEID IN (115, 101) THEN 1 ELSE 0 END),
+           SUM(CASE WHEN d.DELETED_DATE IS NULL AND d.DOCTYPEID = 107 THEN 1 ELSE 0 END),
+           SUM(CASE WHEN d.DELETED_DATE IS NULL AND d.DOCTYPEID = 1791 THEN 1 ELSE 0 END),
+           SUM(CASE WHEN d.DELETED_DATE IS NOT NULL THEN 0
+                    WHEN d.DOCTYPEID = 107 THEN  d.SUMA * COALESCE(NULLIF(d.RATE, 0), 1)
+                    WHEN d.DOCTYPEID = 110 THEN -d.SUMA * COALESCE(NULLIF(d.RATE, 0), 1)
+                    ELSE 0 END),
+           SUM(CASE WHEN d.DELETED_DATE IS NULL AND d.DOCTYPEID = 101
+                    THEN d.SUMA * COALESCE(NULLIF(d.RATE, 0), 1) ELSE 0 END),
+           SUM(CASE WHEN d.DELETED_DATE IS NOT NULL THEN 0
+                    WHEN d.DOCTYPEID IN (116, 120)
+                        THEN  COALESCE(dd.LINK_SUM, d.SUMA * COALESCE(NULLIF(d.RATE, 0), 1))
+                    WHEN d.DOCTYPEID IN (117, 119, 1199)
+                        THEN -COALESCE(dd.LINK_SUM, d.SUMA * COALESCE(NULLIF(d.RATE, 0), 1))
+                    ELSE 0 END)
+    FROM TDB_DEAL_DOCS dd
+    JOIN TDB_DOCS d ON d.DOCID = dd.DOCID
+    WHERE dd.DEAL_ID = :A_DEAL_ID
+    INTO :N_TOTAL, :N_LIVE, :N_WORK, :N_SALE, :N_FIN, :S_SALE, :S_PROFORMA, :S_PAID;
+
+    N_TOTAL = COALESCE(N_TOTAL, 0);  N_LIVE = COALESCE(N_LIVE, 0);
+    N_WORK = COALESCE(N_WORK, 0);    N_SALE = COALESCE(N_SALE, 0);
+    N_FIN = COALESCE(N_FIN, 0);
+    S_SALE = COALESCE(S_SALE, 0);    S_PROFORMA = COALESCE(S_PROFORMA, 0);
+    S_PAID = COALESCE(S_PAID, 0);
+
+    /* livrare + date de contact lipsa */
+    SELECT COUNT(*),
+           SUM(CASE WHEN dl.TRANSMIS_CURIER IS NOT NULL
+                      OR NULLIF(TRIM(dl.AWB), '') IS NOT NULL THEN 1 ELSE 0 END),
+           MAX(NULLIF(TRIM(dl.DELIVERY_ADDRESS), ''))
+    FROM TDB_DEAL_DOCS dd
+    JOIN TDB_DOCS d ON d.DOCID = dd.DOCID AND d.DELETED_DATE IS NULL
+    JOIN TDB_DOCS_DELIVERY dl ON dl.DOCID = d.DOCID
+    WHERE dd.DEAL_ID = :A_DEAL_ID
+    INTO :N_DLV_ROWS, :N_DLV_SENT, :V_NEW_ADDRESS;
+    N_DLV_ROWS = COALESCE(N_DLV_ROWS, 0);  N_DLV_SENT = COALESCE(N_DLV_SENT, 0);
+
+    IF (V_ADDRESS IS NULL AND V_NEW_ADDRESS IS NOT NULL) THEN
+        UPDATE TDB_DEALS SET DELIVERY_ADDRESS = LEFT(:V_NEW_ADDRESS, 500)
+        WHERE DEAL_ID = :A_DEAL_ID;
+
+    IF (V_PHONE IS NULL) THEN
+    BEGIN
+        SELECT FIRST 1 LEFT(TRIM(p.PHONENUMBER), 40)
+        FROM TDB_DEAL_DOCS dd
+        JOIN TDB_DOCS_PHONES p ON p.DOCID = dd.DOCID
+        WHERE dd.DEAL_ID = :A_DEAL_ID AND NULLIF(TRIM(p.PHONENUMBER), '') IS NOT NULL
+        ORDER BY dd.DOCID
+        INTO :V_NEW_PHONE;
+        IF (V_NEW_PHONE IS NOT NULL) THEN
+            UPDATE TDB_DEALS SET PHONE = :V_NEW_PHONE WHERE DEAL_ID = :A_DEAL_ID;
+    END
+
+    IF (V_PHONE IS NULL AND V_NEW_PHONE IS NULL) THEN
+        EXECUTE PROCEDURE SP_DEAL_SYNC_CONTACT(:A_DEAL_ID);
+
+    SELECT CODE FROM TS_DEAL_STATES WHERE STATE_ID = :V_PAY INTO :V_PAY_CODE;
+    SELECT CODE FROM TS_DEAL_STATES WHERE STATE_ID = :V_FIN INTO :V_FIN_CODE;
+
+    /* ---- FIN ---- */
+    IF (BIN_AND(V_FLAGS, 4) = 0 AND N_FIN > 0
+        AND (V_FIN_CODE IS NULL OR V_FIN_CODE = 'FIN_NONE')) THEN
+    BEGIN
+        SELECT STATE_ID FROM SP_DEAL_GET_STATE_ID('FIN_REQUESTED') INTO :V_NEW_ID;
+        EXECUTE PROCEDURE SP_DEAL_APPLY_STATE(:A_DEAL_ID, 'FIN', :V_NEW_ID, :A_USER_ID, 'AUTO');
+        V_FIN_CODE = 'FIN_REQUESTED';
+    END
+
+    /* ---- PAY ---- */
+    IF (BIN_AND(V_FLAGS, 2) = 0) THEN
+    BEGIN
+        S_TOTAL = CASE WHEN S_SALE <> 0 THEN S_SALE ELSE S_PROFORMA END;
+        V_NEW_CODE = NULL;
+        IF (S_PAID > 0.005) THEN
+            V_NEW_CODE = CASE WHEN S_TOTAL > 0.005 AND S_PAID >= S_TOTAL - 0.005
+                              THEN 'PAY_PAID' ELSE 'PAY_PARTIAL' END;
+        ELSE IF (V_PAY_CODE IS NULL OR V_PAY_CODE IN ('PAY_PARTIAL', 'PAY_PAID')) THEN
+            V_NEW_CODE = 'PAY_WAITING';
+        /* PAY_NONE / PAY_WAITING / PAY_FAILED fara incasari raman cum sunt */
+
+        IF (V_NEW_CODE IS NOT NULL AND V_NEW_CODE IS DISTINCT FROM V_PAY_CODE) THEN
+        BEGIN
+            SELECT STATE_ID FROM SP_DEAL_GET_STATE_ID(:V_NEW_CODE) INTO :V_NEW_ID;
+            EXECUTE PROCEDURE SP_DEAL_APPLY_STATE(:A_DEAL_ID, 'PAY', :V_NEW_ID, :A_USER_ID, 'AUTO');
+            V_PAY_CODE = V_NEW_CODE;
+        END
+    END
+
+    /* ---- DLV: doar inainte, niciodata peste o stare finala sau DLV_FAILED ---- */
+    SELECT CODE, SORT_ORDER, IS_FINAL FROM TS_DEAL_STATES WHERE STATE_ID = :V_DLV
+    INTO :V_DLV_CODE, :V_DLV_SORT, :V_DLV_FINAL;
+
+    IF (BIN_AND(V_FLAGS, 8) = 0 AND N_DLV_ROWS > 0 AND COALESCE(V_DLV_FINAL, 0) = 0) THEN
+    BEGIN
+        V_NEW_CODE = CASE WHEN N_DLV_SENT > 0 THEN 'DLV_IN_TRANSIT' ELSE 'DLV_PREPARING' END;
+        V_NEW_ID = NULL;
+        SELECT STATE_ID, SORT_ORDER FROM TS_DEAL_STATES
+        WHERE CODE = :V_NEW_CODE AND IS_ACTIVE = 1
+        INTO :V_NEW_ID, :V_NEW_SORT;
+        IF (V_NEW_ID IS NOT NULL AND V_NEW_SORT > COALESCE(V_DLV_SORT, 0)) THEN
+        BEGIN
+            EXECUTE PROCEDURE SP_DEAL_APPLY_STATE(:A_DEAL_ID, 'DLV', :V_NEW_ID, :A_USER_ID, 'AUTO');
+            V_DLV_CODE = V_NEW_CODE;
+        END
+    END
+
+    /* ---- PIPE ---- */
+    SELECT CODE, SORT_ORDER, IS_FINAL, IS_CANCEL FROM TS_DEAL_STATES WHERE STATE_ID = :V_PIPE
+    INTO :V_PIPE_CODE, :V_PIPE_SORT, :V_PIPE_FINAL, :V_PIPE_CANCEL;
+
+    IF (BIN_AND(V_FLAGS, 1) = 0 AND COALESCE(V_PIPE_FINAL, 0) = 0) THEN
+    BEGIN
+        IF (N_LIVE = 0) THEN               /* toate sterse (si fizic: N_TOTAL = 0) */
+            V_NEW_CODE = 'PIPE_CANCELLED_BY_SHOP';
+        ELSE IF (V_DLV_CODE = 'DLV_DELIVERED') THEN
+            V_NEW_CODE = 'PIPE_DELIVERED';
+        ELSE IF (V_DLV_CODE = 'DLV_IN_TRANSIT') THEN
+            V_NEW_CODE = 'PIPE_ON_DELIVERY';
+        ELSE IF (N_SALE > 0) THEN
+            V_NEW_CODE = 'PIPE_READY_TO_SHIP';
+        ELSE IF (N_WORK > 0) THEN
+            V_NEW_CODE = 'PIPE_IN_WORK';
+        ELSE
+            V_NEW_CODE = 'PIPE_WAITING_CHECK';
+
+        V_NEW_ID = NULL;
+        SELECT STATE_ID, SORT_ORDER FROM TS_DEAL_STATES
+        WHERE CODE = :V_NEW_CODE AND IS_ACTIVE = 1
+        INTO :V_NEW_ID, :V_NEW_SORT;
+
+        /* etapa avanseaza automat DOAR inainte: o etapa aleasa de om in
+           documentul WMS (ex. "In lucru" pe un Web-Order) nu e readusa inapoi,
+           iar documentele noi o duc mai departe (vanzare -> gata de expediere) */
+        IF (V_NEW_ID IS NOT NULL AND V_NEW_CODE IS DISTINCT FROM V_PIPE_CODE
+            AND V_NEW_SORT > COALESCE(V_PIPE_SORT, 0)) THEN
+        BEGIN
+            EXECUTE PROCEDURE SP_DEAL_APPLY_STATE(:A_DEAL_ID, 'PIPE', :V_NEW_ID, :A_USER_ID, 'AUTO');
+            V_PIPE_CODE = V_NEW_CODE;
+            SELECT IS_CANCEL FROM TS_DEAL_STATES WHERE STATE_ID = :V_NEW_ID INTO :V_PIPE_CANCEL;
+        END
+    END
+
+    /* ---- inchidere / redeschidere ---- */
+    IF (COALESCE(V_PIPE_CANCEL, 0) = 1) THEN
+    BEGIN
+        IF (V_CLOSED_AT IS NULL) THEN
+            UPDATE TDB_DEALS SET CLOSED_AT = CURRENT_TIMESTAMP, CLOSED_RESULT = 'CANCEL',
+                                 UPDATED_AT = CURRENT_TIMESTAMP, UPDATED_BY = :A_USER_ID
+            WHERE DEAL_ID = :A_DEAL_ID;
+    END
+    ELSE IF (V_PIPE_CODE = 'PIPE_DELIVERED'
+             AND (V_PAY_CODE = 'PAY_PAID' OR V_FIN_CODE = 'FIN_DISBURSED')) THEN
+    BEGIN
+        IF (V_CLOSED_AT IS NULL) THEN
+            UPDATE TDB_DEALS SET CLOSED_AT = CURRENT_TIMESTAMP, CLOSED_RESULT = 'SUCCESS',
+                                 UPDATED_AT = CURRENT_TIMESTAMP, UPDATED_BY = :A_USER_ID
+            WHERE DEAL_ID = :A_DEAL_ID;
+    END
+    ELSE IF (V_CLOSED_AT IS NOT NULL AND V_CLOSED_RESULT IN ('SUCCESS', 'CANCEL')) THEN
+        UPDATE TDB_DEALS SET CLOSED_AT = NULL, CLOSED_RESULT = NULL,
+                             UPDATED_AT = CURRENT_TIMESTAMP, UPDATED_BY = :A_USER_ID
+        WHERE DEAL_ID = :A_DEAL_ID;
+END^
+
+/* --- 6b. Motivul pierderii si canalul vanzarii ---------------------------------------- */
+/* A_REASON_CODE NULL sau '' = sterge motivul. Motivul cu PIPE_CODE muta si etapa
+   (ex. "Pret - scump" -> Anulat de client), daca etapa nu e deja finala. */
+CREATE OR ALTER PROCEDURE SP_DEAL_SET_REASON (
+    A_DEAL_ID     BIGINT,
+    A_REASON_CODE VARCHAR(32),
+    A_USER_ID     INTEGER,
+    A_SOURCE      VARCHAR(8) = 'MANUAL')
+SQL SECURITY DEFINER
+AS
+DECLARE V_REASON_ID INTEGER;
+DECLARE V_PIPE_CODE VARCHAR(32);
+DECLARE V_PIPE_ID INTEGER;
+DECLARE V_FINAL SMALLINT;
+BEGIN
+    IF (NULLIF(TRIM(A_REASON_CODE), '') IS NULL) THEN
+    BEGIN
+        UPDATE TDB_DEALS SET CANCEL_REASON_ID = NULL, UPDATED_AT = CURRENT_TIMESTAMP,
+                             UPDATED_BY = :A_USER_ID
+        WHERE DEAL_ID = :A_DEAL_ID AND CANCEL_REASON_ID IS NOT NULL;
+        EXIT;
+    END
+
+    SELECT REASON_ID, PIPE_CODE FROM TS_DEAL_REASONS
+    WHERE CODE = TRIM(:A_REASON_CODE) AND GROUP_CODE = 'CANCEL'
+    INTO :V_REASON_ID, :V_PIPE_CODE;
+    IF (V_REASON_ID IS NULL) THEN
+        EXCEPTION E_DEAL 'Motiv necunoscut: ' || :A_REASON_CODE;
+
+    UPDATE TDB_DEALS SET CANCEL_REASON_ID = :V_REASON_ID, UPDATED_AT = CURRENT_TIMESTAMP,
+                         UPDATED_BY = :A_USER_ID
+    WHERE DEAL_ID = :A_DEAL_ID;
+
+    IF (V_PIPE_CODE IS NOT NULL) THEN
+    BEGIN
+        SELECT s.IS_FINAL FROM TDB_DEALS d JOIN TS_DEAL_STATES s ON s.STATE_ID = d.PIPE_STATE_ID
+        WHERE d.DEAL_ID = :A_DEAL_ID INTO :V_FINAL;
+        IF (COALESCE(V_FINAL, 0) = 0) THEN
+        BEGIN
+            SELECT STATE_ID FROM SP_DEAL_GET_STATE_ID(:V_PIPE_CODE) INTO :V_PIPE_ID;
+            EXECUTE PROCEDURE SP_DEAL_APPLY_STATE(:A_DEAL_ID, 'PIPE', :V_PIPE_ID, :A_USER_ID, :A_SOURCE);
+        END
+    END
+    EXECUTE PROCEDURE SP_DEAL_RECALC_STATES(:A_DEAL_ID, :A_USER_ID);
+END^
+
+CREATE OR ALTER PROCEDURE SP_DEAL_SET_CHANNEL (
+    A_DEAL_ID      BIGINT,
+    A_CHANNEL_CODE VARCHAR(32),
+    A_USER_ID      INTEGER)
+SQL SECURITY DEFINER
+AS
+DECLARE V_ID INTEGER;
+BEGIN
+    V_ID = NULL;
+    IF (NULLIF(TRIM(A_CHANNEL_CODE), '') IS NOT NULL) THEN
+    BEGIN
+        SELECT REASON_ID FROM TS_DEAL_REASONS
+        WHERE CODE = TRIM(:A_CHANNEL_CODE) AND GROUP_CODE = 'CHANNEL'
+        INTO :V_ID;
+        IF (V_ID IS NULL) THEN
+            EXCEPTION E_DEAL 'Canal necunoscut: ' || :A_CHANNEL_CODE;
+    END
+    UPDATE TDB_DEALS SET CHANNEL_ID = :V_ID, UPDATED_AT = CURRENT_TIMESTAMP, UPDATED_BY = :A_USER_ID
+    WHERE DEAL_ID = :A_DEAL_ID AND CHANNEL_ID IS DISTINCT FROM :V_ID;
+END^
+
+/* Aplica deal-ului informatia din starea veche a unui document (TDB_DOCS.STATEID),
+   dupa TS_DEAL_STATE_MAP. Folosita la migrarea istoricului si, cat timp WMS inca
+   seteaza STATEID, din TDB_DOCS_AU_DEAL. A_ONLY_CHANNEL = 1 -> doar canalul.
+   Motivul / anularea se aplica doar daca deal-ul nu are o vanzare (107) activa. */
+CREATE OR ALTER PROCEDURE SP_DEAL_APPLY_DOC_STATE (
+    A_DOCID        INTEGER,
+    A_USER_ID      INTEGER = NULL,
+    A_SOURCE       VARCHAR(8) = 'DOCSTATE',
+    A_ONLY_CHANNEL SMALLINT = 0)
+SQL SECURITY DEFINER
+AS
+DECLARE V_STATEID INTEGER;
+DECLARE V_DEAL BIGINT;
+DECLARE V_REASON VARCHAR(32);
+DECLARE V_CHANNEL VARCHAR(32);
+DECLARE V_PIPE VARCHAR(32);
+DECLARE V_FIN VARCHAR(32);
+DECLARE V_CUR_PIPE VARCHAR(32);
+DECLARE V_CUR_FIN VARCHAR(32);
+DECLARE V_ID INTEGER;
+BEGIN
+    SELECT STATEID FROM TDB_DOCS WHERE DOCID = :A_DOCID AND DELETED_DATE IS NULL INTO :V_STATEID;
+    IF (V_STATEID IS NULL) THEN EXIT;
+    SELECT MIN(DEAL_ID) FROM TDB_DEAL_DOCS WHERE DOCID = :A_DOCID INTO :V_DEAL;
+    IF (V_DEAL IS NULL) THEN EXIT;
+
+    SELECT REASON_CODE, CHANNEL_CODE, PIPE_CODE, FIN_CODE FROM TS_DEAL_STATE_MAP
+    WHERE OLD_STATEID = :V_STATEID
+    INTO :V_REASON, :V_CHANNEL, :V_PIPE, :V_FIN;
+
+    IF (V_CHANNEL IS NOT NULL) THEN
+        UPDATE TDB_DEALS SET CHANNEL_ID = (SELECT REASON_ID FROM TS_DEAL_REASONS WHERE CODE = :V_CHANNEL)
+        WHERE DEAL_ID = :V_DEAL AND CHANNEL_ID IS NULL;
+    IF (A_ONLY_CHANNEL = 1) THEN EXIT;
+
+    SELECT sp.CODE, sf.CODE FROM TDB_DEALS d
+    LEFT JOIN TS_DEAL_STATES sp ON sp.STATE_ID = d.PIPE_STATE_ID
+    LEFT JOIN TS_DEAL_STATES sf ON sf.STATE_ID = d.FIN_STATE_ID
+    WHERE d.DEAL_ID = :V_DEAL INTO :V_CUR_PIPE, :V_CUR_FIN;
+
+    IF (V_FIN IS NOT NULL AND V_CUR_FIN IS DISTINCT FROM V_FIN) THEN
+    BEGIN
+        SELECT STATE_ID FROM SP_DEAL_GET_STATE_ID(:V_FIN) INTO :V_ID;
+        EXECUTE PROCEDURE SP_DEAL_APPLY_STATE(:V_DEAL, 'FIN', :V_ID, :A_USER_ID, :A_SOURCE);
+    END
+
+    IF (V_REASON IS NOT NULL
+        AND NOT EXISTS(SELECT 1 FROM TDB_DEAL_DOCS x JOIN TDB_DOCS d ON d.DOCID = x.DOCID
+                       WHERE x.DEAL_ID = :V_DEAL AND d.DOCTYPEID = 107 AND d.DELETED_DATE IS NULL)) THEN
+        EXECUTE PROCEDURE SP_DEAL_SET_REASON(:V_DEAL, :V_REASON, :A_USER_ID, :A_SOURCE);
+    ELSE IF (V_PIPE IS NOT NULL AND V_CUR_PIPE = 'PIPE_WAITING_CHECK') THEN
+    BEGIN
+        SELECT STATE_ID FROM SP_DEAL_GET_STATE_ID(:V_PIPE) INTO :V_ID;
+        EXECUTE PROCEDURE SP_DEAL_APPLY_STATE(:V_DEAL, 'PIPE', :V_ID, :A_USER_ID, :A_SOURCE);
+    END
+
+    EXECUTE PROCEDURE SP_DEAL_RECALC_STATES(:V_DEAL, :A_USER_ID);
+END^
+
+/* Migrarea istoricului: pentru fiecare deal, ULTIMUL document (115 / 134 / 1791) cu o
+   stare (alta decat 8) da motivul / etapa; canalul vine din orice document. Idempotent. */
+CREATE OR ALTER PROCEDURE SP_DEAL_MIGRATE_DOC_STATES
+RETURNS (N_DEALS INTEGER, N_REASONS INTEGER, N_CHANNELS INTEGER)
+SQL SECURITY DEFINER
+AS
+DECLARE V_DEAL BIGINT;
+DECLARE V_DOCID INTEGER;
+BEGIN
+    N_DEALS = 0;
+    FOR SELECT dl.DEAL_ID FROM TDB_DEALS dl INTO :V_DEAL
+    DO
+    BEGIN
+        N_DEALS = N_DEALS + 1;
+
+        /* ultimul document cu O stare (oricare): daca e LID / "Comanda noua",
+           deal-ul ramane deschis chiar daca o oferta mai veche a fost pierduta */
+        V_DOCID = NULL;
+        SELECT MAX(d.DOCID) FROM TDB_DEAL_DOCS x
+        JOIN TDB_DOCS d ON d.DOCID = x.DOCID AND d.DELETED_DATE IS NULL
+        WHERE x.DEAL_ID = :V_DEAL AND d.DOCTYPEID IN (115, 134, 1791)
+          AND d.STATEID IS NOT NULL AND d.STATEID <> 8
+        INTO :V_DOCID;
+        IF (V_DOCID IS NOT NULL) THEN
+            EXECUTE PROCEDURE SP_DEAL_APPLY_DOC_STATE(:V_DOCID, NULL, 'MIGRATE', 0);
+
+        V_DOCID = NULL;
+        SELECT MIN(d.DOCID) FROM TDB_DEAL_DOCS x
+        JOIN TDB_DOCS d ON d.DOCID = x.DOCID AND d.DELETED_DATE IS NULL
+        JOIN TS_DEAL_STATE_MAP m ON m.OLD_STATEID = d.STATEID AND m.CHANNEL_CODE IS NOT NULL
+        WHERE x.DEAL_ID = :V_DEAL
+        INTO :V_DOCID;
+        IF (V_DOCID IS NOT NULL) THEN
+            EXECUTE PROCEDURE SP_DEAL_APPLY_DOC_STATE(:V_DOCID, NULL, 'MIGRATE', 1);
+    END
+    SELECT COUNT(*) FROM TDB_DEALS WHERE CANCEL_REASON_ID IS NOT NULL INTO :N_REASONS;
+    SELECT COUNT(*) FROM TDB_DEALS WHERE CHANNEL_ID IS NOT NULL INTO :N_CHANNELS;
+END^
+
+/* --- 7. Deal-ul unui document (urcand pe PARENTDOCID) ------------------------- */
+CREATE OR ALTER PROCEDURE SP_DEAL_FIND_BY_DOC (A_DOCID INTEGER)
+RETURNS (O_DEAL_ID BIGINT)
+SQL SECURITY DEFINER
+AS
+DECLARE V_CUR INTEGER;
+DECLARE V_NEXT INTEGER;
+DECLARE V_LVL INTEGER;
+BEGIN
+    O_DEAL_ID = NULL;
+    V_CUR = A_DOCID;
+    V_LVL = 0;
+    WHILE (V_CUR IS NOT NULL AND V_LVL <= 10 AND O_DEAL_ID IS NULL) DO
+    BEGIN
+        SELECT MIN(DEAL_ID) FROM TDB_DEAL_DOCS WHERE DOCID = :V_CUR INTO :O_DEAL_ID;
+        IF (O_DEAL_ID IS NULL) THEN
+        BEGIN
+            V_NEXT = NULL;
+            SELECT PARENTDOCID FROM TDB_DOCS WHERE DOCID = :V_CUR INTO :V_NEXT;
+            IF (V_NEXT = V_CUR) THEN V_NEXT = NULL;
+            V_CUR = V_NEXT;
+        END
+        V_LVL = V_LVL + 1;
+    END
+    SUSPEND;
+END^
+
+/* --- 7b. Potrivirea automata a incasarilor fara lant ----------------------------- */
+/* totalul, platitul si restul de plata al unui deal (aceleasi reguli ca in RECALC) */
+CREATE OR ALTER PROCEDURE SP_DEAL_GET_BALANCE (A_DEAL_ID BIGINT)
+RETURNS (
+    O_TOTAL   DOUBLE PRECISION,
+    O_PAID    DOUBLE PRECISION,
+    O_BALANCE DOUBLE PRECISION)
+SQL SECURITY DEFINER
+AS
+DECLARE S_SALE DOUBLE PRECISION;
+DECLARE S_PROFORMA DOUBLE PRECISION;
+BEGIN
+    SELECT SUM(CASE WHEN d.DOCTYPEID = 107 THEN  d.SUMA * COALESCE(NULLIF(d.RATE, 0), 1)
+                    WHEN d.DOCTYPEID = 110 THEN -d.SUMA * COALESCE(NULLIF(d.RATE, 0), 1)
+                    ELSE 0 END),
+           SUM(CASE WHEN d.DOCTYPEID = 101 THEN d.SUMA * COALESCE(NULLIF(d.RATE, 0), 1) ELSE 0 END),
+           SUM(CASE WHEN d.DOCTYPEID IN (116, 120)
+                        THEN  COALESCE(dd.LINK_SUM, d.SUMA * COALESCE(NULLIF(d.RATE, 0), 1))
+                    WHEN d.DOCTYPEID IN (117, 119, 1199)
+                        THEN -COALESCE(dd.LINK_SUM, d.SUMA * COALESCE(NULLIF(d.RATE, 0), 1))
+                    ELSE 0 END)
+    FROM TDB_DEAL_DOCS dd
+    JOIN TDB_DOCS d ON d.DOCID = dd.DOCID AND d.DELETED_DATE IS NULL
+    WHERE dd.DEAL_ID = :A_DEAL_ID
+    INTO :S_SALE, :S_PROFORMA, :O_PAID;
+
+    S_SALE = COALESCE(S_SALE, 0);
+    O_PAID = COALESCE(O_PAID, 0);
+    O_TOTAL = CASE WHEN S_SALE <> 0 THEN S_SALE ELSE COALESCE(S_PROFORMA, 0) END;
+    O_BALANCE = O_TOTAL - O_PAID;
+    SUSPEND;
+END^
+
+/* Incasare (116 / 120) fara lant de documente: se leaga singura DOAR daca platitorul
+   are exact UN deal deschis al carui rest de plata = suma incasarii. Platile agregate
+   (decontari de carduri, companii de credit, curieri) nu se potrivesc asa - se
+   distribuie manual din WMS (Utile > Incasari nelegate de deal-uri). */
+CREATE OR ALTER PROCEDURE SP_DEAL_MATCH_PAYMENT (
+    A_DOCID   INTEGER,
+    A_USER_ID INTEGER = NULL)
+RETURNS (
+    O_DEAL_ID      BIGINT,
+    O_CANDIDATES   INTEGER)
+SQL SECURITY DEFINER
+AS
+DECLARE V_TYPE INTEGER;
+DECLARE V_CT INTEGER;
+DECLARE V_SUM DOUBLE PRECISION;
+DECLARE V_DELETED TIMESTAMP;
+DECLARE V_DEAL BIGINT;
+DECLARE V_FOUND BIGINT;
+DECLARE V_TOTAL DOUBLE PRECISION;
+DECLARE V_PAID DOUBLE PRECISION;
+DECLARE V_BALANCE DOUBLE PRECISION;
+DECLARE V_INS SMALLINT;
+DECLARE V_LINK VARCHAR(32);
+BEGIN
+    O_DEAL_ID = NULL;
+    O_CANDIDATES = 0;
+
+    SELECT DOCTYPEID, CT, SUMA * COALESCE(NULLIF(RATE, 0), 1), DELETED_DATE
+    FROM TDB_DOCS WHERE DOCID = :A_DOCID
+    INTO :V_TYPE, :V_CT, :V_SUM, :V_DELETED;
+
+    IF (V_TYPE IS NULL OR V_DELETED IS NOT NULL OR V_TYPE NOT IN (116, 120)
+        OR COALESCE(V_SUM, 0) <= 0.005) THEN EXIT;
+    IF (EXISTS(SELECT 1 FROM TDB_DEAL_DOCS WHERE DOCID = :A_DOCID)) THEN EXIT;
+
+    V_FOUND = NULL;
+    FOR SELECT DEAL_ID FROM TDB_DEALS
+        WHERE CONTACTID = :V_CT AND CLOSED_AT IS NULL
+        INTO :V_DEAL
+    DO
+    BEGIN
+        SELECT O_TOTAL, O_PAID, O_BALANCE FROM SP_DEAL_GET_BALANCE(:V_DEAL)
+        INTO :V_TOTAL, :V_PAID, :V_BALANCE;
+        IF (ABS(V_BALANCE - V_SUM) <= 0.011) THEN
+        BEGIN
+            O_CANDIDATES = O_CANDIDATES + 1;
+            V_FOUND = V_DEAL;
+        END
+    END
+
+    IF (O_CANDIDATES = 1) THEN
+    BEGIN
+        SELECT IS_INSERTED, USED_LINK_TYPE
+        FROM SP_DEAL_BIND_DOC(:V_FOUND, :A_DOCID, NULL, :A_USER_ID, NULL)
+        INTO :V_INS, :V_LINK;
+        EXECUTE PROCEDURE SP_DEAL_RECALC_STATES(:V_FOUND, :A_USER_ID);
+        O_DEAL_ID = V_FOUND;
+    END
+END^
+
+/* --- 8. Algoritmul principal ---------------------------------------------------- */
+CREATE OR ALTER PROCEDURE SP_DEAL_ATTACH_DOC (
+    A_DOCID   INTEGER,
+    A_USER_ID INTEGER = NULL)
+RETURNS (
+    O_DEAL_ID BIGINT,
+    O_ACTION  VARCHAR(16))
+SQL SECURITY DEFINER
+AS
+DECLARE V_TYPE INTEGER;
+DECLARE V_PARENT INTEGER;
+DECLARE V_DELETED TIMESTAMP;
+DECLARE V_CUR INTEGER;
+DECLARE V_NEXT INTEGER;
+DECLARE V_LVL INTEGER;
+DECLARE V_ROOT INTEGER;
+DECLARE V_STOP INTEGER;
+DECLARE V_RTYPE INTEGER;
+DECLARE V_CT INTEGER;
+DECLARE V_CURRENCYID INTEGER;
+DECLARE V_OPERATOR INTEGER;
+DECLARE V_DATA TIMESTAMP;
+DECLARE V_NAME VARCHAR(120);
+DECLARE V_PHONE VARCHAR(40);
+DECLARE V_REF VARCHAR(64);
+DECLARE V_INS SMALLINT;
+DECLARE V_LINK VARCHAR(32);
+BEGIN
+    O_DEAL_ID = NULL;
+    O_ACTION = 'SKIP';
+
+    SELECT DOCTYPEID, PARENTDOCID, DELETED_DATE FROM TDB_DOCS WHERE DOCID = :A_DOCID
+    INTO :V_TYPE, :V_PARENT, :V_DELETED;
+
+    IF (V_TYPE IS NULL OR V_DELETED IS NOT NULL) THEN EXIT;
+    IF (V_TYPE NOT IN (101, 107, 110, 112, 115, 116, 117, 119, 120, 126, 128, 134, 1199, 1791)) THEN EXIT;
+
+    SELECT MIN(DEAL_ID) FROM TDB_DEAL_DOCS WHERE DOCID = :A_DOCID INTO :O_DEAL_ID;
+    IF (O_DEAL_ID IS NOT NULL) THEN
+    BEGIN
+        O_ACTION = 'EXISTS';
+        EXIT;
+    END
+
+    /* urcam: cautam un deal; retinem cel mai de sus document "radacina" */
+    V_ROOT = NULL;
+    IF (V_TYPE IN (134, 1791, 115, 101, 107)) THEN V_ROOT = A_DOCID;
+    V_CUR = V_PARENT;
+    IF (V_CUR = A_DOCID) THEN V_CUR = NULL;
+    V_LVL = 0;
+    WHILE (V_CUR IS NOT NULL AND V_LVL < 10 AND O_DEAL_ID IS NULL) DO
+    BEGIN
+        V_RTYPE = NULL;  V_NEXT = NULL;  V_DELETED = NULL;
+        SELECT DOCTYPEID, PARENTDOCID, DELETED_DATE FROM TDB_DOCS WHERE DOCID = :V_CUR
+        INTO :V_RTYPE, :V_NEXT, :V_DELETED;
+        IF (V_RTYPE IS NULL) THEN
+            V_CUR = NULL;                      /* parintele nu exista = capat de lant */
+        ELSE
+        BEGIN
+            SELECT MIN(DEAL_ID) FROM TDB_DEAL_DOCS WHERE DOCID = :V_CUR INTO :O_DEAL_ID;
+            IF (O_DEAL_ID IS NULL) THEN
+            BEGIN
+                IF (V_DELETED IS NULL AND V_RTYPE IN (134, 1791, 115, 101, 107)) THEN
+                    V_ROOT = V_CUR;
+                IF (V_NEXT = V_CUR) THEN V_NEXT = NULL;
+                V_CUR = V_NEXT;
+            END
+        END
+        V_LVL = V_LVL + 1;
+    END
+
+    V_STOP = NULL;
+    IF (O_DEAL_ID IS NOT NULL) THEN
+        O_ACTION = 'BOUND';
+    ELSE
+    BEGIN
+        IF (V_ROOT IS NULL) THEN               /* plata / factura / retur fara lant */
+        BEGIN
+            IF (V_TYPE IN (116, 120)) THEN
+            BEGIN
+                EXECUTE PROCEDURE SP_DEAL_MATCH_PAYMENT(:A_DOCID, :A_USER_ID)
+                    RETURNING_VALUES :O_DEAL_ID, :V_LVL;
+                IF (O_DEAL_ID IS NOT NULL) THEN O_ACTION = 'MATCHED';
+            END
+            EXIT;
+        END
+
+        SELECT d.DOCTYPEID, d.CT, d.CURRENCYID, COALESCE(d.RESPONSIBLE_USERID, d.CREATED_BY), d.DATA
+        FROM TDB_DOCS d WHERE d.DOCID = :V_ROOT
+        INTO :V_RTYPE, :V_CT, :V_CURRENCYID, :V_OPERATOR, :V_DATA;
+
+        V_NAME = NULL;
+        SELECT LEFT(COALESCE(NULLIF(TRIM(c.DISPLAYNAME), ''), TRIM(c.NAME)), 120)
+        FROM TS_CUSTOMER c WHERE c.CUSTOMERID = :V_CT
+        INTO :V_NAME;
+
+        IF (NOT EXISTS(SELECT 1 FROM TS_CUSTOMER c WHERE c.CUSTOMERID = :V_CT)) THEN
+        BEGIN
+            EXECUTE PROCEDURE SP_DEAL_LOG_ERROR('ATTACH_NO_CUSTOMER', :A_DOCID, NULL, NULL, NULL,
+                'Documentul radacina ' || :V_ROOT || ' are CT=' || COALESCE(:V_CT, -1) ||
+                ' care nu exista in TS_CUSTOMER');
+            EXIT;
+        END
+
+        V_PHONE = NULL;
+        SELECT FIRST 1 LEFT(TRIM(p.PHONENUMBER), 40) FROM TDB_DOCS_PHONES p
+        WHERE p.DOCID = :V_ROOT AND NULLIF(TRIM(p.PHONENUMBER), '') IS NOT NULL
+        INTO :V_PHONE;
+
+        V_REF = CAST(V_ROOT AS VARCHAR(64));
+        V_OPERATOR = COALESCE(V_OPERATOR, A_USER_ID);
+
+        IF (V_RTYPE = 134) THEN
+            SELECT O_DEAL_ID FROM SP_DEAL_CREATE_FROM_SITE_CART(
+                :V_REF, :V_CT, :V_NAME, :V_PHONE, NULL, NULL, NULL, :V_CURRENCYID, :V_OPERATOR, NULL)
+            INTO :O_DEAL_ID;
+        ELSE IF (V_RTYPE = 1791) THEN
+            SELECT O_DEAL_ID FROM SP_DEAL_CREATE_FROM_FIN_REQUEST(
+                :V_REF, :V_CT, :V_NAME, :V_PHONE, NULL, NULL, NULL, NULL, NULL, :V_OPERATOR, NULL)
+            INTO :O_DEAL_ID;
+        ELSE IF (V_RTYPE = 115) THEN
+            SELECT O_DEAL_ID FROM SP_DEAL_CREATE_MANUAL_OFFER(
+                :V_REF, :V_CT, :V_NAME, :V_PHONE, NULL, :V_CURRENCYID, :V_OPERATOR, NULL, NULL)
+            INTO :O_DEAL_ID;
+        ELSE
+            SELECT O_DEAL_ID FROM SP_DEAL_CREATE_DIRECT_SALE(
+                :V_REF, :V_CT, :V_NAME, :V_PHONE, NULL, :V_CURRENCYID, :V_OPERATOR, NULL)
+            INTO :O_DEAL_ID;
+
+        /* deal-ul incepe la data documentului radacina (conteaza la backfill) */
+        UPDATE TDB_DEALS SET CREATED_AT = :V_DATA
+        WHERE DEAL_ID = :O_DEAL_ID AND :V_DATA IS NOT NULL AND :V_DATA < CREATED_AT;
+
+        V_STOP = V_ROOT;
+        O_ACTION = 'CREATED';
+    END
+
+    /* legam documentul si verigile nelegate de deasupra lui */
+    V_CUR = A_DOCID;
+    V_LVL = 0;
+    WHILE (V_CUR IS NOT NULL AND V_LVL <= 10) DO
+    BEGIN
+        V_RTYPE = NULL;  V_NEXT = NULL;  V_DELETED = NULL;
+        IF (EXISTS(SELECT 1 FROM TDB_DEAL_DOCS WHERE DEAL_ID = :O_DEAL_ID AND DOCID = :V_CUR)) THEN
+            V_CUR = NULL;
+        ELSE
+        BEGIN
+            SELECT DOCTYPEID, PARENTDOCID, DELETED_DATE FROM TDB_DOCS WHERE DOCID = :V_CUR
+            INTO :V_RTYPE, :V_NEXT, :V_DELETED;
+            IF (V_RTYPE IS NULL) THEN
+                V_CUR = NULL;
+            ELSE
+            BEGIN
+                IF (V_DELETED IS NULL AND V_RTYPE IN
+                    (101, 107, 110, 112, 115, 116, 117, 119, 120, 126, 128, 134, 1199, 1791)) THEN
+                    SELECT IS_INSERTED, USED_LINK_TYPE
+                    FROM SP_DEAL_BIND_DOC(:O_DEAL_ID, :V_CUR, NULL, :A_USER_ID, NULL)
+                    INTO :V_INS, :V_LINK;
+                IF (V_CUR = V_STOP OR V_NEXT = V_CUR) THEN V_NEXT = NULL;
+                V_CUR = V_NEXT;
+            END
+        END
+        V_LVL = V_LVL + 1;
+    END
+
+    EXECUTE PROCEDURE SP_DEAL_RECALC_STATES(:O_DEAL_ID, :A_USER_ID);
+END^
+
+/* --- 9. Operatii manuale (apelate din WMS) --------------------------------------- */
+CREATE OR ALTER PROCEDURE SP_DEAL_SET_STATE (
+    A_DEAL_ID    BIGINT,
+    A_STATE_CODE VARCHAR(32),
+    A_USER_ID    INTEGER,
+    A_LOCK       SMALLINT = 0)      /* 1 = axa nu mai e recalculata automat */
+SQL SECURITY DEFINER
+AS
+DECLARE V_STATE_ID INTEGER;
+DECLARE V_GROUP VARCHAR(8);
+DECLARE V_BIT INTEGER;
+BEGIN
+    SELECT STATE_ID, TRIM(GROUP_CODE) FROM TS_DEAL_STATES
+    WHERE CODE = :A_STATE_CODE AND IS_ACTIVE = 1
+    INTO :V_STATE_ID, :V_GROUP;
+
+    IF (V_STATE_ID IS NULL) THEN
+        EXCEPTION E_DEAL 'Stare necunoscuta: ' || COALESCE(:A_STATE_CODE, 'NULL');
+    IF (NOT EXISTS(SELECT 1 FROM TDB_DEALS WHERE DEAL_ID = :A_DEAL_ID)) THEN
+        EXCEPTION E_DEAL 'Deal inexistent: ' || COALESCE(:A_DEAL_ID, -1);
+
+    EXECUTE PROCEDURE SP_DEAL_APPLY_STATE(:A_DEAL_ID, :V_GROUP, :V_STATE_ID, :A_USER_ID, 'MANUAL');
+
+    IF (A_LOCK = 1) THEN
+    BEGIN
+        V_BIT = CASE V_GROUP WHEN 'PIPE' THEN 1 WHEN 'PAY' THEN 2 WHEN 'FIN' THEN 4 ELSE 8 END;
+        UPDATE TDB_DEALS SET FLAGS = BIN_OR(COALESCE(FLAGS, 0), :V_BIT) WHERE DEAL_ID = :A_DEAL_ID;
+    END
+
+    EXECUTE PROCEDURE SP_DEAL_RECALC_STATES(:A_DEAL_ID, :A_USER_ID);
+END^
+
+CREATE OR ALTER PROCEDURE SP_DEAL_UNLOCK_AXIS (
+    A_DEAL_ID BIGINT,
+    A_GROUP   VARCHAR(8),
+    A_USER_ID INTEGER)
+SQL SECURITY DEFINER
+AS
+DECLARE V_BIT INTEGER;
+BEGIN
+    V_BIT = CASE TRIM(A_GROUP) WHEN 'PIPE' THEN 1 WHEN 'PAY' THEN 2 WHEN 'FIN' THEN 4
+                               WHEN 'DLV' THEN 8 ELSE 0 END;
+    UPDATE TDB_DEALS SET FLAGS = BIN_AND(COALESCE(FLAGS, 0), BIN_NOT(:V_BIT))
+    WHERE DEAL_ID = :A_DEAL_ID;
+    EXECUTE PROCEDURE SP_DEAL_RECALC_STATES(:A_DEAL_ID, :A_USER_ID);
+END^
+
+/* legare manuala (plati fara lant etc.) + recalculare */
+CREATE OR ALTER PROCEDURE SP_DEAL_BIND_DOC_MANUAL (
+    A_DEAL_ID  BIGINT,
+    A_DOCID    INTEGER,
+    A_USER_ID  INTEGER,
+    A_LINK_SUM DOUBLE PRECISION = NULL)
+SQL SECURITY DEFINER
+AS
+DECLARE V_INS SMALLINT;
+DECLARE V_LINK VARCHAR(32);
+BEGIN
+    SELECT IS_INSERTED, USED_LINK_TYPE
+    FROM SP_DEAL_BIND_DOC(:A_DEAL_ID, :A_DOCID, NULL, :A_USER_ID, :A_LINK_SUM)
+    INTO :V_INS, :V_LINK;
+    EXECUTE PROCEDURE SP_DEAL_RECALC_STATES(:A_DEAL_ID, :A_USER_ID);
+END^
+
+CREATE OR ALTER PROCEDURE SP_DEAL_UNBIND_DOC (
+    A_DEAL_ID BIGINT,
+    A_DOCID   INTEGER,
+    A_USER_ID INTEGER)
+SQL SECURITY DEFINER
+AS
+BEGIN
+    DELETE FROM TDB_DEAL_DOCS WHERE DEAL_ID = :A_DEAL_ID AND DOCID = :A_DOCID;
+    EXECUTE PROCEDURE SP_DEAL_RECALC_STATES(:A_DEAL_ID, :A_USER_ID);
+END^
+
+/* uneste A_FROM in A_INTO (acelasi client, oferte paralele devenite o vanzare) */
+CREATE OR ALTER PROCEDURE SP_DEAL_MERGE (
+    A_INTO_DEAL_ID BIGINT,
+    A_FROM_DEAL_ID BIGINT,
+    A_USER_ID      INTEGER)
+SQL SECURITY DEFINER
+AS
+BEGIN
+    IF (A_INTO_DEAL_ID = A_FROM_DEAL_ID) THEN EXIT;
+    IF (NOT EXISTS(SELECT 1 FROM TDB_DEALS WHERE DEAL_ID = :A_INTO_DEAL_ID)
+        OR NOT EXISTS(SELECT 1 FROM TDB_DEALS WHERE DEAL_ID = :A_FROM_DEAL_ID)) THEN
+        EXCEPTION E_DEAL 'Deal inexistent la unire';
+
+    DELETE FROM TDB_DEAL_DOCS f
+    WHERE f.DEAL_ID = :A_FROM_DEAL_ID
+      AND EXISTS(SELECT 1 FROM TDB_DEAL_DOCS t
+                 WHERE t.DEAL_ID = :A_INTO_DEAL_ID AND t.DOCID = f.DOCID);
+    UPDATE TDB_DEAL_DOCS SET DEAL_ID = :A_INTO_DEAL_ID WHERE DEAL_ID = :A_FROM_DEAL_ID;
+
+    UPDATE TDB_DEALS
+    SET NOTE = LEFT(COALESCE(NOTE || ' ', '') || '[unit in deal ' || :A_INTO_DEAL_ID || ']', 1000),
+        CLOSED_AT = CURRENT_TIMESTAMP, CLOSED_RESULT = 'MERGED',
+        UPDATED_AT = CURRENT_TIMESTAMP, UPDATED_BY = :A_USER_ID
+    WHERE DEAL_ID = :A_FROM_DEAL_ID;
+
+    EXECUTE PROCEDURE SP_DEAL_RECALC_STATES(:A_INTO_DEAL_ID, :A_USER_ID);
+END^
+
+/* potrivirea in masa a incasarilor nelegate (idempotent) */
+CREATE OR ALTER PROCEDURE SP_DEAL_MATCH_PAYMENTS (A_DATE_FROM DATE, A_USER_ID INTEGER = NULL)
+RETURNS (
+    N_DOCS    INTEGER,
+    N_MATCHED INTEGER)
+SQL SECURITY DEFINER
+AS
+DECLARE V_DOCID INTEGER;
+DECLARE V_DEAL BIGINT;
+DECLARE V_CAND INTEGER;
+BEGIN
+    N_DOCS = 0;  N_MATCHED = 0;
+    FOR SELECT d.DOCID FROM TDB_DOCS d
+        WHERE d.DATA >= :A_DATE_FROM AND d.DELETED_DATE IS NULL AND d.DOCTYPEID IN (116, 120)
+          AND NOT EXISTS(SELECT 1 FROM TDB_DEAL_DOCS x WHERE x.DOCID = d.DOCID)
+        ORDER BY d.DOCID
+        INTO :V_DOCID
+    DO
+    BEGIN
+        N_DOCS = N_DOCS + 1;
+        V_DEAL = NULL;
+        EXECUTE PROCEDURE SP_DEAL_MATCH_PAYMENT(:V_DOCID, :A_USER_ID)
+            RETURNING_VALUES :V_DEAL, :V_CAND;
+        IF (V_DEAL IS NOT NULL) THEN N_MATCHED = N_MATCHED + 1;
+    END
+END^
+
+/* --- 10. Backfill ------------------------------------------------------------------ */
+CREATE OR ALTER PROCEDURE SP_DEAL_BACKFILL (A_DATE_FROM DATE)
+RETURNS (
+    N_DOCS    INTEGER,
+    N_CREATED INTEGER,
+    N_BOUND   INTEGER,
+    N_SKIPPED INTEGER,
+    N_ERRORS  INTEGER)
+SQL SECURITY DEFINER
+AS
+DECLARE V_DOCID INTEGER;
+DECLARE V_USER INTEGER;
+DECLARE V_DEAL BIGINT;
+DECLARE V_ACTION VARCHAR(16);
+BEGIN
+    N_DOCS = 0;  N_CREATED = 0;  N_BOUND = 0;  N_SKIPPED = 0;  N_ERRORS = 0;
+    FOR SELECT d.DOCID, d.CREATED_BY
+        FROM TDB_DOCS d
+        WHERE d.DATA >= :A_DATE_FROM
+          AND d.DELETED_DATE IS NULL
+          AND d.DOCTYPEID IN (101, 107, 110, 112, 115, 116, 117, 119, 120, 126, 128, 134, 1199, 1791)
+        ORDER BY d.DOCID
+        INTO :V_DOCID, :V_USER
+    DO
+    BEGIN
+        N_DOCS = N_DOCS + 1;
+        V_ACTION = NULL;
+        BEGIN
+            EXECUTE PROCEDURE SP_DEAL_ATTACH_DOC(:V_DOCID, :V_USER)
+                RETURNING_VALUES :V_DEAL, :V_ACTION;
+            WHEN ANY DO
+            BEGIN
+                V_ACTION = 'ERROR';
+                EXECUTE PROCEDURE SP_DEAL_LOG_ERROR('BACKFILL', :V_DOCID, NULL,
+                    GDSCODE, SQLSTATE, LEFT(RDB$ERROR(MESSAGE), 1000));
+            END
+        END
+        IF (V_ACTION = 'CREATED') THEN N_CREATED = N_CREATED + 1;
+        ELSE IF (V_ACTION IN ('BOUND', 'MATCHED')) THEN N_BOUND = N_BOUND + 1;
+        ELSE IF (V_ACTION = 'ERROR') THEN N_ERRORS = N_ERRORS + 1;
+        ELSE N_SKIPPED = N_SKIPPED + 1;
+    END
+END^
+
+COMMIT^
+
+/* --- 11. Analitica (semne explicite, sume in MDL) ------------------------------------ */
+CREATE OR ALTER VIEW V_DEAL_ANALYTICS (
+    DEAL_ID, SOURCE_CODE, SOURCE_REF, CREATED_AT, CLOSED_AT, CURRENCYID,
+    PROFORMA_SUM, PROFORMA_VAT, OP_SALE_SUM, OP_SALE_VAT, OP_RETURN_SUM, OP_RETURN_VAT,
+    OP_NET_SALE_SUM, OP_NET_SALE_VAT, SUPP_RETURN_SUM, CASH_IN_SUM, BANK_IN_SUM, PAID_SUM,
+    OP_COST_SUM, OP_MARGIN_SUM, ACC_SALE_SUM, ACC_IN_SUM, BALANCE_DUE,
+    FIRST_DOC_DATE, LAST_DOC_DATE, PROFORMA_FIRST_DATE, OP_SALE_FIRST_DATE, OP_RETURN_FIRST_DATE,
+    CASH_OUT_SUM, BANK_OUT_SUM)
+AS
+WITH DEAL_DOCS AS (
+    SELECT dd.DEAL_ID, d.DOCID, d.DATA, d.DOCTYPEID,
+           d.SUMA * COALESCE(NULLIF(d.RATE, 0), 1) AS SUMA,
+           d.VAT  * COALESCE(NULLIF(d.RATE, 0), 1) AS VAT,
+           COALESCE(dd.LINK_SUM, d.SUMA * COALESCE(NULLIF(d.RATE, 0), 1)) AS PAY_SUMA
+    FROM TDB_DEAL_DOCS dd
+    JOIN TDB_DOCS d ON d.DOCID = dd.DOCID
+    WHERE d.DELETED_DATE IS NULL
+),
+DOC_AGG AS (
+    SELECT DEAL_ID,
+        SUM(CASE WHEN DOCTYPEID = 101 THEN SUMA ELSE 0 END) AS PROFORMA_SUM,
+        SUM(CASE WHEN DOCTYPEID = 101 THEN VAT  ELSE 0 END) AS PROFORMA_VAT,
+        SUM(CASE WHEN DOCTYPEID = 107 THEN SUMA ELSE 0 END) AS OP_SALE_SUM,
+        SUM(CASE WHEN DOCTYPEID = 107 THEN VAT  ELSE 0 END) AS OP_SALE_VAT,
+        SUM(CASE WHEN DOCTYPEID = 110 THEN SUMA ELSE 0 END) AS OP_RETURN_SUM,
+        SUM(CASE WHEN DOCTYPEID = 110 THEN VAT  ELSE 0 END) AS OP_RETURN_VAT,
+        SUM(CASE WHEN DOCTYPEID = 126 THEN SUMA ELSE 0 END) AS SUPP_RETURN_SUM,
+        SUM(CASE WHEN DOCTYPEID = 116 THEN PAY_SUMA ELSE 0 END) AS CASH_IN_SUM,
+        SUM(CASE WHEN DOCTYPEID = 120 THEN PAY_SUMA ELSE 0 END) AS BANK_IN_SUM,
+        SUM(CASE WHEN DOCTYPEID = 117 THEN PAY_SUMA ELSE 0 END) AS CASH_OUT_SUM,
+        SUM(CASE WHEN DOCTYPEID IN (119, 1199) THEN PAY_SUMA ELSE 0 END) AS BANK_OUT_SUM,
+        SUM(CASE WHEN DOCTYPEID = 112 THEN SUMA ELSE 0 END) AS ACC_SALE_SUM,
+        SUM(CASE WHEN DOCTYPEID = 109 THEN SUMA ELSE 0 END) AS ACC_IN_SUM,
+        MIN(CASE WHEN DOCTYPEID = 101 THEN DATA END) AS PROFORMA_FIRST_DATE,
+        MIN(CASE WHEN DOCTYPEID = 107 THEN DATA END) AS OP_SALE_FIRST_DATE,
+        MIN(CASE WHEN DOCTYPEID = 110 THEN DATA END) AS OP_RETURN_FIRST_DATE,
+        MIN(DATA) AS FIRST_DOC_DATE,
+        MAX(DATA) AS LAST_DOC_DATE
+    FROM DEAL_DOCS
+    GROUP BY DEAL_ID
+)
+SELECT
+    d.DEAL_ID, d.SOURCE_CODE, d.SOURCE_REF, d.CREATED_AT, d.CLOSED_AT, d.CURRENCYID,
+    COALESCE(a.PROFORMA_SUM, 0), COALESCE(a.PROFORMA_VAT, 0),
+    COALESCE(a.OP_SALE_SUM, 0), COALESCE(a.OP_SALE_VAT, 0),
+    COALESCE(a.OP_RETURN_SUM, 0), COALESCE(a.OP_RETURN_VAT, 0),
+    COALESCE(a.OP_SALE_SUM, 0) - COALESCE(a.OP_RETURN_SUM, 0),
+    COALESCE(a.OP_SALE_VAT, 0) - COALESCE(a.OP_RETURN_VAT, 0),
+    COALESCE(a.SUPP_RETURN_SUM, 0),
+    COALESCE(a.CASH_IN_SUM, 0), COALESCE(a.BANK_IN_SUM, 0),
+    COALESCE(a.CASH_IN_SUM, 0) + COALESCE(a.BANK_IN_SUM, 0)
+        - COALESCE(a.CASH_OUT_SUM, 0) - COALESCE(a.BANK_OUT_SUM, 0),
+    CAST(NULL AS DOUBLE PRECISION),      /* OP_COST_SUM   - vezi nota din antet */
+    CAST(NULL AS DOUBLE PRECISION),      /* OP_MARGIN_SUM - vezi nota din antet */
+    COALESCE(a.ACC_SALE_SUM, 0), COALESCE(a.ACC_IN_SUM, 0),
+    CASE WHEN COALESCE(a.OP_SALE_SUM, 0) <> 0
+             THEN COALESCE(a.OP_SALE_SUM, 0) - COALESCE(a.OP_RETURN_SUM, 0)
+         ELSE COALESCE(a.PROFORMA_SUM, 0)
+    END
+    - (COALESCE(a.CASH_IN_SUM, 0) + COALESCE(a.BANK_IN_SUM, 0)
+       - COALESCE(a.CASH_OUT_SUM, 0) - COALESCE(a.BANK_OUT_SUM, 0)),
+    a.FIRST_DOC_DATE, a.LAST_DOC_DATE, a.PROFORMA_FIRST_DATE, a.OP_SALE_FIRST_DATE,
+    a.OP_RETURN_FIRST_DATE,
+    COALESCE(a.CASH_OUT_SUM, 0), COALESCE(a.BANK_OUT_SUM, 0)
+FROM TDB_DEALS d
+LEFT JOIN DOC_AGG  a ON a.DEAL_ID = d.DEAL_ID^
+
+/* browserul din WMS */
+CREATE OR ALTER VIEW VW_DEALS_BROWSER (
+    DEAL_ID, SOURCE_CODE, SOURCE_REF, CONTACTID, CONTACT_NAME, PHONE, EMAIL,
+    DELIVERY_ADDRESS, OPERATOR_ID, NOTE, FLAGS, PRIORITY,
+    CREATED_AT, UPDATED_AT, CLOSED_AT, CLOSED_RESULT,
+    PIPE_STATE_ID, PIPE_CODE, PIPE_TITLE,
+    PAY_STATE_ID, PAY_CODE, PAY_TITLE,
+    FIN_STATE_ID, FIN_CODE, FIN_TITLE,
+    DLV_STATE_ID, DLV_CODE, DLV_TITLE,
+    DOCS_COUNT, PROFORMA_SUM, NET_SALE_SUM, PAID_SUM, BALANCE_DUE, MARGIN_SUM, LAST_DOC_DATE,
+    CANCEL_REASON_ID, REASON_CODE, REASON_TITLE, CHANNEL_ID, CHANNEL_CODE, CHANNEL_TITLE)
+AS
+SELECT
+    d.DEAL_ID, d.SOURCE_CODE, d.SOURCE_REF, d.CONTACTID, d.CONTACT_NAME, d.PHONE, d.EMAIL,
+    d.DELIVERY_ADDRESS, d.OPERATOR_ID, d.NOTE, d.FLAGS, d.PRIORITY,
+    d.CREATED_AT, d.UPDATED_AT, d.CLOSED_AT, d.CLOSED_RESULT,
+    d.PIPE_STATE_ID, sp.CODE, sp.TITLE_RO,
+    d.PAY_STATE_ID, sy.CODE, sy.TITLE_RO,
+    d.FIN_STATE_ID, sf.CODE, sf.TITLE_RO,
+    d.DLV_STATE_ID, sl.CODE, sl.TITLE_RO,
+    (SELECT COUNT(*) FROM TDB_DEAL_DOCS x WHERE x.DEAL_ID = d.DEAL_ID),
+    a.PROFORMA_SUM, a.OP_NET_SALE_SUM, a.PAID_SUM, a.BALANCE_DUE, a.OP_MARGIN_SUM, a.LAST_DOC_DATE,
+    d.CANCEL_REASON_ID, rr.CODE, rr.TITLE_RO, d.CHANNEL_ID, rc.CODE, rc.TITLE_RO
+FROM TDB_DEALS d
+JOIN V_DEAL_ANALYTICS a ON a.DEAL_ID = d.DEAL_ID
+LEFT JOIN TS_DEAL_STATES sp ON sp.STATE_ID = d.PIPE_STATE_ID
+LEFT JOIN TS_DEAL_STATES sy ON sy.STATE_ID = d.PAY_STATE_ID
+LEFT JOIN TS_DEAL_STATES sf ON sf.STATE_ID = d.FIN_STATE_ID
+LEFT JOIN TS_DEAL_STATES sl ON sl.STATE_ID = d.DLV_STATE_ID
+LEFT JOIN TS_DEAL_REASONS rr ON rr.REASON_ID = d.CANCEL_REASON_ID
+LEFT JOIN TS_DEAL_REASONS rc ON rc.REASON_ID = d.CHANNEL_ID^
+
+/* incasarile (116 / 120) si cat din ele e distribuit pe deal-uri */
+CREATE OR ALTER VIEW VW_DEAL_PAYMENTS (
+    DOCID, DOCTYPEID, DOC_TYPE, DATA, CUSTOMERID, CUSTOMER_NAME, SUMA,
+    DEALS_COUNT, DISTRIBUTED_SUM, REMAINING_SUM, FIRST_DEAL_ID, HAS_PARENT)
+AS
+SELECT
+    d.DOCID, d.DOCTYPEID, t.TITLE, d.DATA, d.CT,
+    COALESCE(NULLIF(TRIM(c.DISPLAYNAME), ''), TRIM(c.NAME)),
+    d.SUMA * COALESCE(NULLIF(d.RATE, 0), 1),
+    (SELECT COUNT(*) FROM TDB_DEAL_DOCS x WHERE x.DOCID = d.DOCID),
+    COALESCE((SELECT SUM(COALESCE(x.LINK_SUM, d.SUMA * COALESCE(NULLIF(d.RATE, 0), 1)))
+              FROM TDB_DEAL_DOCS x WHERE x.DOCID = d.DOCID), 0),
+    d.SUMA * COALESCE(NULLIF(d.RATE, 0), 1)
+      - COALESCE((SELECT SUM(COALESCE(x.LINK_SUM, d.SUMA * COALESCE(NULLIF(d.RATE, 0), 1)))
+                  FROM TDB_DEAL_DOCS x WHERE x.DOCID = d.DOCID), 0),
+    (SELECT MIN(x.DEAL_ID) FROM TDB_DEAL_DOCS x WHERE x.DOCID = d.DOCID),
+    IIF(EXISTS(SELECT 1 FROM TDB_DOCS p WHERE p.DOCID = d.PARENTDOCID AND p.DOCID <> d.DOCID), 1, 0)
+FROM TDB_DOCS d
+LEFT JOIN TS_CUSTOMER c ON c.CUSTOMERID = d.CT
+LEFT JOIN TS_DOCTYPES t ON t.DOCTYPEID = d.DOCTYPEID
+WHERE d.DOCTYPEID IN (116, 120) AND d.DELETED_DATE IS NULL^
+
+/* etapa deal-ului unui document - pentru site (WEBUSER), in locul vechiului STATE_NAME */
+CREATE OR ALTER VIEW VW_DOC_DEAL_STATE (DOCID, DEAL_ID, PIPE_CODE, PIPE_TITLE, REASON_TITLE)
+AS
+SELECT dd.DOCID, d.DEAL_ID, s.CODE, s.TITLE_RO, r.TITLE_RO
+FROM TDB_DEAL_DOCS dd
+JOIN TDB_DEALS d ON d.DEAL_ID = dd.DEAL_ID
+LEFT JOIN TS_DEAL_STATES s ON s.STATE_ID = d.PIPE_STATE_ID
+LEFT JOIN TS_DEAL_REASONS r ON r.REASON_ID = d.CANCEL_REASON_ID^
+
+COMMIT^
+
+/* --- 12. Triggere (INACTIVE la prima instalare; la re-rulare starea se pastreaza) ----- */
+EXECUTE BLOCK AS
+BEGIN
+    RDB$SET_CONTEXT('USER_SESSION', 'DEALS_FIRST_INSTALL',
+        CASE WHEN EXISTS(SELECT 1 FROM RDB$TRIGGERS
+                         WHERE TRIM(RDB$TRIGGER_NAME) = 'TDB_DOCS_AI_DEAL') THEN '0' ELSE '1' END);
+END^
+
+CREATE OR ALTER TRIGGER TDB_DOCS_AI_DEAL FOR TDB_DOCS
+AFTER INSERT POSITION 900
+SQL SECURITY DEFINER
+AS
+DECLARE V_DEAL BIGINT;
+DECLARE V_ACTION VARCHAR(16);
+BEGIN
+    IF (NEW.DOCTYPEID IN (101, 107, 110, 112, 115, 116, 117, 119, 120, 126, 128, 134, 1199, 1791)) THEN
+    BEGIN
+        EXECUTE PROCEDURE SP_DEAL_ATTACH_DOC(NEW.DOCID, NEW.CREATED_BY)
+            RETURNING_VALUES :V_DEAL, :V_ACTION;
+        WHEN ANY DO
+            EXECUTE PROCEDURE SP_DEAL_LOG_ERROR('TDB_DOCS_AI_DEAL', NEW.DOCID, NULL,
+                GDSCODE, SQLSTATE, LEFT(RDB$ERROR(MESSAGE), 1000));
+    END
+END^
+
+CREATE OR ALTER TRIGGER TDB_DOCS_AU_DEAL FOR TDB_DOCS
+AFTER UPDATE POSITION 900
+SQL SECURITY DEFINER
+AS
+DECLARE V_DEAL BIGINT;
+DECLARE V_ACTION VARCHAR(16);
+DECLARE V_FOUND SMALLINT;
+BEGIN
+    IF (NEW.DOCTYPEID IN (101, 107, 110, 112, 115, 116, 117, 119, 120, 126, 128, 134, 1199, 1791)
+        AND (NEW.SUMA IS DISTINCT FROM OLD.SUMA
+             OR NEW.RATE IS DISTINCT FROM OLD.RATE
+             OR NEW.DELETED_DATE IS DISTINCT FROM OLD.DELETED_DATE
+             OR NEW.PARENTDOCID IS DISTINCT FROM OLD.PARENTDOCID
+             OR NEW.DOCTYPEID IS DISTINCT FROM OLD.DOCTYPEID
+             OR NEW.STATEID IS DISTINCT FROM OLD.STATEID)) THEN
+    BEGIN
+        V_FOUND = 0;
+        FOR SELECT DEAL_ID FROM TDB_DEAL_DOCS WHERE DOCID = NEW.DOCID INTO :V_DEAL
+        DO
+        BEGIN
+            V_FOUND = 1;
+            EXECUTE PROCEDURE SP_DEAL_RECALC_STATES(:V_DEAL, NULL);
+        END
+        IF (V_FOUND = 0 AND NEW.DELETED_DATE IS NULL) THEN
+            EXECUTE PROCEDURE SP_DEAL_ATTACH_DOC(NEW.DOCID, NEW.CREATED_BY)
+                RETURNING_VALUES :V_DEAL, :V_ACTION;
+        /* tranzitie: cat timp WMS mai scrie TDB_DOCS.STATEID (de scos la DROP STATEID) */
+        IF (NEW.STATEID IS DISTINCT FROM OLD.STATEID AND NEW.DOCTYPEID IN (115, 134, 1791)) THEN
+            EXECUTE PROCEDURE SP_DEAL_APPLY_DOC_STATE(NEW.DOCID, NULL, 'DOCSTATE', 0);
+        WHEN ANY DO
+            EXECUTE PROCEDURE SP_DEAL_LOG_ERROR('TDB_DOCS_AU_DEAL', NEW.DOCID, NULL,
+                GDSCODE, SQLSTATE, LEFT(RDB$ERROR(MESSAGE), 1000));
+    END
+END^
+
+CREATE OR ALTER TRIGGER TDB_DOCS_DELIVERY_AIU_DEAL FOR TDB_DOCS_DELIVERY
+AFTER INSERT OR UPDATE POSITION 900
+SQL SECURITY DEFINER
+AS
+DECLARE V_DEAL BIGINT;
+BEGIN
+    FOR SELECT DEAL_ID FROM TDB_DEAL_DOCS WHERE DOCID = NEW.DOCID INTO :V_DEAL
+    DO
+        EXECUTE PROCEDURE SP_DEAL_RECALC_STATES(:V_DEAL, NULL);
+    WHEN ANY DO
+        EXECUTE PROCEDURE SP_DEAL_LOG_ERROR('TDB_DOCS_DELIVERY_AIU', NEW.DOCID, NULL,
+            GDSCODE, SQLSTATE, LEFT(RDB$ERROR(MESSAGE), 1000));
+END^
+
+/* contactul apare DUPA inserarea documentului (TWEB_TRANSACTION / comentarii) */
+CREATE OR ALTER TRIGGER TWEB_TRANSACTION_AI_DEAL FOR TWEB_TRANSACTION
+AFTER INSERT POSITION 900
+SQL SECURITY DEFINER
+AS
+DECLARE V_DEAL BIGINT;
+BEGIN
+    FOR SELECT DEAL_ID FROM TDB_DEAL_DOCS WHERE DOCID = NEW.DOCID INTO :V_DEAL
+    DO
+        EXECUTE PROCEDURE SP_DEAL_SYNC_CONTACT(:V_DEAL);
+    WHEN ANY DO
+        EXECUTE PROCEDURE SP_DEAL_LOG_ERROR('TWEB_TRANSACTION_AI', NEW.DOCID, NULL,
+            GDSCODE, SQLSTATE, LEFT(RDB$ERROR(MESSAGE), 1000));
+END^
+
+CREATE OR ALTER TRIGGER TDB_DOCS_PROPS_AIU_DEAL FOR TDB_DOCS_PROPS
+AFTER INSERT OR UPDATE POSITION 900
+SQL SECURITY DEFINER
+AS
+DECLARE V_DEAL BIGINT;
+BEGIN
+    FOR SELECT dd.DEAL_ID
+        FROM TDB_DEAL_DOCS dd
+        JOIN TDB_DEALS dl ON dl.DEAL_ID = dd.DEAL_ID AND dl.PHONE IS NULL
+        WHERE dd.DOCID = NEW.DOCID
+        INTO :V_DEAL
+    DO
+        EXECUTE PROCEDURE SP_DEAL_SYNC_CONTACT(:V_DEAL);
+    WHEN ANY DO
+        EXECUTE PROCEDURE SP_DEAL_LOG_ERROR('TDB_DOCS_PROPS_AIU', NEW.DOCID, NULL,
+            GDSCODE, SQLSTATE, LEFT(RDB$ERROR(MESSAGE), 1000));
+END^
+
+/* FK_DD_DOC nu are cascada: fara acest trigger stergerea FIZICA a unui document
+   legat de un deal ar fi refuzata. E ACTIV mereu (fara legaturi nu face nimic). */
+CREATE OR ALTER TRIGGER TDB_DOCS_BD_DEAL FOR TDB_DOCS
+ACTIVE BEFORE DELETE POSITION 900
+SQL SECURITY DEFINER
+AS
+DECLARE V_DEAL BIGINT;
+BEGIN
+    FOR SELECT DEAL_ID FROM TDB_DEAL_DOCS WHERE DOCID = OLD.DOCID INTO :V_DEAL
+    DO
+    BEGIN
+        DELETE FROM TDB_DEAL_DOCS WHERE DEAL_ID = :V_DEAL AND DOCID = OLD.DOCID;
+        BEGIN
+            EXECUTE PROCEDURE SP_DEAL_RECALC_STATES(:V_DEAL, NULL);
+            WHEN ANY DO
+                EXECUTE PROCEDURE SP_DEAL_LOG_ERROR('TDB_DOCS_BD_DEAL', OLD.DOCID, :V_DEAL,
+                    GDSCODE, SQLSTATE, LEFT(RDB$ERROR(MESSAGE), 1000));
+        END
+    END
+END^
+
+COMMIT^
+
+EXECUTE BLOCK AS
+BEGIN
+    IF (RDB$GET_CONTEXT('USER_SESSION', 'DEALS_FIRST_INSTALL') = '1') THEN
+    BEGIN
+        EXECUTE STATEMENT 'ALTER TRIGGER TDB_DOCS_AI_DEAL INACTIVE';
+        EXECUTE STATEMENT 'ALTER TRIGGER TDB_DOCS_AU_DEAL INACTIVE';
+        EXECUTE STATEMENT 'ALTER TRIGGER TDB_DOCS_DELIVERY_AIU_DEAL INACTIVE';
+        EXECUTE STATEMENT 'ALTER TRIGGER TWEB_TRANSACTION_AI_DEAL INACTIVE';
+        EXECUTE STATEMENT 'ALTER TRIGGER TDB_DOCS_PROPS_AIU_DEAL INACTIVE';
+    END
+END^
+
+COMMIT^
+
+SET TERM ; ^
+
+/* --- 13. Drepturi pentru WMS (rutinele ruleaza ca DEFINER) ---------------------------- */
+GRANT SELECT ON TDB_DEALS TO SWN;
+GRANT SELECT ON TDB_DEAL_DOCS TO SWN;
+GRANT SELECT ON TDB_DEAL_HISTORY TO SWN;
+GRANT SELECT ON TDB_DEAL_LOG TO SWN;
+GRANT SELECT ON TS_DEAL_STATES TO SWN;
+GRANT SELECT ON V_DEAL_ANALYTICS TO SWN;
+GRANT SELECT ON VW_DEALS_BROWSER TO SWN;
+GRANT UPDATE (NOTE, PRIORITY, OPERATOR_ID, CONTACT_NAME, PHONE, EMAIL,
+              DELIVERY_ADDRESS, DELIVERY_NOTE, CANCEL_REASON_ID, FAIL_REASON_ID) ON TDB_DEALS TO SWN;
+GRANT EXECUTE ON PROCEDURE SP_DEAL_FIND_BY_DOC TO SWN;
+GRANT EXECUTE ON PROCEDURE SP_DEAL_ATTACH_DOC TO SWN;
+GRANT EXECUTE ON PROCEDURE SP_DEAL_RECALC_STATES TO SWN;
+GRANT EXECUTE ON PROCEDURE SP_DEAL_SET_STATE TO SWN;
+GRANT EXECUTE ON PROCEDURE SP_DEAL_UNLOCK_AXIS TO SWN;
+GRANT EXECUTE ON PROCEDURE SP_DEAL_BIND_DOC_MANUAL TO SWN;
+GRANT EXECUTE ON PROCEDURE SP_DEAL_UNBIND_DOC TO SWN;
+GRANT EXECUTE ON PROCEDURE SP_DEAL_MERGE TO SWN;
+GRANT EXECUTE ON PROCEDURE SP_DEAL_SET_REASON TO SWN;
+GRANT EXECUTE ON PROCEDURE SP_DEAL_SET_CHANNEL TO SWN;
+GRANT SELECT ON TS_DEAL_REASONS TO SWN;
+GRANT EXECUTE ON PROCEDURE SP_DEAL_SYNC_CONTACT TO SWN;
+GRANT EXECUTE ON PROCEDURE SP_DEAL_SYNC_CONTACTS_ALL TO SWN;
+GRANT EXECUTE ON PROCEDURE SP_DEAL_GET_BALANCE TO SWN;
+GRANT EXECUTE ON PROCEDURE SP_DEAL_MATCH_PAYMENT TO SWN;
+GRANT EXECUTE ON PROCEDURE SP_DEAL_MATCH_PAYMENTS TO SWN;
+GRANT SELECT ON VW_DEAL_PAYMENTS TO SWN;
+GRANT SELECT ON VW_DOC_DEAL_STATE TO SWN;
+GRANT SELECT ON VW_DOC_DEAL_STATE TO WEBUSER;
+
+COMMIT;

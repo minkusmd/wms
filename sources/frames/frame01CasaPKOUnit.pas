@@ -6,7 +6,7 @@ unit frame01CasaPKOUnit;
 
 interface
 
-uses
+uses SWNDealsUnit,
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, System.UITypes, Dialogs, SWNDataFiltering,
   SWNBaseFrameUnit, cxGraphics, DB, cxDBData, cxGridLevel, cxGridCustomTableView, cxGridDBTableView, cxGridCustomView, cxGrid,
   StdCtrls, ExtCtrls, dxBar, cxGridPopupMenu, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxStyles, cxCustomData,
@@ -42,7 +42,6 @@ type
     cxGridCasaPKODBTableCreatedBy: TcxGridDBColumn;
     cxGridCasaPKO_CT: TcxGridDBColumn;
     cxGridCasaPKODB_SC2_NAME: TcxGridDBColumn;
-    cxGridCasaPKODB_State: TcxGridDBColumn;
     cxGridCasaPKOLevel: TcxGridLevel;
     procedure cxGridCasaPKODBTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo;
       AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
@@ -351,6 +350,7 @@ begin
 
      // 1. Legam grid-urile de datasource-sele
   cxGridCasaPKODBTable.DataController.DataSource := dmDB.IBCDataSourceDocs;
+  AddDealColumns(cxGridCasaPKODBTable);
 
      // 2. Selection handlers
   cxGridCasaPKODBTable.OnFocusedRecordChanged := WhenGridFocusedRecordChanged;

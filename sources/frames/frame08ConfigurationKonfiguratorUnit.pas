@@ -8,7 +8,7 @@ unit frame08ConfigurationKonfiguratorUnit;
 
 interface
 
-uses
+uses SWNDealsUnit,
     Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
     SWNDataFiltering, SWNBaseFrameUnit, cxStyles, cxCustomData, cxGraphics, DB,
     cxDBData, dxBar, DBAccess, IBC, cxSplitter, cxPC, ExtCtrls, cxGridLevel,
@@ -157,7 +157,6 @@ type
         cxGridComplect_FLG_ADDON: TcxGridDBColumn;
         dxBarButton8: TdxBarButton;
         dxBarButton9: TdxBarButton;
-        cxGridBRKDB_STATE_NAME: TcxGridDBColumn;
         cxGridBRKDBTableColumn2: TcxGridDBColumn;
         bbTVA0: TdxBarButton;
         cxGridBRKDB_FLG_REZERVA: TcxGridDBColumn;
@@ -1435,6 +1434,7 @@ begin
 
      // 1. Legam grid-urile de datasource-sele
     cxGridBRKDBTable.DataController.DataSource := dmDB.IBCDataSourceDocs;
+    AddDealColumns(cxGridBRKDBTable);
     cxGridComponentsTable.DataController.DataSource := dmDB.IBCDataSourceJurnal;
     cxGridComplectTable.DataController.DataSource := IBCDataSourceJurnalKit;
 

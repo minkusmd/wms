@@ -7,7 +7,7 @@ unit frame24WebZakazUnit;
 
 interface
 
-uses
+uses SWNDealsUnit,
   Windows,
   Messages,
   SysUtils,
@@ -116,7 +116,6 @@ type
     cxGridComponentsTableColumn1: TcxGridDBColumn;
     bbEcommInfo: TdxBarButton;
     bbCancelCashback: TdxBarButton;
-    cxGridWZ_STATUT: TcxGridDBColumn;
     cxGridWZ_RESPONSIBLE_USERNAME: TcxGridDBColumn;
     bbAssignToMe: TdxBarButton;
     procedure bbAddGoodsClick(Sender: TObject);
@@ -577,6 +576,7 @@ begin
 
      // 1. Legam grid-urile de datasource-sele
   cxGridWZTable.DataController.DataSource := dmDB.IBCDataSourceDocs;
+  AddDealColumns(cxGridWZTable);
   cxGridComponentsTable.DataController.DataSource := dmDB.IBCDataSourceJurnal;
 
      // 2. Selection handlers

@@ -159,16 +159,6 @@ object frmAddGoodsToSupplierOrderDlg: TfrmAddGoodsToSupplierOrderDlg
           Visible = False
           HeaderAlignmentHorz = taCenter
         end
-        object cxGrid1DBTableView1STATEID: TcxGridDBColumn
-          DataBinding.FieldName = 'STATEID'
-          Visible = False
-          HeaderAlignmentHorz = taCenter
-        end
-        object cxGrid1DBTableView1STATE_NAME: TcxGridDBColumn
-          DataBinding.FieldName = 'STATE_NAME'
-          Visible = False
-          HeaderAlignmentHorz = taCenter
-        end
       end
       object cxGrid1Level1: TcxGridLevel
         GridView = cxGrid1DBTableView1

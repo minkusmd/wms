@@ -701,38 +701,6 @@ object frmConfigurationDocDlg: TfrmConfigurationDocDlg
         Style.TransparentBorder = False
         TabOrder = 12
       end
-      object lcbDocumentState: TcxDBLookupComboBox
-        Left = 332
-        Top = 38
-        Hint = 'Starea documentului'
-        DataBinding.DataField = 'STATEID'
-        DataBinding.DataSource = dmDB.IBCDataSourceDocs
-        ParentShowHint = False
-        Properties.DropDownWidth = 300
-        Properties.ImmediatePost = True
-        Properties.KeyFieldNames = 'STATEID'
-        Properties.ListColumns = <
-          item
-            Caption = 'cod'
-            Fixed = True
-            HeaderAlignment = taCenter
-            MinWidth = 30
-            Width = 30
-            FieldName = 'STATEID'
-          end
-          item
-            Caption = 'statut'
-            HeaderAlignment = taCenter
-            MinWidth = 100
-            Width = 150
-            FieldName = 'TITLE'
-          end>
-        Properties.ListFieldIndex = 1
-        Properties.ListSource = dmDB.IBCDataSourceDocTypeStates
-        ShowHint = True
-        TabOrder = 1
-        Width = 160
-      end
     end
   end
   object btnOk: TcxButton

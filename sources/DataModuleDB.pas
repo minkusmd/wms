@@ -303,7 +303,6 @@ type
         procedure AppendCurrentRecord(Dataset: TDataSet);
         procedure QueryCancelUpdate(DataSet: TIBCQuery);
         procedure LoadDefaultContract(const CustomerID: Integer; const DocDate: TDateTime; var ContractID: Integer; var ContractName: string; var FlgAcnt: Boolean; var ContractCurrencyID: Integer);
-        function GetDefaultDocumentState(ADocTypeID: Integer): integer;
         function CreateNewGoods(ParentID: Integer; GoodsName: string; GoodstypeID, WebTypeID: Integer; SupplierGoodsCode: string; VendorID, SupplierID: Integer; Model, BaseParam: string; Price3: Double; Currency3ID: Integer; Price7: Double; Currency7ID: Integer; AFlgRRP: integer; GoodsTypeName: string = ''): Integer;
 // TODO: GetAccentGUID
 //      function GetAccentGUID: string;
@@ -3432,21 +3431,6 @@ begin
     end;
 end;
 
-function TdmDB.GetDefaultDocumentState(ADocTypeID: Integer): integer;
-var
-    query: TIBCQuery;
-begin
-    Result := -1;
-    query := TIBCQuery.Create(nil);
-    try
-        query.SQL.Text := 'select stateid from ts_doctypes_states where doctypeid = :doctypeid and int_value=1';
-        query.ParamByName('doctypeid').Asinteger := ADocTypeID;
-        query.Open;
-        Result := query.FieldByName('stateid').AsInteger;
-    finally
-        query.Free;
-    end;
-end;
 
 function TdmDB.CreateNewGoods(ParentID: Integer; GoodsName: string; GoodstypeID, WebTypeID: Integer; SupplierGoodsCode: string; VendorID, SupplierID: Integer; Model, BaseParam: string; Price3: Double; Currency3ID: Integer; Price7: Double; Currency7ID: Integer; AFlgRRP: integer; GoodsTypeName: string = ''): Integer;
 var

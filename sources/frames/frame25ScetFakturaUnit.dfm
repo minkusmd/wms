@@ -260,20 +260,6 @@ inherited frame25ScetFaktura: Tframe25ScetFaktura
         Options.Sorting = False
         Width = 19
       end
-      object cxGridSF_STATE_NAME: TcxGridDBColumn
-        Caption = 'statut'
-        DataBinding.FieldName = 'STATE_NAME'
-        HeaderAlignmentHorz = taCenter
-        MinWidth = 51
-        Options.HorzSizing = False
-        Width = 51
-      end
-      object cxGridSF_STATUSID: TcxGridDBColumn
-        Caption = 'cod status'
-        DataBinding.FieldName = 'STATEID'
-        Visible = False
-        MinWidth = 16
-      end
     end
     object cxGridSFLevel: TcxGridLevel
       GridView = cxGridSFTable

@@ -250,26 +250,6 @@ object frmWebZakazDocDlg: TfrmWebZakazDocDlg
       TabOrder = 0
       Width = 150
     end
-    object lcbSTATEID: TcxDBLookupComboBox
-      Left = 332
-      Top = 38
-      Hint = 'Statutul documentului'
-      DataBinding.DataField = 'STATEID'
-      DataBinding.DataSource = dmDB.IBCDataSourceDocs
-      ParentShowHint = False
-      Properties.DropDownRows = 16
-      Properties.DropDownWidth = 300
-      Properties.KeyFieldNames = 'STATEID'
-      Properties.ListColumns = <
-        item
-          FieldName = 'TITLE'
-        end>
-      Properties.ListOptions.ShowHeader = False
-      Properties.ListSource = dmDB.IBCDataSourceDocTypeStates
-      ShowHint = True
-      TabOrder = 1
-      Width = 160
-    end
     object beDT_NAME: TcxButtonEdit
       Left = 112
       Top = 74

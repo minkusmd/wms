@@ -42,7 +42,6 @@ type
     cxGridBRK_FLG_CLOSED: TcxGridDBColumn;
     cxGridBRKDB_dtsc_name: TcxGridDBColumn;
     cxGridBRKDB_CTSC_NAME: TcxGridDBColumn;
-    cxGridBRKDB_STATE_NAME: TcxGridDBColumn;
     cxGridBRKDBTableColumn2: TcxGridDBColumn;
     cxGridBRKDB_FLG_REZERVA: TcxGridDBColumn;
     cxGridBRKDB_FLG_PROFORMA: TcxGridDBColumn;

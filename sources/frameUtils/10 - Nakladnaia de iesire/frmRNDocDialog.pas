@@ -44,8 +44,6 @@ type
     lbContractInfo: TLabel;
     lcbCURRENCY: TcxDBLookupComboBox;
     Label4: TLabel;
-    lcbDocumentState: TcxDBLookupComboBox;
-    cmbImageState: TcxDBImageComboBox;
     frameDelivery: TframeDocsDelivery;
     lblSecDocument: TLabel;
     lblSecParti: TLabel;
@@ -100,7 +98,6 @@ type
   public
     { Public declarations }
     property CreateNewDocument: Boolean read fCreateNewDocument write SetCreateNewDocument;
-    procedure PrepareStatesImages;
     procedure SetCustomTitle(const Title: string);
     property AllowChangeDT: Boolean read FAllowChangeDT write SetAllowChangeDT;
     property CustomCT: Integer read FCustomCT write SetCustomCT;
@@ -115,6 +112,7 @@ type
 implementation
 
 uses
+  SWNDealsUnit,
   DateUtils, DataModuleDB, SWNUtils, SWNConst, DataModuleAdditions, System.Types,
   frmCustomersDlg, SWNValueStorageUnit, SWNSecurityFlags, SWNSecurity,
   SWNCustomersTypesUnit, frmDocumentCommentsEditorDialog, SWNDBErrors,
@@ -354,12 +352,8 @@ begin
 
     dmDB.OpenAnalyticsDataSource;
 
-    dmdb.IBCQueryDocTypeStates.Open;
-
     frameDelivery.ReadOnly := FReadOnly;
     frameDelivery.PrepareData(dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger);
-
-    PrepareStatesImages;
 
   except
     if dmDB.IBCQueryDocs.State in dsEditModes then
@@ -370,6 +364,7 @@ begin
 
     raise;
   end;
+  AttachDealToDialog(Self, dmDB.IBCQueryDocs);
 end;
 
 procedure TfrmRNDocDlg.SelectCT;
@@ -520,25 +515,6 @@ begin
   dmDB.IBCQueryAnalitica.Close;
   dmDB.IBCQueryAnalytics.Close;
   dmDB.IBCQueryStocks.Close;
-end;
-
-procedure TfrmRNDocDlg.PrepareStatesImages;
-var
-  item: TcxImageComboBoxItem;
-  i: integer;
-begin
-  i := 0;
-  dmDB.IBCQueryDocTypeStates.Open;
-  dmDB.IBCQueryDocTypeStates.First;
-  while not dmdb.IBCQueryDocTypeStates.Eof do
-  begin
-    Item := cmbImageState.Properties.Items.Add;
-    item.Value := dmdb.IBCQueryDocTypeStates.FieldByName('stateid').AsInteger;
-    item.Description := dmdb.IBCQueryDocTypeStates.FieldByName('title').AsString;
-    item.ImageIndex := i;
-    inc(i);
-    dmdb.IBCQueryDocTypeStates.Next;
-  end;
 end;
 
 procedure TfrmRNDocDlg.WhenCancelForm;

@@ -194,12 +194,6 @@ inherited frame01CasaPKO: Tframe01CasaPKO
         MinWidth = 16
         Width = 40
       end
-      object cxGridCasaPKODB_State: TcxGridDBColumn
-        Caption = 'Stare'
-        DataBinding.FieldName = 'State_NAME'
-        MinWidth = 16
-        Width = 64
-      end
     end
     object cxGridCasaPKOLevel: TcxGridLevel
       GridView = cxGridCasaPKODBTable

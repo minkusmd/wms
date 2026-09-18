@@ -43,7 +43,6 @@ type
     beContract: TcxButtonEdit;
     lcbCURRENCY: TcxDBLookupComboBox;
     cxDBLookupComboBox1: TcxDBLookupComboBox;
-    lcbDocumentState: TcxDBLookupComboBox;
     Label4: TLabel;
     IBCDataSourceDocs: TIBCDataSource;
     IBCDataSourceJurnal: TIBCDataSource;

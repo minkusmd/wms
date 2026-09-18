@@ -180,6 +180,9 @@ type
     bbWebCatalog: TdxBarButton;
     bbWebBlockedIp: TdxBarButton;
     bbApiConfig: TdxBarButton;
+    bbDeals: TdxBarButton;
+    bbDealOfCurrentDoc: TdxBarButton;
+    bbDealPayments: TdxBarButton;
     bbStockRecalc: TdxBarButton;
     bbGoodsPriceSynchronize: TdxBarButton;
     bbMainMenuAcs_Analytics: TdxBarButton;
@@ -404,6 +407,9 @@ type
     procedure bbWebCatalogClick(Sender: TObject);
     procedure bbWebBlockedIpClick(Sender: TObject);
     procedure bbApiConfigClick(Sender: TObject);
+    procedure bbDealsClick(Sender: TObject);
+    procedure bbDealOfCurrentDocClick(Sender: TObject);
+    procedure bbDealPaymentsClick(Sender: TObject);
     procedure bbStockRecalcClick(Sender: TObject);
     procedure bbGoodsPriceSynchronizeClick(Sender: TObject);
     procedure bbMainMenuAcs_AnalyticsClick(Sender: TObject);
@@ -889,6 +895,7 @@ uses
   frmWebBlogDialog,
   frmBlockedIpDialog,
   frmApiConfigDialog,
+  SWNDealsUnit,
   frmWebCatalogDialog,
   frmWebDeliveryDialog,
   frmWebDescriptionTemplateDialog,
@@ -1678,6 +1685,26 @@ begin
   finally
     dialog.Free;
   end;
+end;
+
+procedure TfrmMainForm.bbDealsClick(Sender: TObject);
+begin
+  ShowDealsBrowser(Self);
+end;
+
+procedure TfrmMainForm.bbDealPaymentsClick(Sender: TObject);
+begin
+  ShowDealPayments(Self);
+end;
+
+procedure TfrmMainForm.bbDealOfCurrentDocClick(Sender: TObject);
+var
+  docID: Integer;
+begin
+  docID := 0;
+  if dmDB.IBCQueryDocs.Active and not dmDB.IBCQueryDocs.IsEmpty then
+    docID := dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger;
+  ShowDealOfDocument(Self, docID);
 end;
 
 procedure TfrmMainForm.bbWebConfigClick(Sender: TObject);
@@ -3915,6 +3942,14 @@ begin
 
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_1C_Бухгалтерия) then
     bbMainMenu1C.Visible := ivNever;
+
+  // Deal-uri: vizibile doar daca DB Model\deals_integration.sql e rulat pe baza
+  if not DealsAvailable then
+  begin
+    bbDeals.Visible := ivNever;
+    bbDealOfCurrentDoc.Visible := ivNever;
+    bbDealPayments.Visible := ivNever;
+  end;
 
   // Utilizatori
   if not SWNSecurityManager.IsSuperUser then

@@ -109,9 +109,6 @@ type
         cxGridTable_SumaTVA: TcxGridColumn;
         cxGridTable_TVA: TcxGridColumn;
         Label14: TLabel;
-    cbIncasareNumerarStatus: TcxLookupComboBox;
-    IBCQueryStatutIncasare: TIBCQuery;
-    IBCDataSourceStatutIncasare: TIBCDataSource;
         procedure FormCreate(Sender: TObject);
         procedure btnOpenTillClick(Sender: TObject);
         procedure btnPrintReceiptClick(Sender: TObject);
@@ -551,8 +548,6 @@ begin
           AddErrorToStr(ErrorStr, 'Suma achitata in numerar de la persoana juridica nu poate fi mai mare decit 10000.00 LEI');
         end;
 
-        if cbIncasareNumerarStatus.ItemIndex = -1 then
-          AddErrorToStr(ErrorStr, 'Alegeti tipul achitarii');
     end;
 
     if ErrorStr = '' then
@@ -1088,7 +1083,6 @@ begin
     IBCQueryFactura.ParamByName('CT').AsInteger := fFacturaDocInfo.CT;
     IBCQueryFactura.ParamByName('SUMA').AsCurrency := fFacturaDocInfo.Suma;
     IBCQueryFactura.Active := True;
-    IBCQueryStatutIncasare.Active := True;
 
     DisplayPrifodFacturaInfo;
 

@@ -6,7 +6,7 @@ unit frame18SciotNaOplatuUnit;
 
 interface
 
-uses
+uses SWNDealsUnit,
   Windows,
   Messages,
   SysUtils,
@@ -480,6 +480,7 @@ begin
 
      // 1. Legam grid-urile de datasource-sele
   cxGridScetOplataTable.DataController.DataSource := dmDB.IBCDataSourceDocs;
+  AddDealColumns(cxGridScetOplataTable);
   cxGridComponentsTable.DataController.DataSource := dmDB.IBCDataSourceJurnal;
 
      // 2. Selection handlers

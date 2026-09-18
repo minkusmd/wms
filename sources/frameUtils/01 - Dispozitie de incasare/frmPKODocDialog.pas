@@ -49,9 +49,6 @@ type
     IBCDataSourceRechizite: TIBCDataSource;
     btnOk: TcxButton;
     btnCancel: TcxButton;
-    lcbDocumentState: TcxDBLookupComboBox;
-    IBCQueryStates: TIBCQuery;
-    IBCDataSourceStates: TIBCDataSource;
     Label2: TLabel;
     beCT_NAME: TcxButtonEdit;
     procedure cmbCurrencyPropertiesEditValueChanged(Sender: TObject);
@@ -96,6 +93,7 @@ type
 implementation
 
 uses
+  SWNDealsUnit,
   DateUtils, SWNUtils, SWNTypes, SWNConst, DataModuleDB, DataModuleAdditions, frmCustomersDlg, frmBanknoteCounterDialog,
   SWNSecurityFlags, SWNSecurity, SWNCustomersTypesUnit, frmDocumentCommentsEditorDialog, SWNDBErrors, frmCustomerContractsDialog,
   frmCustomerAccountsDlg;
@@ -197,11 +195,6 @@ begin
 
   if dmDB.IBCQueryDocs.FieldByName('RATEUSD').IsNull or (dmDB.IBCQueryDocs.FieldByName('RATEUSD').AsFloat < 1) then
     AddErrorToStr(ErrorStr, 'Rata USD >= 1');
-
-  if dmdb.ibcquerydocs.FieldByName('STATEID').IsNull then
-    begin
-      AddErrorToStr(ErrorStr, 'Statutul incasarii!');
-    end;
 
   if ErrorStr = '' then
     Result := True
@@ -455,8 +448,6 @@ begin
     IBCQueryDT_Accounts.Open;
     IBCQueryDT_Accounts.Open;
     IBCQueryRechizite.Open;
-    IBCQueryStates.ParamByName('DOCTYPEID').AsInteger := dmDB.IBCQueryDocs.FieldByName('DOCTYPEID').AsInteger;
-    IBCQueryStates.Open;
     IBCQueryDocProps.Active := True;
 
     if FCreateNewDocument then
@@ -543,6 +534,7 @@ begin
     raise;
   end;
 
+  AttachDealToDialog(Self, dmDB.IBCQueryDocs);
 end;
 
 procedure TfrmPKODocDlg.sbShowCurrencyCalcClick(Sender: TObject);

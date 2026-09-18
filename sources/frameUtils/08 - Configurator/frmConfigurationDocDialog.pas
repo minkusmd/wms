@@ -82,7 +82,6 @@ type
     beContract: TcxButtonEdit;
     lcbCURRENCY: TcxDBLookupComboBox;
     cbFLG_FURNITURE: TcxDBCheckBox;
-    lcbDocumentState: TcxDBLookupComboBox;
     lblSecDocument: TLabel;
     lblAnaliticaOrg: TLabel;
     lblSecFinante: TLabel;
@@ -133,6 +132,7 @@ type
 implementation
 
 uses
+  SWNDealsUnit,
   DateUtils,
   DataModuleDB,
   SWNUtils,
@@ -365,10 +365,7 @@ var
 begin
   SetupSecurityItems;
 
-  if fCreateNewDocument then
-    ActiveControl := beCT_NAME
-  else
-    ActiveControl := lcbDocumentState;
+  ActiveControl := beCT_NAME;
 
   dmDB.IBCQueryDocs.UpdateTransaction.StartTransaction;
   try
@@ -384,7 +381,6 @@ begin
       dmDB.IBCQueryDocs.Append;
 
       dmDB.IBCQueryDocs.FieldByName('DOCTYPEID').AsInteger := dmDB.CurrentDocTypeID;
-      dmDB.IBCQueryDocs.FieldByName('STATEID').AsInteger := dmDB.GetDefaultDocumentState(dmDB.CurrentDocTypeID);
 
              // system defaults
       if not dmDB.LoadDocumentDefaults(dmDB.CurrentDocTypeID, dmDB.CurrentFirma, dmDB.IBCQueryDocs, DocumentAdditionalFlags) then
@@ -455,9 +451,6 @@ begin
     dmDB.IBCQuerySYSSList.Active := True;
 
     dmDB.OpenAnalyticsDataSource;
-    dmdb.IBCQueryDocTypeStates.Close;
-    dmdb.IBCQueryDocTypeStates.ParamByName('DOCTYPEID').AsInteger := 115; // Configurator
-    dmdb.IBCQueryDocTypeStates.Open;
 
     frameDelivery.ReadOnly := False;
     frameDelivery.PrepareData(dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger);
@@ -473,6 +466,7 @@ begin
 
     raise;
   end;
+  AttachDealToDialog(Self, dmDB.IBCQueryDocs);
 end;
 
 procedure TfrmConfigurationDocDlg.SelectCT;

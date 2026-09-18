@@ -524,19 +524,7 @@ object frmDocTypesEditorDlg: TfrmDocTypesEditorDlg
           UserPaintStyle = psCaptionGlyph
           Visible = True
           ItemName = 'bbDocDefaults'
-        end
-        item
-          Visible = True
-          ItemName = 'bbDocumentStates'
         end>
-    end
-    object bbDocumentStates: TdxBarButton
-      Caption = 'Starile documentului'
-      Category = 0
-      Hint = 'Starile documentului'
-      Visible = ivAlways
-      ShortCut = 118
-      OnClick = bbDocumentStatesClick
     end
     object dxBarButton3: TdxBarButton
       Caption = 'Vizualizare grupe setate'

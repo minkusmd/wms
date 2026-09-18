@@ -214,14 +214,6 @@ inherited frame24WebZakaz: Tframe24WebZakaz
         Options.HorzSizing = False
         Width = 64
       end
-      object cxGridWZ_STATUT: TcxGridDBColumn
-        Caption = 'Statut'
-        DataBinding.FieldName = 'STATE_NAME'
-        HeaderAlignmentHorz = taCenter
-        MinWidth = 150
-        Options.HorzSizing = False
-        Width = 150
-      end
     end
     object cxGridWZLevel: TcxGridLevel
       GridView = cxGridWZTable

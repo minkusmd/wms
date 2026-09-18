@@ -517,46 +517,6 @@ object frmRNDocDlg: TfrmRNDocDlg
       TabOrder = 11
       Width = 80
     end
-    object lcbDocumentState: TcxDBLookupComboBox
-      Left = 132
-      Top = 68
-      DataBinding.DataField = 'STATEID'
-      DataBinding.DataSource = dmDB.IBCDataSourceDocs
-      Properties.DropDownWidth = 300
-      Properties.ImmediatePost = True
-      Properties.KeyFieldNames = 'STATEID'
-      Properties.ListColumns = <
-        item
-          Caption = 'cod'
-          Fixed = True
-          HeaderAlignment = taCenter
-          MinWidth = 30
-          Width = 30
-          FieldName = 'STATEID'
-        end
-        item
-          Caption = 'statut'
-          HeaderAlignment = taCenter
-          MinWidth = 100
-          Width = 150
-          FieldName = 'TITLE'
-        end>
-      Properties.ListFieldIndex = 1
-      Properties.ListSource = dmDB.IBCDataSourceDocTypeStates
-      TabOrder = 4
-      Width = 160
-    end
-    object cmbImageState: TcxDBImageComboBox
-      Left = 312
-      Top = 68
-      DataBinding.DataField = 'STATE_NAME'
-      DataBinding.DataSource = dmDB.IBCDataSourceDocs
-      Properties.Images = dmAdditions.ilStates
-      Properties.ImmediatePost = True
-      Properties.Items = <>
-      TabOrder = 5
-      Width = 312
-    end
     inline frameDelivery: TframeDocsDelivery
       Left = 648
       Top = 38

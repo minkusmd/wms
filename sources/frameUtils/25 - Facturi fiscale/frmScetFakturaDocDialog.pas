@@ -94,6 +94,7 @@ type
 implementation
 
 uses
+  SWNDealsUnit,
   DateUtils, DataModuleDB, SWNUtils, SWNConst,
   frmCustomersDlg, SWNSecurityFlags, SWNCustomersTypesUnit,
   frmDocumentCommentsEditorDialog, frmCustomerContractsDialog;
@@ -391,6 +392,7 @@ begin
     raise;
   end;
 
+  AttachDealToDialog(Self, dmDB.IBCQueryDocs);
 end;
 
 procedure TfrmScetFakturaDocDlg.SelectCT;

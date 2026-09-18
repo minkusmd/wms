@@ -84,6 +84,7 @@ type
 implementation
 
 uses
+  SWNDealsUnit,
    DateUtils, SWNUtils, SWNTypes, SWNConst, DataModuleDB, DataModuleAdditions, frmCustomersDlg,
    frmBanknoteCounterDialog, SWNSecurityFlags, SWNSecurity, SWNCustomersTypesUnit,
    frmDocumentCommentsEditorDialog, frmCustomerContractsDialog;
@@ -475,6 +476,7 @@ begin
       raise;
    end;
 
+  AttachDealToDialog(Self, dmDB.IBCQueryDocs);
 end;
 
 procedure TfrmRKODocDlg.sbShowCurrencyCalcClick(Sender: TObject);

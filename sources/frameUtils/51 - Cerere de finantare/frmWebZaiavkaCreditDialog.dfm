@@ -351,28 +351,6 @@ object frmWebZaiavkaCreditDlg: TfrmWebZaiavkaCreditDlg
       TabOrder = 10
       Width = 113
     end
-    object cxDBLookupComboBox1: TcxDBLookupComboBox
-      Left = 455
-      Top = 18
-      Hint = #1040#1085#1072#1083#1080#1090#1080#1082#1072' '#1076#1086#1082#1091#1084#1077#1085#1090#1072
-      DataBinding.DataField = 'STATEID'
-      DataBinding.DataSource = dmDB.IBCDataSourceDocs
-      ParentShowHint = False
-      Properties.DropDownAutoSize = True
-      Properties.DropDownListStyle = lsFixedList
-      Properties.DropDownRows = 16
-      Properties.DropDownWidth = 300
-      Properties.KeyFieldNames = 'STATEID'
-      Properties.ListColumns = <
-        item
-          FieldName = 'TITLE'
-        end>
-      Properties.ListOptions.ShowHeader = False
-      Properties.ListSource = dmDB.IBCDataSourceDocTypeStates
-      ShowHint = True
-      TabOrder = 1
-      Width = 272
-    end
     object lcbCURRENCY: TcxDBLookupComboBox
       Left = 108
       Top = 210

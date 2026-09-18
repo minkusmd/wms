@@ -6,7 +6,7 @@ unit frame07BankBPPVUnit;
 
 interface
 
-uses
+uses SWNDealsUnit,
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, System.UITypes,
   Dialogs, SWNDataFiltering, SWNBaseFrameUnit,
   cxGraphics, DB, cxDBData,
@@ -234,6 +234,7 @@ begin
 
      // 1. Legam grid-urile de datasource-sele
      cxGridBankBPPVDBTable.DataController.DataSource:=dmDB.IBCDataSourceDocs;
+     AddDealColumns(cxGridBankBPPVDBTable);
 
      // 2. Selection handlers
      cxGridBankBPPVDBTable.OnFocusedRecordChanged:=WhenDocGrid_FocusedRecordChanged;

@@ -7,7 +7,7 @@ unit frame25ScetFakturaUnit;
 
 interface
 
-uses
+uses SWNDealsUnit,
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, IBC, System.UITypes, Dialogs, SWNDataFiltering,
   SWNBaseFrameUnit, cxStyles, cxGraphics, DB, cxDBData, dxBar, ExtCtrls, cxSplitter, cxGridLevel, cxGridCustomTableView,
   cxGridTableView, cxGridDBTableView, cxGridCustomView, cxGrid, cxPC, DBAccess, cxGridPopupMenu, cxCalc, cxTextEdit, cxVGrid,
@@ -207,8 +207,6 @@ type
     bbPdncRamburs: TdxBarButton;
     bbBankOut: TdxBarButton;
     bbFLG_Export_Cancel: TdxBarButton;
-    cxGridSF_STATE_NAME: TcxGridDBColumn;
-    cxGridSF_STATUSID: TcxGridDBColumn;
     frameScanFile1: TframeScanFile;
     cxDBVerticalGrid1DBEditorRow1: TcxDBEditorRow;
     bbExport2eFactura: TdxBarButton;
@@ -1264,6 +1262,7 @@ begin
 
      // 1. Legam grid-urile de datasource-sele
   cxGridSFTable.DataController.DataSource := dmDB.IBCDataSourceDocs;
+  AddDealColumns(cxGridSFTable);
   cxGridComponentsTable.DataController.DataSource := dmDB.IBCDataSourceJurnal;
 
      // 2. Selection handlers

@@ -82,7 +82,6 @@ type
     cxGridWZ_CREATED_DATE: TcxGridDBColumn;
     cxImageList1: TcxImageList;
     cxGridComponentsTable_FLG_FORCED_ADDON: TcxGridDBColumn;
-    cxGridWZ_STATE: TcxGridDBColumn;
     cxGridWZ_DTSC: TcxGridDBColumn;
     cxDBImage1: TcxDBImage;
     cxDBImage2: TcxDBImage;

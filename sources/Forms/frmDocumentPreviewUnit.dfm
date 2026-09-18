@@ -1144,45 +1144,36 @@ object frmDocumentPreviewDlg: TfrmDocumentPreviewDlg
     SQLInsert.Strings = (
       'INSERT INTO VW_TDB_DOCS'
       '  (DOCID, DOCNO, DATA, '
-      
-        '   DT, DT_NAME, CT, CT_NAME, DTDEP, DTDEP_NAME, CTDEP, CTDEP_NAM' +
-        'E, '
+      '   DT, DT_NAME, CT, CT_NAME, DTDEP, DTDEP_NAME, CTDEP, CTDEP_NAME, '
       '   DTSC, SC2,'
       '   SUMA, VAT, CURRENCYID, DISCOUNT, RATE, '
       ''
       '   FLG_SHIP, FLG_ACNT, FLG_DEL, FLG_PROTECTED,'
       '   FLG_SEND, FLG_RECEIVE, FLG_PAID, FLG_INVOICE, '
-      
-        '   FLG_GOODS_ARRIVAL, FLG_READY, FLG_CHILD, FLG_NEW_CEC, FLG_SAL' +
-        'ARY, FLG_UPDATE_DATE,'
+      '   FLG_GOODS_ARRIVAL, FLG_READY, FLG_CHILD, FLG_NEW_CEC, FLG_SALARY, FLG_UPDATE_DATE,'
       '   FLG_FURNITURE, '
       ''
       '   CREATED_DATE, CREATED_BY, DELETED_DATE, DELETED_BY, '
       '   PARENTDOCID, ACC$MASK, DOCTYPEID,'
       '   RATEUSD,'
       '   CONTRACTID,'
-      '   CTSC,'
-      '   stateid '
+      '   CTSC '
       '  )'
       'VALUES'
-      
-        '  (:DOCID, :DOCNO, :DATA, :DT, :DT_NAME, :CT, :CT_NAME, :DTDEP, ' +
-        ':DTDEP_NAME, :CTDEP, :CTDEP_NAME, '
+      '  (:DOCID, :DOCNO, :DATA, :DT, :DT_NAME, :CT, :CT_NAME, :DTDEP, :DTDEP_NAME, :CTDEP, :CTDEP_NAME, '
       '   :DTSC, :SC2,'
       '   :SUMA, :VAT, :CURRENCYID, :DISCOUNT, :RATE, '
       ''
       '   :FLG_SHIP, :FLG_ACNT, :FLG_DEL, :FLG_PROTECTED,'
       '   :FLG_SEND, :FLG_RECEIVE, :FLG_PAID, :FLG_INVOICE, '
-      
-        '   :FLG_GOODS_ARRIVAL, :FLG_READY, :FLG_CHILD, :FLG_NEW_CEC, :FL' +
-        'G_SALARY, :FLG_UPDATE_DATE,'
+      '   :FLG_GOODS_ARRIVAL, :FLG_READY, :FLG_CHILD, :FLG_NEW_CEC, :FLG_SALARY, :FLG_UPDATE_DATE,'
       '   :FLG_FURNITURE,'
       ' '
       '   :CREATED_DATE, :CREATED_BY, :DELETED_DATE, :DELETED_BY, '
       '   :PARENTDOCID, :"ACC$MASK", :DOCTYPEID,'
       '   :RATEUSD,'
       '   :CONTRACTID,'
-      '   :CTSC, :STATEID'
+      '   :CTSC'
       '  )')
     SQLDelete.Strings = (
       'DELETE FROM VW_TDB_DOCS'
@@ -1235,8 +1226,7 @@ object frmDocumentPreviewDlg: TfrmDocumentPreviewDlg
       '  DOCTYPEID = :DOCTYPEID,'
       ''
       '  RATEUSD = :RATEUSD,'
-      '  CONTRACTID = :CONTRACTID,'
-      '  STATEID = :STATEID'
+      '  CONTRACTID = :CONTRACTID'
       'WHERE'
       '  DOCID = :Old_DOCID')
     SQLRefresh.Strings = (

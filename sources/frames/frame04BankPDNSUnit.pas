@@ -6,7 +6,7 @@ unit frame04BankPDNSUnit;
 
 interface
 
-uses
+uses SWNDealsUnit,
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, System.UITypes,
   Dialogs, SWNDataFiltering, SWNBaseFrameUnit, cxGraphics, DB, cxDBData,
   cxGridLevel, cxGridCustomTableView, cxGridDBTableView, cxGridCustomView, cxGrid,
@@ -282,6 +282,7 @@ begin
 
      // 1. Legam grid-urile de datasource-sele
      cxGridBankPDNSTable.DataController.DataSource:=dmDB.IBCDataSourceDocs;
+     AddDealColumns(cxGridBankPDNSTable);
 
      // 2. Selection handlers
      cxGridBankPDNSTable.OnFocusedRecordChanged:=WhenGridFocusedRecordChanged;

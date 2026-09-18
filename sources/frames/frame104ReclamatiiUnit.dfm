@@ -251,12 +251,6 @@ inherited frame104Reclamatii: Tframe104Reclamatii
           VisibleForCustomization = False
           Width = 100
         end
-        object cxGridBRKDB_STATE_NAME: TcxGridDBColumn
-          Caption = 'Statut'
-          DataBinding.FieldName = 'STATE_NAME'
-          HeaderAlignmentHorz = taCenter
-          Width = 80
-        end
         object cxGridBRKDBTableColumn2: TcxGridDBColumn
           Caption = 'doc.p.'
           DataBinding.FieldName = 'PARENTDOCID'

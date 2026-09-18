@@ -34,7 +34,6 @@ type
     lcbAnalytics: TcxDBLookupComboBox;
     ceRATEUSD: TcxDBCalcEdit;
     Label1: TLabel;
-    cxDBLookupComboBox1: TcxDBLookupComboBox;
     lcbCURRENCY: TcxDBLookupComboBox;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure beDT_NAMEPropertiesButtonClick(Sender: TObject; AButtonIndex: Integer);
@@ -160,9 +159,6 @@ begin
     dmDB.IBCQueryStocks.Active := True;
 
     IBCQueryDocProps.Active := True;
-
-    dmdb.IBCQueryDocTypeStates.ParamByName('DOCTYPEID').AsInteger := dmDB.IBCQueryDocs.FieldByName('DOCTYPEID').AsInteger;
-    dmdb.IBCQueryDocTypeStates.Active := True;
 
     if fCreateNewDocument then
     begin
@@ -307,7 +303,6 @@ begin
   dmDB.IBCQueryAnalitica.Close;
   dmDB.IBCQueryAnalytics.Close;
   dmDB.IBCQueryStocks.Close;
-  dmdb.IBCQueryDocTypeStates.Active := False;
 end;
 
 end.

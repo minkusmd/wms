@@ -116,6 +116,7 @@ type
 implementation
 
 uses
+  SWNDealsUnit,
   DataModuleAdditions, DataModuleDB, DateUtils, SWNConst, SWNCustomersTypesUnit, SWNDBErrors, SWNSecurity,
   SWNSecurityFlags, SWNTypes, SWNUtils, frmBPPLSelectCustomUSDRateDialog, frmCustomerContractsDialog, frmCustomersDlg,
   frmDocumentCommentsEditorDialog;
@@ -482,6 +483,7 @@ begin
     raise;
   end;
 
+  AttachDealToDialog(Self, fMasterDataSet);
 end;
 
 procedure TfrmBPPLDlg.sbRateUsdFromDocClick(Sender: TObject);

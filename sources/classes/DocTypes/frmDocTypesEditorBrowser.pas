@@ -50,7 +50,6 @@ type
         cxTreeActions_FLG_ACHITARI: TcxTreeListColumn;
         cxTreeActions_FLG_ACCESS_VISIBLE: TcxTreeListColumn;
         dxBarSubItem1: TdxBarSubItem;
-        bbDocumentStates: TdxBarButton;
         cxTreeActions_FLG_URP_UCET: TcxTreeListColumn;
         cxTreeActions_FLG_BUH_UCET: TcxTreeListColumn;
         dxBarButton3: TdxBarButton;
@@ -105,8 +104,7 @@ type
             var Value: string);
         procedure cxTreeActions_FLG_ACHITARIGetDisplayText(Sender: TcxTreeListColumn; ANode: TcxTreeListNode;
             var Value: string);
-        procedure bbDocumentStatesClick(Sender: TObject);
-        procedure cxTreeActionsDragDrop(Sender, Source: TObject; X, Y: Integer);
+            procedure cxTreeActionsDragDrop(Sender, Source: TObject; X, Y: Integer);
         procedure cxTreeActions_FLG_BUH_UCETGetDisplayText(Sender: TcxTreeListColumn; ANode: TcxTreeListNode;
             var Value: string);
         procedure cxTreeActions_FLG_URP_UCETGetDisplayText(Sender: TcxTreeListColumn; ANode: TcxTreeListNode;
@@ -176,7 +174,7 @@ implementation
 uses
     DataModuleAdditions, DataModuleDB, frmDocTypesRegionEditorDialog, frmDocTypesElementEditorDialog,
     frmDocTypesActionEditorDialog, SWNUtils, SWNSecurityFlags, SWNSecurity, frmDocTypeAnalyticsDialog,
-    frmDocTypeDefaultsDialog, ShellAPI, frmDocTypesViewCodeUnit, frmDocTypeStatesDialog,
+    frmDocTypeDefaultsDialog, ShellAPI, frmDocTypesViewCodeUnit,
     ufrmListOfUserGroupsDialog;
 
 {$R *.dfm}
@@ -293,27 +291,6 @@ begin
     end;
 end;
 
-procedure TfrmDocTypesEditorDlg.bbDocumentStatesClick(Sender: TObject);
-var
-    dialog: TfrmDocTypeStatesDlg;
-    Node: TcxTreeListNode;
-    Data: PActionItem;
-begin
-    dialog := TfrmDocTypeStatesDlg.Create(self);
-
-    try
-        Node := cxTreeActions.FocusedNode;
-        if Assigned(Node) then
-        begin
-            Data := Node.Data;
-            dialog.DocTypeID := Data^.ID;
-            dialog.ShowModal;
-        end;
-    finally
-        dialog.Free;
-    end;
-
-end;
 
 procedure TfrmDocTypesEditorDlg.bbExportDocTypesClick(Sender: TObject);
 begin

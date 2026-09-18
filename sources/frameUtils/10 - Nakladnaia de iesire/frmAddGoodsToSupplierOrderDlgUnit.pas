@@ -90,8 +90,6 @@ type
     cxGrid1DBTableView1CONTRACT_TYPE_TITLE: TcxGridDBColumn;
     cxGrid1DBTableView1CONTRACT_PRICECOLUMN: TcxGridDBColumn;
     cxGrid1DBTableView1FLG_WITH_DELIVERY: TcxGridDBColumn;
-    cxGrid1DBTableView1STATEID: TcxGridDBColumn;
-    cxGrid1DBTableView1STATE_NAME: TcxGridDBColumn;
     btnRefresh: TcxButton;
     IBCQueryForeign: TIBCQuery;
     IBCDataSourceForeign: TIBCDataSource;

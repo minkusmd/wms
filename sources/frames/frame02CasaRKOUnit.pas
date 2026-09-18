@@ -6,7 +6,7 @@ unit frame02CasaRKOUnit;
 
 interface
 
-uses
+uses SWNDealsUnit,
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, System.UITypes, Dialogs, SWNDataFiltering,
   SWNBaseFrameUnit, cxGraphics, DB, cxDBData,
   cxGridLevel, cxGridCustomTableView, cxGridDBTableView,
@@ -287,6 +287,7 @@ begin
 
      // 1. Legam grid-urile de datasource-sele
   cxGridCasaRKODBTable.DataController.DataSource := dmDB.IBCDataSourceDocs;
+  AddDealColumns(cxGridCasaRKODBTable);
 
      // 2. Selection handlers
   cxGridCasaRKODBTable.OnFocusedRecordChanged := WhenGridFocusedRecordChanged;

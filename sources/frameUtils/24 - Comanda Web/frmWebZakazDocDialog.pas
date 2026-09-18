@@ -37,7 +37,6 @@ type
     cxLabel8: TLabel;
     bvMentiuni: TBevel;
     deDATA: TcxDBDateEdit;
-    lcbSTATEID: TcxDBLookupComboBox;
     beDT_NAME: TcxButtonEdit;
     lcbDTSC: TcxDBLookupComboBox;
     lcbAnalytics: TcxDBLookupComboBox;
@@ -83,6 +82,7 @@ type
 implementation
 
 uses
+  SWNDealsUnit,
   DateUtils, DataModuleDB, SWNUtils, SWNConst, frmCustomersDlg, SWNCustomersTypesUnit, frmDocumentCommentsEditorDialog,
   SWNSecurity;
 
@@ -228,10 +228,6 @@ begin
 
     dmDB.IBCQueryAnalitica.Active := True;
 
-    dmdb.IBCQueryDocTypeStates.Close;
-    dmdb.IBCQueryDocTypeStates.ParamByName('DOCTYPEID').AsInteger := dmDB.IBCQueryDocs.FieldByName('DOCTYPEID').AsInteger;
-    dmdb.IBCQueryDocTypeStates.Open;
-
     IBCQueryCashback.ParamByName('DOCID').AsInteger := dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger;
     IBCQueryCashback.Open;
 
@@ -252,6 +248,7 @@ begin
     raise;
   end;
 
+  AttachDealToDialog(Self, dmDB.IBCQueryDocs);
 end;
 
 procedure TfrmWebZakazDocDlg.SelectCT;
@@ -337,7 +334,6 @@ begin
   dmDB.IBCQueryAnalitica.Close;
   dmDB.IBCQueryAnalytics.Close;
   dmDB.IBCQueryStocks.Close;
-  dmdb.IBCQueryDocTypeStates.Close;
 end;
 
 procedure TfrmWebZakazDocDlg.Timer1Timer(Sender: TObject);

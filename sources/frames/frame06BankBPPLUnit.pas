@@ -6,7 +6,7 @@ unit frame06BankBPPLUnit;
 
 interface
 
-uses
+uses SWNDealsUnit,
   Windows,
   Messages,
   SysUtils,
@@ -421,6 +421,7 @@ begin
 
      // 1. Legam grid-urile de datasource-sele
   cxGridBankBPPLDBTable.DataController.DataSource := dmDB.IBCDataSourceDocs;
+  AddDealColumns(cxGridBankBPPLDBTable);
 
      // 2. Selection handlers
   cxGridBankBPPLDBTable.OnFocusedRecordChanged := WhenDocGrid_FocusedRecordChanged;

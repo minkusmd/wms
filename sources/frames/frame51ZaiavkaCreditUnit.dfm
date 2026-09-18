@@ -177,12 +177,6 @@ inherited frame51ZaiavkaCredit: Tframe51ZaiavkaCredit
         DataBinding.FieldName = 'CT'
         Visible = False
       end
-      object cxGridWZ_STATE: TcxGridDBColumn
-        Caption = 'Status'
-        DataBinding.FieldName = 'STATE_NAME'
-        HeaderAlignmentHorz = taCenter
-        Width = 89
-      end
       object cxGridWZ_DTSC: TcxGridDBColumn
         Caption = 'Analitica'
         DataBinding.FieldName = 'DTSC_NAME'

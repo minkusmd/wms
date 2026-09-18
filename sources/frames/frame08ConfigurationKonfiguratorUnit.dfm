@@ -235,13 +235,6 @@ inherited frame08ConfigurationBRK: Tframe08ConfigurationBRK
         VisibleForCustomization = False
         Width = 64
       end
-      object cxGridBRKDB_STATE_NAME: TcxGridDBColumn
-        Caption = 'Statut'
-        DataBinding.FieldName = 'STATE_NAME'
-        HeaderAlignmentHorz = taCenter
-        MinWidth = 13
-        Width = 51
-      end
       object cxGridBRKDBTableColumn2: TcxGridDBColumn
         Caption = 'doc.p.'
         DataBinding.FieldName = 'PARENTDOCID'

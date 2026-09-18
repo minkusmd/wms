@@ -132,7 +132,6 @@ type
         dxBarSubItem1: TdxBarSubItem;
         cxGridComplect_FLG_ADDON: TcxGridDBColumn;
         dxBarButton9: TdxBarButton;
-        cxGridBRKDB_STATE_NAME: TcxGridDBColumn;
         cxGridBRKDBTableColumn2: TcxGridDBColumn;
         bbTVA0: TdxBarButton;
         IBCQueryTenderItems: TIBCQuery;

@@ -660,39 +660,6 @@ object frmPKODocDlg: TfrmPKODocDlg
       TabOrder = 5
       Width = 364
     end
-    object lcbDocumentState: TcxDBLookupComboBox
-      Left = 500
-      Top = 310
-      Margins.Left = 4
-      Margins.Top = 4
-      Margins.Right = 4
-      Margins.Bottom = 4
-      DataBinding.DataField = 'STATEID'
-      DataBinding.DataSource = dmDB.IBCDataSourceDocs
-      ParentFont = False
-      Properties.ImmediatePost = True
-      Properties.KeyFieldNames = 'STATEID'
-      Properties.ListColumns = <
-        item
-          Caption = 'cod'
-          Fixed = True
-          HeaderAlignment = taCenter
-          MinWidth = 30
-          Width = 30
-          FieldName = 'STATEID'
-        end
-        item
-          Caption = 'statut'
-          HeaderAlignment = taCenter
-          MinWidth = 100
-          Width = 150
-          FieldName = 'TITLE'
-        end>
-      Properties.ListFieldIndex = 1
-      Properties.ListSource = IBCDataSourceStates
-      TabOrder = 13
-      Width = 271
-    end
     object beCT_NAME: TcxButtonEdit
       Left = 125
       Top = 168
@@ -951,26 +918,5 @@ object frmPKODocDlg: TfrmPKODocDlg
     DataSet = IBCQueryRechizite
     Left = 176
     Top = 104
-  end
-  object IBCQueryStates: TIBCQuery
-    KeyFields = 'STATEID'
-    Connection = dmDB.IBCConnection
-    SQL.Strings = (
-      'select * from ts_doctypes_states'
-      'where doctypeid = :doctypeid')
-    Options.CacheBlobs = False
-    Left = 536
-    Top = 144
-    ParamData = <
-      item
-        DataType = ftUnknown
-        Name = 'doctypeid'
-        Value = nil
-      end>
-  end
-  object IBCDataSourceStates: TIBCDataSource
-    DataSet = IBCQueryStates
-    Left = 536
-    Top = 96
   end
 end

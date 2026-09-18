@@ -641,23 +641,6 @@
         TabOrder = 1
         OnClick = btnPrintReceiptClick
       end
-      object cbIncasareNumerarStatus: TcxLookupComboBox
-        Left = 16
-        Top = 138
-        ParentFont = False
-        Properties.ImmediatePost = True
-        Properties.KeyFieldNames = 'STATEID'
-        Properties.ListColumns = <
-          item
-            FieldName = 'TITLE'
-          end>
-        Properties.ListOptions.ShowHeader = False
-        Properties.ListOptions.SyncMode = True
-        Properties.ListSource = IBCDataSourceStatutIncasare
-        Properties.PostPopupValueOnTab = True
-        TabOrder = 6
-        Width = 145
-      end
     end
     object tbsReceiptSummary: TTabSheet
       Caption = 'Cecuri eliberate'
@@ -992,18 +975,5 @@
     DefaultConnection = dmDB.IBCConnection
     Left = 356
     Top = 332
-  end
-  object IBCQueryStatutIncasare: TIBCQuery
-    Connection = dmDB.IBCConnection
-    SQL.Strings = (
-      'select * from TS_DOCTYPES_STATES'
-      'where doctypeid = 116 ')
-    Left = 488
-    Top = 352
-  end
-  object IBCDataSourceStatutIncasare: TIBCDataSource
-    DataSet = IBCQueryStatutIncasare
-    Left = 488
-    Top = 296
   end
 end

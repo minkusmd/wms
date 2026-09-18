@@ -234,13 +234,6 @@ inherited frame93Tender: Tframe93Tender
         VisibleForCustomization = False
         Width = 80
       end
-      object cxGridBRKDB_STATE_NAME: TcxGridDBColumn
-        Caption = 'Statut'
-        DataBinding.FieldName = 'STATE_NAME'
-        HeaderAlignmentHorz = taCenter
-        MinWidth = 16
-        Width = 64
-      end
       object cxGridBRKDBTableColumn2: TcxGridDBColumn
         Caption = 'doc.p.'
         DataBinding.FieldName = 'PARENTDOCID'

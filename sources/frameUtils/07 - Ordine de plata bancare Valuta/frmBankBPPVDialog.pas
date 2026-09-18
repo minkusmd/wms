@@ -93,6 +93,7 @@ type
 implementation
 
 uses
+  SWNDealsUnit,
   DateUtils, DataModuleDB, DataModuleAdditions, SWNUtils, SWNConst, SWNTypes,
   frmCustomersDlg, SWNSecurityFlags, SWNSecurity, SWNCustomersTypesUnit,
   frmDocumentCommentsEditorDialog, SWNDBErrors, frmCustomerContractsDialog;
@@ -404,6 +405,7 @@ begin
 
     raise;
   end;
+  AttachDealToDialog(Self, dmDB.IBCQueryDocs);
 end;
 
 procedure TfrmBankBPPVDlg.SelectCT;

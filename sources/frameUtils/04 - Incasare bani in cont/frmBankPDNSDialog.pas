@@ -140,6 +140,7 @@ type
 implementation
 
 uses
+  SWNDealsUnit,
   DateUtils, DataModuleDB, SWNUtils, SWNConst, SWNTypes, frmCustomersDlg,
   SWNSecurityFlags, SWNSecurity, SWNCustomersTypesUnit, frmDocumentCommentsEditorDialog, SWNDBErrors,
   frmCustomerContractsDialog, Vcl.Clipbrd, frmDistributieRambursEditorDialog;
@@ -573,6 +574,7 @@ begin
 
     raise;
   end;
+  AttachDealToDialog(Self, fMasterDataSet);
 end;
 
 procedure TfrmBankPDNSDlg.SelectCT;

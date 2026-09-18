@@ -7,7 +7,7 @@
 
 interface
 
-uses
+uses SWNDealsUnit,
   Windows,
   Messages,
   SysUtils,
@@ -1425,6 +1425,7 @@ begin
   fLastDocID := -1;
      // 1. Legam grid-urile de datasource-sele
   cxGridNPNTable.DataController.DataSource := dmDB.IBCDataSourceDocs;
+  AddDealColumns(cxGridNPNTable);
   cxGridComponentsTable.DataController.DataSource := dmDB.IBCDataSourceJurnal;
 
      // 2. Selection handlers

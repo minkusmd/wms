@@ -93,7 +93,8 @@ type
 
 implementation
 
-uses DateUtils, DataModuleDB, SWNUtils, SWNConst,
+uses
+  SWNDealsUnit, DateUtils, DataModuleDB, SWNUtils, SWNConst,
   frmCustomersDlg, SWNSecurityFlags, frmDocumentCommentsEditorDialog, SWNSecurity,
   frmCustomerContractsDialog;
 
@@ -345,6 +346,7 @@ begin
 
     raise;
   end;
+  AttachDealToDialog(Self, dmDB.IBCQueryDocs);
 end;
 
 procedure TfrmScetNaOplatuDocDlg.SelectCT;
