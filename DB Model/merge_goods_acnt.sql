@@ -45,10 +45,20 @@ BEGIN
                 AND FLG_FOLDER = 1)) THEN
     EXCEPTION E_MERGE_GOODS_ACNT 'Mapele nu pot fi unite.';
 
-  /* 1. produsele trec pe denumirea noua */
-  UPDATE TS_GOODS
-     SET GOODS_ACNT_ID = :NEW_GOODS_ACNT_ID
-   WHERE GOODS_ACNT_ID = :OLD_GOODS_ACNT_ID;
+  /* 1. produsele trec pe denumirea noua; TS_GOODS_AU_ACNT (goods_acnt_stock_fix.sql)
+        nu muta stocul, fiindca soldurile se muta integral la pasul 2 */
+  RDB$SET_CONTEXT('USER_TRANSACTION', 'ACNT_STOCK_SKIP_GOODS', '1');
+  BEGIN
+    UPDATE TS_GOODS
+       SET GOODS_ACNT_ID = :NEW_GOODS_ACNT_ID
+     WHERE GOODS_ACNT_ID = :OLD_GOODS_ACNT_ID;
+    WHEN ANY DO
+    BEGIN
+      RDB$SET_CONTEXT('USER_TRANSACTION', 'ACNT_STOCK_SKIP_GOODS', NULL);
+      EXCEPTION;
+    END
+  END
+  RDB$SET_CONTEXT('USER_TRANSACTION', 'ACNT_STOCK_SKIP_GOODS', NULL);
 
   /* 2. soldurile contabile - PK este (GOODS_ACNT_ID, DT), deci se cumuleaza */
   FOR SELECT DT, QTY_ACCOUNT

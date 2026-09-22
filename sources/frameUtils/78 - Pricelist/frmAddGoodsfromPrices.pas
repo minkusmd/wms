@@ -112,6 +112,7 @@ type
     bbMergeSelectedGoods: TdxBarButton;
     tvGoodsFounded_GOODS_TYPE: TcxGridDBColumn;
     tvGoodsFoundedVendor: TcxGridDBColumn;
+    bbChangeInventoryCostingMethod: TdxBarButton;
     procedure SearchBox1InvokeSearch(Sender: TObject);
     procedure bbNewLinkClick(Sender: TObject);
     procedure bbNewGoodsClick(Sender: TObject);
@@ -124,6 +125,7 @@ type
     procedure bbMergeSelectedGoodsClick(Sender: TObject);
     procedure dxBarLookupCombo1Exit(Sender: TObject);
     procedure SearchGoodsMemoKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure bbChangeInventoryCostingMethodClick(Sender: TObject);
 
   private
     fMergeDialog: TfrmMergeGoodsDlgEx;
@@ -159,9 +161,73 @@ implementation
 uses
   DataModuleAdditions,
   DataModuleDB,
+  frmSelectInventoryCostingMethodUnit,
   System.Generics.Collections;
 
 {$R *.dfm}
+
+procedure TfrmAddGoodsFromPriceDlg.bbChangeInventoryCostingMethodClick(
+  Sender: TObject);
+var
+  Dialog: TfrmSelectInventoryCostingMethodDlg;
+  Query: TIBCQuery;
+  TransactionStarted: Boolean;
+begin
+  inherited;
+
+  if not IBCQuerySearch.Active or IBCQuerySearch.IsEmpty then
+  begin
+    MessageDlg('Selectati un produs.', mtWarning, [mbOK], 0);
+    Exit;
+  end;
+
+  Dialog := TfrmSelectInventoryCostingMethodDlg.Create(Self, IBCConnection,
+    IBCQuerySearch.FieldByName('SERIAL_TYPE_ID').AsInteger);
+  try
+    if Dialog.ShowModal <> mrOK then
+      Exit;
+
+    if Dialog.InventoryCostingMethodID =
+      IBCQuerySearch.FieldByName('SERIAL_TYPE_ID').AsInteger then
+      Exit;
+
+    Query := TIBCQuery.Create(nil);
+    try
+      IBCTrLocal.DefaultConnection := IBCConnection;
+      Query.Connection := IBCConnection;
+      Query.Transaction := IBCTrLocal;
+      Query.AutoCommit := False;
+
+      TransactionStarted := not Query.Transaction.Active;
+      if TransactionStarted then
+        Query.Transaction.StartTransaction;
+
+      try
+        Query.SQL.Text :=
+          'UPDATE VW_TS_GOODS SET SERIAL_TYPE_ID = :SERIAL_TYPE_ID ' +
+          'WHERE GOODSID = :GOODSID';
+        Query.ParamByName('SERIAL_TYPE_ID').AsInteger :=
+          Dialog.InventoryCostingMethodID;
+        Query.ParamByName('GOODSID').AsInteger :=
+          IBCQuerySearch.FieldByName('GOODSID').AsInteger;
+        Query.ExecSQL;
+
+        if TransactionStarted then
+          Query.Transaction.Commit;
+      except
+        if TransactionStarted and Query.Transaction.Active then
+          Query.Transaction.Rollback;
+        raise;
+      end;
+    finally
+      Query.Free;
+    end;
+  finally
+    Dialog.Free;
+  end;
+
+  DoSearch;
+end;
 
 procedure TfrmAddGoodsFromPriceDlg.bbMergeGoodsClick(Sender: TObject);
 begin
@@ -483,7 +549,7 @@ begin
     end;
 
     // Punem în Clipboard pentru siguranță
-    Clipboard.AsText := PrepareTextForSearch;
+//    Clipboard.AsText := PrepareTextForSearch;
 
     // Consumăm tasta
     Key := 0;

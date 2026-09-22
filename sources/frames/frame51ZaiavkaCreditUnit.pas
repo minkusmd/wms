@@ -34,6 +34,7 @@ type
     cxGridWZ_RATE: TcxGridDBColumn;
     cxGridWZ_PARENTDOCID: TcxGridDBColumn;
     cxGridWZ_FLG_ACNT: TcxGridDBColumn;
+    cxGridWZ_RESPONSIBLE_USERNAME: TcxGridDBColumn;
     cxGridWZ_CREATED_BY_NAME: TcxGridDBColumn;
     cxGridWZLevel: TcxGridLevel;
     cxGridComponents: TcxGrid;
@@ -108,6 +109,7 @@ type
     procedure DoCloseDocument;
     function DoCloseDocumentDB(const DocID: integer): Boolean;
     procedure CreateConfigurator;
+    procedure AssignResponsibleOnOpen;
   protected
     { Protected declarations }
     function InitFrameID: integer; override;
@@ -410,6 +412,61 @@ begin
   dmDB.CreateGridImageColumnItems(cxGridDBCol_IMG);
 end;
 
+procedure Tframe51ZaiavkaCredit.AssignResponsibleOnOpen;
+// Cererea de finantare deschisa, neinchisa si fara responsabil (NULL, 0 sau -1) primeste
+// utilizatorul curent - la fel ca la Web-Order (Tframe24WebZakaz.AssignResponsibleOnOpen).
+// UPDATE-ul e conditionat pe responsabil gol, deci daca doi operatori o deschid in acelasi
+// timp ramine primul. Reincarcarea completa pastreaza in grila atit RESPONSIBLE_USERID,
+// cit si RESPONSIBLE_USERNAME.
+var
+  DocID, Winner: Integer;
+  Query: TIBCQuery;
+begin
+  if not dmDB.IBCQueryDocs.Active or dmDB.IBCQueryDocs.IsEmpty then
+    Exit;
+  if (dmDB.IBCQueryDocs.FieldByName('FLG_CLOSED').AsInteger = 1) or
+    (dmDB.IBCQueryDocs.FieldByName('RESPONSIBLE_USERID').AsInteger > 0) then
+    Exit;
+
+  DocID := dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger;
+  try
+    dmDB.ExecuteQuery('UPDATE TDB_DOCS SET RESPONSIBLE_USERID = :USERID' +
+      ' WHERE DOCID = :DOCID AND DOCTYPEID = 1791 AND COALESCE(RESPONSIBLE_USERID, -1) <= 0',
+      [dmDB.CurrentUserID, DocID]);
+
+    // Cine a cistigat: noi sau un coleg care a deschis-o cu o clipa inainte
+    Winner := 0;
+    Query := TIBCQuery.Create(nil);
+    try
+      Query.Connection := dmDB.IBCConnection;
+      Query.Transaction := dmDB.IBCTrDefaultSelect;
+      Query.SQL.Text := 'SELECT COALESCE(RESPONSIBLE_USERID, 0) FROM TDB_DOCS WHERE DOCID = :DOCID';
+      Query.ParamByName('DOCID').AsInteger := DocID;
+      Query.Open;
+      if not Query.Eof then
+        Winner := Query.Fields[0].AsInteger;
+      Query.Close;
+    finally
+      Query.Free;
+    end;
+
+    if Winner > 0 then
+    begin
+      dmDB.IBCQueryDocs.DisableControls;
+      try
+        dmDB.IBCQueryDocs.Refresh;
+        dmDB.IBCQueryDocs.Locate('DOCID', DocID, []);
+      finally
+        dmDB.IBCQueryDocs.EnableControls;
+      end;
+    end;
+  except
+    // preluarea automata nu are voie sa blocheze deschiderea cererii
+    if dmDB.IBCQueryDocs.State in [dsEdit, dsInsert] then
+      dmDB.IBCQueryDocs.Cancel;
+  end;
+end;
+
 procedure Tframe51ZaiavkaCredit.ModifyRecord;
 var
   dialog: TfrmWebZaiavkaCreditDlg;
@@ -417,6 +474,10 @@ var
 begin
   if not (fSEC_CanModify or fSEC_ViewOnly) then
     exit;
+
+  // Primul operator care deschide cererea o preia: devine responsabil.
+  if fSEC_CanModify then
+    AssignResponsibleOnOpen;
 
   FLG_CLOSED := dmDB.IBCQueryDocs.FieldByName('FLG_CLOSED').AsInteger = 1;
   canEdit := fSEC_CanModify and (not FLG_CLOSED);

@@ -840,6 +840,7 @@ begin
 
   SetupSecurityItems;
 
+  cxGridSuppliersDBTableView1DISPLAYNAME.Focused := True;
 end;
 
 procedure Tframe78PriceList.bbSetParentIDClick(Sender: TObject);

@@ -266,9 +266,9 @@ inherited frame111UltraMD: Tframe111UltraMD
     Connection = dmDB.IBCConnection
     SQL.Strings = (
       
-        'select distinct n.uuid, n.code, n.mainimage, gf.goodsid, g.titl' +
-        'e, get_flg_in_price(gf.goodsid) flg_in_price from tapi_ultra_no' +
-        'menclature  n'
+        'select distinct n.uuid, n.code, n.mainimage, gf.goodsid, g.title' +
+        ', get_flg_in_price(gf.goodsid) flg_in_price from tapi_ultra_nome' +
+        'nclature  n'
       
         'join ts_goods_foreign gf on gf.goods_code=n.code and gf.customer' +
         'id = 202294 '

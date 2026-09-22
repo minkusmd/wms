@@ -118,7 +118,7 @@ object frmMainForm: TfrmMainForm
       Left = 0
       Top = 0
       Width = 323
-      Height = 423
+      Height = 372
       Align = alClient
       ActiveGroupIndex = -1
       TabOrder = 1
@@ -134,12 +134,13 @@ object frmMainForm: TfrmMainForm
       OptionsImage.SmallImages = dmAdditions.cxSmallImageListStructure
       OptionsView.NavigationPane.MaxVisibleGroups = 1
       OnActiveGroupChanged = dxStructureNavigationActiveGroupChanged
+      ExplicitHeight = 423
     end
     object cxTreeDocTypes: TcxTreeList
       Left = 0
       Top = 0
       Width = 323
-      Height = 423
+      Height = 372
       BorderStyle = cxcbsNone
       Align = alClient
       Bands = <
@@ -180,6 +181,7 @@ object frmMainForm: TfrmMainForm
       OnCollapsing = cxTreeDocTypesCollapsing
       OnDblClick = cxTreeDocTypesDblClick
       OnDeletion = cxTreeDocTypesDeletion
+      ExplicitHeight = 423
       object cxTreeDocTypescxTreeListColumn1: TcxTreeListColumn
         Width = 100
         Position.ColIndex = 0
@@ -189,17 +191,18 @@ object frmMainForm: TfrmMainForm
     end
     object bdcSIP: TdxBarDockControl
       Left = 0
-      Top = 423
+      Top = 372
       Width = 323
       Height = 28
       Align = dalBottom
       BarManager = dxBarManagerMain
+      ExplicitTop = 423
     end
     inline frameSipClient1: TframeSipClient
       Left = 0
-      Top = 451
+      Top = 400
       Width = 323
-      Height = 310
+      Height = 361
       Margins.Left = 5
       Margins.Top = 5
       Margins.Right = 5
@@ -215,37 +218,34 @@ object frmMainForm: TfrmMainForm
       ParentColor = False
       ParentFont = False
       TabOrder = 3
-      ExplicitTop = 451
+      ExplicitTop = 416
       ExplicitWidth = 323
-      ExplicitHeight = 310
+      ExplicitHeight = 361
       inherited Panel1: TPanel
         Width = 323
-        Height = 181
+        Height = 232
         StyleElements = [seFont, seClient, seBorder]
         ExplicitWidth = 323
         ExplicitHeight = 181
         inherited cxPageControl1: TcxPageControl
           Width = 319
-          Height = 177
+          Height = 228
           ExplicitWidth = 319
           ExplicitHeight = 177
-          ClientRectBottom = 173
+          ClientRectBottom = 224
           ClientRectRight = 315
           inherited cxTabSheet1: TcxTabSheet
             ExplicitWidth = 311
             ExplicitHeight = 149
             inherited cxGrid1: TcxGrid
               Width = 301
-              Height = 139
+              Height = 190
               ExplicitWidth = 301
               ExplicitHeight = 139
             end
           end
           inherited tsDial: TcxTabSheet
-            ExplicitLeft = 4
-            ExplicitTop = 24
-            ExplicitWidth = 316
-            ExplicitHeight = 221
+            ExplicitHeight = 281
           end
         end
       end
@@ -280,7 +280,6 @@ object frmMainForm: TfrmMainForm
           ExplicitLeft = 4
           ExplicitTop = 67
           ExplicitWidth = 151
-          ExplicitHeight = 23
           Width = 151
         end
         inherited CallBtn: TcxButton
@@ -1345,7 +1344,6 @@ object frmMainForm: TfrmMainForm
           Style.IsFontAssigned = True
           ExplicitTop = 98
           ExplicitWidth = 68
-          ExplicitHeight = 23
           Width = 68
         end
         inherited cxButton1: TcxButton
@@ -1965,6 +1963,10 @@ object frmMainForm: TfrmMainForm
           BeginGroup = True
           Visible = True
           ItemName = 'bbDial'
+        end
+        item
+          Visible = True
+          ItemName = 'bsUsdRate'
         end>
       NotDocking = [dsNone, dsLeft, dsTop, dsRight, dsBottom]
       OneOnRow = True
@@ -2150,6 +2152,13 @@ object frmMainForm: TfrmMainForm
       ShortCut = 16471
       OnClick = bbWebCatalogClick
     end
+    object bbWebPopularCategories: TdxBarButton
+      Caption = 'Categorii populare pe site'
+      Category = 0
+      Hint = 'Categoriile de pe prima pagina a site-ului: ordine si reducere'
+      Visible = ivAlways
+      OnClick = bbWebPopularCategoriesClick
+    end
     object bbStockRecalc: TdxBarButton
       Caption = 'Recalcul sold produse'
       Category = 0
@@ -2185,6 +2194,10 @@ object frmMainForm: TfrmMainForm
         item
           Visible = True
           ItemName = 'bbWebCatalog'
+        end
+        item
+          Visible = True
+          ItemName = 'bbWebPopularCategories'
         end
         item
           Visible = True
@@ -2836,6 +2849,13 @@ object frmMainForm: TfrmMainForm
       ShortCut = 32836
       OnClick = bbDialClick
     end
+    object bsUsdRate: TdxBarStatic
+      Align = iaRight
+      Caption = 'USD: -'
+      Category = 0
+      Hint = 'Cursul USD (TS_CURRENCY)'
+      Visible = ivAlways
+    end
     object bbSipLog: TdxBarButton
       Caption = 'Sip log...'
       Category = 0
@@ -2939,6 +2959,13 @@ object frmMainForm: TfrmMainForm
       Hint = 'Calculatoarele care pot fi legate la MCC'
       Visible = ivAlways
       OnClick = bbWorkStationsClick
+    end
+    object bbPOSTerminals: TdxBarButton
+      Caption = 'Case POS'
+      Category = 0
+      Hint = 'Casele POS: firma, calculator, aparat fiscal, depozit'
+      Visible = ivAlways
+      OnClick = bbPOSTerminalsClick
     end
     object bbWebUrlManager: TdxBarButton
       Caption = 'Gestionarea URL de pe site...'
@@ -3537,6 +3564,10 @@ object frmMainForm: TfrmMainForm
         item
           Visible = True
           ItemName = 'bbWorkStations'
+        end
+        item
+          Visible = True
+          ItemName = 'bbPOSTerminals'
         end
         item
           Visible = True

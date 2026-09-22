@@ -832,11 +832,11 @@ inherited frame78PriceList: Tframe78PriceList
                     Caption = 'Add7-1'
                     DataBinding.FieldName = 'MARGIN71'
                     PropertiesClassName = 'TcxCalcEditProperties'
-                    MinWidth = 80
+                    MinWidth = 54
                     Options.Editing = False
                     Options.ShowEditButtons = isebNever
                     Options.HorzSizing = False
-                    Width = 80
+                    Width = 54
                   end
                   object cxGridItemsDBTableView1Price1_LEI: TcxGridDBColumn
                     Caption = 'RRP, Lei'

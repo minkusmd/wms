@@ -420,6 +420,11 @@ const
 			cSecurityFlag_VINZARE_VPP_Modifica_pozitia = 3430;		// Modifica pozitia
 			cSecurityFlag_VINZARE_VPP_Sterge_produs = 3431;		// Sterge produs
 
+		// POS vinzare
+		cSecurityFlag_VINZARE_POS_vinzare = 3447;
+			cSecurityFlag_VINZARE_PV_Adauga_document = 3448;		// Adauga document
+			cSecurityFlag_VINZARE_PV_Modifica_document = 3449;		// Modifica document
+			cSecurityFlag_VINZARE_PV_Sterge_Document = 3450;		// Sterge Document
 
 	// TRANSFER
 	cSecurityFlag_ПЕРЕМЕЩЕНИЕ = 6;

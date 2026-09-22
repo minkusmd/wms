@@ -643,6 +643,13 @@ object frmAddGoodsFromPriceDlg: TfrmAddGoodsFromPriceDlg
       ShortCut = 32838
       OnClick = bbMergeSelectedGoodsClick
     end
+    object bbChangeInventoryCostingMethod: TdxBarButton
+      Caption = 'Schimba tipul de evidenta'
+      Category = 0
+      Hint = 'Schimba tipul de evidenta'
+      Visible = ivAlways
+      OnClick = bbChangeInventoryCostingMethodClick
+    end
     object dxBarControlContainerItem1: TdxBarControlContainerItem
       Caption = 'Search'
       Category = 1
@@ -870,6 +877,10 @@ object frmAddGoodsFromPriceDlg: TfrmAddGoodsFromPriceDlg
       item
         Visible = True
         ItemName = 'bbMergeGoods'
+      end
+      item
+        Visible = True
+        ItemName = 'bbChangeInventoryCostingMethod'
       end>
     UseOwnFont = False
     Left = 656

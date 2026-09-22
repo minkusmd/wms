@@ -193,6 +193,18 @@ type
     cxPageControl1: TcxPageControl;
     cxTabSheet1: TcxTabSheet;
     tsDial: TcxTabSheet;
+    btnDtmf1: TcxButton;
+    btnDtmf2: TcxButton;
+    btnDtmf3: TcxButton;
+    btnDtmf4: TcxButton;
+    btnDtmf5: TcxButton;
+    btnDtmf6: TcxButton;
+    btnDtmf7: TcxButton;
+    btnDtmf8: TcxButton;
+    btnDtmf9: TcxButton;
+    btnDtmfStar: TcxButton;
+    btnDtmf0: TcxButton;
+    btnDtmfHash: TcxButton;
     cxGrid1: TcxGrid;
     cxGrid1DBTableView1: TcxGridDBTableView;
     cxGrid1DBTableView1_CALLTYPEID: TcxGridDBColumn;
@@ -1476,7 +1488,7 @@ begin
   if Assigned(FLines[FLineIndex]) and (FLines[FLineIndex].State = sipints.csActive) then
   begin
     sipclient.DtmfMethod := dtmfSipInfo;
-    case TSpeedButton(Sender).Tag of
+    case TComponent(Sender).Tag of
       0:
         sipclient.SendDtmf(FLines[FLineIndex], '0');
       1:
@@ -1503,11 +1515,11 @@ begin
         sipclient.SendDtmf(FLines[FLineIndex], '#');
     end;
   end
-  else if TSpeedButton(Sender).Tag in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] then
-    PhoneEdit.Text := PhoneEdit.Text + IntToStr(TSpeedButton(Sender).Tag)
-  else if TSpeedButton(Sender).Tag = 10 then
+  else if TComponent(Sender).Tag in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] then
+    PhoneEdit.Text := PhoneEdit.Text + IntToStr(TComponent(Sender).Tag)
+  else if TComponent(Sender).Tag = 10 then
     PhoneEdit.Text := PhoneEdit.Text + '*'
-  else if TSpeedButton(Sender).Tag = 11 then
+  else if TComponent(Sender).Tag = 11 then
     PhoneEdit.Text := PhoneEdit.Text + '#';
 
   sipclient.DtmfMethod := dtmfInBand;

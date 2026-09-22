@@ -178,6 +178,7 @@ type
     bbSearchSciotFactura: TdxBarButton;
     bbWebFilters: TdxBarButton;
     bbWebCatalog: TdxBarButton;
+    bbWebPopularCategories: TdxBarButton;
     bbWebBlockedIp: TdxBarButton;
     bbApiConfig: TdxBarButton;
     bbDeals: TdxBarButton;
@@ -278,6 +279,7 @@ type
     dxBarButton4: TdxBarButton;
     bbToolsRecalcQtyAcnt: TdxBarButton;
     bbDial: TdxBarButton;
+    bsUsdRate: TdxBarStatic;
     bbSipLog: TdxBarButton;
     bbTipCredite: TdxBarButton;
     bbCredite: TdxBarSubItem;
@@ -287,6 +289,7 @@ type
     dxBarSubItem3: TdxBarSubItem;
     bbMCC: TdxBarButton;
     bbWorkStations: TdxBarButton;
+    bbPOSTerminals: TdxBarButton;
     bbWebUrlManager: TdxBarButton;
     bbWebGoodsGroups: TdxBarButton;
     dxBarSubItem4: TdxBarSubItem;
@@ -405,6 +408,7 @@ type
     procedure bbSearchSciotFacturaClick(Sender: TObject);
     procedure bbWebFiltersClick(Sender: TObject);
     procedure bbWebCatalogClick(Sender: TObject);
+    procedure bbWebPopularCategoriesClick(Sender: TObject);
     procedure bbWebBlockedIpClick(Sender: TObject);
     procedure bbApiConfigClick(Sender: TObject);
     procedure bbDealsClick(Sender: TObject);
@@ -478,6 +482,7 @@ type
     procedure bbPriceRulesClick(Sender: TObject);
     procedure bbMCCClick(Sender: TObject);
     procedure bbWorkStationsClick(Sender: TObject);
+    procedure bbPOSTerminalsClick(Sender: TObject);
     procedure bbWebUrlManagerClick(Sender: TObject);
     procedure bbWebGoodsGroupsClick(Sender: TObject);
     procedure bbECBClick(Sender: TObject);
@@ -518,6 +523,8 @@ type
     procedure bbCloseDocumentClick(Sender: TObject);
     procedure bbOpenDocumentClick(Sender: TObject);
   private    { Private declarations }
+    FPendingDocsTimer: TTimer;
+    FPendingDocCounts: array[0..1] of Integer; { aliniat cu cPendingDocTypes }
     fInShutdown: Boolean;
     fCurrentFrameFilterFields: TFrameFilterFields;
     fCurrentFrameDataFilter: TFrameDataFilteringInfo;
@@ -669,6 +676,10 @@ type
     procedure SetupNomenclatoareRights;
     procedure ShowClientBankECB;
     procedure ShowWebFirstPageGoodsGroups;
+    procedure PendingDocsTimerTimer(Sender: TObject);
+    procedure RefreshPendingDocsIndicator;
+    function PendingDocCount(const ADocTypeID: Integer): Integer;
+    procedure RefreshUsdRateCaption;
   public    { Public declarations }
     procedure GotoDocument(const SearchDocumentID: Integer; const Target: TSearchDocumentSearchTarget);
     procedure ShowCreditRetailDlg;
@@ -698,6 +709,7 @@ uses
   SWNSecurityFlags,
   SWNTypes,
   SWNUtils,
+  UltraCurrencyRateThread,
   SWNValueStorageUnit,
   SwnThreadsUnit,
   dxNavBarCollns,
@@ -741,6 +753,7 @@ uses
   frame129VinzarePrinPartenerUnit,
   frame12CassaPersonalUnit,
   frame132DMLinkUnit,
+  frame133POSUnit,
   frame14NareadSborkaUnit,
   frame15TovarBezHaracteristicUnit,
   frame16NedostaiushiiTovarUnit,
@@ -897,6 +910,7 @@ uses
   frmApiConfigDialog,
   SWNDealsUnit,
   frmWebCatalogDialog,
+  frmWebPopularCategoriesDialog,
   frmWebDeliveryDialog,
   frmWebDescriptionTemplateDialog,
   frmWebFilterButtonsDialog,
@@ -909,6 +923,7 @@ uses
   frmWebStaticPagesDialog,
   frmWebUrlsUnit,
   frmWorkStationsSetupDialog,
+  frmPOSTerminalsSetupDialog,
   uAnalizePriceList,
   uAnalizeSupplierPrice,
   uCrediteDlg,
@@ -932,6 +947,14 @@ type
   end;
 
 {$R *.dfm}
+
+const
+  // Documente "de prelucrat" semnalate in arbore (nod rosu-ingrosat cu numarul lor):
+  // 134 Web-Order (frame24WebZakazUnit) si 1791 Cerere de Finantare. Neprelucrat =
+  // nesters si neinchis (bitul 10 din TDB_DOCS.FLAGS, pus la prelucrare, de ex. de
+  // SP_CLOSE_WEBZAKAZ). Aceeasi ordine in FPendingDocCounts.
+  cPendingDocTypes: array[0..1] of Integer = (134, 1791);
+  cPendingDocsRefreshMs = 60000;
 
 function GetCurrentUserAndDomain(var User, Domain: string): Boolean;
 var
@@ -1658,6 +1681,18 @@ begin
   ShowWebPromoActiuniDialog;
 end;
 
+procedure TfrmMainForm.bbWebPopularCategoriesClick(Sender: TObject);
+var
+  dialog: TfrmWebPopularCategoriesDlg;
+begin
+  dialog := TfrmWebPopularCategoriesDlg.Create(Self);
+  try
+    dialog.ShowModal;
+  finally
+    dialog.Free;
+  end;
+end;
+
 procedure TfrmMainForm.bbWebCatalogClick(Sender: TObject);
 begin
   ShowWebCatalogDialog;
@@ -1886,6 +1921,9 @@ begin
   // notificam Frame-u curent despre schimbarea filtrului de date
   fCurrentFrameDataFilter.firmaID := firmaID;
   SWNFrameManager.FrameDataFilterChanged(fCurrentFrameDataFilter);
+
+  // numerele din arbore sunt pe subdiviziune: le recalculam pentru firma noua
+  RefreshPendingDocsIndicator;
 end;
 
 procedure TfrmMainForm.BringDocsByToday;
@@ -2098,7 +2136,9 @@ var
   Data: PDocTypeItem;
 begin
   Data := PDocTypeItem(ANode.Data);
-  if Data^.isFolder then
+  if (not Data^.isFolder) and (PendingDocCount(Data^.DocTypeID) > 0) then
+    AStyle := dmAdditions.cxStyle_TextBoldRed
+  else if Data^.isFolder then
     AStyle := dmAdditions.cxStyle_Bold
   else if (Data^.TabSheetIndex = -1) then
     AStyle := dmAdditions.cxStyle_TextGray;
@@ -2775,6 +2815,18 @@ begin
   end;
 end;
 
+procedure TfrmMainForm.bbPOSTerminalsClick(Sender: TObject);
+var
+  dialog: TfrmPOSTerminalsSetupDlg;
+begin
+  dialog := TfrmPOSTerminalsSetupDlg.Create(Self);
+  try
+    dialog.ShowModal;
+  finally
+    dialog.Free;
+  end;
+end;
+
 procedure TfrmMainForm.bbWorkStationsClick(Sender: TObject);
 var
   dialog: TfrmWorkStationsSetupDlg;
@@ -2822,6 +2874,16 @@ begin
   end;
 
   Application.OnHint := WhenAppHint;
+
+  // Cursul USD in bara de lucru; se reciteste si dupa verificarea cursului la Ultra
+  OnUltraUsdRateChecked := RefreshUsdRateCaption;
+  RefreshUsdRateCaption;
+
+  // Comenzi web si cereri de finantare neprelucrate: nodul lor devine rosu-ingrosat, cu numarul
+  FPendingDocsTimer := TTimer.Create(Self);
+  FPendingDocsTimer.Interval := cPendingDocsRefreshMs;
+  FPendingDocsTimer.OnTimer := PendingDocsTimerTimer;
+  FPendingDocsTimer.Enabled := True;
 
   fCurrentFrameFilterFields := [];
   fCurrentFrameDataFilter := TFrameDataFilteringInfo.Create;
@@ -2917,8 +2979,178 @@ begin
   frmSchedulerDaemon.Hide;
 end;
 
+function StripPendingSuffix(const AText: string): string;
+// Scoate sufixul " (N)" adaugat de TfrmMainForm.RefreshPendingDocsIndicator.
+var
+  P: Integer;
+begin
+  Result := AText;
+  if (Result <> '') and (Result[Length(Result)] = ')') then
+  begin
+    P := LastDelimiter('(', Result);
+    if (P > 1) and (Result[P - 1] = ' ') and
+      (StrToIntDef(Copy(Result, P + 1, Length(Result) - P - 1), -1) >= 0) then
+      Result := Copy(Result, 1, P - 2);
+  end;
+end;
+
+function PendingDocIndex(const ADocTypeID: Integer): Integer;
+// Pozitia tipului in cPendingDocTypes sau -1 daca nu e urmarit.
+var
+  I: Integer;
+begin
+  Result := -1;
+  for I := Low(cPendingDocTypes) to High(cPendingDocTypes) do
+    if cPendingDocTypes[I] = ADocTypeID then
+      Exit(I);
+end;
+
+procedure FlashTaskbarUntilActive(AHandle: HWND);
+// Butonul din taskbar clipeste pana cand operatorul aduce SWN in fata.
+var
+  Info: FLASHWINFO;
+begin
+  FillChar(Info, SizeOf(Info), 0);
+  Info.cbSize := SizeOf(Info);
+  Info.hwnd := AHandle;
+  Info.dwFlags := FLASHW_ALL or FLASHW_TIMERNOFG;
+  FlashWindowEx(Info);
+end;
+
+function TfrmMainForm.PendingDocCount(const ADocTypeID: Integer): Integer;
+var
+  I: Integer;
+begin
+  I := PendingDocIndex(ADocTypeID);
+  if I >= 0 then
+    Result := FPendingDocCounts[I]
+  else
+    Result := 0;
+end;
+
+procedure TfrmMainForm.PendingDocsTimerTimer(Sender: TObject);
+begin
+  if fInShutdown then
+    Exit;
+  RefreshPendingDocsIndicator;
+end;
+
+procedure TfrmMainForm.RefreshPendingDocsIndicator;
+// Numara documentele de prelucrat ale subdiviziunii curente (cPendingDocTypes, nesterse si
+// neinchise, DT = dmDB.CurrentFirma) si le arata in
+// arbore: nodul tipului primeste sufixul " (N)" si stilul rosu-ingrosat din
+// cxTreeDocTypesStylesGetContentStyle. Daca un numar creste cat timp SWN nu e fereastra
+// activa, butonul din taskbar clipeste.
+var
+  I, J, DocTypeID, DocCount: Integer;
+  NewCounts: array[0..1] of Integer;
+  Node: TcxTreeListNode;
+  Data: PDocTypeItem;
+  HasNode, Increased: Boolean;
+  Query: TIBCQuery;
+  BaseText, NewText: string;
+begin
+  // Interogam doar daca utilizatorul are in arbore macar unul dintre nodurile urmarite.
+  HasNode := False;
+  for I := 0 to cxTreeDocTypes.AbsoluteCount - 1 do
+  begin
+    Data := PDocTypeItem(cxTreeDocTypes.AbsoluteItems[I].Data);
+    if Assigned(Data) and not Data^.isFolder and (PendingDocIndex(Data^.DocTypeID) >= 0) then
+    begin
+      HasNode := True;
+      Break;
+    end;
+  end;
+  if not HasNode then
+    Exit;
+
+  for J := Low(NewCounts) to High(NewCounts) do
+    NewCounts[J] := 0;
+  try
+    Query := TIBCQuery.Create(nil);
+    try
+      Query.Connection := dmDB.IBCConnection;
+      Query.Transaction := dmDB.IBCTrDefaultSelect;
+      // Doar subdiviziunea curenta (firma din bara), ca lista documentelor (DT = :DT).
+      // ~20 ms: indexuri pe DT si pe GET_FLG_VALUE(FLAGS, 10) (TDB_DOCS_IDX_F10).
+      Query.SQL.Text := 'SELECT DOCTYPEID, COUNT(*) FROM TDB_DOCS WHERE DOCTYPEID IN (:DT1, :DT2)' +
+        ' AND DT = :FIRMA AND DELETED_DATE IS NULL AND GET_FLG_VALUE(FLAGS, 10) = 0 GROUP BY DOCTYPEID';
+      Query.ParamByName('FIRMA').AsInteger := dmDB.CurrentFirma;
+      Query.ParamByName('DT1').AsInteger := cPendingDocTypes[0];
+      Query.ParamByName('DT2').AsInteger := cPendingDocTypes[1];
+      Query.Open;
+      while not Query.Eof do
+      begin
+        DocTypeID := Query.Fields[0].AsInteger;
+        DocCount := Query.Fields[1].AsInteger;
+        J := PendingDocIndex(DocTypeID);
+        if J >= 0 then
+          NewCounts[J] := DocCount;
+        Query.Next;
+      end;
+      Query.Close;
+    finally
+      Query.Free;
+    end;
+  except
+    // legatura cu serverul poate fi pierduta; reincercam la urmatorul tic
+    Exit;
+  end;
+
+  Increased := False;
+  for J := Low(NewCounts) to High(NewCounts) do
+  begin
+    if NewCounts[J] > FPendingDocCounts[J] then
+      Increased := True;
+    FPendingDocCounts[J] := NewCounts[J];
+  end;
+  if Increased and not Application.Active then
+    FlashTaskbarUntilActive(Handle);
+
+  for I := 0 to cxTreeDocTypes.AbsoluteCount - 1 do
+  begin
+    Node := cxTreeDocTypes.AbsoluteItems[I];
+    Data := PDocTypeItem(Node.Data);
+    if not Assigned(Data) or Data^.isFolder then
+      Continue;
+    J := PendingDocIndex(Data^.DocTypeID);
+    if J < 0 then
+      Continue;
+    BaseText := StripPendingSuffix(Node.Texts[0]);
+    if FPendingDocCounts[J] > 0 then
+      NewText := Format('%s (%d)', [BaseText, FPendingDocCounts[J]])
+    else
+      NewText := BaseText;
+    if Node.Texts[0] <> NewText then
+      Node.Texts[0] := NewText;
+  end;
+  // stilul depinde de FPendingDocCounts: redesenam si cand textul a ramas acelasi
+  cxTreeDocTypes.Invalidate;
+end;
+
+procedure TfrmMainForm.RefreshUsdRateCaption;
+// Cursul USD din TS_CURRENCY (840): comercial (EXCHANGE_RATE) in eticheta, BNM in hint.
+var
+  Rate, BnmRate: Double;
+begin
+  if not Assigned(bsUsdRate) then
+    Exit;
+  try
+    Rate := dmDB.GetCurrencyExchangeValue(840, False);
+    BnmRate := dmDB.GetCurrencyExchangeValue(840, False, True);
+    bsUsdRate.Caption := 'USD: ' + FormatFloat('0.00##', Rate);
+    bsUsdRate.Hint := 'Curs USD: ' + FormatFloat('0.00##', Rate) + ' | BNM: ' + FormatFloat('0.00##', BnmRate);
+  except
+    bsUsdRate.Caption := 'USD: -';
+  end;
+end;
+
 procedure TfrmMainForm.FormDestroy(Sender: TObject);
 begin
+  OnUltraUsdRateChecked := nil;
+  if Assigned(FPendingDocsTimer) then
+    FPendingDocsTimer.Enabled := False;
+
   if Assigned(winChatWindow) then
   begin
     SaveChatPanelPosition;
@@ -4061,6 +4293,7 @@ begin
     bbMainMenuRef_Enterprises.Visible := ivNever;
     bbMCC.Visible := ivNever;
     bbWorkStations.Visible := ivNever;
+    bbPOSTerminals.Visible := ivNever;
     bbAutoTransport.Visible := ivNever;
     bbSupplierPickups.Visible := ivNever;
     bbSupplierOrderRules.Visible := ivNever;
@@ -4640,6 +4873,9 @@ begin
   finally
     cxTreeDocTypes.EndUpdate;
   end;
+
+  // arborele e reconstruit: reafisam imediat documentele de prelucrat
+  RefreshPendingDocsIndicator;
 end;
 
 procedure TfrmMainForm.ShowDocumentTypeAnalyticsDialog;
@@ -5984,6 +6220,8 @@ begin
 //            NewCustomFrame := Tframe131OlisGrup.Create(self);
     132:
       NewCustomFrame := Tframe132DMLink.Create(self);
+    133: // POS - vinzari din magazin cu casa
+      NewCustomFrame := Tframe133POS.Create(self);
 
   end;
   // custom actions

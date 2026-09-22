@@ -750,8 +750,8 @@ end;
 
 procedure TfrmWebCatalogDlg.Prepare;
 begin
-    if (FirmaID = 0) then
-        FirmaID := 5213; //dmdb.CurrentFirma;
+//    if (FirmaID = 0) then
+    FirmaID := dmdb.CurrentFirma;
     IBCQueryTree.ParamByName('DT').AsInteger := FirmaID;
     IBCQueryTree.Active := True;
 

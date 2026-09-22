@@ -3,7 +3,7 @@ object frmWebZakazDocDlg: TfrmWebZakazDocDlg
   Top = 0
   BorderStyle = bsDialog
   Caption = 'Web comanda'
-  ClientHeight = 580
+  ClientHeight = 592
   ClientWidth = 1000
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -15,7 +15,7 @@ object frmWebZakazDocDlg: TfrmWebZakazDocDlg
   OnClose = FormClose
   DesignSize = (
     1000
-    580)
+    592)
   TextHeight = 15
   object dtDialogTitle: TDialogTitle
     Left = 0
@@ -39,7 +39,7 @@ object frmWebZakazDocDlg: TfrmWebZakazDocDlg
   end
   object dxStatusBar1: TdxStatusBar
     Left = 0
-    Top = 560
+    Top = 572
     Width = 1000
     Height = 20
     Panels = <
@@ -53,6 +53,7 @@ object frmWebZakazDocDlg: TfrmWebZakazDocDlg
     Font.Name = 'Tahoma'
     Font.Style = []
     ParentFont = False
+    ExplicitTop = 560
   end
   object pnClient: TScrollBox
     Left = 8
@@ -66,7 +67,7 @@ object frmWebZakazDocDlg: TfrmWebZakazDocDlg
     object lblSecDocument: TLabel
       Left = 12
       Top = 8
-      Width = 86
+      Width = 87
       Height = 15
       Caption = 'Date document'
       Font.Charset = DEFAULT_CHARSET
@@ -87,7 +88,7 @@ object frmWebZakazDocDlg: TfrmWebZakazDocDlg
     object cxLabel5: TLabel
       Left = 12
       Top = 41
-      Width = 25
+      Width = 24
       Height = 15
       Caption = 'Data'
       Transparent = True
@@ -95,7 +96,7 @@ object frmWebZakazDocDlg: TfrmWebZakazDocDlg
     object lblStare: TLabel
       Left = 282
       Top = 41
-      Width = 30
+      Width = 26
       Height = 15
       Caption = 'Stare'
       Transparent = True
@@ -103,7 +104,7 @@ object frmWebZakazDocDlg: TfrmWebZakazDocDlg
     object lblOrganizatie: TLabel
       Left = 12
       Top = 77
-      Width = 64
+      Width = 60
       Height = 15
       Caption = 'Organizatie'
       Transparent = True
@@ -111,7 +112,7 @@ object frmWebZakazDocDlg: TfrmWebZakazDocDlg
     object lblAnaliticaOrg: TLabel
       Left = 12
       Top = 113
-      Width = 77
+      Width = 70
       Height = 15
       Caption = 'Analitica org.'
       Transparent = True
@@ -119,7 +120,7 @@ object frmWebZakazDocDlg: TfrmWebZakazDocDlg
     object cxLabel1: TLabel
       Left = 12
       Top = 149
-      Width = 78
+      Width = 72
       Height = 15
       Caption = 'Analitica doc.'
       Transparent = True
@@ -143,7 +144,7 @@ object frmWebZakazDocDlg: TfrmWebZakazDocDlg
     object lblSecFinante: TLabel
       Left = 12
       Top = 258
-      Width = 87
+      Width = 78
       Height = 15
       Caption = 'Valuta si sume'
       Font.Charset = DEFAULT_CHARSET
@@ -164,7 +165,7 @@ object frmWebZakazDocDlg: TfrmWebZakazDocDlg
     object cxLabel3: TLabel
       Left = 12
       Top = 291
-      Width = 35
+      Width = 32
       Height = 15
       Caption = 'Valuta'
       Transparent = True
@@ -172,7 +173,7 @@ object frmWebZakazDocDlg: TfrmWebZakazDocDlg
     object lblRata: TLabel
       Left = 248
       Top = 291
-      Width = 25
+      Width = 23
       Height = 15
       Caption = 'Rata'
       Transparent = True
@@ -196,7 +197,7 @@ object frmWebZakazDocDlg: TfrmWebZakazDocDlg
     object lblSecLivrare: TLabel
       Left = 516
       Top = 8
-      Width = 42
+      Width = 39
       Height = 15
       Caption = 'Livrare'
       Font.Charset = DEFAULT_CHARSET
@@ -217,7 +218,7 @@ object frmWebZakazDocDlg: TfrmWebZakazDocDlg
     object cxLabel8: TLabel
       Left = 516
       Top = 326
-      Width = 55
+      Width = 50
       Height = 15
       Caption = 'Mentiuni'
       Font.Charset = DEFAULT_CHARSET
@@ -300,7 +301,7 @@ object frmWebZakazDocDlg: TfrmWebZakazDocDlg
       Properties.ViewStyle = vsHideCursor
       Properties.OnButtonClick = beDT_NAMEPropertiesButtonClick
       ShowHint = True
-      TabOrder = 2
+      TabOrder = 1
       Text = 'beDT_NAME'
       Width = 380
     end
@@ -321,7 +322,7 @@ object frmWebZakazDocDlg: TfrmWebZakazDocDlg
       Properties.ListOptions.ShowHeader = False
       Properties.ListSource = dmDB.IBCDataSourceAnalitica
       ShowHint = True
-      TabOrder = 3
+      TabOrder = 2
       Width = 380
     end
     object lcbAnalytics: TcxDBLookupComboBox
@@ -349,7 +350,7 @@ object frmWebZakazDocDlg: TfrmWebZakazDocDlg
       Properties.ListOptions.ShowHeader = False
       Properties.ListSource = dmDB.IBCDataSourceAnalytics
       ShowHint = True
-      TabOrder = 4
+      TabOrder = 3
       Width = 380
     end
     object beCT_NAME: TcxButtonEdit
@@ -402,7 +403,7 @@ object frmWebZakazDocDlg: TfrmWebZakazDocDlg
       Properties.ViewStyle = vsHideCursor
       Properties.OnButtonClick = beCT_NAMEPropertiesButtonClick
       ShowHint = True
-      TabOrder = 5
+      TabOrder = 4
       Text = 'beCT_NAME'
       Width = 380
     end
@@ -431,7 +432,7 @@ object frmWebZakazDocDlg: TfrmWebZakazDocDlg
       Properties.ListOptions.ShowHeader = False
       Properties.ListSource = dmDB.IBCDataSourceStocks
       ShowHint = True
-      TabOrder = 6
+      TabOrder = 5
       Width = 380
     end
     object lcbCURRENCY: TcxDBLookupComboBox
@@ -451,7 +452,7 @@ object frmWebZakazDocDlg: TfrmWebZakazDocDlg
         end>
       Properties.ListOptions.ShowHeader = False
       Properties.ListSource = dmDB.IBCDataSourceCurrency
-      TabOrder = 7
+      TabOrder = 6
       Width = 120
     end
     object ceRATE: TcxDBCalcEdit
@@ -461,7 +462,7 @@ object frmWebZakazDocDlg: TfrmWebZakazDocDlg
       DataBinding.DataSource = dmDB.IBCDataSourceDocs
       Enabled = False
       Properties.ImmediatePost = True
-      TabOrder = 8
+      TabOrder = 7
       Width = 100
     end
     object ceRATEUSD: TcxDBCalcEdit
@@ -471,7 +472,7 @@ object frmWebZakazDocDlg: TfrmWebZakazDocDlg
       DataBinding.DataSource = dmDB.IBCDataSourceDocs
       Enabled = False
       Properties.ImmediatePost = True
-      TabOrder = 9
+      TabOrder = 8
       Width = 120
     end
     object ceCashback: TcxDBCalcEdit
@@ -483,7 +484,7 @@ object frmWebZakazDocDlg: TfrmWebZakazDocDlg
       ParentShowHint = False
       Properties.ReadOnly = True
       ShowHint = True
-      TabOrder = 10
+      TabOrder = 9
       Width = 100
     end
     object cbFLG_ACNT: TcxDBCheckBox
@@ -498,8 +499,7 @@ object frmWebZakazDocDlg: TfrmWebZakazDocDlg
       Properties.ValueChecked = 1
       Properties.ValueUnchecked = 0
       Style.TransparentBorder = False
-      TabOrder = 11
-      Width = 130
+      TabOrder = 10
     end
     inline frameDelivery: TframeDocsDelivery
       Left = 516
@@ -509,6 +509,81 @@ object frmWebZakazDocDlg: TfrmWebZakazDocDlg
       TabOrder = 12
       ExplicitLeft = 516
       ExplicitTop = 34
+      ExplicitWidth = 460
+      inherited lbEmptyHint: TLabel
+        Width = 460
+        StyleElements = [seFont, seClient, seBorder]
+      end
+      inherited cxDBVerticalGrid1: TcxDBVerticalGrid
+        Width = 460
+        ExplicitWidth = 460
+        Version = 1
+        inherited cxDBVerticalGrid1DOCID: TcxDBEditorRow
+          ID = 0
+          ParentID = -1
+          Index = 0
+          Version = 1
+        end
+        inherited cxDBVerticalGrid1COURIERID: TcxDBEditorRow
+          ID = 1
+          ParentID = -1
+          Index = 1
+          Version = 1
+        end
+        inherited cxDBVerticalGrid1CategoryRow2: TcxCategoryRow
+          ID = 2
+          ParentID = -1
+          Index = 2
+          Version = 1
+        end
+        inherited cxDBVerticalGrid1COURIER_NAME: TcxDBEditorRow
+          ID = 3
+          ParentID = 2
+          Index = 0
+          Version = 1
+        end
+        inherited cxDBVerticalGrid1AWB: TcxDBEditorRow
+          ID = 4
+          ParentID = 2
+          Index = 1
+          Version = 1
+        end
+        inherited cxDBVerticalGrid1DBMultiEditorRow1: TcxDBMultiEditorRow
+          ID = 5
+          ParentID = 2
+          Index = 2
+          Version = 1
+        end
+        inherited cxDBVerticalGrid1CategoryRow1: TcxCategoryRow
+          ID = 6
+          ParentID = -1
+          Index = 3
+          Version = 1
+        end
+        inherited cxDBVerticalGrid1DELIVERY_DATE: TcxDBEditorRow
+          ID = 7
+          ParentID = 6
+          Index = 0
+          Version = 1
+        end
+        inherited cxDBVerticalGrid1DELIVERY_TIME: TcxDBEditorRow
+          ID = 8
+          ParentID = 6
+          Index = 1
+          Version = 1
+        end
+        inherited cxDBVerticalGrid1DELIVERY_ADDRESS: TcxDBEditorRow
+          ID = 9
+          ParentID = 6
+          Index = 2
+          Version = 1
+        end
+      end
+      inherited pnButtons: TPanel
+        Width = 460
+        StyleElements = [seFont, seClient, seBorder]
+        ExplicitWidth = 460
+      end
     end
     object mmCOMMENTS: TcxDBMemo
       Left = 516
@@ -522,14 +597,14 @@ object frmWebZakazDocDlg: TfrmWebZakazDocDlg
       Properties.VisibleLineCount = 4
       Properties.WantReturns = False
       ShowHint = True
-      TabOrder = 13
+      TabOrder = 11
       OnClick = mmCOMMENTSClick
       Width = 460
     end
   end
   object btnOk: TcxButton
     Left = 804
-    Top = 523
+    Top = 535
     Width = 90
     Height = 29
     Anchors = [akRight, akBottom]
@@ -537,10 +612,11 @@ object frmWebZakazDocDlg: TfrmWebZakazDocDlg
     Default = True
     ModalResult = 1
     TabOrder = 3
+    ExplicitTop = 523
   end
   object btnCancel: TcxButton
     Left = 902
-    Top = 523
+    Top = 535
     Width = 90
     Height = 29
     Anchors = [akRight, akBottom]
@@ -548,6 +624,7 @@ object frmWebZakazDocDlg: TfrmWebZakazDocDlg
     Caption = 'Renunta'
     ModalResult = 2
     TabOrder = 4
+    ExplicitTop = 523
   end
   object IBCQueryCashback: TIBCQuery
     Connection = dmDB.IBCConnection

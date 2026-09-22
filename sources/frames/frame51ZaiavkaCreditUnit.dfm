@@ -168,6 +168,13 @@ inherited frame51ZaiavkaCredit: Tframe51ZaiavkaCredit
         Options.HorzSizing = False
         Width = 40
       end
+      object cxGridWZ_RESPONSIBLE_USERNAME: TcxGridDBColumn
+        Caption = 'Responsabil'
+        DataBinding.FieldName = 'RESPONSIBLE_USERNAME'
+        MinWidth = 100
+        Options.HorzSizing = False
+        Width = 100
+      end
       object cxGridWZ_CREATED_BY_NAME: TcxGridDBColumn
         Caption = 'Utilizator'
         DataBinding.FieldName = 'CREATED_BY_NAME'

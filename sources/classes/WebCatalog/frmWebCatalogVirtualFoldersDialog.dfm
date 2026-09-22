@@ -11,9 +11,7 @@ object frmWebCatalogVirtualFoldersDlg: TfrmWebCatalogVirtualFoldersDlg
   Font.Height = -12
   Font.Name = 'Segoe UI'
   Font.Style = []
-  OldCreateOrder = False
   Position = poOwnerFormCenter
-  PixelsPerInch = 96
   TextHeight = 15
   object dtDialogTitle: TDialogTitle
     Left = 0
@@ -67,7 +65,7 @@ object frmWebCatalogVirtualFoldersDlg: TfrmWebCatalogVirtualFoldersDlg
       object Label1: TLabel
         Left = 12
         Top = 16
-        Width = 108
+        Width = 110
         Height = 15
         Caption = 'Mape virtuale pentru'
       end
@@ -98,15 +96,10 @@ object frmWebCatalogVirtualFoldersDlg: TfrmWebCatalogVirtualFoldersDlg
       Align = alClient
       TabOrder = 2
       object cxGridTable: TcxGridDBTableView
-        Navigator.Buttons.CustomButtons = <>
-        ScrollbarAnnotations.CustomAnnotations = <>
         OnCellDblClick = cxGridTableCellDblClick
         OnFocusedRecordChanged = cxGridTableFocusedRecordChanged
         DataController.DataSource = IBCDataSourceFolders
         DataController.KeyFieldNames = 'ID'
-        DataController.Summary.DefaultGroupSummaryItems = <>
-        DataController.Summary.FooterSummaryItems = <>
-        DataController.Summary.SummaryGroups = <>
         OptionsCustomize.ColumnFiltering = False
         OptionsCustomize.ColumnSorting = False
         OptionsData.Deleting = False
@@ -123,7 +116,6 @@ object frmWebCatalogVirtualFoldersDlg: TfrmWebCatalogVirtualFoldersDlg
         Styles.Header = dmAdditions.cxStyle_GridHeader
         Styles.Inactive = dmAdditions.cxStyle_GirdContentInactive
         object cxGridTable_ID: TcxGridDBColumn
-          Caption = 'ID'
           DataBinding.FieldName = 'ID'
           HeaderAlignmentHorz = taCenter
           MinWidth = 40
@@ -190,10 +182,10 @@ object frmWebCatalogVirtualFoldersDlg: TfrmWebCatalogVirtualFoldersDlg
           Caption = 'Ordine'
           DataBinding.FieldName = 'ORDERNO'
           HeaderAlignmentHorz = taCenter
-          SortIndex = 0
-          SortOrder = soAscending
           MinWidth = 50
           Options.HorzSizing = False
+          SortIndex = 0
+          SortOrder = soAscending
           Width = 50
         end
       end
@@ -308,13 +300,19 @@ object frmWebCatalogVirtualFoldersDlg: TfrmWebCatalogVirtualFoldersDlg
     GeneratorMode = gmInsert
     SQLInsert.Strings = (
       'INSERT INTO VW_TWEB_CATALOG_VIRTUAL'
-      '  (ID, CATALOGID, TITLE_ROM, TITLE_RUS, H1_ROM, H1_RUS, REWRITE_URL,'
+      
+        '  (ID, CATALOGID, TITLE_ROM, TITLE_RUS, H1_ROM, H1_RUS, REWRITE_' +
+        'URL,'
       '   FILTERID, FILTERPARAMIDS, ORDERNO, FLG_ENABLED, FLG_TILE,'
       '   META_TITLE_ROM, META_TITLE_RUS, META_DESCRIPTION_ROM,'
       '   META_DESCRIPTION_RUS, SEO_TEXT_ROM, SEO_TEXT_RUS)'
       'VALUES'
-      '  (:ID, :CATALOGID, :TITLE_ROM, :TITLE_RUS, :H1_ROM, :H1_RUS, :REWRITE_URL,'
-      '   :FILTERID, :FILTERPARAMIDS, :ORDERNO, :FLG_ENABLED, :FLG_TILE,'
+      
+        '  (:ID, :CATALOGID, :TITLE_ROM, :TITLE_RUS, :H1_ROM, :H1_RUS, :R' +
+        'EWRITE_URL,'
+      
+        '   :FILTERID, :FILTERPARAMIDS, :ORDERNO, :FLG_ENABLED, :FLG_TILE' +
+        ','
       '   :META_TITLE_ROM, :META_TITLE_RUS, :META_DESCRIPTION_ROM,'
       '   :META_DESCRIPTION_RUS, :SEO_TEXT_ROM, :SEO_TEXT_RUS)')
     SQLDelete.Strings = (

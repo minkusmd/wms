@@ -1,0 +1,11 @@
+[Database]
+Host=192.168.106.254
+Database=sw
+User=SYSDBA
+Password=
+CharacterSet=UTF8
+ClientLibrary=fbclient.dll
+
+[Loader]
+SupplierId=262735
+RequestDelayMs=250

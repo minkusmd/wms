@@ -861,7 +861,6 @@ object frmGoodsEditorDialog: TfrmGoodsEditorDialog
     Default = True
     ModalResult = 1
     TabOrder = 3
-    ExplicitTop = 659
   end
   object btnCancel: TcxButton
     Left = 845
@@ -873,7 +872,6 @@ object frmGoodsEditorDialog: TfrmGoodsEditorDialog
     Caption = 'Renunta'
     ModalResult = 2
     TabOrder = 4
-    ExplicitTop = 659
   end
   object dxStatusBar1: TdxStatusBar
     Left = 0
@@ -898,7 +896,6 @@ object frmGoodsEditorDialog: TfrmGoodsEditorDialog
     Font.Name = 'Segoe UI'
     Font.Style = []
     ParentFont = False
-    ExplicitTop = 694
   end
   object dxBarManagerGoods: TdxBarManager
     Scaled = False

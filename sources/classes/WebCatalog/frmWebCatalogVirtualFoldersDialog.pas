@@ -20,7 +20,7 @@ uses
     cxEdit, DB, cxDBData, dxBar, cxClasses, cxGridLevel, cxGridCustomView,
     cxGridCustomTableView, cxGridTableView, cxGridDBTableView, cxGrid, cxContainer,
     cxTextEdit, DBAccess, IBC, MemDS, cxNavigator, dxDateRanges,
-    dxScrollbarAnnotations;
+    dxScrollbarAnnotations, cxCheckBox;
 
 type
     TfrmWebCatalogVirtualFoldersDlg = class(TSWNCustomForm)

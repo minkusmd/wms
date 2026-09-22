@@ -1,9 +1,9 @@
 object frmCustomerEditorDialog: TfrmCustomerEditorDialog
   Left = 0
   Top = 0
-  ActiveControl = btnDeleteSufix
+  ActiveControl = edName
   BorderStyle = bsDialog
-  Caption = 'RRP_DISCOUNT'
+  Caption = 'Modifica clienti'
   ClientHeight = 650
   ClientWidth = 815
   Color = clBtnFace
@@ -63,7 +63,7 @@ object frmCustomerEditorDialog: TfrmCustomerEditorDialog
       end
       object cxLabel16: TLabel
         Left = 508
-        Top = 57
+        Top = 78
         Width = 63
         Height = 15
         Caption = 'Statut client'
@@ -71,7 +71,7 @@ object frmCustomerEditorDialog: TfrmCustomerEditorDialog
       end
       object Label2: TLabel
         Left = 508
-        Top = 106
+        Top = 130
         Width = 53
         Height = 15
         Caption = 'Web page'
@@ -79,7 +79,7 @@ object frmCustomerEditorDialog: TfrmCustomerEditorDialog
       end
       object cxLabel17: TLabel
         Left = 508
-        Top = 155
+        Top = 179
         Width = 64
         Height = 15
         Caption = 'Grila de pret'
@@ -87,7 +87,7 @@ object frmCustomerEditorDialog: TfrmCustomerEditorDialog
       end
       object Label4: TLabel
         Left = 606
-        Top = 158
+        Top = 182
         Width = 70
         Height = 15
         Caption = 'RRP discount'
@@ -95,7 +95,7 @@ object frmCustomerEditorDialog: TfrmCustomerEditorDialog
       end
       object Label1: TLabel
         Left = 503
-        Top = 205
+        Top = 229
         Width = 65
         Height = 15
         Caption = 'Data nasterii'
@@ -103,7 +103,7 @@ object frmCustomerEditorDialog: TfrmCustomerEditorDialog
       end
       object Label6: TLabel
         Left = 625
-        Top = 205
+        Top = 229
         Width = 31
         Height = 15
         Caption = 'Genul'
@@ -111,7 +111,7 @@ object frmCustomerEditorDialog: TfrmCustomerEditorDialog
       end
       object Label7: TLabel
         Left = 15
-        Top = 11
+        Top = 9
         Width = 129
         Height = 15
         Caption = 'Denumirea intreprinderii'
@@ -119,7 +119,7 @@ object frmCustomerEditorDialog: TfrmCustomerEditorDialog
       end
       object cxLabel18: TLabel
         Left = 340
-        Top = 85
+        Top = 83
         Width = 37
         Height = 15
         Caption = 'TVA, %'
@@ -127,7 +127,7 @@ object frmCustomerEditorDialog: TfrmCustomerEditorDialog
       end
       object cxLabel7: TLabel
         Left = 15
-        Top = 138
+        Top = 136
         Width = 73
         Height = 15
         Caption = 'Administrator'
@@ -135,7 +135,7 @@ object frmCustomerEditorDialog: TfrmCustomerEditorDialog
       end
       object cxLabel8: TLabel
         Left = 228
-        Top = 138
+        Top = 136
         Width = 65
         Height = 15
         Caption = 'Contabil-sef'
@@ -143,7 +143,7 @@ object frmCustomerEditorDialog: TfrmCustomerEditorDialog
       end
       object cxLabel10: TLabel
         Left = 15
-        Top = 88
+        Top = 86
         Width = 52
         Height = 15
         Caption = 'Cod fiscal'
@@ -151,7 +151,7 @@ object frmCustomerEditorDialog: TfrmCustomerEditorDialog
       end
       object cxLabel11: TLabel
         Left = 228
-        Top = 85
+        Top = 83
         Width = 46
         Height = 15
         Caption = 'Cod TVA'
@@ -159,7 +159,7 @@ object frmCustomerEditorDialog: TfrmCustomerEditorDialog
       end
       object btnGetSFSData: TSpeedButton
         Left = 396
-        Top = 103
+        Top = 101
         Width = 25
         Height = 24
         Hint = 
@@ -192,12 +192,12 @@ object frmCustomerEditorDialog: TfrmCustomerEditorDialog
         Properties.ListOptions.ShowHeader = False
         Properties.ListSource = IBCDataSourceCustomerType
         Properties.OnChange = cmbCustomerTypePropertiesChange
-        TabOrder = 1
+        TabOrder = 2
         Width = 207
       end
       object cmbCustomerStatus: TcxDBLookupComboBox
         Left = 508
-        Top = 78
+        Top = 99
         DataBinding.DataField = 'CUSTOMER_STATUS_ID'
         ParentFont = False
         Properties.DropDownRows = 16
@@ -220,15 +220,15 @@ object frmCustomerEditorDialog: TfrmCustomerEditorDialog
       end
       object edWEBPAGE: TcxDBTextEdit
         Left = 508
-        Top = 124
+        Top = 148
         DataBinding.DataField = 'WEBPAGE'
         ParentFont = False
-        TabOrder = 9
+        TabOrder = 11
         Width = 207
       end
       object cxPageControl1: TcxPageControl
         Left = 15
-        Top = 255
+        Top = 258
         Width = 700
         Height = 209
         TabOrder = 18
@@ -276,9 +276,6 @@ object frmCustomerEditorDialog: TfrmCustomerEditorDialog
               Left = 208
               Top = 40
               PixelsPerInch = 96
-              inherited dxBarManager1Bar1: TdxBar
-                Visible = True
-              end
             end
           end
         end
@@ -302,9 +299,6 @@ object frmCustomerEditorDialog: TfrmCustomerEditorDialog
             end
             inherited dxBarManager1: TdxBarManager
               PixelsPerInch = 96
-              inherited dxBarManager1Bar1: TdxBar
-                Visible = True
-              end
             end
             inherited IBCQueryCustomerPhones: TIBCQuery
               CachedUpdates = True
@@ -352,9 +346,6 @@ object frmCustomerEditorDialog: TfrmCustomerEditorDialog
             end
             inherited dxBarManager1: TdxBarManager
               PixelsPerInch = 96
-              inherited dxBarManager1Bar1: TdxBar
-                Visible = True
-              end
             end
           end
         end
@@ -380,9 +371,6 @@ object frmCustomerEditorDialog: TfrmCustomerEditorDialog
               Left = 296
               Top = 24
               PixelsPerInch = 96
-              inherited dxBarManager1Bar1: TdxBar
-                Visible = True
-              end
             end
             inherited IBCQueryCustomerEMail: TIBCQuery
               Top = 72
@@ -396,35 +384,35 @@ object frmCustomerEditorDialog: TfrmCustomerEditorDialog
       end
       object cmbPriceColumn: TcxDBComboBox
         Left = 508
-        Top = 176
+        Top = 200
         DataBinding.DataField = 'PRICECOLUMN'
         ParentFont = False
         Properties.Alignment.Horz = taLeftJustify
         Properties.DropDownListStyle = lsFixedList
         Properties.Items.Strings = (
           '1,5')
-        TabOrder = 12
+        TabOrder = 14
         Width = 63
       end
       object ceRRPDiscount: TcxDBCalcEdit
         Left = 610
-        Top = 176
+        Top = 200
         DataBinding.DataField = 'RRP_DISCOUNT'
-        TabOrder = 13
+        TabOrder = 15
         Width = 60
       end
       object cxButton2: TcxButton
         Left = 198
-        Top = 102
+        Top = 100
         Width = 24
         Height = 25
         Caption = '...'
-        TabOrder = 14
+        TabOrder = 7
         OnClick = cxButton2Click
       end
       object deBIRTH_DATE: TcxDBDateEdit
         Left = 503
-        Top = 226
+        Top = 233
         DataBinding.DataField = 'BIRTH_DATE'
         ParentFont = False
         Properties.DateButtons = [btnToday]
@@ -432,43 +420,43 @@ object frmCustomerEditorDialog: TfrmCustomerEditorDialog
         Properties.SaveTime = False
         Properties.ShowTime = False
         Properties.WeekNumbers = True
-        TabOrder = 7
+        TabOrder = 16
         Width = 101
       end
       object cbGender: TcxDBComboBox
         Left = 625
-        Top = 226
+        Top = 233
         DataBinding.DataField = 'GENDER'
         ParentFont = False
         Properties.DropDownListStyle = lsFixedList
         Properties.Items.Strings = (
           'M'
           'F')
-        TabOrder = 8
+        TabOrder = 17
         Width = 66
       end
       object edName: TcxDBTextEdit
         Left = 15
-        Top = 28
+        Top = 26
         DataBinding.DataField = 'NAME'
         ParentFont = False
         Properties.CharCase = ecUpperCase
         Style.TextStyle = [fsBold]
-        TabOrder = 2
+        TabOrder = 0
         Width = 385
       end
       object btnDeleteSufix: TcxButton
         Left = 406
-        Top = 26
+        Top = 24
         Width = 29
         Height = 26
         Caption = 'X'
-        TabOrder = 0
+        TabOrder = 1
         OnClick = btnDeleteSufixClick
       end
       object cmbVAT: TcxDBComboBox
         Left = 340
-        Top = 103
+        Top = 101
         DataBinding.DataField = 'VAT'
         ParentFont = False
         Properties.Alignment.Horz = taLeftJustify
@@ -477,12 +465,12 @@ object frmCustomerEditorDialog: TfrmCustomerEditorDialog
           '20'
           '0'
           '-1')
-        TabOrder = 17
+        TabOrder = 10
         Width = 50
       end
       object cbRezident: TcxDBCheckBox
         Left = 18
-        Top = 58
+        Top = 56
         Caption = 'Rezident'
         DataBinding.DataField = 'REZIDENT'
         ParentFont = False
@@ -490,48 +478,48 @@ object frmCustomerEditorDialog: TfrmCustomerEditorDialog
         Properties.ValueChecked = 'R'
         Properties.ValueUnchecked = 'N'
         Style.TransparentBorder = False
-        TabOrder = 5
+        TabOrder = 3
       end
       object edChief: TcxDBTextEdit
         Left = 15
-        Top = 159
+        Top = 157
         DataBinding.DataField = 'CHIEF'
         ParentFont = False
         Properties.CharCase = ecUpperCase
-        TabOrder = 10
+        TabOrder = 12
         Width = 207
       end
       object edAccountant: TcxDBTextEdit
         Left = 228
-        Top = 159
+        Top = 157
         DataBinding.DataField = 'ACCOUNTANT'
         ParentFont = False
         Properties.CharCase = ecUpperCase
-        TabOrder = 11
+        TabOrder = 13
         Width = 162
       end
       object edIDEN: TcxDBTextEdit
         Left = 15
-        Top = 103
+        Top = 101
         DataBinding.DataField = 'IDEN_NUMBER'
         ParentFont = False
         Properties.CharCase = ecUpperCase
         Properties.ValidateOnEnter = True
-        TabOrder = 15
+        TabOrder = 8
         Width = 177
       end
       object edVAT: TcxDBTextEdit
         Left = 228
-        Top = 103
+        Top = 101
         DataBinding.DataField = 'VAT_NUMBER'
         ParentFont = False
         Properties.CharCase = ecUpperCase
-        TabOrder = 16
+        TabOrder = 9
         Width = 98
       end
       object cbsFurnizor: TcxDBCheckBox
         Left = 191
-        Top = 57
+        Top = 55
         Caption = 'Furnizor'
         DataBinding.DataField = 'FLG_FURNIZOR'
         ParentFont = False
@@ -539,11 +527,11 @@ object frmCustomerEditorDialog: TfrmCustomerEditorDialog
         Properties.ValueChecked = '1'
         Properties.ValueUnchecked = '0'
         Style.TransparentBorder = False
-        TabOrder = 3
+        TabOrder = 4
       end
       object cbsCumparator: TcxDBCheckBox
         Left = 266
-        Top = 57
+        Top = 55
         Caption = 'Cumparator'
         DataBinding.DataField = 'FLG_CUMPARATOR'
         ParentFont = False
@@ -551,7 +539,7 @@ object frmCustomerEditorDialog: TfrmCustomerEditorDialog
         Properties.ValueChecked = '1'
         Properties.ValueUnchecked = '0'
         Style.TransparentBorder = False
-        TabOrder = 4
+        TabOrder = 5
       end
     end
     object tbsClientPrices: TTabSheet
@@ -624,7 +612,7 @@ object frmCustomerEditorDialog: TfrmCustomerEditorDialog
     Caption = 'OK'
     Default = True
     ModalResult = 1
-    TabOrder = 2
+    TabOrder = 3
   end
   object btnCancel: TcxButton
     Left = 698
@@ -635,7 +623,7 @@ object frmCustomerEditorDialog: TfrmCustomerEditorDialog
     Cancel = True
     Caption = 'Renunta'
     ModalResult = 2
-    TabOrder = 3
+    TabOrder = 4
   end
   object dxStatusBar1: TdxStatusBar
     Left = 0
@@ -660,7 +648,7 @@ object frmCustomerEditorDialog: TfrmCustomerEditorDialog
     Height = 25
     Anchors = [akRight, akBottom]
     Caption = 'Note despre client'
-    TabOrder = 5
+    TabOrder = 2
     OnClick = cxButton1Click
   end
   object IBCQueryCity: TIBCQuery

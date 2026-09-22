@@ -171,9 +171,10 @@ var
 begin
   SetupSecurityItems;
 
-  if not fReadOnly then
-    dmDB.IBCQueryDocs.UpdateTransaction.StartTransaction;
   try
+    if not fReadOnly and not dmDB.IBCQueryDocs.UpdateTransaction.Active then
+      dmDB.IBCQueryDocs.UpdateTransaction.StartTransaction;
+
     dmDB.IBCQueryCurrency.Active := True;
     dmDB.IBCQueryStocks.Active := True;
 
@@ -240,7 +241,7 @@ begin
     if dmDB.IBCQueryDocs.State in dsEditModes then
       dmDB.IBCQueryDocs.Cancel;
     dmdb.IBCQueryDocComments.Close;
-    if not fReadOnly then
+    if not fReadOnly and dmDB.IBCQueryDocs.UpdateTransaction.Active then
       dmDB.IBCQueryDocs.UpdateTransaction.Rollback;
 
     CloseAdditionaldataSources;
@@ -322,7 +323,7 @@ begin
   frameDelivery.CancelData;
 
   dmDB.IBCQueryDocs.Cancel;
-  if not fReadOnly then
+  if not fReadOnly and dmDB.IBCQueryDocs.UpdateTransaction.Active then
     dmDB.IBCQueryDocs.UpdateTransaction.Rollback;
 end;
 

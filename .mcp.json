@@ -7,6 +7,17 @@
         "--fb-token",
         "YOUR_META_ACCESS_TOKEN"
       ]
+    },
+    "firebird": {
+      "command": "cmd",
+      "args": ["/c", "npx", "-y", "mcp-firebird@2.9.3"],
+      "env": {
+        "FIREBIRD_HOST": "192.168.106.254",
+        "FIREBIRD_PORT": "3050",
+        "FIREBIRD_DATABASE": "SW",
+        "FIREBIRD_USER": "SYSDBA",
+        "FIREBIRD_PASSWORD": "${FIREBIRD_PASSWORD}"
+      }
     }
   }
 }

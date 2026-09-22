@@ -86,6 +86,7 @@ msbuild SWN.dproj /p:Config=Release /p:Platform=Win32
 | `SWNService.exe` | `DB Service/SWNService.dpr` | Windows-служба для фоновых операций с БД |
 | `SWNServiceManager.exe` | `DB Service Manager/SWNServiceManager.dpr` | UI для управления службой и задачами |
 | `SWNUpdater.exe` | `WmsUpdater/SWNUpdater.dpr` | Автообновление приложения |
+| `WMSParsers.exe` | `Parsers/WMSParsers.dpr` | Парсеры сайтов поставщиков: цены (h-t.md — 262735, maximum.md — 229873) и контент Maximum (картинки + характеристики → `TS_PRICELIST_ITEMS_IMAGES` / `_DESCRIPTION`); окно + режим `/auto` для Task Scheduler. Новая задача = наследник `TParserJob` (для цен — `TSupplierPriceSource` + `TSupplierPriceJob`) + строка в `ParserRunnerUnit.ParserJobs`. Фрейм 124 в WMS использует те же юниты из `Parsers/`. В `wms project.groupproj` не входит |
 
 ## Architecture
 

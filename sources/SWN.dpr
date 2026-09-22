@@ -77,6 +77,7 @@ uses
   frmPrintWizardDialog in 'Print\frmPrintWizardDialog.pas' {frmPrintWizardDlg},
   frmReportEditorDialog in 'Print\frmReportEditorDialog.pas' {frmReportEditorDlg},
   frmPrintEngineWindow in 'Print\frmPrintEngineWindow.pas' {frmPrintEngine},
+  ReportMessengerSendUnit in 'Print\ReportMessengerSendUnit.pas',
   ReportVariablesUnit in 'Print\ReportVariablesUnit.pas',
   frmSyssEditorWindow in 'classes\Syss\frmSyssEditorWindow.pas' {frmSelectSyssEditorWin},
   frmSyssFolderEditor in 'classes\Syss\frmSyssFolderEditor.pas' {frmSyssFolderEditorDlg},
@@ -236,6 +237,7 @@ uses
   frmGoodsFilterParamEditorDialog in 'classes\Goods\frmGoodsFilterParamEditorDialog.pas' {frmGoodsFilterParamEditor},
   GoodsFiltersClasses in 'classes\Goods\GoodsFiltersClasses.pas',
   frmWebCatalogDialog in 'classes\WebCatalog\frmWebCatalogDialog.pas' {frmWebCatalogDlg},
+  frmWebPopularCategoriesDialog in 'classes\WebCatalog\frmWebPopularCategoriesDialog.pas' {frmWebPopularCategoriesDlg},
   frmWebVirtualCategoriesDialog in 'classes\WebCatalog\frmWebVirtualCategoriesDialog.pas' {frmWebVirtualCategoriesDlg},
   frmWebVirtualCategoryEditorDialog in 'classes\WebCatalog\frmWebVirtualCategoryEditorDialog.pas' {frmWebVirtualCategoryEditorDlg},
   frmWebCatalogLevel2Dialog in 'classes\WebCatalog\frmWebCatalogLevel2Dialog.pas' {frmWebCatalogLevel2Dlg},
@@ -244,6 +246,7 @@ uses
   frmWebCatalogVirtualFoldersDialog in 'classes\WebCatalog\frmWebCatalogVirtualFoldersDialog.pas' {frmWebCatalogVirtualFoldersDlg},
   frmWebCatalogVirtualFolderEditorDialog in 'classes\WebCatalog\frmWebCatalogVirtualFolderEditorDialog.pas' {frmWebCatalogVirtualFolderEditorDlg},
   frmCurrencyHistoryDialog in 'classes\Currency\frmCurrencyHistoryDialog.pas' {frmCurrencyHistoryDlg},
+  UltraCurrencyRateThread in 'classes\Currency\UltraCurrencyRateThread.pas',
   frmGoodsPricesDialog in 'classes\Goods\frmGoodsPricesDialog.pas' {frmGoodsPricesDlg},
   frmGoodsForeignCodeDialog in 'classes\Goods\frmGoodsForeignCodeDialog.pas' {frmGoodsForeignCodeDlg},
   frmGoodsForeignCodeEditorDialog in 'classes\Goods\frmGoodsForeignCodeEditorDialog.pas' {frmGoodsForeignCodeEditorDlg},
@@ -692,6 +695,7 @@ uses
   frmWebSelectFilterParamDialog in 'classes\WebDescriptionTemplate\frmWebSelectFilterParamDialog.pas' {frmWebSelectFilterParamDlg},
   frame89RezerveAnulateUnit in 'frames\frame89RezerveAnulateUnit.pas' {frame89RezerveAnulate: TFrame},
   frmAddGoodsfromPrices in 'frameUtils\78 - Pricelist\frmAddGoodsfromPrices.pas' {frmAddGoodsFromPriceDlg},
+  frmSelectInventoryCostingMethodUnit in 'frameUtils\78 - Pricelist\frmSelectInventoryCostingMethodUnit.pas' {frmSelectInventoryCostingMethodDlg},
   frmContentPackage in 'frameUtils\15 - Content packages\frmContentPackage.pas' {frmContentPackageDlg},
   frameDeliveryUnit in 'frames\frameDeliveryUnit.pas' {frameDelivery: TFrame},
   frmAnalyticTypesUnit in 'classes\AnalyticsTypes\frmAnalyticTypesUnit.pas' {frmAnalyticTypesDlg},
@@ -820,6 +824,10 @@ uses
   SamsoniteParserUnit in 'classes\WebParse\SamsoniteParserUnit.pas',
   frame123DehomeUnit in 'frames\frame123DehomeUnit.pas' {frame123Dehome},
   frame124HiTechUnit in 'frames\frame124HiTechUnit.pas' {frame124HiTech},
+  HiTechScraperUnit in '..\Parsers\HiTechScraperUnit.pas',
+  ParseImagesHiTechUnit in 'frameUtils\124\ParseImagesHiTechUnit.pas',
+  SupplierPriceSyncUnit in '..\Parsers\SupplierPriceSyncUnit.pas',
+  HiTechPriceSourceUnit in '..\Parsers\HiTechPriceSourceUnit.pas',
   frame125NexDistributionUnit in 'frames\frame125NexDistributionUnit.pas' {frame125NexDistribution},
   frmMergeGoodsDialogEx in 'classes\Goods\frmMergeGoodsDialogEx.pas' {frmMergeGoodsDlgEx},
   frame126RefurbUnit in 'frames\frame126RefurbUnit.pas' {frame126Refurb},
@@ -847,6 +855,14 @@ uses
   SWNBaseMDIChildFormUnit in 'SWNBaseMDIChildFormUnit.pas',
   TelegramBot in 'Utils\TelegramBot.pas',
   frame132DMLinkUnit in 'frames\frame132DMLinkUnit.pas' {frame132DMLink},
+  frame133POSUnit in 'frames\frame133POSUnit.pas' {frame133POS},
+  POSSaleUnit in 'classes\POS\POSSaleUnit.pas',
+  POSFiscalUnit in 'classes\POS\POSFiscalUnit.pas',
+  POSCheckoutUnit in 'classes\POS\POSCheckoutUnit.pas',
+  frmPOSPaymentDialog in 'frameUtils\133 - POS\frmPOSPaymentDialog.pas' {frmPOSPaymentDlg},
+  frmPOSTerminalsSetupDialog in 'frameUtils\133 - POS\frmPOSTerminalsSetupDialog.pas' {frmPOSTerminalsSetupDlg},
+  frmPOSTerminalEditDialog in 'frameUtils\133 - POS\frmPOSTerminalEditDialog.pas' {frmPOSTerminalEditDlg},
+  frmPOSShiftDialog in 'frameUtils\133 - POS\frmPOSShiftDialog.pas' {frmPOSShiftDlg},
   dmlink.api in 'b2b.api\dmlink\dmlink.api.pas',
   uZipDbfContentOnly in 'frameUtils\96 - Distributie ramburs\uZipDbfContentOnly.pas',
   frmGlobalCallHistoryUnit in 'classes\SipClient\frmGlobalCallHistoryUnit.pas' {frmGlobalCallHistory},
@@ -1008,6 +1024,8 @@ begin
             CreateCoreDataModules;
             if dmDB.TryConnect(ConnectionError) then
             begin
+                // Cursul USD de la Ultra.md -> TS_CURRENCY, in fundal (nu blocheaza pornirea)
+                StartUltraCurrencyRateCheck;
                 Application.CreateForm(TfrmMainForm, frmMainForm);
                 Screen.Cursors[crSQLWait] := Screen.Cursors[crHourGlass];
                 Application.Run;

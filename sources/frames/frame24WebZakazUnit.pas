@@ -164,6 +164,7 @@ type
     function DoCloseDocumentDB(const DocID: integer): Boolean;
     procedure CreateConfigurator;
     procedure SetupQtyFields;
+    procedure AssignResponsibleOnOpen;
   protected
     { Protected declarations }
     function InitFrameID: integer; override;
@@ -310,6 +311,20 @@ var
 begin
   if ShowAskDialog('Web Order', 'Crearea oferte din Web-Order?') = mrYes then
   begin
+    // Daca Web-Order-ul nu are responsabil (NULL, 0 sau -1), cine creeaza oferta devine responsabil;
+    // un responsabil existent ramine. SP_CREATE_CONFIGURATOR copiaza RESPONSIBLE_USERID de pe
+    // Web-Order pe oferta, deci ajunge si acolo.
+    try
+      dmDB.ExecuteQuery('UPDATE TDB_DOCS SET RESPONSIBLE_USERID = :USERID' +
+        ' WHERE DOCID = :DOCID AND DOCTYPEID = 134 AND COALESCE(RESPONSIBLE_USERID, -1) <= 0',
+        [dmDB.CurrentUserID, dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger]);
+    except
+      on E: Exception do
+      begin
+        ShowErrorDialog('Web-Order', 'Responsabilul nu a putut fi setat: ' + E.Message);
+        Exit;
+      end;
+    end;
     docID := dmDB.CreateConfiguratorDoc_DB(dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger);
     if docID <> -1 then
     begin
@@ -687,6 +702,60 @@ begin
   SetupQtyFields;
 end;
 
+procedure Tframe24WebZakaz.AssignResponsibleOnOpen;
+// Comanda web deschisa, neinchisa si fara responsabil primeste utilizatorul curent.
+// UPDATE-ul e conditionat pe RESPONSIBLE_USERID gol, deci daca doi operatori o
+// deschid in acelasi timp ramane primul. Reincarcarea completa pastreaza in
+// grila atat RESPONSIBLE_USERID, cat si RESPONSIBLE_USERNAME.
+var
+  DocID, Winner: Integer;
+  Query: TIBCQuery;
+begin
+  if not dmDB.IBCQueryDocs.Active or dmDB.IBCQueryDocs.IsEmpty then
+    Exit;
+  if (dmDB.IBCQueryDocs.FieldByName('FLG_CLOSED').AsInteger = 1) or
+    (dmDB.IBCQueryDocs.FieldByName('RESPONSIBLE_USERID').AsInteger <> 0) then
+    Exit;
+
+  DocID := dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger;
+  try
+    dmDB.ExecuteQuery('UPDATE TDB_DOCS SET RESPONSIBLE_USERID = :USERID' +
+      ' WHERE DOCID = :DOCID AND DOCTYPEID = 134 AND COALESCE(RESPONSIBLE_USERID, 0) = 0',
+      [dmDB.CurrentUserID, DocID]);
+
+    // Cine a castigat: noi sau un coleg care a deschis-o cu o clipa inainte
+    Winner := 0;
+    Query := TIBCQuery.Create(nil);
+    try
+      Query.Connection := dmDB.IBCConnection;
+      Query.Transaction := dmDB.IBCTrDefaultSelect;
+      Query.SQL.Text := 'SELECT COALESCE(RESPONSIBLE_USERID, 0) FROM TDB_DOCS WHERE DOCID = :DOCID';
+      Query.ParamByName('DOCID').AsInteger := DocID;
+      Query.Open;
+      if not Query.Eof then
+        Winner := Query.Fields[0].AsInteger;
+      Query.Close;
+    finally
+      Query.Free;
+    end;
+
+    if Winner <> 0 then
+    begin
+      dmDB.IBCQueryDocs.DisableControls;
+      try
+        dmDB.IBCQueryDocs.Refresh;
+        dmDB.IBCQueryDocs.Locate('DOCID', DocID, []);
+      finally
+        dmDB.IBCQueryDocs.EnableControls;
+      end;
+    end;
+  except
+    // preluarea automata nu are voie sa blocheze deschiderea comenzii
+    if dmDB.IBCQueryDocs.State in [dsEdit, dsInsert] then
+      dmDB.IBCQueryDocs.Cancel;
+  end;
+end;
+
 procedure Tframe24WebZakaz.ModifyRecord;
 var
   dialog: TfrmWebZakazDocDlg;
@@ -700,10 +769,14 @@ begin
   else
     ReadOnly := fSEC_ViewOnly;
 
+  // Primul operator care deschide comanda web o preia: devine responsabil.
+  if fSEC_CanModify then
+    AssignResponsibleOnOpen;
+
   dialog := TfrmWebZakazDocDlg.Create(Self);
   try
     dialog.CreateNewDocument := False;
-    dialog.ReadOnly := False;
+    dialog.ReadOnly := ReadOnly;
     dialog.ShowModal;
   finally
     dialog.Free;

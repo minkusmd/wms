@@ -84,9 +84,17 @@ type
     fReportIDList: TIntegerList;
     fPrinted: Boolean;
     fReportsLoadedOk: Boolean;
+    FMailFocusTimer: TTimer;
+    FMailFocusAttempts: Integer;
+    // calea PDF-ului pentru trimiterea pe mesagerie; cit e setata, exportul PDF scrie acolo
+    fMessengerPdfFile: string;
     procedure StartPrintThread;
     procedure WhenStartToPrint(Sender: TObject);
     procedure WhenReportPreviewClosed(Sender: TObject);
+    procedure frxPDFExportBeforeExport(Sender: TObject);
+    procedure frxMailExportBeforeExport(Sender: TObject);
+    procedure FocusMailAddressTimer(Sender: TObject);
+    function GetDocumentPDFFileName: string;
     function LoadReport(const ReportID: Integer): Boolean;
     procedure PrepareMessage(FromField, ToField, BccField, SubjectField, TextField: WideString);
     procedure SetReportParams(const Value: TReportParamsList);
@@ -100,6 +108,9 @@ type
       PasswordField: string);
     procedure PrepareAttachment(FileNames: TStringList);
     procedure SendReportToEmail;
+    procedure WhenSendToMessengerButtonClick(Sender: TObject);
+    procedure WhenSendToMessengerMenuClick(Sender: TObject);
+    procedure SendReportToMessenger(const AMessengerIndex: Integer);
     procedure SMTPDisconnect;
     procedure SMTPSend;
   public
@@ -119,7 +130,7 @@ uses
   DataModuleDB, Vcl.StdCtrls, Vcl.ComCtrls, SWNDBErrors, ReportControlsUnit, SWNSecurity, SWNValueStorageUnit,
   SWNSecurityFlags, IdAttachmentFile,
   SWNUtils,
-  IdGlobal;
+  IdGlobal, Vcl.Menus, System.UITypes, System.Types, ReportMessengerSendUnit;
 
 {$R *.dfm}
 
@@ -128,6 +139,12 @@ uses
 constructor TfrmPrintEngine.Create(AOwner: TComponent);
 begin
   inherited;
+  FMailFocusTimer := TTimer.Create(Self);
+  FMailFocusTimer.Enabled := False;
+  FMailFocusTimer.Interval := 50;
+  FMailFocusTimer.OnTimer := FocusMailAddressTimer;
+  frxPDFExport.OnBeforeExport := frxPDFExportBeforeExport;
+  frxMailExport1.OnBeforeExport := frxMailExportBeforeExport;
   fReportIDList := TIntegerList.Create;
   fPrinted := False;
   ClientHeight := MulDiv(64, Screen.PixelsPerInch, 96);
@@ -160,9 +177,79 @@ begin
   SavePageActivityToLog(fReportIDList[0], 'Raportul este exportat in JPEG');
 end;
 
+procedure TfrmPrintEngine.frxMailExportBeforeExport(Sender: TObject);
+begin
+  FMailFocusAttempts := 0;
+  FMailFocusTimer.Enabled := True;
+end;
+
+procedure TfrmPrintEngine.frxPDFExportBeforeExport(Sender: TObject);
+begin
+  if Sender is TfrxPDFExport then
+    if fMessengerPdfFile <> '' then
+      TfrxPDFExport(Sender).FileName := fMessengerPdfFile
+    else
+      TfrxPDFExport(Sender).FileName := GetDocumentPDFFileName;
+end;
+
 procedure TfrmPrintEngine.frxPDFExportBeginExport(Sender: TObject);
 begin
   SavePageActivityToLog(fReportIDList[0], 'Report exported to PDF');
+end;
+
+procedure TfrmPrintEngine.FocusMailAddressTimer(Sender: TObject);
+var
+  i: Integer;
+  MailForm: TCustomForm;
+  AddressComponent: TComponent;
+  AddressControl: TWinControl;
+begin
+  Inc(FMailFocusAttempts);
+  MailForm := nil;
+  for i := Screen.FormCount - 1 downto 0 do
+    if SameText(Screen.Forms[i].ClassName, 'TfrxMailExportDialog') and Screen.Forms[i].Visible then
+    begin
+      MailForm := Screen.Forms[i];
+      Break;
+    end;
+
+  if Assigned(MailForm) then
+  begin
+    AddressComponent := MailForm.FindComponent('AddressE');
+    if AddressComponent is TWinControl then
+    begin
+      AddressControl := TWinControl(AddressComponent);
+      if AddressControl.CanFocus then
+      begin
+        MailForm.ActiveControl := AddressControl;
+        AddressControl.SetFocus;
+        FMailFocusTimer.Enabled := False;
+      end;
+    end;
+  end;
+
+  if FMailFocusAttempts >= 100 then
+    FMailFocusTimer.Enabled := False;
+end;
+
+function TfrmPrintEngine.GetDocumentPDFFileName: string;
+var
+  Param: TReportParamItem;
+  DocumentID: string;
+begin
+  Result := '';
+  if not Assigned(FReportParams) then
+    Exit;
+
+  Param := FReportParams.GetParamByName('DOCID');
+  if not Assigned(Param) then
+    Exit;
+  if VarIsNull(Param.Value) or VarIsEmpty(Param.Value) then
+    Exit;
+
+  DocumentID := Trim(VarToStr(Param.Value));
+  if DocumentID <> '' then
+    Result := DocumentID + '.pdf';
 end;
 
 procedure TfrmPrintEngine.frxReportAfterPrint(Sender: TfrxReportComponent);
@@ -192,8 +279,11 @@ procedure TfrmPrintEngine.frxReportPreview(Sender: TObject);
 var
   i: Integer;
   ToolBar: TToolBar;
-  Btn2: TButton;
+  Btn2, BtnSend: TButton;
   Sep: TBevel;
+  SendMenu: TPopupMenu;
+  MenuItem: TMenuItem;
+  M: TReportMessenger;
 begin
   ToolBar := nil;
      // find ToolBar
@@ -219,6 +309,146 @@ begin
     Btn2.TabStop := False;
     Btn2.Parent := ToolBar;
     Btn2.OnClick := WhenReportRerun;
+
+          // trimitere semi-automata pe Viber / WhatsApp / Telegram (ReportMessengerSendUnit)
+    SendMenu := TPopupMenu.Create(ToolBar);
+    for M := Low(TReportMessenger) to High(TReportMessenger) do
+    begin
+      MenuItem := TMenuItem.Create(SendMenu);
+      MenuItem.Caption := cReportMessengerNames[M];
+      MenuItem.Tag := Ord(M);
+      MenuItem.OnClick := WhenSendToMessengerMenuClick;
+      SendMenu.Items.Add(MenuItem);
+    end;
+    BtnSend := TButton.Create(ToolBar);
+    BtnSend.Caption := 'Trimite pe...';
+    BtnSend.Hint := 'Trimite raportul ca PDF pe Viber / WhatsApp / Telegram';
+    BtnSend.ShowHint := True;
+    BtnSend.Width := 110;
+    BtnSend.Left := 1200;
+    BtnSend.TabStop := False;
+    BtnSend.Parent := ToolBar;
+    BtnSend.PopupMenu := SendMenu;
+    BtnSend.OnClick := WhenSendToMessengerButtonClick;
+  end;
+end;
+
+procedure TfrmPrintEngine.WhenSendToMessengerButtonClick(Sender: TObject);
+var
+  Btn: TButton;
+  P: TPoint;
+begin
+  // click stinga deschide acelasi meniu ca si click dreapta
+  if not (Sender is TButton) then
+    Exit;
+  Btn := TButton(Sender);
+  if Assigned(Btn.PopupMenu) then
+  begin
+    P := Btn.ClientToScreen(Point(0, Btn.Height));
+    Btn.PopupMenu.Popup(P.X, P.Y);
+  end;
+end;
+
+procedure TfrmPrintEngine.WhenSendToMessengerMenuClick(Sender: TObject);
+begin
+  if Sender is TMenuItem then
+    SendReportToMessenger(TMenuItem(Sender).Tag);
+end;
+
+// Exporta raportul in PDF, il pune in clipboard ca fisier si deschide conversatia cu numarul
+// dat; operatorul lipeste fisierul (Ctrl+V) si trimite. Vezi ReportMessengerSendUnit.
+procedure TfrmPrintEngine.SendReportToMessenger(const AMessengerIndex: Integer);
+var
+  Messenger: TReportMessenger;
+  Param: TReportParamItem;
+  DocID: Integer;
+  Phone, Digits, Dir, BaseName: string;
+  OldShowDialog, OldSlaveExport, OldShowProgress, OldOpenAfterExport, Exported: Boolean;
+  OldFileName: string;
+begin
+  if (AMessengerIndex < Ord(Low(TReportMessenger))) or (AMessengerIndex > Ord(High(TReportMessenger))) then
+    Exit;
+  Messenger := TReportMessenger(AMessengerIndex);
+
+  // telefonul clientului din document, ca propunere
+  DocID := 0;
+  if Assigned(FReportParams) then
+  begin
+    Param := FReportParams.GetParamByName('DOCID');
+    if Assigned(Param) and not (VarIsNull(Param.Value) or VarIsEmpty(Param.Value)) then
+      DocID := StrToIntDef(Trim(VarToStr(Param.Value)), 0);
+  end;
+  Phone := GetDocumentCustomerPhone(DocID);
+  if not InputQuery('Trimite pe ' + cReportMessengerNames[Messenger], 'Numarul de telefon al destinatarului:', Phone) then
+    Exit;
+  Digits := NormalizePhoneForMessenger(Phone);
+  if Digits = '' then
+  begin
+    MessageDlg('Numarul "' + Phone + '" nu poate fi folosit. Scrieti-l ca 079123456 sau +37379123456.',
+      mtError, [mbOK], 0);
+    Exit;
+  end;
+
+  // fisier cu nume citibil pentru destinatar: <document>_<data>.pdf
+  Dir := IncludeTrailingPathDelimiter(System.IOUtils.TPath.GetTempPath) + 'WMS_Rapoarte';
+  ForceDirectories(Dir);
+  if DocID > 0 then
+    BaseName := 'Document_' + IntToStr(DocID)
+  else
+    BaseName := 'Raport';
+  fMessengerPdfFile := IncludeTrailingPathDelimiter(Dir) + BaseName + '_' +
+    FormatDateTime('yyyymmdd_hhnnss', Now) + '.pdf';
+
+  OldShowDialog := frxPDFExport.ShowDialog;
+  OldSlaveExport := frxPDFExport.SlaveExport;
+  OldShowProgress := frxPDFExport.ShowProgress;
+  OldOpenAfterExport := frxPDFExport.OpenAfterExport;
+  OldFileName := frxPDFExport.FileName;
+  try
+    frxPDFExport.ShowDialog := False;
+    frxPDFExport.SlaveExport := True;
+    frxPDFExport.ShowProgress := False;
+    frxPDFExport.OpenAfterExport := False;
+    frxPDFExport.FileName := fMessengerPdfFile;
+    Exported := frxReport.Export(frxPDFExport) and FileExists(fMessengerPdfFile);
+
+    if not Exported then
+    begin
+      MessageDlg('Raportul nu a putut fi exportat in PDF.', mtError, [mbOK], 0);
+      Exit;
+    end;
+
+    try
+      CopyFileToClipboard(fMessengerPdfFile);
+    except
+      on E: Exception do
+      begin
+        MessageDlg('PDF-ul nu a putut fi pus in clipboard: ' + E.Message + sLineBreak + sLineBreak +
+          'Fisierul este: ' + fMessengerPdfFile, mtError, [mbOK], 0);
+        Exit;
+      end;
+    end;
+
+    if OpenMessengerChat(Messenger, Digits) then
+    begin
+      SavePageActivityToLog(fReportIDList[0], 'Raportul este trimis pe ' + cReportMessengerNames[Messenger] +
+        ' la +' + Digits);
+      MessageDlg('PDF-ul este in clipboard.' + sLineBreak + sLineBreak +
+        'In conversatia deschisa in ' + cReportMessengerNames[Messenger] + ' cu +' + Digits +
+        ' apasati Ctrl+V, apoi Enter.' + sLineBreak + sLineBreak +
+        'Fisierul: ' + fMessengerPdfFile, mtInformation, [mbOK], 0);
+    end
+    else
+      MessageDlg(cReportMessengerNames[Messenger] + ' nu a putut fi deschis pe acest calculator.' + sLineBreak +
+        sLineBreak + 'PDF-ul ramine in clipboard si in fisierul:' + sLineBreak + fMessengerPdfFile,
+        mtWarning, [mbOK], 0);
+  finally
+    fMessengerPdfFile := '';
+    frxPDFExport.ShowDialog := OldShowDialog;
+    frxPDFExport.SlaveExport := OldSlaveExport;
+    frxPDFExport.ShowProgress := OldShowProgress;
+    frxPDFExport.OpenAfterExport := OldOpenAfterExport;
+    frxPDFExport.FileName := OldFileName;
   end;
 end;
 

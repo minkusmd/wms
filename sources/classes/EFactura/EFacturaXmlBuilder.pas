@@ -273,7 +273,20 @@ begin
       Errors.Add('Factura nu are produse.');
     SB.Append('</Merchandises>' + sLineBreak);
 
-    if H.FieldByName('REDIRIJARI_NAME').AsString = '<Non livrare>' then
+    // Motivul crearii depinde de furnizor:
+    //   platitor de TVA (are cod TVA):  4 = livrare, 5 = non-livrare
+    //   neplatitor de TVA (fara cod):   1 = livrare, 2 = non-livrare
+    // Cu 4/5 la un neplatitor e-Factura respinge factura: "Motivul Crearii este indicat
+    // incorect trebue sa fie 1 sau 2" (21.09.2026, SOLUTII COMERCIALE SRL, DOCID 2180796).
+    // Sensul exact al lui 1 si 2 nu e documentat public - e dedus prin analogie cu 4/5.
+    if Trim(H.FieldByName('DT_VAT_NUMBER').AsString) = '' then
+    begin
+      if H.FieldByName('REDIRIJARI_NAME').AsString = '<Non livrare>' then
+        S := '2'
+      else
+        S := '1';
+    end
+    else if H.FieldByName('REDIRIJARI_NAME').AsString = '<Non livrare>' then
       S := '5'
     else
       S := '4';

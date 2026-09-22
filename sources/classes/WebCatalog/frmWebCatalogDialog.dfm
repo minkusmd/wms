@@ -4,8 +4,8 @@ object frmWebCatalogDlg: TfrmWebCatalogDlg
   ActiveControl = cxDBTreeList
   BorderIcons = [biSystemMenu, biMaximize]
   Caption = 'Web Catalog'
-  ClientHeight = 578
-  ClientWidth = 1149
+  ClientHeight = 761
+  ClientWidth = 1584
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -18,7 +18,7 @@ object frmWebCatalogDlg: TfrmWebCatalogDlg
   object dtDialogTitle: TDialogTitle
     Left = 0
     Top = 0
-    Width = 1149
+    Width = 1584
     Height = 64
     Title = 'Web Catalog'
     Text = 'Administrarea web catalogului de produse'
@@ -34,21 +34,24 @@ object frmWebCatalogDlg: TfrmWebCatalogDlg
     FontText.Style = []
     ImageList = dmAdditions.cxImageList_DialogIcons
     ImageIndex = 30
+    ExplicitWidth = 1149
   end
   object Panel2: TPanel
     Left = 0
     Top = 64
-    Width = 1149
-    Height = 463
+    Width = 1584
+    Height = 646
     Align = alClient
     BevelOuter = bvNone
     ShowCaption = False
     TabOrder = 1
+    ExplicitWidth = 1149
+    ExplicitHeight = 463
     object pnGoods: TPanel
-      Left = 742
+      Left = 1177
       Top = 0
       Width = 407
-      Height = 463
+      Height = 646
       Align = alRight
       BevelOuter = bvNone
       Color = clWindow
@@ -56,6 +59,8 @@ object frmWebCatalogDlg: TfrmWebCatalogDlg
       ParentBackground = False
       ShowCaption = False
       TabOrder = 1
+      ExplicitLeft = 742
+      ExplicitHeight = 463
       object dxBarDockControl2: TdxBarDockControl
         Left = 1
         Top = 0
@@ -262,9 +267,10 @@ object frmWebCatalogDlg: TfrmWebCatalogDlg
         Left = 1
         Top = 500
         Width = 406
-        Height = 16
+        Height = 146
         Align = alClient
         TabOrder = 5
+        ExplicitHeight = 16
         object cxGrid1DBTableView1: TcxGridDBTableView
           OnKeyDown = cxGrid1DBTableView1KeyDown
           FindPanel.DisplayMode = fpdmAlways
@@ -314,27 +320,30 @@ object frmWebCatalogDlg: TfrmWebCatalogDlg
     object pnTree: TPanel
       Left = 0
       Top = 0
-      Width = 742
-      Height = 463
+      Width = 1177
+      Height = 646
       Align = alClient
       BevelOuter = bvNone
       TabOrder = 0
+      ExplicitWidth = 742
+      ExplicitHeight = 463
       DesignSize = (
-        742
-        463)
+        1177
+        646)
       object dxBarDockControl1: TdxBarDockControl
         Left = 0
         Top = 0
-        Width = 742
+        Width = 1177
         Height = 28
         Align = dalTop
         BarManager = dxBarManager
+        ExplicitWidth = 742
       end
       object cxDBTreeList: TcxDBTreeList
         Left = 10
         Top = 34
-        Width = 730
-        Height = 208
+        Width = 1165
+        Height = 391
         Anchors = [akLeft, akTop, akRight, akBottom]
         Bands = <
           item
@@ -367,10 +376,12 @@ object frmWebCatalogDlg: TfrmWebCatalogDlg
         Styles.ColumnHeader = dmAdditions.cxStyle_GridHeader
         TabOrder = 2
         OnFocusedNodeChanged = cxDBTreeListFocusedNodeChanged
+        ExplicitWidth = 730
+        ExplicitHeight = 208
         object cxDBTreeList_TITLE: TcxDBTreeListColumn
           Caption.Text = 'Denumirea'
           DataBinding.FieldName = 'TITLE'
-          Width = 70
+          Width = 60
           Position.ColIndex = 0
           Position.RowIndex = 0
           Position.BandIndex = 0
@@ -378,7 +389,7 @@ object frmWebCatalogDlg: TfrmWebCatalogDlg
         object cxDBTreeList_TITLE_RUS: TcxDBTreeListColumn
           Caption.Text = #1053#1072#1079#1074#1072#1085#1080#1077
           DataBinding.FieldName = 'TITLE_RUS'
-          Width = 50
+          Width = 60
           Position.ColIndex = 1
           Position.RowIndex = 0
           Position.BandIndex = 0
@@ -520,24 +531,28 @@ object frmWebCatalogDlg: TfrmWebCatalogDlg
         Left = 0
         Top = 28
         Width = 8
-        Height = 220
+        Height = 403
+        ExplicitHeight = 220
       end
       object cxPageControl1: TcxPageControl
         Left = 0
-        Top = 248
-        Width = 742
+        Top = 431
+        Width = 1177
         Height = 215
         Align = alBottom
         TabOrder = 3
         Properties.ActivePage = tbsReWriteURL
         Properties.CustomButtons.Buttons = <>
+        ExplicitTop = 248
+        ExplicitWidth = 742
         ClientRectBottom = 211
         ClientRectLeft = 4
-        ClientRectRight = 738
+        ClientRectRight = 1173
         ClientRectTop = 26
         object cxTabSheet2: TcxTabSheet
           Caption = 'Meta descriere'
           ImageIndex = 1
+          ExplicitWidth = 734
           object cxDBMemo1: TcxDBMemo
             Left = 0
             Top = 28
@@ -553,7 +568,8 @@ object frmWebCatalogDlg: TfrmWebCatalogDlg
             Style.Font.Style = []
             Style.IsFontAssigned = True
             TabOrder = 0
-            Width = 734
+            ExplicitWidth = 734
+            Width = 1169
           end
           object cxDBMemo2: TcxDBMemo
             Left = 0
@@ -570,7 +586,8 @@ object frmWebCatalogDlg: TfrmWebCatalogDlg
             Style.Font.Style = []
             Style.IsFontAssigned = True
             TabOrder = 1
-            Width = 734
+            ExplicitWidth = 734
+            Width = 1169
           end
           object cxDBMemo3: TcxDBMemo
             Left = 0
@@ -587,7 +604,8 @@ object frmWebCatalogDlg: TfrmWebCatalogDlg
             Style.Font.Style = []
             Style.IsFontAssigned = True
             TabOrder = 2
-            Width = 734
+            ExplicitWidth = 734
+            Width = 1169
           end
           object cxDBMemo4: TcxDBMemo
             Left = 0
@@ -604,32 +622,36 @@ object frmWebCatalogDlg: TfrmWebCatalogDlg
             Style.Font.Style = []
             Style.IsFontAssigned = True
             TabOrder = 4
-            Width = 734
+            ExplicitWidth = 734
+            Width = 1169
           end
           object dxBarDockControl5: TdxBarDockControl
             Left = 0
             Top = 0
-            Width = 734
+            Width = 1169
             Height = 28
             Align = dalTop
             BarManager = dxBarManager
+            ExplicitWidth = 734
           end
         end
         object cxTabSheet1: TcxTabSheet
           Caption = 'Articole SEO'
           ImageIndex = 0
+          ExplicitWidth = 734
           object dxBarDockControl4: TdxBarDockControl
             Left = 0
             Top = 0
-            Width = 734
+            Width = 1169
             Height = 28
             Align = dalTop
             BarManager = dxBarManager
+            ExplicitWidth = 734
           end
           object cxGrid2: TcxGrid
             Left = 0
             Top = 28
-            Width = 734
+            Width = 1169
             Height = 157
             Align = alClient
             TabOrder = 1
@@ -659,6 +681,7 @@ object frmWebCatalogDlg: TfrmWebCatalogDlg
         object tbsReWriteURL: TcxTabSheet
           Caption = #1063#1055#1059
           ImageIndex = 2
+          ExplicitWidth = 734
           object Label4: TLabel
             Left = 267
             Top = 3
@@ -720,8 +743,8 @@ object frmWebCatalogDlg: TfrmWebCatalogDlg
   end
   object pnButtons: TPanel
     Left = 0
-    Top = 527
-    Width = 1149
+    Top = 710
+    Width = 1584
     Height = 51
     Align = alBottom
     BevelOuter = bvNone
@@ -729,6 +752,8 @@ object frmWebCatalogDlg: TfrmWebCatalogDlg
     Padding.Right = 12
     Padding.Bottom = 12
     TabOrder = 2
+    ExplicitTop = 527
+    ExplicitWidth = 1149
     object btnVirtualCategories: TcxButton
       Left = 12
       Top = 8
@@ -739,7 +764,7 @@ object frmWebCatalogDlg: TfrmWebCatalogDlg
       OnClick = btnVirtualCategoriesClick
     end
     object btnCancel: TcxButton
-      Left = 1047
+      Left = 1482
       Top = 8
       Width = 90
       Height = 31
@@ -748,9 +773,10 @@ object frmWebCatalogDlg: TfrmWebCatalogDlg
       Caption = 'Inchide'
       ModalResult = 2
       TabOrder = 1
+      ExplicitLeft = 1047
     end
     object btnOK: TcxButton
-      Left = 957
+      Left = 1392
       Top = 8
       Width = 90
       Height = 31
@@ -760,6 +786,7 @@ object frmWebCatalogDlg: TfrmWebCatalogDlg
       ModalResult = 1
       TabOrder = 0
       Visible = False
+      ExplicitLeft = 957
     end
   end
   object dxBarManager: TdxBarManager
@@ -1040,15 +1067,6 @@ object frmWebCatalogDlg: TfrmWebCatalogDlg
       ShortCut = 16454
       OnClick = bbCatalogFiltersClick
     end
-    object bbVirtualFolders: TdxBarButton
-      Caption = 'Mape virtuale...'
-      Category = 0
-      Hint = 'Mape virtuale (subcategorii pe atribut)'
-      Visible = ivAlways
-      ImageIndex = 26
-      ShortCut = 32845
-      OnClick = bbVirtualFoldersClick
-    end
     object bbCompatibleGoods: TdxBarButton
       Caption = 'Produse compatibile'
       Category = 0
@@ -1266,6 +1284,15 @@ object frmWebCatalogDlg: TfrmWebCatalogDlg
       Visible = ivAlways
       ShortCut = 45
       OnClick = bbNewFolderCurrentLevelClick
+    end
+    object bbVirtualFolders: TdxBarButton
+      Caption = 'Mape virtuale...'
+      Category = 2
+      Hint = 'Mape virtuale (subcategorii pe atribut)'
+      Visible = ivAlways
+      ImageIndex = 26
+      ShortCut = 32854
+      OnClick = bbVirtualFoldersClick
     end
     object bbNewArticle: TdxBarButton
       Caption = 'Nou'
@@ -1743,6 +1770,11 @@ object frmWebCatalogDlg: TfrmWebCatalogDlg
       item
         Visible = True
         ItemName = 'dxBarButton3'
+      end
+      item
+        BeginGroup = True
+        Visible = True
+        ItemName = 'bbVirtualFolders'
       end>
     UseOwnFont = False
     Left = 304

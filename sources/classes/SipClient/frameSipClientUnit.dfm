@@ -2,7 +2,7 @@ object frameSipClient: TframeSipClient
   Left = 0
   Top = 0
   Width = 328
-  Height = 382
+  Height = 442
   Margins.Left = 5
   Margins.Top = 5
   Margins.Right = 5
@@ -15,7 +15,7 @@ object frameSipClient: TframeSipClient
     Left = 0
     Top = 129
     Width = 328
-    Height = 253
+    Height = 313
     Margins.Left = 5
     Margins.Top = 5
     Margins.Right = 5
@@ -32,11 +32,12 @@ object frameSipClient: TframeSipClient
     ParentBackground = False
     ParentFont = False
     TabOrder = 1
+    ExplicitHeight = 253
     object cxPageControl1: TcxPageControl
       Left = 0
       Top = 0
       Width = 324
-      Height = 249
+      Height = 309
       Align = alClient
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
@@ -47,19 +48,21 @@ object frameSipClient: TframeSipClient
       TabOrder = 0
       Properties.ActivePage = cxTabSheet1
       Properties.CustomButtons.Buttons = <>
-      ClientRectBottom = 245
+      ExplicitHeight = 249
+      ClientRectBottom = 305
       ClientRectLeft = 4
       ClientRectRight = 320
       ClientRectTop = 24
       object cxTabSheet1: TcxTabSheet
         Caption = 'Istoria sunetelor'
         ImageIndex = 0
+        ExplicitHeight = 221
         object cxGrid1: TcxGrid
           AlignWithMargins = True
           Left = 5
           Top = 5
           Width = 306
-          Height = 211
+          Height = 271
           Margins.Left = 5
           Margins.Top = 5
           Margins.Right = 5
@@ -74,6 +77,7 @@ object frameSipClient: TframeSipClient
           TabOrder = 0
           LookAndFeel.NativeStyle = True
           LookAndFeel.ScrollbarMode = sbmClassic
+          ExplicitHeight = 211
           object cxGrid1DBTableView1: TcxGridDBTableView
             PopupMenu = PopupMenu1
             OnDblClick = cxGrid1DBTableView1DblClick
@@ -217,6 +221,234 @@ object frameSipClient: TframeSipClient
       object tsDial: TcxTabSheet
         Caption = 'Dial'
         ImageIndex = 1
+        ExplicitHeight = 341
+        object btnDtmf1: TcxButton
+          Tag = 1
+          Left = 47
+          Top = 12
+          Width = 70
+          Height = 40
+          Hint = 'Tasta 1: in apel trimite tonul DTMF, altfel o adauga la numar'
+          Caption = '1'
+          ParentShowHint = False
+          ShowHint = True
+          TabOrder = 0
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -19
+          Font.Name = 'Segoe UI'
+          Font.Style = [fsBold]
+          ParentFont = False
+          OnClick = SpeedButton13Click
+        end
+        object btnDtmf2: TcxButton
+          Tag = 2
+          Left = 123
+          Top = 12
+          Width = 70
+          Height = 40
+          Hint = 'Tasta 2: in apel trimite tonul DTMF, altfel o adauga la numar'
+          Caption = '2'
+          ParentShowHint = False
+          ShowHint = True
+          TabOrder = 1
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -19
+          Font.Name = 'Segoe UI'
+          Font.Style = [fsBold]
+          ParentFont = False
+          OnClick = SpeedButton13Click
+        end
+        object btnDtmf3: TcxButton
+          Tag = 3
+          Left = 199
+          Top = 12
+          Width = 70
+          Height = 40
+          Hint = 'Tasta 3: in apel trimite tonul DTMF, altfel o adauga la numar'
+          Caption = '3'
+          ParentShowHint = False
+          ShowHint = True
+          TabOrder = 2
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -19
+          Font.Name = 'Segoe UI'
+          Font.Style = [fsBold]
+          ParentFont = False
+          OnClick = SpeedButton13Click
+        end
+        object btnDtmf4: TcxButton
+          Tag = 4
+          Left = 47
+          Top = 58
+          Width = 70
+          Height = 40
+          Hint = 'Tasta 4: in apel trimite tonul DTMF, altfel o adauga la numar'
+          Caption = '4'
+          ParentShowHint = False
+          ShowHint = True
+          TabOrder = 3
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -19
+          Font.Name = 'Segoe UI'
+          Font.Style = [fsBold]
+          ParentFont = False
+          OnClick = SpeedButton13Click
+        end
+        object btnDtmf5: TcxButton
+          Tag = 5
+          Left = 123
+          Top = 58
+          Width = 70
+          Height = 40
+          Hint = 'Tasta 5: in apel trimite tonul DTMF, altfel o adauga la numar'
+          Caption = '5'
+          ParentShowHint = False
+          ShowHint = True
+          TabOrder = 4
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -19
+          Font.Name = 'Segoe UI'
+          Font.Style = [fsBold]
+          ParentFont = False
+          OnClick = SpeedButton13Click
+        end
+        object btnDtmf6: TcxButton
+          Tag = 6
+          Left = 199
+          Top = 58
+          Width = 70
+          Height = 40
+          Hint = 'Tasta 6: in apel trimite tonul DTMF, altfel o adauga la numar'
+          Caption = '6'
+          ParentShowHint = False
+          ShowHint = True
+          TabOrder = 5
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -19
+          Font.Name = 'Segoe UI'
+          Font.Style = [fsBold]
+          ParentFont = False
+          OnClick = SpeedButton13Click
+        end
+        object btnDtmf7: TcxButton
+          Tag = 7
+          Left = 47
+          Top = 104
+          Width = 70
+          Height = 40
+          Hint = 'Tasta 7: in apel trimite tonul DTMF, altfel o adauga la numar'
+          Caption = '7'
+          ParentShowHint = False
+          ShowHint = True
+          TabOrder = 6
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -19
+          Font.Name = 'Segoe UI'
+          Font.Style = [fsBold]
+          ParentFont = False
+          OnClick = SpeedButton13Click
+        end
+        object btnDtmf8: TcxButton
+          Tag = 8
+          Left = 123
+          Top = 104
+          Width = 70
+          Height = 40
+          Hint = 'Tasta 8: in apel trimite tonul DTMF, altfel o adauga la numar'
+          Caption = '8'
+          ParentShowHint = False
+          ShowHint = True
+          TabOrder = 7
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -19
+          Font.Name = 'Segoe UI'
+          Font.Style = [fsBold]
+          ParentFont = False
+          OnClick = SpeedButton13Click
+        end
+        object btnDtmf9: TcxButton
+          Tag = 9
+          Left = 199
+          Top = 104
+          Width = 70
+          Height = 40
+          Hint = 'Tasta 9: in apel trimite tonul DTMF, altfel o adauga la numar'
+          Caption = '9'
+          ParentShowHint = False
+          ShowHint = True
+          TabOrder = 8
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -19
+          Font.Name = 'Segoe UI'
+          Font.Style = [fsBold]
+          ParentFont = False
+          OnClick = SpeedButton13Click
+        end
+        object btnDtmfStar: TcxButton
+          Tag = 10
+          Left = 47
+          Top = 150
+          Width = 70
+          Height = 40
+          Hint = 'Tasta *: in apel trimite tonul DTMF, altfel o adauga la numar'
+          Caption = '*'
+          ParentShowHint = False
+          ShowHint = True
+          TabOrder = 9
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -19
+          Font.Name = 'Segoe UI'
+          Font.Style = [fsBold]
+          ParentFont = False
+          OnClick = SpeedButton13Click
+        end
+        object btnDtmf0: TcxButton
+          Left = 123
+          Top = 150
+          Width = 70
+          Height = 40
+          Hint = 'Tasta 0: in apel trimite tonul DTMF, altfel o adauga la numar'
+          Caption = '0'
+          ParentShowHint = False
+          ShowHint = True
+          TabOrder = 10
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -19
+          Font.Name = 'Segoe UI'
+          Font.Style = [fsBold]
+          ParentFont = False
+          OnClick = SpeedButton13Click
+        end
+        object btnDtmfHash: TcxButton
+          Tag = 11
+          Left = 199
+          Top = 150
+          Width = 70
+          Height = 40
+          Hint = 'Tasta #: in apel trimite tonul DTMF, altfel o adauga la numar'
+          Caption = '#'
+          ParentShowHint = False
+          ShowHint = True
+          TabOrder = 11
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -19
+          Font.Name = 'Segoe UI'
+          Font.Style = [fsBold]
+          ParentFont = False
+          OnClick = SpeedButton13Click
+        end
       end
     end
   end
@@ -1401,15 +1633,19 @@ object frameSipClient: TframeSipClient
       'select ch.nickname, ch.customerid, ch.docid, ch.phonenumber,'
       '       ch.calltypeid, ch.data, ch.userid, ch.callid,'
       '       iif(exists (select callid from ts_phone_calls_register zz'
-      '                   where zz.callid = ch.callid), 1, 0) FLG_HAS_WAV,'
+      
+        '                   where zz.callid = ch.callid), 1, 0) FLG_HAS_W' +
+        'AV,'
       '       ch.call_stateid,'
       '       case ch.call_stateid'
-      '         when 0 then ''In curs'''
-      '         when 1 then ''Preluat'''
-      '         when 2 then iif(ch.calltypeid = 0, ''Pierdut'', ''Fara raspuns'')'
-      '         when 3 then ''Preluat de coleg'''
-      '         when 4 then ''Respins'''
-      '         when 5 then ''Neterminat'''
+      '         when 0 then '#39'In curs'#39
+      '         when 1 then '#39'Preluat'#39
+      
+        '         when 2 then iif(ch.calltypeid = 0, '#39'Pierdut'#39', '#39'Fara ras' +
+        'puns'#39')'
+      '         when 3 then '#39'Preluat de coleg'#39
+      '         when 4 then '#39'Respins'#39
+      '         when 5 then '#39'Neterminat'#39
       '       end CALL_STATE_NAME,'
       '       (select lu.full_name from ts_phone_calls_history l'
       '          join ts_users lu on lu.userid = l.userid'
@@ -1576,8 +1812,8 @@ object frameSipClient: TframeSipClient
   object cxImageList1: TcxImageList
     SourceDPI = 96
     FormatVersion = 1
-    Left = 264
-    Top = 424
+    Left = 224
+    Top = 272
     Bitmap = {
       494C010102000800040010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
@@ -1717,7 +1953,7 @@ object frameSipClient: TframeSipClient
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       000000000000}
-    DesignInfo = 27787528
+    DesignInfo = 17826016
     ImageInfo = <
       item
         ImageClass = 'TdxSmartImage'
@@ -1818,8 +2054,8 @@ object frameSipClient: TframeSipClient
     MasterFields = 'CALLID'
     DetailFields = 'CALLID'
     MasterSource = IBCDataSourceCallHistory
-    Left = 16
-    Top = 441
+    Left = 92
+    Top = 261
     ParamData = <
       item
         DataType = ftInteger

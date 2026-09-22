@@ -57,6 +57,15 @@ inherited frame124HiTech: Tframe124HiTech
     TabOrder = 1
     OnClick = cxButton1Click
   end
+  object btnSyncPrices: TcxButton
+    Left = 152
+    Top = 423
+    Width = 260
+    Height = 25
+    Caption = 'Verifica preturile pe h-t.md'
+    TabOrder = 4
+    OnClick = btnSyncPricesClick
+  end
   object cxImage1: TcxImage
     Left = 912
     Top = 16
@@ -91,41 +100,5 @@ inherited frame124HiTech: Tframe124HiTech
     DataSet = IBCQuerySupplierGoods
     Left = 304
     Top = 176
-  end
-  object NetHTTPClient1: TNetHTTPClient
-    UserAgent = 
-      'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like ' +
-      'Gecko) Chrome/51.0.2704.103 Safari/537.36'
-    Left = 456
-    Top = 56
-  end
-  object IBCSQL1: TIBCSQL
-    Connection = dmDB.IBCConnection
-    Transaction = IBCtrLocalUpdate
-    SQL.Strings = (
-      'insert into ts_goods_image (goodsid, image)'
-      'values(:goodsid, :image)')
-    Left = 176
-    Top = 224
-    ParamData = <
-      item
-        DataType = ftUnknown
-        Name = 'goodsid'
-        Value = nil
-      end
-      item
-        DataType = ftUnknown
-        Name = 'image'
-        Value = nil
-      end>
-  end
-  object IBCtrLocalUpdate: TIBCTransaction
-    DefaultConnection = dmDB.IBCConnection
-    Left = 480
-    Top = 224
-  end
-  object IBCQuery1: TIBCQuery
-    Left = 128
-    Top = 344
   end
 end
