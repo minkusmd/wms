@@ -51,6 +51,8 @@ function DealAxesForDocType(const ADocTypeID: Integer): string;
 { Adauga jos in dialogul de modificare a documentului randul "Deal": numarul
   deal-ului si cate o lista de stari pentru fiecare axa a tipului de document.
   Starile alese se salveaza la inchiderea dialogului cu OK, dupa document.
+  Sub stari, daca deal-ul le are: datele comenzii web (client, telefon, metoda de
+  plata, adresa, nota, UTM) - doar pentru citire (TDB_DEALS, scrise de site).
   ADataSet = datasetul editat de dialog (dmDB.IBCQueryDocs). Nu arunca exceptii. }
 procedure AttachDealToDialog(AForm: TForm; ADataSet: TDataSet);
 
@@ -410,6 +412,14 @@ const
   cBarRowH = 32;
 
 type
+  { un camp din blocul "date comanda web" }
+  TDealInfoField = record
+    Caption: string;
+    Value: string;
+    Weight: Integer;
+  end;
+  TDealInfoRow = TArray<TDealInfoField>;
+
   TDealDialogBar = class(TComponent)
   private
     FForm: TForm;
@@ -425,7 +435,10 @@ type
     FOldCloseQuery: TCloseQueryEvent;
     lbDeal: TLabel;
     btnDeal: TButton;
+    FInfoRows: TArray<TDealInfoRow>;
     function S(const AValue: Integer): Integer;
+    procedure LoadInfo;
+    procedure BuildInfo(APanel: TPanel; ATop: Integer);
     procedure Layout(out APerRow, ARows, AComboW: Integer);
     procedure Build(APanel: TPanel);
     procedure LoadStates;
@@ -538,6 +551,130 @@ begin
     FCombos[i] := cb;
     FCodes[i] := TStringList.Create;
     FInitial[i] := -1;
+  end;
+end;
+
+function InfoField(const ACaption, AValue: string; AWeight: Integer): TDealInfoField;
+begin
+  Result.Caption := ACaption;
+  Result.Value := Trim(AValue);
+  Result.Weight := AWeight;
+end;
+
+{ datele comenzii web din deal (scrise de site la crearea comenzii, vezi
+  DB Model\deals_web_order_info.sql). FInfoRows ramane gol daca nu e nimic de aratat. }
+procedure TDealDialogBar.LoadInfo;
+const
+  cSqlNew =
+    'SELECT CONTACT_NAME, PHONE, DELIVERY_ADDRESS, DELIVERY_NOTE, PAYMENT_METHOD, ' +
+    '       UTM_SOURCE, UTM_MEDIUM, UTM_CAMPAIGN, UTM_CONTENT, UTM_TERM ' +
+    '  FROM TDB_DEALS WHERE DEAL_ID = :dealid';
+  { pina la rularea scriptului pe baza coloanele noi lipsesc }
+  cSqlOld =
+    'SELECT CONTACT_NAME, PHONE, DELIVERY_ADDRESS, DELIVERY_NOTE, ' +
+    '       CAST(NULL AS VARCHAR(60)) AS PAYMENT_METHOD, ' +
+    '       CAST(NULL AS VARCHAR(255)) AS UTM_SOURCE, CAST(NULL AS VARCHAR(255)) AS UTM_MEDIUM, ' +
+    '       CAST(NULL AS VARCHAR(255)) AS UTM_CAMPAIGN, CAST(NULL AS VARCHAR(255)) AS UTM_CONTENT, ' +
+    '       CAST(NULL AS VARCHAR(255)) AS UTM_TERM ' +
+    '  FROM TDB_DEALS WHERE DEAL_ID = :dealid';
+var
+  q: TIBCQuery;
+  row: TDealInfoRow;
+
+  function V(const AField: string): string;
+  begin
+    Result := Trim(q.FieldByName(AField).AsString);
+  end;
+
+begin
+  FInfoRows := nil;
+  if FDealID <= 0 then
+    Exit;
+  q := TIBCQuery.Create(nil);
+  try
+    q.Connection := dmDB.IBCConnection;
+    q.SQL.Text := cSqlNew;
+    q.ParamByName('dealid').AsLargeInt := FDealID;
+    try
+      q.Open;
+    except
+      q.Close;
+      q.SQL.Text := cSqlOld;
+      q.ParamByName('dealid').AsLargeInt := FDealID;
+      q.Open;
+    end;
+    if q.IsEmpty then
+      Exit;
+
+    if (V('CONTACT_NAME') <> '') or (V('PHONE') <> '') or (V('PAYMENT_METHOD') <> '') then
+      FInfoRows := FInfoRows + [TDealInfoRow.Create(
+        InfoField('Client', V('CONTACT_NAME'), 3),
+        InfoField('Telefon', V('PHONE'), 2),
+        InfoField('Plata', V('PAYMENT_METHOD'), 2))];
+
+    if (V('DELIVERY_ADDRESS') <> '') or (V('DELIVERY_NOTE') <> '') then
+    begin
+      row := [InfoField('Adresa', V('DELIVERY_ADDRESS'), 5)];
+      if V('DELIVERY_NOTE') <> '' then
+        row := row + [InfoField('Nota', V('DELIVERY_NOTE'), 3)];
+      FInfoRows := FInfoRows + [row];
+    end;
+
+    if (V('UTM_SOURCE') <> '') or (V('UTM_MEDIUM') <> '') or (V('UTM_CAMPAIGN') <> '') or
+       (V('UTM_CONTENT') <> '') or (V('UTM_TERM') <> '') then
+      FInfoRows := FInfoRows + [TDealInfoRow.Create(
+        InfoField('utm_source', V('UTM_SOURCE'), 2),
+        InfoField('utm_medium', V('UTM_MEDIUM'), 2),
+        InfoField('utm_campaign', V('UTM_CAMPAIGN'), 3),
+        InfoField('utm_content', V('UTM_CONTENT'), 2),
+        InfoField('utm_term', V('UTM_TERM'), 2))];
+  finally
+    q.Free;
+  end;
+end;
+
+procedure TDealDialogBar.BuildInfo(APanel: TPanel; ATop: Integer);
+var
+  r, i, x, y, avail, totalW, fieldW, gap: Integer;
+  lb: TLabel;
+  ed: TEdit;
+begin
+  gap := S(12);
+  for r := 0 to High(FInfoRows) do
+  begin
+    y := ATop + r * S(cBarRowH);
+    avail := FForm.ClientWidth - S(16) - gap * (Length(FInfoRows[r]) - 1);
+    totalW := 0;
+    for i := 0 to High(FInfoRows[r]) do
+      Inc(totalW, FInfoRows[r][i].Weight);
+
+    x := S(8);
+    for i := 0 to High(FInfoRows[r]) do
+    begin
+      fieldW := MulDiv(avail, FInfoRows[r][i].Weight, totalW);
+
+      lb := TLabel.Create(FForm);
+      lb.Parent := APanel;
+      lb.AutoSize := True;
+      lb.Caption := FInfoRows[r][i].Caption + ':';
+      lb.Left := x;
+      lb.Top := y + (S(cBarRowH) - lb.Height) div 2;
+
+      { TEdit needitabil: textul se poate selecta si copia (telefon, adresa) }
+      ed := TEdit.Create(FForm);
+      ed.Parent := APanel;
+      ed.ReadOnly := True;
+      ed.TabStop := False;
+      ed.ParentColor := True;
+      ed.Text := FInfoRows[r][i].Value;
+      ed.Hint := FInfoRows[r][i].Value;
+      ed.ShowHint := FInfoRows[r][i].Value <> '';
+      ed.Left := x + lb.Width + S(4);
+      ed.Width := Max(S(40), fieldW - lb.Width - S(4));
+      ed.Top := y + (S(cBarRowH) - ed.Height) div 2;
+
+      Inc(x, fieldW + gap);
+    end;
   end;
 end;
 
@@ -800,7 +937,12 @@ begin
     { fereastra creste cu inaltimea randului; controalele existente raman exact
       unde erau (se restaureaza pozitiile schimbate de ancore) }
     bar.Layout(perRow, rows, comboW);
-    h := bar.S(8) + rows * bar.S(cBarRowH);
+    try
+      bar.LoadInfo;
+    except
+      bar.FInfoRows := nil;
+    end;
+    h := bar.S(8) + (rows + Length(bar.FInfoRows)) * bar.S(cBarRowH);
     SetLength(tops, AForm.ControlCount);
     SetLength(heights, AForm.ControlCount);
     for i := 0 to AForm.ControlCount - 1 do
@@ -822,6 +964,7 @@ begin
     pn.Align := alBottom;
 
     bar.Build(pn);
+    bar.BuildInfo(pn, bar.S(4) + rows * bar.S(cBarRowH));
     bar.LoadStates;
 
     bar.FOldCloseQuery := AForm.OnCloseQuery;

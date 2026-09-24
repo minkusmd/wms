@@ -160,6 +160,20 @@ var
 begin
   if ShowAskDialog('Cerere de finantare', 'Doriti sa creati o oferta din cererea de finantare?') = mrYes then
   begin
+    // Daca cererea nu are responsabil (NULL, 0 sau -1), cine creeaza oferta devine responsabil;
+    // un responsabil existent ramine. SP_CREATE_CONFIGURATOR copiaza RESPONSIBLE_USERID de pe
+    // cerere pe oferta, deci ajunge si acolo (aceeasi regula ca la Web-Order).
+    try
+      dmDB.ExecuteQuery('UPDATE TDB_DOCS SET RESPONSIBLE_USERID = :USERID' +
+        ' WHERE DOCID = :DOCID AND DOCTYPEID = 1791 AND COALESCE(RESPONSIBLE_USERID, -1) <= 0',
+        [dmDB.CurrentUserID, dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger]);
+    except
+      on E: Exception do
+      begin
+        ShowErrorDialog('Cerere de finantare', 'Responsabilul nu a putut fi setat: ' + E.Message);
+        Exit;
+      end;
+    end;
     docID := dmDB.CreateConfiguratorDoc_DB(dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger, dmDB.CurrentUserID, dmDB.IBCQueryDocComments.FieldByName('COMMENTS').AsString);
     if docID <> -1 then
     begin

@@ -134,7 +134,6 @@ object frmMainForm: TfrmMainForm
       OptionsImage.SmallImages = dmAdditions.cxSmallImageListStructure
       OptionsView.NavigationPane.MaxVisibleGroups = 1
       OnActiveGroupChanged = dxStructureNavigationActiveGroupChanged
-      ExplicitHeight = 423
     end
     object cxTreeDocTypes: TcxTreeList
       Left = 0
@@ -181,7 +180,6 @@ object frmMainForm: TfrmMainForm
       OnCollapsing = cxTreeDocTypesCollapsing
       OnDblClick = cxTreeDocTypesDblClick
       OnDeletion = cxTreeDocTypesDeletion
-      ExplicitHeight = 423
       object cxTreeDocTypescxTreeListColumn1: TcxTreeListColumn
         Width = 100
         Position.ColIndex = 0
@@ -196,7 +194,6 @@ object frmMainForm: TfrmMainForm
       Height = 28
       Align = dalBottom
       BarManager = dxBarManagerMain
-      ExplicitTop = 423
     end
     inline frameSipClient1: TframeSipClient
       Left = 0
@@ -218,7 +215,7 @@ object frmMainForm: TfrmMainForm
       ParentColor = False
       ParentFont = False
       TabOrder = 3
-      ExplicitTop = 416
+      ExplicitTop = 400
       ExplicitWidth = 323
       ExplicitHeight = 361
       inherited Panel1: TPanel
@@ -226,22 +223,22 @@ object frmMainForm: TfrmMainForm
         Height = 232
         StyleElements = [seFont, seClient, seBorder]
         ExplicitWidth = 323
-        ExplicitHeight = 181
+        ExplicitHeight = 232
         inherited cxPageControl1: TcxPageControl
           Width = 319
           Height = 228
           ExplicitWidth = 319
-          ExplicitHeight = 177
+          ExplicitHeight = 228
           ClientRectBottom = 224
           ClientRectRight = 315
           inherited cxTabSheet1: TcxTabSheet
             ExplicitWidth = 311
-            ExplicitHeight = 149
+            ExplicitHeight = 200
             inherited cxGrid1: TcxGrid
               Width = 301
               Height = 190
               ExplicitWidth = 301
-              ExplicitHeight = 139
+              ExplicitHeight = 190
             end
           end
           inherited tsDial: TcxTabSheet
@@ -280,6 +277,7 @@ object frmMainForm: TfrmMainForm
           ExplicitLeft = 4
           ExplicitTop = 67
           ExplicitWidth = 151
+          ExplicitHeight = 23
           Width = 151
         end
         inherited CallBtn: TcxButton
@@ -1344,6 +1342,7 @@ object frmMainForm: TfrmMainForm
           Style.IsFontAssigned = True
           ExplicitTop = 98
           ExplicitWidth = 68
+          ExplicitHeight = 23
           Width = 68
         end
         inherited cxButton1: TcxButton

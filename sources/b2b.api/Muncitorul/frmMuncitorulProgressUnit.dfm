@@ -37,7 +37,7 @@ object frmMuncitorulProgressDlg: TfrmMuncitorulProgressDlg
     Caption = '3. Import to PriceList'
   end
   object lbTime: TLabel
-    Left = 449
+    Left = 253
     Top = 16
     Width = 37
     Height = 15

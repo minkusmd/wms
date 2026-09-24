@@ -8,6 +8,7 @@ uses
   System.SysUtils,
   System.Variants,
   System.Classes,
+  System.SyncObjs,
   Vcl.Graphics,
   Vcl.Controls,
   Vcl.Forms,
@@ -39,7 +40,58 @@ uses
   FireDAC.Comp.DataSet,
   Muncitorul.Data;
 
+const
+  cOlisSupplierID = 251465;
+  cOlisThreadCount = 8;
+  cOlisFeedUrl = 'https://price.muncitorul.md/api/products.json';
+
 type
+  { un rind de pricelist, copiat din dataset pe firul coordonator -
+    firele de import nu ating memtable-urile }
+  TOlisPriceItem = record
+    Code: string;
+    Name: string;
+    Brand: string;
+    Category: string;
+    Stock: Double;
+    PriceOnline: Double;
+    PriceVinz: Double;
+    Warranty: Integer;
+  end;
+
+  { starea comuna a importului: lista, indexul urmator, rezultatele }
+  TOlisImportJob = class
+  public
+    Items: TArray<TOlisPriceItem>;
+    PLID: Integer;
+    ConnectionParams: TStringList;
+    NextIndex: Integer;          // TInterlocked
+    Inserted: Integer;           // TInterlocked
+    Failed: Integer;             // 0/1, TInterlocked - un fir a cazut, restul se opresc
+    InsertPhaseLeft: TCountdownEvent;
+    Decision: TEvent;            // semnalat de coordonator dupa ce toate firele au terminat INSERT-urile
+    CommitAll: Boolean;          // citit de fire abia dupa Decision
+    constructor Create;
+    destructor Destroy; override;
+    function HasFailed: Boolean;
+  end;
+
+  { un fir de import: conexiune + tranzactie proprie; face INSERT-urile, apoi
+    asteapta decizia coordonatorului si da COMMIT sau ROLLBACK - totul sau nimic }
+  TOlisInsertWorker = class(TThread)
+  private
+    FJob: TOlisImportJob;
+    FError: string;
+    FCommitted: Boolean;
+    procedure InsertItems(AConnection: TFDConnection);
+  protected
+    procedure Execute; override;
+  public
+    constructor Create(AJob: TOlisImportJob);
+    property Error: string read FError;
+    property Committed: Boolean read FCommitted;
+  end;
+
   TfrmMuncitorulProgressDlg = class(TForm)
     Label1: TLabel;
     Label2: TLabel;
@@ -56,16 +108,25 @@ type
     procedure FormDestroy(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
+    procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
   private
     FData: TMuncitorulData;
     FDownloadTime: Int64;
     FLoadTime: Int64;
+    FImportTime: Int64;
     FJson: TStringList;
     FPLID: Integer;
     FPriceCategoryID: Integer;
+    FRunner: TThread;
+    FRunning: Boolean;
+    procedure RunImport;
+    procedure FinishImport(const AError: string);
+    procedure ShowStep(ALabel: TLabel; const AText: string);
     procedure FetchJsonToMemo;
     procedure ParseJsonFromMemoAndLoadDataSets;
-    procedure AddToPriceListItems(Sender: TObject);
+    function BuildPriceItems: TArray<TOlisPriceItem>;
+    function AddToPriceListItems(const AItems: TArray<TOlisPriceItem>): Integer;
+    procedure DeletePriceList(APLID: Integer);
     function DownloadImage(ImageUrl: string): string;
     procedure SetPriceCategoryID(const Value: Integer);
     procedure UpsertImage(PLID: Integer; GoodsCode: string);
@@ -87,64 +148,269 @@ implementation
 uses
   System.Diagnostics,
   System.IOUtils,
+  System.Math,
   System.Net.HttpClient;
 
 
 {$R *.dfm}
 
+{ ---------------------------------------------------------------------------- }
+{ TOlisImportJob                                                                }
+{ ---------------------------------------------------------------------------- }
+
+constructor TOlisImportJob.Create;
+begin
+  inherited Create;
+  ConnectionParams := TStringList.Create;
+  InsertPhaseLeft := TCountdownEvent.Create(cOlisThreadCount);
+  Decision := TEvent.Create(nil, True, False, '');
+end;
+
+destructor TOlisImportJob.Destroy;
+begin
+  Decision.Free;
+  InsertPhaseLeft.Free;
+  ConnectionParams.Free;
+  inherited;
+end;
+
+function TOlisImportJob.HasFailed: Boolean;
+begin
+  Result := TInterlocked.CompareExchange(Failed, 0, 0) <> 0;
+end;
+
+{ ---------------------------------------------------------------------------- }
+{ TOlisInsertWorker                                                             }
+{ ---------------------------------------------------------------------------- }
+
+constructor TOlisInsertWorker.Create(AJob: TOlisImportJob);
+begin
+  FJob := AJob;
+  inherited Create(False);
+  FreeOnTerminate := False;
+end;
+
+procedure TOlisInsertWorker.InsertItems(AConnection: TFDConnection);
+var
+  q: TFDQuery;
+  Index: Integer;
+begin
+  q := TFDQuery.Create(nil);
+  try
+    q.Connection := AConnection;
+    q.SQL.Add('insert into TS_PRICELIST_ITEMS (PLID, SUPPLIER_GOODS_CODE, SUPPLIER_GOODS_NAME, STOCK_QTY, PRICE0,');
+    q.SQL.Add('CURRENCY0ID, PRICE3, CURRENCY3ID, PRICE7, CURRENCY7ID, SUPPLIER_GOODS_BRAND,');
+    q.SQL.Add('SUPPLIER_GOODS_MODEL, waranty, ');
+    q.SQL.Add('SUPPLIER_CATEGORY)');
+    q.SQL.Add('values (:PLID, :SUPPLIER_GOODS_CODE, :SUPPLIER_GOODS_NAME, :STOCK_QTY, :PRICE0, :CURRENCY0ID, :PRICE3,');
+    q.SQL.Add(':CURRENCY3ID, :PRICE7, :CURRENCY7ID, :SUPPLIER_GOODS_BRAND, :SUPPLIER_GOODS_MODEL,  :waranty, ');
+    q.SQL.Add(':SUPPLIER_CATEGORY)');
+
+    // fara Prepare explicit: primul ExecSQL pregateste cu tipurile date de AsXXX,
+    // restul refolosesc instructiunea (SQL-ul nu se schimba)
+    q.ParamByName('PLID').AsInteger := FJob.PLID;
+    q.ParamByName('CURRENCY0ID').AsInteger := 498;
+    q.ParamByName('CURRENCY3ID').AsInteger := 498;
+    q.ParamByName('CURRENCY7ID').AsInteger := 498;
+    q.ParamByName('SUPPLIER_GOODS_MODEL').DataType := ftString;
+    q.ParamByName('SUPPLIER_GOODS_MODEL').Clear;
+
+    while not Terminated and not FJob.HasFailed do
+    begin
+      Index := TInterlocked.Increment(FJob.NextIndex) - 1;
+      if Index > High(FJob.Items) then
+        Break;
+
+      with FJob.Items[Index] do
+      begin
+        q.ParamByName('SUPPLIER_GOODS_CODE').AsString := Code;
+        q.ParamByName('SUPPLIER_GOODS_NAME').AsString := Name;
+        q.ParamByName('STOCK_QTY').AsFloat := Stock;
+        // la Olis PRICE0 = PRICE7 = pret_online
+        q.ParamByName('PRICE0').AsFloat := PriceOnline;
+        q.ParamByName('PRICE3').AsFloat := PriceVinz;
+        q.ParamByName('PRICE7').AsFloat := PriceOnline;
+        q.ParamByName('WARANTY').AsInteger := Warranty;
+        q.ParamByName('SUPPLIER_GOODS_BRAND').AsString := Brand;
+        q.ParamByName('SUPPLIER_CATEGORY').AsString := Category;
+      end;
+      q.ExecSQL;
+      TInterlocked.Increment(FJob.Inserted);
+    end;
+  finally
+    q.Free;
+  end;
+end;
+
+procedure TOlisInsertWorker.Execute;
+var
+  Connection: TFDConnection;
+  InsertPhaseSignaled: Boolean;
+begin
+  InsertPhaseSignaled := False;
+  Connection := nil;
+  try
+    try
+      Connection := TFDConnection.Create(nil);
+      Connection.Params.Assign(FJob.ConnectionParams);
+      Connection.LoginPrompt := False;
+      // fara cursorul de asteptare VCL - nu e voie din alt fir decit cel principal
+      Connection.ResourceOptions.SilentMode := True;
+      Connection.TxOptions.Isolation := xiReadCommitted;
+      Connection.Connected := True;
+      Connection.StartTransaction;
+
+      InsertItems(Connection);
+    except
+      on E: Exception do
+      begin
+        FError := E.Message;
+        TInterlocked.Exchange(FJob.Failed, 1);
+      end;
+    end;
+
+    // gata cu INSERT-urile; decizia (COMMIT/ROLLBACK) o ia coordonatorul
+    FJob.InsertPhaseLeft.Signal;
+    InsertPhaseSignaled := True;
+    FJob.Decision.WaitFor(INFINITE);
+
+    if Assigned(Connection) and Connection.InTransaction then
+    try
+      if FJob.CommitAll and (FError = '') then
+      begin
+        Connection.Commit;
+        FCommitted := True;
+      end
+      else
+        Connection.Rollback;
+    except
+      on E: Exception do
+        if FError = '' then
+          FError := E.Message;
+    end;
+  finally
+    if not InsertPhaseSignaled then
+      FJob.InsertPhaseLeft.Signal;
+    Connection.Free;
+  end;
+end;
+
+{ ---------------------------------------------------------------------------- }
+{ TfrmMuncitorulProgressDlg                                                     }
+{ ---------------------------------------------------------------------------- }
+
 procedure TfrmMuncitorulProgressDlg.FormDestroy(Sender: TObject);
 begin
+  if Assigned(FRunner) then
+  begin
+    FRunner.WaitFor;
+    TThread.RemoveQueuedEvents(FRunner);
+    FRunner.Free;
+  end;
   FJson.Free;
   FData.Free;
 end;
 
 procedure TfrmMuncitorulProgressDlg.FormCreate(Sender: TObject);
 begin
+  // conexiunea e folosita de firul coordonator - fara cursorul de asteptare VCL
+  FDConnection1.ResourceOptions.SilentMode := True;
   FDConnection1.Connected := True;
   fJSon := TStringList.Create;
+  OnCloseQuery := FormCloseQuery;
+  Caption := Format('Olis Grup - import pricelist (%d fire)', [cOlisThreadCount]);
+end;
+
+procedure TfrmMuncitorulProgressDlg.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+begin
+  // cit timp ruleaza importul fereastra nu se inchide
+  CanClose := not FRunning;
 end;
 
 procedure TfrmMuncitorulProgressDlg.FormShow(Sender: TObject);
-var
-  LTotalWatch: TStopwatch;
-  LTotalTime: Int64;
 begin
-  // Ensure FData is created (it should be by FormCreate)
-  Application.ProcessMessages;
+  if FRunning or Assigned(FRunner) then
+    Exit;
 
   if not Assigned(FData) then
     FData := TMuncitorulData.Create;
 
-  Application.ProcessMessages;
+  FRunning := True;
+  lbTime.Caption := '';
+  dxActivityIndicator1.Active := True;
 
-  LTotalWatch := TStopwatch.StartNew;
+  // tot lucrul merge pe un fir separat, fereastra ramine responsiva
+  FRunner := TThread.CreateAnonymousThread(RunImport);
+  FRunner.FreeOnTerminate := False;
+  FRunner.Start;
+end;
 
-  { --- STEP 1: Get JSON and put it into MemoJson --- }
-  // We pass the state of the checkbox to the method.
-  FetchJsonToMemo;
-  Application.ProcessMessages;
+procedure TfrmMuncitorulProgressDlg.ShowStep(ALabel: TLabel; const AText: string);
+begin
+  TThread.Queue(TThread.Current,
+    procedure
+    begin
+      ALabel.Caption := AText;
+    end);
+end;
 
-  { --- STEP 2: Parse JSON from Memo and load datasets --- }
-  ParseJsonFromMemoAndLoadDataSets;
-  Application.ProcessMessages;
+{ firul coordonator }
+procedure TfrmMuncitorulProgressDlg.RunImport;
+var
+  LWatch: TStopwatch;
+  LItems: TArray<TOlisPriceItem>;
+  LError: string;
+  LInserted: Integer;
+begin
+  LError := '';
+  try
+    { --- STEP 1: Get JSON --- }
+    ShowStep(Label1, '1. Get product json...');
+    FetchJsonToMemo;
+    ShowStep(Label1, Format('1. Get product json - %d ms', [FDownloadTime]));
 
-  { Stop total timer }
-  LTotalWatch.Stop;
-  LTotalTime := LTotalWatch.ElapsedMilliseconds;
+    { --- STEP 2: Parse JSON and load datasets --- }
+    ShowStep(Label2, '2. Parse json...');
+    ParseJsonFromMemoAndLoadDataSets;
+    LItems := BuildPriceItems;
+    ShowStep(Label2, Format('2. Parse json - %d ms, %d produse cu stoc', [FLoadTime, Length(LItems)]));
+
+    { --- STEP 3: Import to PriceList, in cOlisThreadCount fire --- }
+    LWatch := TStopwatch.StartNew;
+    LInserted := AddToPriceListItems(LItems);
+    FImportTime := LWatch.ElapsedMilliseconds;
+    ShowStep(Label3, Format('3. Import to PriceList - %d ms, %d rinduri (%d fire)',
+      [FImportTime, LInserted, cOlisThreadCount]));
+  except
+    on E: Exception do
+      LError := E.Message;
+  end;
+
+  TThread.Queue(TThread.Current,
+    procedure
+    begin
+      FinishImport(LError);
+    end);
+end;
+
+procedure TfrmMuncitorulProgressDlg.FinishImport(const AError: string);
+begin
+  FRunning := False;
+  dxActivityIndicator1.Active := False;
 
   { Afișăm timpii }
-  // FDownloadTime and FLoadTime are set by the helper methods
-  lbTime.Caption := Format('Acquire JSON: %d ms' + sLineBreak + 'Load JSON: %d ms' + sLineBreak + 'Total: %d ms', [FDownloadTime,
-    FLoadTime, LTotalTime]);
+  lbTime.Caption := Format('Acquire JSON: %d ms' + sLineBreak + 'Load JSON: %d ms' + sLineBreak +
+    'Import: %d ms (%d fire)', [FDownloadTime, FLoadTime, FImportTime, cOlisThreadCount]);
 
-  AddToPriceListItems(Sender);
+  if AError <> '' then
+    ShowMessage('Importul Olis Grup nu s-a facut:' + sLineBreak + AError);
+
   Close;
 end;
 
 procedure TfrmMuncitorulProgressDlg.FetchJsonToMemo;
 var
   LWatch: TStopwatch;
-  LDebugFile: string;
 begin
   Assert(Assigned(FData), 'FData instance is missing in FetchJsonToMemo.');
 
@@ -152,14 +418,10 @@ begin
   try
     try
       { LIVE MODE: Download from URL }
-      FJson.Text := FData.DownloadJsonAsString('https://price.muncitorul.md/api/products.json');
+      FJson.Text := FData.DownloadJsonAsString(cOlisFeedUrl);
     except
       on E: Exception do
-      begin
-      // Show error in message and put it in the memo for inspection
-        FJson.Text := Format('{"error": "Failed to fetch JSON: %s"}', [E.Message]);
-        ShowMessage('Error fetching JSON: ' + E.Message);
-      end;
+        raise Exception.Create('Error fetching JSON: ' + E.Message);
     end;
   finally
     LWatch.Stop;
@@ -181,9 +443,7 @@ begin
       FData.LoadFromJson(FJson.Text);
     except
       on E: Exception do
-      begin
-        ShowMessage('Error parsing or loading JSON: ' + E.Message);
-      end;
+        raise Exception.Create('Error parsing or loading JSON: ' + E.Message);
     end;
   finally
     LWatch.Stop;
@@ -191,82 +451,126 @@ begin
     FLoadTime := LWatch.ElapsedMilliseconds;
   end;
 
-  { Conectăm sursele de date la seturile de date din clasa noastră }
-  // This is done even if parsing fails, so the grids show empty datasets
-  // instead of keeping old data.
-  DsProducts.DataSet := FData.Products;
-  DsImages.DataSet := FData.Images;
-  DsFeatures.DataSet := FData.Features;
+  // LoadFromJson iese fara eroare si la un JSON invalid - atunci Products e gol
+  if FData.Products.IsEmpty then
+    raise Exception.Create('JSON-ul nu contine produse.');
 end;
 
-procedure TfrmMuncitorulProgressDlg.AddToPriceListItems(Sender: TObject);
+{ copia produselor cu stoc intr-un tablou - pe firul coordonator, inainte de a
+  porni firele de import (memtable-urile nu se citesc din mai multe fire) }
+function TfrmMuncitorulProgressDlg.BuildPriceItems: TArray<TOlisPriceItem>;
 var
-  LNewPLID: Integer;
-  q: TFDQuery;
+  LProducts: TFDMemTable;
+  LCount: Integer;
+  Item: TOlisPriceItem;
 begin
-  q := TFDQuery.Create(self);
+  LProducts := FData.Products;
+  SetLength(Result, LProducts.RecordCount);
+  LCount := 0;
+  LProducts.DisableControls;
   try
-    q.Connection := FDConnection1;
-
-    LNewPLID := FDConnection1.ExecSQLScalar('insert into TS_PRICELISTS (SUPPLIERID, PRICE_CATEGORYID) ' +
-      'values (:SUPPLIERID, :PRICE_CATEGORYID) ' + 'returning PLID', [251465, PriceCategoryID]);
-
-    q.sql.Clear;
-    q.SQL.Add('insert into TS_PRICELIST_ITEMS (PLID, SUPPLIER_GOODS_CODE, SUPPLIER_GOODS_NAME, STOCK_QTY, PRICE0,');
-    q.SQL.Add('CURRENCY0ID, PRICE3, CURRENCY3ID, PRICE7, CURRENCY7ID, SUPPLIER_GOODS_BRAND,');
-    q.SQL.Add('SUPPLIER_GOODS_MODEL, waranty, ');
-    q.SQL.Add('SUPPLIER_CATEGORY)');
-    q.SQL.Add('values (:PLID, :SUPPLIER_GOODS_CODE, :SUPPLIER_GOODS_NAME, :STOCK_QTY, :PRICE0, :CURRENCY0ID, :PRICE3,');
-    q.SQL.Add(':CURRENCY3ID, :PRICE7, :CURRENCY7ID, :SUPPLIER_GOODS_BRAND, :SUPPLIER_GOODS_MODEL,  :waranty, ');
-    q.SQL.Add(':SUPPLIER_CATEGORY)');
-
-    DsProducts.DataSet.Open;
-    DsProducts.DataSet.First;
-    Application.ProcessMessages;
-    while not DsProducts.DataSet.Eof do
+    LProducts.First;
+    while not LProducts.Eof do
     begin
-      { params prepare }
-      q.ParamByName('PLID').AsInteger := LNewPLID;
-      q.ParamByName('SUPPLIER_GOODS_CODE').AsString := DsProducts.DataSet.FieldByName('code').AsString;
-      q.ParamByName('SUPPLIER_GOODS_NAME').AsString := DsProducts.DataSet.FieldByName('titluRO').AsString;
-      q.ParamByName('STOCK_QTY').AsFloat := DsProducts.DataSet.FieldByName('stoc').AsFloat;
-
-      q.ParamByName('PRICE0').AsFloat := DsProducts.DataSet.FieldByName('pret_online').AsFloat;
-      q.ParamByName('CURRENCY0ID').AsInteger := 498;
-
-      q.ParamByName('PRICE3').AsFloat := DsProducts.DataSet.FieldByName('pret_vinz').AsFloat;
-      q.ParamByName('CURRENCY3ID').AsInteger := 498;
-
-      q.ParamByName('PRICE7').AsFloat := DsProducts.DataSet.FieldByName('pret_online').AsFloat;
-      q.ParamByName('CURRENCY7ID').AsInteger := 498;
-
-      q.ParamByName('WARANTY').AsInteger := DsProducts.DataSet.FieldByName('guar_period').AsInteger;
-
-      q.ParamByName('SUPPLIER_GOODS_BRAND').AsString := DsProducts.DataSet.FieldByName('brand').AsString;
-//      q.ParamByName('SUPPLIER_GOODS_MODEL').AsString := Item.Model;
-
-//      q.ParamByName('SUPPLIER_GOODSTYPE').AsString := Item.SupplierGoodsType;
-//      q.ParamByName('GOODSTYPEID').AsInteger := Item.GoodsTypeID;
-
-//      q.ParamByName('SYSTEM_VENDORID').AsInteger := Item.SystemVendorID;
-//      q.ParamByName('PARENTGOODSID').AsInteger := Item.ParentGoodsID;
-
-      q.ParamByName('SUPPLIER_CATEGORY').AsString := DsProducts.DataSet.FieldByName('categorieRO').AsString;
-
-//      q.ParamByName('COMPATIBILITATE').AsString := Item.Compatibilitate; // text, poate fi NULL
-
-//      q.ParamByName('FLG_PREORDER').AsInteger := Item.FlgPreorder; // 0/1
-
-//      UpsertImage(LNewPLID, DsProducts.DataSet.FieldByName('code').AsString);
-      if  DsProducts.DataSet.FieldByName('stoc').AsFloat > 0 then
-        q.ExecSQL;
-
-      DsProducts.DataSet.Next;
+      if LProducts.FieldByName('stoc').AsFloat > 0 then
+      begin
+        Item.Code := LProducts.FieldByName('code').AsString;
+        Item.Name := LProducts.FieldByName('titluRO').AsString;
+        Item.Brand := LProducts.FieldByName('brand').AsString;
+        Item.Category := LProducts.FieldByName('categorieRO').AsString;
+        Item.Stock := LProducts.FieldByName('stoc').AsFloat;
+        Item.PriceOnline := LProducts.FieldByName('pret_online').AsFloat;
+        Item.PriceVinz := LProducts.FieldByName('pret_vinz').AsFloat;
+        Item.Warranty := StrToIntDef(Trim(LProducts.FieldByName('guar_period').AsString), 0);
+        Result[LCount] := Item;
+        Inc(LCount);
+      end;
+      LProducts.Next;
     end;
+    LProducts.First;
   finally
-    q.Free;
+    LProducts.EnableControls;
   end;
+  SetLength(Result, LCount);
+end;
 
+function TfrmMuncitorulProgressDlg.AddToPriceListItems(const AItems: TArray<TOlisPriceItem>): Integer;
+var
+  Job: TOlisImportJob;
+  Workers: TArray<TOlisInsertWorker>;
+  I, Total: Integer;
+  Errors: string;
+  AllCommitted: Boolean;
+begin
+  Total := Length(AItems);
+  if Total = 0 then
+    raise Exception.Create('Niciun produs cu stoc in JSON.');
+
+  Job := TOlisImportJob.Create;
+  try
+    Job.Items := AItems;
+    Job.ConnectionParams.Assign(FDConnection1.Params);
+
+    // antetul se comite separat: firele il vad (FK) doar dupa COMMIT
+    Job.PLID := FDConnection1.ExecSQLScalar('insert into TS_PRICELISTS (SUPPLIERID, PRICE_CATEGORYID) ' +
+      'values (:SUPPLIERID, :PRICE_CATEGORYID) ' + 'returning PLID', [cOlisSupplierID, PriceCategoryID]);
+    if FDConnection1.InTransaction then
+      FDConnection1.Commit;
+
+    SetLength(Workers, cOlisThreadCount);
+    for I := 0 to High(Workers) do
+      Workers[I] := TOlisInsertWorker.Create(Job);
+    try
+      // progresul, pina cind toate firele termina INSERT-urile
+      while Job.InsertPhaseLeft.WaitFor(200) <> wrSignaled do
+        ShowStep(Label3, Format('3. Import to PriceList - %d / %d (%d fire)',
+          [TInterlocked.CompareExchange(Job.Inserted, 0, 0), Total, cOlisThreadCount]));
+
+      // totul sau nimic: COMMIT doar daca toate firele au reusit
+      Job.CommitAll := not Job.HasFailed;
+      Job.Decision.SetEvent;
+    finally
+      // la o exceptie neasteptata firele trebuie deblocate inainte de eliberarea Job
+      TInterlocked.Exchange(Job.Failed, IfThen(Job.CommitAll, 0, 1));
+      Job.Decision.SetEvent;
+      Errors := '';
+      AllCommitted := True;
+      for I := 0 to High(Workers) do
+      begin
+        Workers[I].WaitFor;
+        if Workers[I].Error <> '' then
+          Errors := Errors + sLineBreak + Format('fir %d: %s', [I + 1, Workers[I].Error]);
+        AllCommitted := AllCommitted and Workers[I].Committed;
+        Workers[I].Free;
+      end;
+    end;
+
+    if not AllCommitted then
+    begin
+      // un fir a cazut (restul au dat ROLLBACK) sau un COMMIT a esuat - nu lasam pricelist partial
+      DeletePriceList(Job.PLID);
+      raise Exception.Create('Pricelist-ul nu a fost creat.' + Errors);
+    end;
+
+    FPLID := Job.PLID;
+    Result := TInterlocked.CompareExchange(Job.Inserted, 0, 0);
+  finally
+    Job.Free;
+  end;
+end;
+
+procedure TfrmMuncitorulProgressDlg.DeletePriceList(APLID: Integer);
+begin
+  try
+    FDConnection1.ExecSQL('delete from TS_PRICELIST_ITEMS where PLID = :PLID', [APLID]);
+    FDConnection1.ExecSQL('delete from TS_PRICELISTS where PLID = :PLID', [APLID]);
+    if FDConnection1.InTransaction then
+      FDConnection1.Commit;
+  except
+    // eroarea initiala e mai importanta; pricelist-ul ramas se poate sterge manual
+    if FDConnection1.InTransaction then
+      FDConnection1.Rollback;
+  end;
 end;
 
 function TfrmMuncitorulProgressDlg.DownloadImage(ImageUrl: string): string;

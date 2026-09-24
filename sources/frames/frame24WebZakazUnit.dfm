@@ -27,7 +27,6 @@ inherited frame24WebZakaz: Tframe24WebZakaz
     TabOrder = 0
     LookAndFeel.NativeStyle = True
     LookAndFeel.SkinName = ''
-    ExplicitTop = -4
     object cxGridWZTable: TcxGridDBTableView
       PopupMenu = dxBarPopupMenu
       OnKeyDown = cxGridWZTableKeyDown
@@ -250,8 +249,6 @@ inherited frame24WebZakaz: Tframe24WebZakaz
       TabOrder = 1
       LookAndFeel.NativeStyle = True
       LookAndFeel.SkinName = ''
-      ExplicitTop = 34
-      ExplicitHeight = 165
       object cxGridComponentsTable: TcxGridDBTableView
         PopupMenu = dxBarPopupMenuJurnal
         OnKeyDown = cxGridComponentsTableKeyDown
@@ -564,7 +561,6 @@ inherited frame24WebZakaz: Tframe24WebZakaz
     PositionAfterOpen = 19
     MinSize = 192
     Control = pnBottom
-    ExplicitTop = 308
   end
   object dxBarManager: TdxBarManager
     Font.Charset = DEFAULT_CHARSET

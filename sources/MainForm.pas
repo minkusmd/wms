@@ -854,7 +854,6 @@ uses
   frmExportTo1CDialog,
   frmFilterDlg,
   frmFirmsLocksLogDialog,
-  frmFiscalPrinterServiceDialogV1,
   frmFiscalPrinterServiceDialogV2,
   frmFiscalPrintersSetupDialog,
   frmGlobalCallHistoryUnit,
@@ -3735,7 +3734,7 @@ end;
 procedure TfrmMainForm.PlayAudio_CerereDeFinantare;
 begin
   PlayCustomSound(AppUserConfigStorage.TextValues.GetValue(cSOUND_WebZakaz, cSOUND_DefaultAudioTitle));
-  dmdb.DoNotification('SWN', 'Web order', 'A fost creata o cerere de finantare!');
+  dmdb.DoNotification('SWN', 'Cerere de finantare', 'A fost creata o cerere de finantare noua.');
 
 end;
 
@@ -5223,7 +5222,7 @@ end;
 
 procedure TfrmMainForm.ShowServiceFiscalPrinter;
 begin
-  if (dmDB.CurrentFirma = 307225) then  // PRIME STORE
+  // MCC se acceseaza numai prin serverul ZFPLab (localhost:4444 sau FP_DEVICES), nu direct prin zfpcom.dll
   begin
     var dialog := TfrmFiscalPrinterServiceV2Dlg.Create(Self);
     try
@@ -5241,26 +5240,6 @@ begin
     finally
       dialog.Free;
     end;
-  end
-  else
-  begin
-    var dialog := TfrmFiscalPrinterServiceV1Dlg.Create(Self);
-    try
-    // setup printer info
-      dialog.PrinterPort := AppConfigStorage.IntValues.GetValue(cSETTINGS_AppFiscalPrinterComPort,
-        cFISCAL_PRINTER_DefaultCOMport);
-      dialog.PrinterBoundRate := AppConfigStorage.IntValues.GetValue(cSETTINGS_AppFiscalPrinterBoundRate,
-        cFISCAL_PRINTER_DefaultBoundRate);
-      dialog.ShowModal;
-      if dialog.PrinterExists then
-      begin
-        AppConfigStorage.IntValues.SetValue(cSETTINGS_AppFiscalPrinterComPort, dialog.PrinterPort);
-        AppConfigStorage.IntValues.SetValue(cSETTINGS_AppFiscalPrinterBoundRate, dialog.PrinterBoundRate);
-      end;
-    finally
-      dialog.Free;
-    end;
-
   end;
 end;
 

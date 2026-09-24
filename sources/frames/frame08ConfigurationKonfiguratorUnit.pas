@@ -188,6 +188,7 @@ type
     cxGridComponentsDBTableView1SUMA: TcxGridDBColumn;
     bbLibrareSubMenu: TdxBarSubItem;
     bbLivrareRepublica: TdxBarButton;
+    bbLivrareSuburbii: TdxBarButton;
         procedure bbGoodsNewClick(Sender: TObject);
         procedure cxGridComponentsTableStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
         procedure bbGoodsModifyClick(Sender: TObject);
@@ -251,6 +252,7 @@ type
     procedure dxBarButton13Click(Sender: TObject);
     procedure dxBarButton14Click(Sender: TObject);
     procedure bbLivrareRepublicaClick(Sender: TObject);
+    procedure bbLivrareSuburbiiClick(Sender: TObject);
     private
     { Private declarations }
         fLastDocID: Integer;
@@ -828,6 +830,12 @@ procedure Tframe08ConfigurationBRK.bbLivrareRepublicaClick(
 begin
   // Livrare Moldova
   AddDelivery2Jurnal(122294);
+end;
+
+procedure Tframe08ConfigurationBRK.bbLivrareSuburbiiClick(Sender: TObject);
+begin
+  // Livrare in suburbiile mun. Chisinau (24H-48H)
+  AddDelivery2Jurnal(182874);
 end;
 
 procedure Tframe08ConfigurationBRK.bbMoveGoodsInComplectClick(Sender: TObject);

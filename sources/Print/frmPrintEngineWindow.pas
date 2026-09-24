@@ -298,14 +298,14 @@ begin
           // add separator
     Sep := TBevel.Create(ToolBar);
     Sep.Width := 60;
-    Sep.Left := 1000;
+    Sep.Left := 900;
     Sep.Shape := bsSpacer;
     Sep.Parent := ToolBar;
           // add custom button
     Btn2 := TButton.Create(ToolBar);
     Btn2.Caption := 'Setari';
     Btn2.Width := 100;
-    Btn2.Left := 1000;
+    Btn2.Left := 900;
     Btn2.TabStop := False;
     Btn2.Parent := ToolBar;
     Btn2.OnClick := WhenReportRerun;
@@ -325,7 +325,7 @@ begin
     BtnSend.Hint := 'Trimite raportul ca PDF pe Viber / WhatsApp / Telegram';
     BtnSend.ShowHint := True;
     BtnSend.Width := 110;
-    BtnSend.Left := 1200;
+    BtnSend.Left := 1100;
     BtnSend.TabStop := False;
     BtnSend.Parent := ToolBar;
     BtnSend.PopupMenu := SendMenu;

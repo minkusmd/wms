@@ -186,13 +186,22 @@ begin
   try
     try
       Query.Connection := dmDB.IBCConnection;
+      // MCC se alege dupa firma curenta (FP_DEVICES.FIRMA_ID). Prioritatea:
+      //   0 - MCC legata de calculatorul curent (WS_ID);
+      //   1 - MCC partajata cu calculatorul curent prin FP_DEVICE_ACCESS;
+      //   2 - MCC a firmei fara calculator indicat (WS_ID gol) - valabila pe orice statie.
+      // MCC legata de alt calculator si nepartajata nu se foloseste: portul ei apartine acelui calculator.
       Query.SQL.Text :=
         'SELECT FIRST 1 D.SERVER_ADDRESS, D.COM_PORT, D.BAUD_RATE, ' +
-        '  CASE WHEN UPPER(W.COMPUTER_NAME) = :COMPUTER_NAME THEN 0 ELSE 1 END AS OTHER_WS ' +
+        '  CASE WHEN UPPER(W.COMPUTER_NAME) = :COMPUTER_NAME THEN 0 ' +
+        '       WHEN EXISTS(SELECT 1 FROM FP_DEVICE_ACCESS A ' +
+        '                   INNER JOIN WS_WORK_STATIONS W2 ON W2.WS_ID = A.WS_ID ' +
+        '                   WHERE (A.FP_ID = D.FP_ID) AND (UPPER(W2.COMPUTER_NAME) = :COMPUTER_NAME)) THEN 1 ' +
+        '       ELSE 2 END AS WS_PRIORITY ' +
         'FROM FP_DEVICES D ' +
         'LEFT JOIN WS_WORK_STATIONS W ON W.WS_ID = D.WS_ID ' +
         'WHERE (D.FIRMA_ID = :FIRMA_ID) AND (D.FLG_ENABLED = 1) AND ' +
-        '      ((UPPER(W.COMPUTER_NAME) = :COMPUTER_NAME) OR ' +
+        '      ((D.WS_ID IS NULL) OR (UPPER(W.COMPUTER_NAME) = :COMPUTER_NAME) OR ' +
         '       EXISTS(SELECT 1 FROM FP_DEVICE_ACCESS A ' +
         '              INNER JOIN WS_WORK_STATIONS W2 ON W2.WS_ID = A.WS_ID ' +
         '              WHERE (A.FP_ID = D.FP_ID) AND (UPPER(W2.COMPUTER_NAME) = :COMPUTER_NAME))) ' +
@@ -206,6 +215,10 @@ begin
         Address := Trim(Query.FieldByName('SERVER_ADDRESS').AsString);
         if Address <> '' then
         begin
+          // in FP_DEVICES adresa poate fi scrisa fara schema ("localhost:4444/") -
+          // clientul HTTP (Indy) are nevoie de ea
+          if Pos('://', Address) = 0 then
+            Address := 'http://' + Address;
           // FP_Core lipeste comanda direct de adresa, deci "/" la sfirsit este obligatoriu
           if Address[Length(Address)] <> '/' then
             Address := Address + '/';

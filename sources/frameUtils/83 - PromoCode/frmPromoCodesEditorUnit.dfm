@@ -57,8 +57,10 @@ object frmPromoCodesEditorDlg: TfrmPromoCodesEditorDlg
     object tbsGeneral: TcxTabSheet
       Caption = 'Promotie'
       ImageIndex = 0
-      ExplicitLeft = 5
-      ExplicitTop = 27
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Label1: TLabel
         Left = 16
         Top = 36
@@ -155,7 +157,7 @@ object frmPromoCodesEditorDlg: TfrmPromoCodesEditorDlg
       object Label6: TLabel
         Left = 16
         Top = 243
-        Width = 96
+        Width = 94
         Height = 15
         Caption = 'Baner (720x360px)'
         Font.Charset = DEFAULT_CHARSET
@@ -207,7 +209,7 @@ object frmPromoCodesEditorDlg: TfrmPromoCodesEditorDlg
       object Label10: TLabel
         Left = 399
         Top = 180
-        Width = 90
+        Width = 91
         Height = 15
         Caption = 'Tipul promo-cod'
         Font.Charset = DEFAULT_CHARSET

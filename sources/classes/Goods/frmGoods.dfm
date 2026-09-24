@@ -827,7 +827,6 @@ object frmGoodsBrowser: TfrmGoodsBrowser
       Anchors = [akLeft, akTop, akRight]
       AutoSize = False
       Caption = '..'
-      Color = clWindow
       Font.Charset = ANSI_CHARSET
       Font.Color = clCream
       Font.Height = -13
@@ -835,6 +834,7 @@ object frmGoodsBrowser: TfrmGoodsBrowser
       Font.Style = []
       ParentColor = False
       ParentFont = False
+      Transparent = True
       Layout = tlCenter
       ExplicitWidth = 1427
     end

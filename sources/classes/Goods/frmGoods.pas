@@ -19,17 +19,6 @@ uses
     dxUIAClasses;
 
 type
-    TDelayedOpenPathCatalog = class(TThread)
-    private
-        FDataSet: TDataSet;
-        FDelay: Integer;
-        FlbPath: TLabel;
-    protected
-        procedure Execute; override;
-    public
-        constructor Create(ADataSet: TDataSet; ADelay: Integer; lbPath: TLabel);
-    end;
-
     TGoodsWebInfoClass = class
         GoodsID: Integer;
         ParentID: Integer;
@@ -3447,7 +3436,6 @@ procedure TfrmGoodsBrowser.ShowAdditionalMasterDetailsData;
 begin
     IBCQueryStockFirms.Close;
     IBCQueryStockWarehouse.Close;
-    IBCQueryCatalog.Open;
   // stokurile
     if cxPageControlAddons.ActivePage = tbsStocks then
     begin
@@ -3887,13 +3875,41 @@ begin
 end;
 
 procedure TfrmGoodsBrowser.UpdatePath;
+var
+    path: string;
 begin
-    if IBCQueryGoods.Active then
-    begin
+  // Calea (breadcrumb) pana la produsul selectat. Interogarea e mica, deci o
+  // citim sincron: varianta cu TThread + Synchronize nu afisa nimic cand
+  // IBCQueryCatalog era deja deschis de alta parte a formei.
+    lbPath.Caption := '';
+    if (not IBCQueryGoods.Active) or IBCQueryGoods.IsEmpty then
+        Exit;
+
+    try
         IBCQueryCatalog.Close;
-        IBCQueryCatalog.ParamByName('GoodsID').AsInteger := IBCQueryGoods.FieldByName('goodsid').AsInteger;
-        TDelayedOpenPathCatalog.Create(IBCQueryCatalog, 500, lbPath);
+        IBCQueryCatalog.ParamByName('GoodsID').AsInteger := IBCQueryGoods.FieldByName('GOODSID').AsInteger;
+        IBCQueryCatalog.Open;
+        try
+            path := Trim(IBCQueryCatalog.FieldByName('BREADCRUMB').AsString);
+        finally
+            IBCQueryCatalog.Close;
+        end;
+    except
+        on E: Exception do
+        begin
+            lbPath.Caption := E.Message; // fara cale: aratam cauza, nu blocam navigarea prin grid
+            Exit;
+        end;
     end;
+
+  // procedura intoarce '<mapa> >  <mapa> >  ' - taiem separatorul de la final
+    while (path <> '') and CharInSet(path[Length(path)], ['>', ' ']) do
+        SetLength(path, Length(path) - 1);
+
+    if path = '' then
+        lbPath.Caption := 'ROOT'
+    else
+        lbPath.Caption := path;
 end;
 
 procedure TfrmGoodsBrowser.ModifyFolder;
@@ -4042,36 +4058,6 @@ begin
 end;
 
 
-
-// TDelayedOpenThread = class(TThread)
-constructor TDelayedOpenPathCatalog.Create(ADataSet: TDataSet; ADelay: Integer; lbPath: TLabel);
-begin
-    inherited Create(True); // Create suspended
-    FDataSet := ADataSet;
-    FDelay := ADelay;
-    FlbPath := lbPath;
-    FreeOnTerminate := True; // Free the thread automatically when it finishes
-    Resume; // Start the thread
-end;
-
-procedure TDelayedOpenPathCatalog.Execute;
-begin
-//    Sleep(FDelay); // Delay for the specified time
-    Synchronize(
-        procedure
-        begin
-            if not FDataSet.Active then
-            try
-                FDataSet.Open; // Open the TDataSet in the main thread
-                if FDataSet.FieldByName('BreadCrumb').AsString = '' then
-                    flbPath.Caption := 'ROOT'
-                else
-                    flbPath.Caption := FDataSet.FieldByName('BreadCrumb').AsString;
-            finally
-                FDataSet.Close;
-            end;
-        end);
-end;
 
 end.
 

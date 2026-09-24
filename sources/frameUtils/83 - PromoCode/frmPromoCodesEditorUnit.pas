@@ -3,16 +3,71 @@ unit frmPromoCodesEditorUnit;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, SWNBaseUnit, DialogTitle, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters,
+  Winapi.Windows,
+  Winapi.Messages,
+  System.SysUtils,
+  System.Variants,
+  System.Classes,
+  Vcl.Graphics,
+  Vcl.Controls,
+  Vcl.Forms,
+  Vcl.Dialogs,
+  SWNBaseUnit,
+  DialogTitle,
+  cxGraphics,
+  cxControls,
+  cxLookAndFeels,
+  cxLookAndFeelPainters,
   cxPCdxBarPopupMenu,
-  cxContainer, cxEdit, cxMemo, cxDBEdit, cxTextEdit, cxMaskEdit, cxDropDownEdit, cxCalendar, Vcl.StdCtrls, cxPC, cxCheckListBox,
+  cxContainer,
+  cxEdit,
+  cxMemo,
+  cxDBEdit,
+  cxTextEdit,
+  cxMaskEdit,
+  cxDropDownEdit,
+  cxCalendar,
+  Vcl.StdCtrls,
+  cxPC,
+  cxCheckListBox,
   cxDBCheckListBox,
-  cxCheckBox, cxButtonEdit, cxCalc, cxLookupEdit, cxDBLookupEdit, cxDBLookupComboBox, dxBarBuiltInMenu, cxCustomListBox,
-  cxStyles, cxCustomData, cxFilter, cxData, cxDataStorage, cxNavigator,
-  cxDataControllerConditionalFormattingRulesManagerDialog, Data.DB, cxDBData, cxGridCustomTableView, cxGridTableView,
-  cxGridDBTableView, cxGridLevel, cxGridCustomView, cxGrid, cxClasses, dxBar, Vcl.ExtCtrls, dxDateRanges, DBAccess, IBC,
-  MemDS, dxScrollbarAnnotations, cxLabel, cxImage, cxBarEditItem, dxBarExtItems, cxListBox;
+  cxCheckBox,
+  cxButtonEdit,
+  cxCalc,
+  cxLookupEdit,
+  cxDBLookupEdit,
+  cxDBLookupComboBox,
+  dxBarBuiltInMenu,
+  cxCustomListBox,
+  cxStyles,
+  cxCustomData,
+  cxFilter,
+  cxData,
+  cxDataStorage,
+  cxNavigator,
+  cxDataControllerConditionalFormattingRulesManagerDialog,
+  Data.DB,
+  cxDBData,
+  cxGridCustomTableView,
+  cxGridTableView,
+  cxGridDBTableView,
+  cxGridLevel,
+  cxGridCustomView,
+  cxGrid,
+  cxClasses,
+  dxBar,
+  Vcl.ExtCtrls,
+  dxDateRanges,
+  DBAccess,
+  IBC,
+  MemDS,
+  dxScrollbarAnnotations,
+  cxLabel,
+  cxImage,
+  cxBarEditItem,
+  dxBarExtItems,
+  cxListBox,
+  dxCoreGraphics;
 
 type
   TfrmPromoCodesEditorDlg = class(TSWNMasteredFormClass)
@@ -85,11 +140,17 @@ implementation
 
 {$R *.dfm}
 
-uses DataModuleAdditions, DataModuleDB, SWNConst, SWNUtils, System.Math, frmGoodsGroupsManagerDialog;
+uses
+  DataModuleAdditions,
+  DataModuleDB,
+  SWNConst,
+  SWNUtils,
+  System.Math,
+  frmGoodsGroupsManagerDialog;
 
 function TfrmPromoCodesEditorDlg.CheckInputValues: Boolean;
 var
-  Errors: String;
+  Errors: string;
 begin
   Result := False;
   if Errors = '' then
@@ -233,3 +294,4 @@ begin
 end;
 
 end.
+

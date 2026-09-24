@@ -160,8 +160,9 @@ type
     procedure DeleteSelectedGoods;
     procedure CreateRashodnaiaNakladnaia;
     procedure CreateSciotNaOplatu;
-    procedure DoCloseDocument;
+    procedure CloseCurrentDocument;
     function DoCloseDocumentDB(const DocID: integer): Boolean;
+    function DoOpenDocumentDB(const DocID: integer): Boolean;
     procedure CreateConfigurator;
     procedure SetupQtyFields;
     procedure AssignResponsibleOnOpen;
@@ -178,6 +179,9 @@ type
     function GetFilterFields: TFrameFilterFields; override;
     function GetFrameButtons: TFrameButtons; override;
     procedure SetupSecurityItems; override;
+    // F9 / Shift+F9 din meniul principal (TSWNFrameManager)
+    procedure DoCloseDocument(const DocID: Integer); override;
+    procedure DoOpenDocument(const DocID: Integer); override;
   public
     { Public declarations }
     procedure SetupDefaultFocus; override;
@@ -248,7 +252,7 @@ end;
 
 procedure Tframe24WebZakaz.bbDocCloseClick(Sender: TObject);
 begin
-  DoCloseDocument;
+  CloseCurrentDocument;
 end;
 
 procedure Tframe24WebZakaz.bbDocStateClick(Sender: TObject);
@@ -328,7 +332,7 @@ begin
     docID := dmDB.CreateConfiguratorDoc_DB(dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger);
     if docID <> -1 then
     begin
-      DoCloseDocument;
+      CloseCurrentDocument;
 //      ShowInfoDialog('Web-Order', 'Oferta creata cu succes!');
     end;
   end;
@@ -343,7 +347,7 @@ begin
     rashodDocID := dmDB.CreateRashodnaiaNakladnaia_DB(dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger);
     if rashodDocID <> -1 then
     begin
-      DoCloseDocument;
+      CloseCurrentDocument;
       ShowInfoDialog('Web-Order', 'Document "Vinzare" creat cu succes!');
     end;
   end;
@@ -356,7 +360,7 @@ begin
   begin
     if dmDB.CreateProforma(dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger) then
     begin
-      DoCloseDocument;
+      CloseCurrentDocument;
       ShowInfoDialog('Web-Order', 'Documentul "PROFORMA" creata cu succes!');
     end;
   end;
@@ -527,13 +531,69 @@ begin
   end;
 end;
 
-procedure Tframe24WebZakaz.DoCloseDocument;
+procedure Tframe24WebZakaz.CloseCurrentDocument;
 begin
-//  if ShowAskDialog('Web-Order', 'Doriti sa inchideti documentul?') = mrYes then
-//  begin
   if DoCloseDocumentDB(dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger) then
     dmDB.FullRefresh;
-//  end;
+end;
+
+procedure Tframe24WebZakaz.DoCloseDocument(const DocID: Integer);
+begin
+  // F9 din meniul principal: aceleasi conditii ca butonul "Inchide document"
+  if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_WEB_Web_Order_Inchide_document) then
+    Exit;
+  if dmDB.IBCQueryDocs.FieldByName('FLG_CLOSED').AsInteger = 1 then
+    Exit;
+
+  if DoCloseDocumentDB(DocID) then
+    dmDB.FullRefresh;
+end;
+
+procedure Tframe24WebZakaz.DoOpenDocument(const DocID: Integer);
+begin
+  // Shift+F9 din meniul principal: redeschide un Web-Order inchis (SP_OPEN_WEBZAKAZ scoate bitul 10 din FLAGS).
+  // Se foloseste acelasi drept ca la inchidere - nu exista un drept separat pentru deschidere.
+  if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_WEB_Web_Order_Inchide_document) then
+    Exit;
+  if dmDB.IBCQueryDocs.FieldByName('FLG_CLOSED').AsInteger <> 1 then
+    Exit;
+
+  if ShowAskDialog('Web-Order', 'Doriti sa deschideti documentul?') <> mrYes then
+    Exit;
+
+  if DoOpenDocumentDB(DocID) then
+    dmDB.FullRefresh;
+end;
+
+function Tframe24WebZakaz.DoOpenDocumentDB(const DocID: integer): Boolean;
+var
+  Query: TIBCQuery;
+begin
+  Result := False;
+  Query := TIBCQuery.Create(Self);
+  try
+    Query.Connection := dmDB.IBCConnection;
+    Query.AutoCommit := False;
+    Query.Transaction := dmDB.IBCTrDefaultUpdate;
+    Query.SQL.Text := 'EXECUTE PROCEDURE SP_OPEN_WEBZAKAZ(:DOCID)';
+    Query.ParamByName('DOCID').AsInteger := DocID;
+
+    Query.Transaction.StartTransaction;
+    try
+      Query.ExecSQL;
+      Query.Transaction.Commit;
+      Result := True;
+    except
+      on E: Exception do
+      begin
+        Query.Transaction.Rollback;
+        if not ProcessSWNError(E) then
+          raise;
+      end;
+    end;
+  finally
+    Query.Free;
+  end;
 end;
 
 function Tframe24WebZakaz.DoCloseDocumentDB(const DocID: integer): Boolean;

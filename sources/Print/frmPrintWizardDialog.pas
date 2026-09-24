@@ -626,11 +626,15 @@ begin
   IBCQueryReports.Close;
 
   S := 'SELECT VW_TS_REPORTS2.* FROM VW_TS_REPORTS2';
-  if not UserHasUserGroup(cUserGroup_Администратор) then
-  begin
-    S := S + ' INNER JOIN TS_REPORTS2_DT ON TS_REPORTS2_DT.REPORTID=VW_TS_REPORTS2.REPORTID AND TS_REPORTS2_DT.CUSTOMERID=' + IntToStr(dmDB.CurrentFirma);
-  end;
   S := S + ' WHERE (BIN_AND(ACC$MASK,:GROUPMASK)>0)';
+
+  // doar rapoartele atribuite intreprinderii curente (TS_REPORTS2_DT) - si pentru administrator;
+  // administratorul vede in plus rapoartele neatribuite nici unei intreprinderi, ca sa le poata configura
+  S := S + ' AND (EXISTS(SELECT 1 FROM TS_REPORTS2_DT D WHERE D.REPORTID=VW_TS_REPORTS2.REPORTID AND D.CUSTOMERID=' +
+    IntToStr(fDT) + ')';
+  if UserHasUserGroup(cUserGroup_Администратор) then
+    S := S + ' OR NOT EXISTS(SELECT 1 FROM TS_REPORTS2_DT D WHERE D.REPORTID=VW_TS_REPORTS2.REPORTID)';
+  S := S + ')';
 
      // Afiseaza dupa tipul documentului
   if fShowByDocType then

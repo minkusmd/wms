@@ -316,6 +316,7 @@ type
     dxBarButton20: TdxBarButton;
     cxGridItemsDBTableView1Column2: TcxGridDBColumn;
     bbGoodsPropertiesDownload: TdxBarButton;
+    bbGoodsContentToProduction: TdxBarButton;
     cxPageControl2: TcxPageControl;
     tsLog: TcxTabSheet;
     cxTabSheet2: TcxTabSheet;
@@ -403,6 +404,7 @@ type
     procedure cxGridItemsDBTableView1CustomDrawCell(Sender: TcxCustomGridTableView; ACanvas: TcxCanvas; AViewInfo:
       TcxGridTableDataCellViewInfo; var ADone: Boolean);
     procedure bbGoodsPropertiesDownloadClick(Sender: TObject);
+    procedure bbGoodsContentToProductionClick(Sender: TObject);
     procedure dxBarButton21Click(Sender: TObject);
     procedure dxBarButton18Click(Sender: TObject);
     procedure bbSupplierNewClick(Sender: TObject);
@@ -479,7 +481,7 @@ uses
   SWNValueStorageUnit, dxInputDialogs, frmAddGoodsfromPrices, frmAddNewGoodsUnit, frmAnalizePriceListUnit,
   frmContentGoodsEditorDialog, frmContentPackage, frmCustomersDlg, frmGoods, frmGoodsPriceListDlgUnit, frmGoodsTypeDialog,
   frmMuncitorulProgressUnit, frmPriceManageStringFieldsUnit, frmPriceTypesUnit, frmPricelistImportUnit,
-  frmSelectGoodsTypeUnit, frmSyssDataEditor, frmSyssEditorWindow, uAnalizePriceList, uLoadProductImages, uPythonRunner,
+  frmSelectGoodsTypeUnit, frmSyssDataEditor, frmSyssEditorWindow, uAnalizePriceList, uLoadProductImages, uPythonRunner, MamicoContentUnit, ImperiaContentUnit, ArvaliscomContentUnit, PriceListContentTransferUnit,
   System.Math,
   System.Win.Registry,
   Vcl.Clipbrd,
@@ -1884,16 +1886,52 @@ begin
   // mamico.md Ad web invest srl
   if IBCQuerySuppliers.FieldByName('CustomerID').AsInteger = 315715 then
   begin
-    IBCQueryPriceItems.First;
-    while IBCQueryPriceItems.Eof do
-    begin
-       {
-       GetMamicoGoodsInfo (IBCQueryPriceItems.FieldByName('product_link').AsString );
-       }
-      IBCQueryPriceItems.Next;
-    end;
+    // cauta fiecare articol dupa SUPPLIER_GOODS_CODE pe mamico.md (fallback PRODUCT_LINK):
+    // imaginile -> TS_PRICELIST_ITEMS_IMAGES, caracteristicile RO/RU -> TS_PRICELIST_ITEMS_DESCRIPTION
+    TMamicoContentLoader.RunForPriceItems(IBCQueryPriceItems, dmDB.IBCConnection, 315715);
+    if IBCQueryPriceListImages.Active then
+      IBCQueryPriceListImages.Refresh;
+  end;
+  // imperia.md (Imperiul sculelor electrice)
+  if IBCQuerySuppliers.FieldByName('CustomerID').AsInteger = cImperiaSupplierID then
+  begin
+    // cauta fiecare articol dupa SUPPLIER_GOODS_CODE pe imperia.md (verificat dupa SKU / titlu):
+    // imaginile -> TS_PRICELIST_ITEMS_IMAGES, descrierea RO/RU -> TS_PRICELIST_ITEMS_DESCRIPTION
+    TImperiaContentLoader.RunForPriceItems(IBCQueryPriceItems, dmDB.IBCConnection, cImperiaSupplierID);
+    if IBCQueryPriceListImages.Active then
+      IBCQueryPriceListImages.Refresh;
   end;
 
+  // arvaliscom.md (ARVALISCOM)
+  if IBCQuerySuppliers.FieldByName('CustomerID').AsInteger = cArvaliscomSupplierID then
+  begin
+    TArvaliscomContentLoader.RunForPriceItems(IBCQueryPriceItems, dmDB.IBCConnection, cArvaliscomSupplierID);
+    if IBCQueryPriceListImages.Active then
+      IBCQueryPriceListImages.Refresh;
+  end;
+
+  //Teocom lux
+  if IBCQuerySuppliers.FieldByName('CustomerID').AsInteger = 74852 then
+  begin
+
+
+    if IBCQueryPriceListImages.Active then
+      IBCQueryPriceListImages.Refresh;
+  end;
+
+
+end;
+
+// imaginile si descrierile furnizorului (TS_PRICELIST_ITEMS_IMAGES / _DESCRIPTION) ->
+// TS_GOODS_IMAGE / TS_GOODS_DSC pentru produsele legate de pricelistul curent; universal,
+// pentru orice furnizor - nu suprascrie imaginile si descrierile existente
+procedure Tframe78PriceList.bbGoodsContentToProductionClick(Sender: TObject);
+begin
+  if not IBCQueryPriceData.Active or IBCQueryPriceData.IsEmpty then
+    Exit;
+  TPriceListContentTransfer.Run(dmDB.IBCConnection,
+    IBCQueryPriceData.FieldByName('SUPPLIERID').AsInteger,
+    IBCQueryPriceData.FieldByName('PLID').AsInteger);
 end;
 
 procedure Tframe78PriceList.bbIdentifyBrandClick(Sender: TObject);

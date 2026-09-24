@@ -795,12 +795,184 @@ begin
     Result := StringReplace(Result, '  ', ' ', [rfReplaceAll]);
 end;
 
+const
+  cAddrTypeJuridic = 7663;   // GET_ADDR_TYPES: 'Adresa juridica'
+  cCityChisinau = 2000;
+
+{ Denumire de localitate/sector comparabila: majuscule, fara diacritice, fara prefixe
+  ("or.", "mun.", "s.", "sect." ...) si fara punctuatie. 'or. Chisinau' = 'CHISINAU'. }
+function NormLocality(const S: string): string;
+var
+  C: Char;
+  R: string;
+  Changed: Boolean;
+  P: string;
+begin
+  R := '';
+  for C in S do
+    case C of
+      #$0103, #$0102, #$00E2, #$00C2: R := R + 'A';
+      #$00EE, #$00CE: R := R + 'I';
+      #$0219, #$0218, #$015F, #$015E: R := R + 'S';
+      #$021B, #$021A, #$0163, #$0162: R := R + 'T';
+      'a'..'z', 'A'..'Z', '0'..'9': R := R + UpCase(C);
+    else
+      R := R + ' ';
+    end;
+  R := Trim(R);
+  while Pos('  ', R) > 0 do
+    R := StringReplace(R, '  ', ' ', [rfReplaceAll]);
+  // prefixele administrative, oricite ar fi ("OR MUN ...")
+  repeat
+    Changed := False;
+    for P in ['OR ', 'MUN ', 'S ', 'SAT ', 'SEC ', 'SECT ', 'SECTOR ', 'COM ', 'RAION ', 'R ', 'ORAS '] do
+      if (Copy(R, 1, Length(P)) = P) and (Length(R) > Length(P)) then
+      begin
+        Delete(R, 1, Length(P));
+        Changed := True;
+      end;
+  until not Changed;
+  Result := R;
+end;
+
+type
+  // adresa juridica din Registrul fiscal, descompusa pe structura WMS (TS_CUST_ADDR)
+  TRegistryAddress = record
+    CityID: Integer;       // 0 = localitatea nu a fost gasita in nomenclator
+    CityName: string;
+    DistrictID: Integer;   // 0 = fara sector
+    DistrictName: string;
+    Street: string;
+    function AsText: string;
+  end;
+
+function TRegistryAddress.AsText: string;
+begin
+  Result := CityName;
+  if DistrictName <> '' then
+    Result := Result + ', ' + DistrictName;
+  if Street <> '' then
+    Result := IfThen(Result = '', '', Result + ', ') + Street;
+end;
+
+{ Registrul fiscal da adresa ca text, cu localitatea la inceput, cu majuscule si prefix:
+    'SEC.BOTANICA Dacia bd. nr.60 bl.5 of.115'   -> Chisinau, sect. Botanica, 'Dacia bd. nr.60 bl.5 of.115'
+    'OR.UNGHENI Burebista nr.17 of.403'          -> Ungheni, 'Burebista nr.17 of.403'
+    'S.BACIOI str. INDEPENDENTEI nr.227'         -> Bacioi, 'str. INDEPENDENTEI nr.227'
+  Numele localitatii se termina la primul cuvint care are litere mici (Dacia, str., bd.).
+  Daca localitatea nu e in nomenclator, tot textul ramine in Street. }
+function ParseRegistryAddress(const AAddress: string): TRegistryAddress;
+var
+  S, Prefix, Locality, W, Key: string;
+  Words: TArray<string>;
+  I, Dot: Integer;
+  Q: TIBCQuery;
+  IsSector: Boolean;
+
+  function HasLower(const X: string): Boolean;
+  var
+    C: Char;
+  begin
+    Result := False;
+    for C in X do
+      if C <> UpCase(C) then
+        Exit(True);
+  end;
+
+begin
+  Result := Default(TRegistryAddress);
+  S := Trim(AAddress);
+  Result.Street := S;
+  if S = '' then
+    Exit;
+
+  // prefixul: SEC. / OR. / MUN. / S. / COM. (lipit de nume)
+  Dot := Pos('.', S);
+  Prefix := '';
+  if (Dot > 1) and (Dot <= 5) and not HasLower(Copy(S, 1, Dot)) then
+  begin
+    Prefix := UpperCase(Copy(S, 1, Dot - 1));
+    S := Trim(Copy(S, Dot + 1, MaxInt));
+  end;
+
+  Words := S.Split([' '], TStringSplitOptions.ExcludeEmpty);
+  Locality := '';
+  I := 0;
+  while (I < Length(Words)) and not HasLower(Words[I]) do
+  begin
+    Locality := Trim(Locality + ' ' + Words[I]);
+    Inc(I);
+  end;
+  W := '';
+  while I < Length(Words) do
+  begin
+    W := Trim(W + ' ' + Words[I]);
+    Inc(I);
+  end;
+  if Locality = '' then
+    Exit;
+
+  IsSector := (Prefix = 'SEC') or (Prefix = 'SECT');
+  Key := NormLocality(Locality);
+  Q := TIBCQuery.Create(nil);
+  try
+    Q.Connection := dmDB.IBCConnection;
+    if IsSector then
+    begin
+      // sector al Chisinaului
+      Q.SQL.Text := 'SELECT CITYID, TITLE FROM GET_CITIES WHERE CITYID = :CITYID';
+      Q.ParamByName('CITYID').AsInteger := cCityChisinau;
+      Q.Open;
+      if not Q.IsEmpty then
+      begin
+        Result.CityID := cCityChisinau;
+        Result.CityName := Trim(Q.Fields[1].AsString);
+      end;
+      Q.Close;
+      Q.SQL.Text := 'SELECT * FROM GET_CITY_DISTRICT(:CITYID)';
+      Q.ParamByName('CITYID').AsInteger := cCityChisinau;
+      Q.Open;
+      while not Q.Eof do
+      begin
+        if NormLocality(Q.FieldByName('DISTRICT_NAME').AsString) = Key then
+        begin
+          Result.DistrictID := Q.FieldByName('DISTRICTID').AsInteger;
+          Result.DistrictName := Trim(Q.FieldByName('DISTRICT_NAME').AsString);
+          Break;
+        end;
+        Q.Next;
+      end;
+    end
+    else
+    begin
+      Q.SQL.Text := 'SELECT DISTINCT CITYID, TITLE FROM GET_CITIES';
+      Q.Open;
+      while not Q.Eof do
+      begin
+        if NormLocality(Q.Fields[1].AsString) = Key then
+        begin
+          Result.CityID := Q.Fields[0].AsInteger;
+          Result.CityName := Trim(Q.Fields[1].AsString);
+          Break;
+        end;
+        Q.Next;
+      end;
+    end;
+  finally
+    Q.Free;
+  end;
+
+  if Result.CityID > 0 then
+    Result.Street := W;   // localitatea e in CITYID/DISTRICTID, in strada ramine restul
+end;
+
 { Datele clientului din Registrul fiscal (SFS), prin API-ul e-Factura: denumire, adresa
-  juridica, cod TVA si conturile IBAN inregistrate. Denumirea (doar daca lipseste) si codul
-  TVA se completeaza in fisa si se salveaza cu OK; IBAN-urile lipsa se adauga direct in
-  TS_CUST_ACCOUNTS, doar pentru clientii deja salvati (conturile au FK spre client). Adresa
-  ramane de comparat manual: in WMS adresele sunt structurate (tara/oras/sector), iar
-  Registrul o da ca text. }
+  juridica, cod TVA si conturile IBAN inregistrate. Denumirea (doar daca lipseste), codul
+  TVA si adresa juridica se completeaza in fisa si se salveaza cu OK (adresa intra in lista
+  de adrese a clientului, ca una introdusa manual - Renunta o anuleaza); IBAN-urile lipsa
+  se adauga direct in TS_CUST_ACCOUNTS, doar pentru clientii deja salvati (conturile au FK
+  spre client). Adresa din Registru (text) se descompune in oras / sector / strada dupa
+  nomenclatorul WMS - vezi ParseRegistryAddress. }
 procedure TfrmCustomerEditorDialog.btnGetSFSDataClick(Sender: TObject);
 var
   Manager: TEFacturaManager;
@@ -808,9 +980,12 @@ var
   Accounts: TEFacturaBankAccounts;
   Acc: TEFacturaBankAccount;
   Q: TIBCQuery;
-  IDNO, Info, Existing, NewAccounts, Changes: string;
+  AddrDS: TDataSet;
+  RegAddr: TRegistryAddress;
+  IDNO, Info, Existing, NewAccounts, Changes, OldAddr: string;
   NewCount, Added: Integer;
-  SetVat, SetName: Boolean;
+  SetVat, SetName, SetAddr: Boolean;
+  JuridicBookmark: TBookmark;
 begin
   IDNO := Trim(fMasterDataSet.FieldByName('IDEN_NUMBER').AsString);
   if IDNO = '' then
@@ -819,6 +994,7 @@ begin
     Exit;
   end;
 
+  JuridicBookmark := nil;
   Manager := TEFacturaManager.Create(dmDB.IBCConnection);
   try
     try
@@ -861,6 +1037,40 @@ begin
       end;
     end;
 
+    // adresa juridica: cea din Registru, descompusa, fata de cea din lista de adrese a clientului
+    RegAddr := ParseRegistryAddress(Taxpayer.Address);
+    AddrDS := frameCustomerAddr1.IBCQueryCustomerAddr;
+    OldAddr := '';
+    SetAddr := False;
+    if (Trim(Taxpayer.Address) <> '') and AddrDS.Active then
+    begin
+      AddrDS.DisableControls;
+      try
+        AddrDS.First;
+        while not AddrDS.Eof do
+        begin
+          if AddrDS.FieldByName('ADDRTYPEID').AsInteger = cAddrTypeJuridic then
+          begin
+            JuridicBookmark := AddrDS.GetBookmark;
+            OldAddr := Trim(AddrDS.FieldByName('CITY_NAME').AsString);
+            if Trim(AddrDS.FieldByName('DISTRICT_NAME').AsString) <> '' then
+              OldAddr := OldAddr + ', ' + Trim(AddrDS.FieldByName('DISTRICT_NAME').AsString);
+            if Trim(AddrDS.FieldByName('STREET').AsString) <> '' then
+              OldAddr := IfThen(OldAddr = '', '', OldAddr + ', ') + Trim(AddrDS.FieldByName('STREET').AsString);
+            // aceeasi localitate si aceeasi strada (fara diacritice/punctuatie) - nu schimbam nimic
+            SetAddr := not ((AddrDS.FieldByName('CITYID').AsInteger = RegAddr.CityID) and
+              (NormLocality(AddrDS.FieldByName('STREET').AsString) = NormLocality(RegAddr.Street)));
+            Break;
+          end;
+          AddrDS.Next;
+        end;
+        if JuridicBookmark = nil then
+          SetAddr := True;   // clientul nu are adresa juridica
+      finally
+        AddrDS.EnableControls;
+      end;
+    end;
+
     Info := 'Denumire: ' + Taxpayer.Name + #13#10 +
       'Adresa juridica: ' + Taxpayer.Address + #13#10 +
       'Cod TVA: ' + IfThen(Taxpayer.CodTVA = '', '- (neplatitor de TVA)', Taxpayer.CodTVA) + #13#10 +
@@ -885,6 +1095,16 @@ begin
       Changes := Changes + #13#10 + '- denumirea: ' + RegistryNameToWMS(Taxpayer.Name);
     if SetVat then
       Changes := Changes + #13#10 + '- codul TVA: ' + Taxpayer.CodTVA;
+    if SetAddr then
+    begin
+      if JuridicBookmark = nil then
+        Changes := Changes + #13#10 + '- adresa juridica: ' + RegAddr.AsText
+      else
+        Changes := Changes + #13#10 + '- adresa juridica: ' + RegAddr.AsText + #13#10 +
+          '   (in locul: ' + OldAddr + ')';
+      if RegAddr.CityID = 0 then
+        Changes := Changes + #13#10 + '   localitatea nu e in nomenclator - adresa se scrie ca text, fara oras';
+    end;
     if (NewCount > 0) and not fCreateNewRecord then
       Changes := Changes + #13#10 + Format('- %d cont(uri) IBAN noi:', [NewCount]) + NewAccounts;
 
@@ -893,7 +1113,7 @@ begin
       if (NewCount > 0) and fCreateNewRecord then
         Info := Info + #13#10#13#10 + 'Conturile IBAN se pot adauga dupa salvarea clientului.'
       else if not fReadOnly then
-        Info := Info + #13#10#13#10 + 'Denumirea, codul TVA si conturile din fisa corespund Registrului fiscal.';
+        Info := Info + #13#10#13#10 + 'Denumirea, codul TVA, adresa juridica si conturile din fisa corespund Registrului fiscal.';
       ShowInfoDialog('Date din e-Factura', Info);
       Exit;
     end;
@@ -909,6 +1129,52 @@ begin
     begin
       fMasterDataSet.FieldByName('VAT_NUMBER').AsString := Taxpayer.CodTVA;
     end;
+
+    // adresa juridica - in lista de adrese (cached updates), se salveaza la OK
+    if SetAddr then
+    begin
+      if AddrDS.State in dsEditModes then
+        AddrDS.Post;
+      if JuridicBookmark <> nil then
+      begin
+        AddrDS.GotoBookmark(JuridicBookmark);
+        AddrDS.Edit;
+      end
+      else
+      begin
+        AddrDS.Append;
+        AddrDS.FieldByName('ADDRTYPEID').AsInteger := cAddrTypeJuridic;
+        AddrDS.FieldByName('ADDRTYPE_NAME').AsString := 'Adresa juridica';
+      end;
+      if not fMasterDataSet.FieldByName('CUSTOMERID').IsNull then
+        AddrDS.FieldByName('CUSTOMERID').AsInteger := fMasterDataSet.FieldByName('CUSTOMERID').AsInteger;
+      AddrDS.FieldByName('COUNTRYID').AsInteger := dmDB.CountryID;
+      AddrDS.FieldByName('COUNTRY_NAME').AsString := dmDB.CountryName;
+      if RegAddr.CityID > 0 then
+      begin
+        AddrDS.FieldByName('CITYID').AsInteger := RegAddr.CityID;
+        AddrDS.FieldByName('CITY_NAME').AsString := RegAddr.CityName;
+      end
+      else
+      begin
+        AddrDS.FieldByName('CITYID').Clear;
+        AddrDS.FieldByName('CITY_NAME').Clear;
+      end;
+      if RegAddr.DistrictID > 0 then
+      begin
+        AddrDS.FieldByName('DISTRICTID').AsInteger := RegAddr.DistrictID;
+        AddrDS.FieldByName('DISTRICT_NAME').AsString := RegAddr.DistrictName;
+      end
+      else
+      begin
+        AddrDS.FieldByName('DISTRICTID').Clear;
+        AddrDS.FieldByName('DISTRICT_NAME').Clear;
+      end;
+      AddrDS.FieldByName('STREET').AsString := RegAddr.Street;
+      AddrDS.FieldByName('COMMENTS').AsString := 'Registrul fiscal (e-Factura), ' + FormatDateTime('dd.mm.yyyy', Date);
+      AddrDS.Post;
+    end;
+
     if (NewCount > 0) and not fCreateNewRecord then
     begin
       try
@@ -921,9 +1187,10 @@ begin
       end;
     end;
   finally
+    if JuridicBookmark <> nil then
+      frameCustomerAddr1.IBCQueryCustomerAddr.FreeBookmark(JuridicBookmark);
     Manager.Free;
   end;
 end;
 
 end.
-

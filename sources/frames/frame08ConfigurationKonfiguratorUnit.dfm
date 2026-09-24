@@ -1557,6 +1557,10 @@ inherited frame08ConfigurationBRK: Tframe08ConfigurationBRK
         item
           Visible = True
           ItemName = 'bbLivrareRepublica'
+        end
+        item
+          Visible = True
+          ItemName = 'bbLivrareSuburbii'
         end>
     end
     object bbLivrareRepublica: TdxBarButton
@@ -1565,6 +1569,13 @@ inherited frame08ConfigurationBRK: Tframe08ConfigurationBRK
       Hint = 'Livrare republica'
       Visible = ivAlways
       OnClick = bbLivrareRepublicaClick
+    end
+    object bbLivrareSuburbii: TdxBarButton
+      Caption = 'Livrare suburbii'
+      Category = 0
+      Hint = 'Livrare suburbii'
+      Visible = ivAlways
+      OnClick = bbLivrareSuburbiiClick
     end
     object bbGoodsNew: TdxBarButton
       Caption = 'Produs nou'

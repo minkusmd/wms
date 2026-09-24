@@ -406,7 +406,7 @@ uses
   frmScetFacturaNomerDialog, SWNSecurity, SWNSecurityFlags,
   frmDocumentDeleteDialog, frmDocumentImportBrowserDialog, SWNTypes,
   SWNCommonDialogs, uEditCecDlg, frmCustomersDlg, frmMoneyIncomeDialog,
-  frmReceiptPrintDialogV2, frmReceiptPrintDialogV1, frmGoodsACNTBrowser, EFacturaXmlBuilder, EFacturaApiClient, EFacturaManager,
+  frmReceiptPrintDialogV2, frmGoodsACNTBrowser, EFacturaXmlBuilder, EFacturaApiClient, EFacturaManager,
   Winapi.ShellAPI, System.IOUtils;
 
 {$R *.dfm}
@@ -2533,7 +2533,7 @@ procedure Tframe25ScetFaktura.ShowPrintReceiptDialog;
 //var
 //  dialog: TSWNCustomForm;
 begin
-  if (dmDB.CurrentFirma = 307225) then  // PRIME STORE
+  // bonul se tipareste numai prin serverul ZFPLab (localhost:4444 sau FP_DEVICES), nu direct prin zfpcom.dll
   begin
     var dialog := TfrmReceiptPrintV2Dlg.Create(Self);
     try
@@ -2553,29 +2553,7 @@ begin
     finally
       dialog.Free;
     end;
-  end
-  else
-  begin
-    var dialog := TfrmReceiptPrintV1Dlg.Create(self);
-    try
-      if (dmDB.IBCQueryDocs.FieldByName('PARENTDOCID').AsInteger = 0) or (dmDB.IBCQueryDocs.FieldByName('FLG_NEW_CEC').AsInteger
-        = 1) then
-        dialog.RASHOD_DOCID := -1
-      else
-        dialog.RASHOD_DOCID := dmDB.IBCQueryDocs.FieldByName('PARENTDOCID').AsInteger;
-
-      dialog.FACTURA_DOCID := dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger;
-        // temp
-      dialog.PrintWithoutPrinter := True;
-      dialog.ShowModal;
-
-      if dialog.ReceiptPrinted and IBCQueryReceipt.Active then
-        IBCQueryReceipt.Refresh;
-    finally
-      dialog.Free;
-    end;
   end;
-
 end;
 
 procedure Tframe25ScetFaktura.ShowSborkaComplectAddGoodsDialog;
