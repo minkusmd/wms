@@ -2158,6 +2158,13 @@ object frmMainForm: TfrmMainForm
       Visible = ivAlways
       OnClick = bbWebPopularCategoriesClick
     end
+    object bbWebPopularBrands: TdxBarButton
+      Caption = 'Branduri populare pe site'
+      Category = 0
+      Hint = 'Brandurile de pe prima pagina a site-ului: ordine si logo'
+      Visible = ivAlways
+      OnClick = bbWebPopularBrandsClick
+    end
     object bbStockRecalc: TdxBarButton
       Caption = 'Recalcul sold produse'
       Category = 0
@@ -2197,6 +2204,10 @@ object frmMainForm: TfrmMainForm
         item
           Visible = True
           ItemName = 'bbWebPopularCategories'
+        end
+        item
+          Visible = True
+          ItemName = 'bbWebPopularBrands'
         end
         item
           Visible = True

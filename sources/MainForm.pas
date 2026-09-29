@@ -179,6 +179,7 @@ type
     bbWebFilters: TdxBarButton;
     bbWebCatalog: TdxBarButton;
     bbWebPopularCategories: TdxBarButton;
+    bbWebPopularBrands: TdxBarButton;
     bbWebBlockedIp: TdxBarButton;
     bbApiConfig: TdxBarButton;
     bbDeals: TdxBarButton;
@@ -409,6 +410,7 @@ type
     procedure bbWebFiltersClick(Sender: TObject);
     procedure bbWebCatalogClick(Sender: TObject);
     procedure bbWebPopularCategoriesClick(Sender: TObject);
+    procedure bbWebPopularBrandsClick(Sender: TObject);
     procedure bbWebBlockedIpClick(Sender: TObject);
     procedure bbApiConfigClick(Sender: TObject);
     procedure bbDealsClick(Sender: TObject);
@@ -910,6 +912,7 @@ uses
   SWNDealsUnit,
   frmWebCatalogDialog,
   frmWebPopularCategoriesDialog,
+  frmWebPopularBrandsDialog,
   frmWebDeliveryDialog,
   frmWebDescriptionTemplateDialog,
   frmWebFilterButtonsDialog,
@@ -1685,6 +1688,18 @@ var
   dialog: TfrmWebPopularCategoriesDlg;
 begin
   dialog := TfrmWebPopularCategoriesDlg.Create(Self);
+  try
+    dialog.ShowModal;
+  finally
+    dialog.Free;
+  end;
+end;
+
+procedure TfrmMainForm.bbWebPopularBrandsClick(Sender: TObject);
+var
+  dialog: TfrmWebPopularBrandsDlg;
+begin
+  dialog := TfrmWebPopularBrandsDlg.Create(Self);
   try
     dialog.ShowModal;
   finally

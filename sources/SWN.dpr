@@ -238,6 +238,7 @@ uses
   GoodsFiltersClasses in 'classes\Goods\GoodsFiltersClasses.pas',
   frmWebCatalogDialog in 'classes\WebCatalog\frmWebCatalogDialog.pas' {frmWebCatalogDlg},
   frmWebPopularCategoriesDialog in 'classes\WebCatalog\frmWebPopularCategoriesDialog.pas' {frmWebPopularCategoriesDlg},
+  frmWebPopularBrandsDialog in 'classes\WebCatalog\frmWebPopularBrandsDialog.pas' {frmWebPopularBrandsDlg},
   frmWebVirtualCategoriesDialog in 'classes\WebCatalog\frmWebVirtualCategoriesDialog.pas' {frmWebVirtualCategoriesDlg},
   frmWebVirtualCategoryEditorDialog in 'classes\WebCatalog\frmWebVirtualCategoryEditorDialog.pas' {frmWebVirtualCategoryEditorDlg},
   frmWebCatalogLevel2Dialog in 'classes\WebCatalog\frmWebCatalogLevel2Dialog.pas' {frmWebCatalogLevel2Dlg},
