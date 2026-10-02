@@ -1848,7 +1848,7 @@ begin
 //        fMasterDataSet.fieldByName('TITLE').AsString := frameGoodsEditDescription2.lbWebNameRo.Caption;
 //      end;
 
-    if fMasterDataSet.State in dsEditModes then
+     if fMasterDataSet.State in dsEditModes then
       fMasterDataSet.Post;
     if IBCQueryDSC.State in dsEditModes then
       IBCQueryDSC.Post;
@@ -2373,6 +2373,18 @@ begin
   try
     Query.Connection := fIBCConnection;
     Query.Transaction := fMasterDataSet.UpdateTransaction; //IBCTrLocalUpdate;
+    // Renumerotare ORDERNO la 1..n dupa ordinea din lista. Stergerea unei imagini lasa un
+    // gol in numerotare, iar site-ul afiseaza imaginile dupa pozitie: fara pozitia 1
+    // produsul ramine fara imagine principala.
+    for i := 0 to lbImages.Items.Count - 1 do
+    begin
+      imageItem := TImageField(lbImages.Items.Objects[i]);
+      if imageItem.Status = ifsUpdated then
+        imageItem.FOrderNo := i + 1 // ramine ifsUpdated: UPDATE-ul complet scrie si ORDERNO
+      else
+        imageItem.OrderNo := i + 1;
+    end;
+
     // delete images
     Query.SQL.Text := 'DELETE FROM TS_GOODS_IMAGE WHERE (GOODSID=:GOODSID) AND (GOODS_IMAGE_ID=:IMAGEID)';
     Query.ParamByName('GOODSID').AsInteger := fMasterDataSet.FieldByName('GOODSID').AsInteger;

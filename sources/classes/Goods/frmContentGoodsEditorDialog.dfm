@@ -133,6 +133,10 @@ object frmContentGoodsEditorDlg: TfrmContentGoodsEditorDlg
     object tbWebName: TcxTabSheet
       Caption = '&0 Denumire web'
       ImageIndex = 0
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object dxBarDockControl4: TdxBarDockControl
         Left = 0
         Top = 0
@@ -157,6 +161,10 @@ object frmContentGoodsEditorDlg: TfrmContentGoodsEditorDlg
         object tbsSearchKeys: TcxTabSheet
           Caption = 'Search Keys'
           ImageIndex = 1
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object cxDBMemo2: TcxDBMemo
             AlignWithMargins = True
             Left = 3
@@ -262,6 +270,10 @@ object frmContentGoodsEditorDlg: TfrmContentGoodsEditorDlg
     object tbsDescriptions: TcxTabSheet
       Caption = '&1 - Descriere'
       ImageIndex = 1
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object pcDescriptions: TPageControl
         Left = 0
         Top = 0
@@ -701,6 +713,10 @@ object frmContentGoodsEditorDlg: TfrmContentGoodsEditorDlg
     object tsSEO: TcxTabSheet
       Caption = 'Seo'
       ImageIndex = 4
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object cxLabel1: TcxLabel
         Left = 12
         Top = 4
@@ -994,6 +1010,17 @@ object frmContentGoodsEditorDlg: TfrmContentGoodsEditorDlg
         TabOrder = 0
         ExplicitWidth = 957
         ExplicitHeight = 432
+        inherited pnTop: TPanel
+          Width = 957
+          StyleElements = [seFont, seClient, seBorder]
+          inherited lbInfo: TLabel
+            StyleElements = [seFont, seClient, seBorder]
+          end
+        end
+        inherited cxGridSvc: TcxGrid
+          Width = 957
+          Height = 372
+        end
       end
     end
   end

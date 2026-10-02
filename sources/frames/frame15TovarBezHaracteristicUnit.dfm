@@ -21,8 +21,6 @@ inherited frame15TovarBezHaracteristic: Tframe15TovarBezHaracteristic
     TabOrder = 0
     Properties.ActivePage = tbPackages
     Properties.CustomButtons.Buttons = <>
-    ExplicitWidth = 1022
-    ExplicitHeight = 474
     ClientRectBottom = 642
     ClientRectLeft = 4
     ClientRectRight = 1247
@@ -34,8 +32,6 @@ inherited frame15TovarBezHaracteristic: Tframe15TovarBezHaracteristic
       Margins.Bottom = 2
       Caption = 'Produse fara caracteristici si imagini'
       ImageIndex = 0
-      ExplicitWidth = 1014
-      ExplicitHeight = 444
       object Panel1: TPanel
         Left = 0
         Top = 30
@@ -94,8 +90,6 @@ inherited frame15TovarBezHaracteristic: Tframe15TovarBezHaracteristic
             Position.ColIndex = 0
             Position.RowIndex = 0
             Position.BandIndex = 0
-            Summary.FooterSummaryItems = <>
-            Summary.GroupFooterSummaryItems = <>
           end
           object cxTree_GOODSID: TcxTreeListColumn
             Visible = False
@@ -104,8 +98,6 @@ inherited frame15TovarBezHaracteristic: Tframe15TovarBezHaracteristic
             Position.ColIndex = 1
             Position.RowIndex = 0
             Position.BandIndex = 0
-            Summary.FooterSummaryItems = <>
-            Summary.GroupFooterSummaryItems = <>
           end
           object cxTree_SPECIAL: TcxTreeListColumn
             Visible = False
@@ -114,8 +106,6 @@ inherited frame15TovarBezHaracteristic: Tframe15TovarBezHaracteristic
             Position.ColIndex = 2
             Position.RowIndex = 0
             Position.BandIndex = 0
-            Summary.FooterSummaryItems = <>
-            Summary.GroupFooterSummaryItems = <>
           end
           object cxTree_SCANNED: TcxTreeListColumn
             Visible = False
@@ -125,8 +115,6 @@ inherited frame15TovarBezHaracteristic: Tframe15TovarBezHaracteristic
             Position.ColIndex = 3
             Position.RowIndex = 0
             Position.BandIndex = 0
-            Summary.FooterSummaryItems = <>
-            Summary.GroupFooterSummaryItems = <>
           end
         end
       end
@@ -145,8 +133,6 @@ inherited frame15TovarBezHaracteristic: Tframe15TovarBezHaracteristic
         Color = clWindow
         ParentBackground = False
         TabOrder = 2
-        ExplicitWidth = 789
-        ExplicitHeight = 414
         object cxGridGoods: TcxGrid
           AlignWithMargins = True
           Left = 2
@@ -161,8 +147,6 @@ inherited frame15TovarBezHaracteristic: Tframe15TovarBezHaracteristic
           TabOrder = 0
           LookAndFeel.NativeStyle = True
           LookAndFeel.SkinName = ''
-          ExplicitWidth = 783
-          ExplicitHeight = 403
           object cxGridGoodsTable: TcxGridDBTableView
             PopupMenu = dxBarPopupMenu
             OnKeyDown = cxGridGoodsTableKeyDown
@@ -308,7 +292,6 @@ inherited frame15TovarBezHaracteristic: Tframe15TovarBezHaracteristic
         BarManager = dxBarManager
         SunkenBorder = True
         UseOwnSunkenBorder = True
-        ExplicitWidth = 1014
       end
     end
     object tbPackages: TcxTabSheet
@@ -318,8 +301,6 @@ inherited frame15TovarBezHaracteristic: Tframe15TovarBezHaracteristic
       Margins.Bottom = 2
       Caption = 'Pachete de produse pentru descriere'
       ImageIndex = 1
-      ExplicitWidth = 1014
-      ExplicitHeight = 444
       object cxGridPacheteWeb: TcxGrid
         Left = 0
         Top = 28
@@ -450,7 +431,6 @@ inherited frame15TovarBezHaracteristic: Tframe15TovarBezHaracteristic
         Margins.Bottom = 2
         Align = dalTop
         BarManager = dxBarManager
-        ExplicitWidth = 1014
       end
       object dxBarDockControl3: TdxBarDockControl
         Left = 0
@@ -463,7 +443,6 @@ inherited frame15TovarBezHaracteristic: Tframe15TovarBezHaracteristic
         Margins.Bottom = 2
         Align = dalTop
         BarManager = dxBarManager
-        ExplicitWidth = 1014
       end
       object Panel2: TPanel
         Left = 0
@@ -675,8 +654,6 @@ inherited frame15TovarBezHaracteristic: Tframe15TovarBezHaracteristic
       ImageIndex = 2
       OnHide = tsWebCatalogHide
       OnShow = tsWebCatalogShow
-      ExplicitWidth = 1014
-      ExplicitHeight = 444
       object cxDBTreeList: TcxDBTreeList
         Left = 0
         Top = 28
@@ -726,8 +703,6 @@ inherited frame15TovarBezHaracteristic: Tframe15TovarBezHaracteristic
           Position.ColIndex = 0
           Position.RowIndex = 0
           Position.BandIndex = 0
-          Summary.FooterSummaryItems = <>
-          Summary.GroupFooterSummaryItems = <>
         end
         object cxDBTreeList_TITLE_RUS: TcxDBTreeListColumn
           Caption.Text = #1053#1072#1079#1074#1072#1085#1080#1077
@@ -737,8 +712,6 @@ inherited frame15TovarBezHaracteristic: Tframe15TovarBezHaracteristic
           Position.ColIndex = 1
           Position.RowIndex = 0
           Position.BandIndex = 0
-          Summary.FooterSummaryItems = <>
-          Summary.GroupFooterSummaryItems = <>
         end
         object cxDBTreeListcx_URL_RO: TcxDBTreeListColumn
           Caption.Text = 'Url'
@@ -748,8 +721,6 @@ inherited frame15TovarBezHaracteristic: Tframe15TovarBezHaracteristic
           Position.ColIndex = 2
           Position.RowIndex = 0
           Position.BandIndex = 0
-          Summary.FooterSummaryItems = <>
-          Summary.GroupFooterSummaryItems = <>
         end
         object cxDBTreeList_CATALOGID: TcxDBTreeListColumn
           Caption.AlignHorz = taCenter
@@ -762,8 +733,6 @@ inherited frame15TovarBezHaracteristic: Tframe15TovarBezHaracteristic
           Position.ColIndex = 3
           Position.RowIndex = 0
           Position.BandIndex = 0
-          Summary.FooterSummaryItems = <>
-          Summary.GroupFooterSummaryItems = <>
         end
         object cxDBTreeListcx_FLG_HAS_IMAGE: TcxDBTreeListColumn
           PropertiesClassName = 'TcxCheckBoxProperties'
@@ -778,8 +747,6 @@ inherited frame15TovarBezHaracteristic: Tframe15TovarBezHaracteristic
           Position.ColIndex = 4
           Position.RowIndex = 0
           Position.BandIndex = 0
-          Summary.FooterSummaryItems = <>
-          Summary.GroupFooterSummaryItems = <>
         end
       end
       object dxBarDockControl4: TdxBarDockControl
@@ -793,7 +760,6 @@ inherited frame15TovarBezHaracteristic: Tframe15TovarBezHaracteristic
         Margins.Bottom = 2
         Align = dalTop
         BarManager = dxBarManager
-        ExplicitWidth = 1014
       end
     end
   end
@@ -1606,14 +1572,15 @@ inherited frame15TovarBezHaracteristic: Tframe15TovarBezHaracteristic
     UpdateTransaction = dmDB.IBCTrDefaultUpdate
     SQL.Strings = (
       
-        'select g.*, gc.comments, GET_FLG_IN_PRICE(g.goodsid) flg_in_pric' +
-        'e'
-      'from VW_TCONTENT_PACKAGE_GOODS g'
+        'select pg.*, gc.comments, GET_FLG_IN_PRICE(pg.goodsid) flg_in_pr' +
+        'ice, g.flg_social'
+      'from VW_TCONTENT_PACKAGE_GOODS pg'
       
-        'left outer join ts_package_goods_comments gc on gc.goodsid=g.goo' +
-        'dsid and gc.packageid = g.packageid')
+        'left outer join ts_package_goods_comments gc on gc.goodsid=pg.go' +
+        'odsid and gc.packageid = pg.packageid'
+      'left outer join vw_ts_goods g on g.goodsid = pg.goodsid')
     MasterFields = 'ID'
-    DetailFields = 'G.PACKAGEID'
+    DetailFields = 'PG.PACKAGEID'
     MasterSource = IBCDataSourcePackages
     RefreshOptions = [roAfterInsert, roAfterUpdate]
     Left = 567

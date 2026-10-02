@@ -245,7 +245,7 @@ type
     cxGridItemsDBTableView1_SYSTEM_PARAMS_RU: TcxGridDBColumn;
     dxBarButton13: TdxBarButton;
     cbRRP: TcxCheckBox;
-    dxBarButton14: TdxBarButton;
+    bbAPISupplier: TdxBarButton;
     cxGridDBTVPricesUp_NEW_PRICE0: TcxGridDBColumn;
     cxGridDBTVPricesDown_OLD_PRICE0: TcxGridDBColumn;
     bbSetEPP: TdxBarButton;
@@ -386,7 +386,7 @@ type
     procedure dxBarButton13Click(Sender: TObject);
     procedure cxGridItemsDBTableView1_CODEPropertiesButtonClick(Sender: TObject; AButtonIndex: Integer);
     procedure pcPricesAnalizePageChanging(Sender: TObject; NewPage: TcxTabSheet; var AllowChange: Boolean);
-    procedure dxBarButton14Click(Sender: TObject);
+    procedure bbAPISupplierClick(Sender: TObject);
     procedure bbSetEPPClick(Sender: TObject);
     procedure dxBarButton15Click(Sender: TObject);
     procedure bbDeleteAllGoodsFromCatalogClick(Sender: TObject);
@@ -481,7 +481,7 @@ uses
   SWNValueStorageUnit, dxInputDialogs, frmAddGoodsfromPrices, frmAddNewGoodsUnit, frmAnalizePriceListUnit,
   frmContentGoodsEditorDialog, frmContentPackage, frmCustomersDlg, frmGoods, frmGoodsPriceListDlgUnit, frmGoodsTypeDialog,
   frmMuncitorulProgressUnit, frmPriceManageStringFieldsUnit, frmPriceTypesUnit, frmPricelistImportUnit,
-  frmSelectGoodsTypeUnit, frmSyssDataEditor, frmSyssEditorWindow, uAnalizePriceList, uLoadProductImages, uPythonRunner, MamicoContentUnit, ImperiaContentUnit, ArvaliscomContentUnit, PriceListContentTransferUnit,
+  frmSelectGoodsTypeUnit, frmSyssDataEditor, frmSyssEditorWindow, uAnalizePriceList, uLoadProductImages, uPythonRunner, MamicoContentUnit, ImperiaContentUnit, ArvaliscomContentUnit, PriceListContentTransferUnit, NexDistributionUnit, TriomacPriceListUnit, PriceGoodsCreateUnit,
   System.Math,
   System.Win.Registry,
   Vcl.Clipbrd,
@@ -981,7 +981,7 @@ begin
   IBCQueryPriceItems.EnableControls;
 end;
 
-procedure Tframe78PriceList.dxBarButton14Click(Sender: TObject);
+procedure Tframe78PriceList.bbAPISupplierClick(Sender: TObject);
 begin
   // Accent
   if IBCQuerySuppliers.FieldByName('CustomerID').AsInteger = 198 then
@@ -1005,9 +1005,14 @@ begin
     var Importer := TDMLinkPriceListImport.Create(dmDB.IBCConnection, 229466, 10);
     try
       var ImportResult := Importer.Execute;
-      ShowMessage(Format('Pricelist DMLink #%d creat: %d produse, %d imagini.',
-        [ImportResult.PLID, ImportResult.ProductsImported, ImportResult.ImagesImported]));
-      IBCQueryPriceData.Refresh;
+      var Msg := Format('Pricelist DMLink #%d creat: %d produse, %d imagini.',
+        [ImportResult.PLID, ImportResult.ProductsImported, ImportResult.ImagesImported]);
+      // DMLink pune uneori acelasi sku (ex. culoarea "Black") la mai multe produse - se sar
+      if ImportResult.DuplicateProducts > 0 then
+        Msg := Msg + sLineBreak + sLineBreak +
+          Format('Sarite %d produse cu cod (sku) repetat in API-ul DMLink:', [ImportResult.DuplicateProducts]) +
+          sLineBreak + ImportResult.DuplicateCodes;
+      ShowMessage(Msg);      IBCQueryPriceData.Refresh;
     finally
       Importer.Free;
     end;
@@ -1032,6 +1037,41 @@ begin
       d.Free;
     end;
 
+  end;
+  // NEXPRIM SERVICE - API NexDistribution: pricelist nou + descrieri RO/RU + imagini
+  if IBCQuerySuppliers.FieldByName('CustomerID').AsInteger = cNexSupplierID then
+  begin
+    var NexPLID := 0;
+    try
+      NexPLID := TNexPriceListImport.Run(dmDB.IBCConnection,
+        IBCQueryPriceCategories.FieldByName('PRICE_CATEGORYID').AsInteger);
+    except
+      on E: Exception do
+        ShowErrorDialog('Import NexDistribution', E.Message);
+    end;
+    if NexPLID > 0 then
+    begin
+      IBCQueryPriceData.Refresh;
+      IBCQueryPriceData.Locate('PLID', NexPLID, []);
+    end;
+  end;
+
+  // TRIOMAC - API SCOP (api.scop.md): pricelist nou din produsele cu stoc
+  if IBCQuerySuppliers.FieldByName('CustomerID').AsInteger = cTriomacSupplierID then
+  begin
+    var TriomacPLID := 0;
+    try
+      TriomacPLID := TTriomacPriceListImport.Run(dmDB.IBCConnection,
+        IBCQueryPriceCategories.FieldByName('PRICE_CATEGORYID').AsInteger);
+    except
+      on E: Exception do
+        ShowErrorDialog('Import Triomac (SCOP)', E.Message);
+    end;
+    if TriomacPLID > 0 then
+    begin
+      IBCQueryPriceData.Refresh;
+      IBCQueryPriceData.Locate('PLID', TriomacPLID, []);
+    end;
   end;
 
   //smartex
@@ -1503,198 +1543,63 @@ end;
 
 procedure Tframe78PriceList.bbAddSelectedGoodsToCatalogClick(Sender: TObject);
 var
-  AccountingCostFormationTypeID: Integer;
-  aRowIndex: Integer;
   ATableView: TcxGridDBTableView;
-  Barcode: string;
-  Currency3ID: Integer;
-  currency7id: Integer;
-  dialog: TfrmGoodsBrowser;
-  LastParentID: Integer;
-  fBestMatсhParentGoodsID: Integer;
-  GoodsTypeID: Integer;
+  aRowIndex: Integer;
   I: Integer;
-  Model: string;
-  ParentGoodsID: string;
-  price3: double;
-  Price7: double;
-  R: TGoodsWebInfoClass;
-  SupplierGoodsCode: string;
-  SupplierGoodsName: string;
-  VendorID: Integer;
-  WebGoodsTypeID: Integer;
-  FlgRRP: integer;
+  Item: TPriceItemGoodsData;
+  Template: TTemplateGoods;
+  NewGoodsID: Integer;
+  ParentID: Integer;
+
+  // valoarea coloanei din rindul curent; Null daca view-ul nu are coloana
+  function Cell(const AFieldName: string): Variant;
+  var
+    Column: TcxGridDBColumn;
+  begin
+    Column := ATableView.GetColumnByFieldName(AFieldName);
+    if Assigned(Column) then
+      Result := ATableView.DataController.Values[aRowIndex, Column.Index]
+    else
+      Result := Null;
+  end;
+
 begin
-// ATLANT
+  // crearea produsului e in PriceGoodsCreateUnit (folosita si de frmAddGoodsfromPrices);
+  // produsul-model (mapa, tip web, producator, flag RRP) e GOODSID-ul din clipboard
   ATableView := GetActiveTableView(pcPricesAnalize.ActivePageIndex);
-
-  Price7 := 0;
-  price3 := 0;
+  Template := Default(TTemplateGoods);
   try
-    R := TGoodsWebInfoClass.Create;
-    LastParentID := AppUserTempConfigStorage.IntValues.GetValue(Self.Name + '_LastParentID', -1);
-    WebGoodsTypeID := -1;
-    try
-      for I := 0 to ATableView.Controller.SelectedRowCount - 1 do
-      begin
-        aRowIndex := ATableView.ViewData.Records[ATableView.Controller.SelectedRecords[I].Index].RecordIndex;
+    for I := 0 to ATableView.Controller.SelectedRowCount - 1 do
+    begin
+      aRowIndex := ATableView.ViewData.Records[ATableView.Controller.SelectedRecords[I].Index].RecordIndex;
 
-                // daca este cod produs atunci nu mai generam un produs nou
-        if not varisnull(ATableView.DataController.Values[aRowIndex, ATableView.GetColumnbyFieldName('GOODSID').Index]) then
-          Continue;
+      // daca este cod produs atunci nu mai generam un produs nou
+      if not VarIsNull(Cell('GOODSID')) then
+        Continue;
 
-                // daca nu este setat parentgoodsid atunci il luam din nomenclator
-        R.ParentID := -1;
-        if not VarIsNull(ATableView.DataController.Values[aRowIndex, ATableView.GetColumnbyFieldName('PARENTGOODSID').Index]) then
-        begin
-          ParentGoodsID := ATableView.DataController.Values[aRowIndex, ATableView.GetColumnbyFieldName('PARENTGOODSID').Index];
-        end
-        else
-        begin
-                // daca nu este valoare pentru ParentGoodsID atunci ->
-                // 1. unde sunt amplasate majoritatea produselor cu webgoodstypeid (daca setat)
-                // if not GetBestMatchParentGoodsID(webgoodstypeid, fBestMatсhParentGoodsID) then begin
-                // 2. daca nu avem inregistrari propunem sa selecteze din nomenclator
-          dialog := TfrmGoodsBrowser.Create(Self);
-          try
-            if (not CheckGoodsIsFolder(LastParentID)) then
-            begin
-//                            LastParentID := -1;
-              LastParentID := StrToIntDef(Clipboard.AsText, -1);
-              var q := TIBCQuery.Create(nil);
-              q.sql.Add('select * from vw_ts_goods where goodsid = :goodsid');
-              q.ParamByName('goodsid').AsInteger := LastParentID;
-              q.Open;
+      Item := Default(TPriceItemGoodsData);
+      Item.SupplierID := IBCQuerySuppliers.FieldByName('CUSTOMERID').AsInteger;
+      Item.SupplierGoodsCode := VarToStr(Cell('SUPPLIER_GOODS_CODE'));
+      Item.SupplierGoodsName := VarToStr(Cell('SUPPLIER_GOODS_NAME'));
+      Item.Model := VarToStr(Cell('SUPPLIER_GOODS_MODEL'));
+      Item.VendorID := StrToIntDef(VarToStr(Cell('SYSTEM_VENDORID')), -1);
+      Item.WebGoodsTypeID := StrToIntDef(VarToStr(Cell('GOODSTYPEID')), -1);
+      Item.ParentGoodsID := StrToIntDef(VarToStr(Cell('PARENTGOODSID')), -1);
+      if VarIsNumeric(Cell('PRICE3')) then
+        Item.Price3 := Cell('PRICE3');
+      Item.Currency3ID := StrToIntDef(VarToStr(Cell('CURRENCY3ID')), 0);
+      if VarIsNumeric(Cell('PRICE7')) then
+        Item.Price7 := Cell('PRICE7');
+      Item.Currency7ID := StrToIntDef(VarToStr(Cell('CURRENCY7ID')), 0);
 
-              if (q.fieldbyname('flg_folder').AsInteger = 0) then
-              begin
-                                    // daca e produs
-                ParentGoodsID := q.fieldbyname('parentid').AsString;
-                FlgRRP := GetRRPFlag(q.FieldByName('goodsid').AsInteger, IBCQuerySuppliers.fieldbyname('customerid').AsInteger);
-                WebGoodsTypeID := q.FieldByName('webgoodstype_id').AsInteger;
-                VendorID := q.FieldByName('vendor_id').AsInteger;
-              end
-              else
-              begin
-                                // daca e mapa
-                ParentGoodsID := q.fieldbyname('goodsid').AsString;
-              end;
-            end
-            else
-              ParentGoodsID := LastParentID.ToString;
+      // modelul se citeste o singura data, la primul rind caruia ii lipseste mapa sau producatorul
+      if not Template.Loaded and ((Item.ParentGoodsID <= 0) or (Item.VendorID <= 0)) then
+        LoadTemplateGoods(StrToIntDef(Trim(Clipboard.AsText), -1), Item.SupplierID, Template);
 
-            if ParentGoodsID <> '' then
-              LastParentID := ParentGoodsID.ToInteger;
-
-            // SaveLastUsedParentFolder
-            if (LastParentID > -1) then
-              AppUserTempConfigStorage.IntValues.SetValue(Self.Name + '_LastParentID', LastParentID);
-          finally
-            if Assigned(dialog) then
-              FreeAndNil(dialog);
-          end;
-        end;
-
-        if ParentGoodsID <> '' then
-        begin
-          Currency3ID := 0;
-          currency7id := 0;
-          price3 := 0;
-          Price7 := 0;
-          if VarIsNumeric(ATableView.DataController.Values[aRowIndex, ATableView.GetColumnByFieldName('PRICE3').Index]) then
-            price3 := ATableView.DataController.Values[aRowIndex, ATableView.GetColumnByFieldName('PRICE3').Index];
-
-          SupplierGoodsName := StringReplace(ATableView.DataController.Values[aRowIndex, ATableView.GetColumnByFieldName
-            ('SUPPLIER_GOODS_NAME').Index], #$D#$A, ' ', [rfReplaceALL]);
-          SupplierGoodsCode := StringReplace(ATableView.DataController.Values[aRowIndex, ATableView.GetColumnByFieldName
-            ('SUPPLIER_GOODS_CODE').Index], #$D#$A, ' ', [rfReplaceALL]);
-
-          if VarIsNumeric(ATableView.DataController.Values[aRowIndex, ATableView.GetColumnByFieldName('PRICE7').Index]) then
-            Price7 := ATableView.DataController.Values[aRowIndex, ATableView.GetColumnByFieldName('PRICE7').Index];
-
-          if not Variants.VarIsNull(ATableView.DataController.Values[aRowIndex, ATableView.GetColumnByFieldName('CURRENCY3ID').Index])
-            then
-          begin
-            Currency3ID := ATableView.DataController.Values[aRowIndex, ATableView.GetColumnByFieldName('CURRENCY3ID').Index];
-          end;
-
-          if not Variants.VarIsNull(ATableView.DataController.Values[aRowIndex, ATableView.GetColumnByFieldName('CURRENCY7ID').Index])
-            then
-            currency7id := ATableView.DataController.Values[aRowIndex, ATableView.GetColumnByFieldName('CURRENCY7ID').Index];
-
-          if StrToIntDef(VarToStr(ATableView.DataController.Values[aRowIndex, ATableView.GetColumnByFieldName('SYSTEM_VENDORID').Index]),
-            -1) = -1 then
-          begin
-            if VendorID > 0 then
-            begin
-              var res := MessageDlg('Nu este setat producatorul!, folosim din produsul sursa?', mtInformation, [mbYes,
-                mbNo, mbCancel], 0);
-              if res = mrCancel then
-              begin
-                VendorID := -1;
-                raise exception.Create('Oprit');
-              end;
-
-              if res = mrNo then
-              begin
-                VendorID := -1;
-                raise exception.Create('Nu este indicat producatorul!');
-              end;
-            end;
-          end
-          else
-            VendorID := StrToIntDef(VarToStr(ATableView.DataController.Values[aRowIndex, ATableView.GetColumnByFieldName
-              ('SYSTEM_VENDORID').Index]), -1);
-
-          if StrToIntDef(VarToStr(ATableView.DataController.Values[aRowIndex, ATableView.GetColumnByFieldName('GOODSTYPEID').Index]),
-            -1) > 0 then
-            WebGoodsTypeID := StrToIntDef(VarToStr(ATableView.DataController.Values[aRowIndex, ATableView.GetColumnByFieldName
-              ('GOODSTYPEID').Index]), -1);
-
-          Barcode := VarToStr(ATableView.DataController.Values[aRowIndex, ATableView.GetColumnByFieldName('BARCODE').Index]);
-
-          Model := VarToStr(ATableView.DataController.Values[aRowIndex, ATableView.GetColumnByFieldName('SUPPLIER_GOODS_MODEL').Index]);
-
-          if (ParentGoodsID <> '') then
-          begin
-            R := GetGoodsWebInfo(ParentGoodsID.ToInteger);
-
-            R.ParentID := strtoint(ParentGoodsID);
-
-            if not VarIsNull(ATableView.DataController.Values[aRowIndex, ATableView.GetColumnByFieldName('PARENTGOODSID').Index])
-              then
-              R.ParentID := ATableView.DataController.Values[aRowIndex, ATableView.GetColumnByFieldName('PARENTGOODSID').Index]
-            else
-              R.ParentID := strtoint(ParentGoodsID)
-          end
-          else
-            raise Exception.Create('Nu este setata mapa unde doriti sa adaugati produsele selectate!');
-
-          if Model <> '' then
-            R.CodeRO := Model;
-
-          // fara pret indicativ de la furnizor produsul nou nu are din ce sa-si
-          // calculeze pretul de vinzare - il cream direct in modul EPP, pe baza RRP-ului
-          if (Price7 = 0) and (price3 > 0) then
-            FlgRRP := 1;
-
-          AccountingCostFormationTypeID := iif(R.AccountingCostFormationTypeID = -1, 4201, R.AccountingCostFormationTypeID);
-          if VendorID <= 0 then
-            raise Exception.Create('Eroare! Nu este indicat producatorul');
-
-          var NewGoodsID := dmDB.CreateNewGoods(R.ParentID, SupplierGoodsName, AccountingCostFormationTypeID,
-            WebGoodsTypeID, SupplierGoodsCode, VendorID, IBCQuerySuppliers.FieldByName('CUSTOMERID').AsInteger, R.CodeRO,
-            R.BaseParamsRO, price3, Currency3ID, Price7, currency7id, FlgRRP);
-
-          ATableView.DataController.Values[aRowIndex, ATableView.GetColumnByFieldName('GOODSID').Index] := NewGoodsID;
-          AppUserTempConfigStorage.IntValues.SetValue(Self.Name + '_LastGoodsID', ParentGoodsID.ToInteger);
-        end;
-      end;
-    finally
-      AppUserTempConfigStorage.IntValues.SetValue(Self.Name + '_LastParentID', -1);
-      R.Free;
+      NewGoodsID := CreateGoodsFromPriceItem(Item, Template, ParentID);
+      ATableView.DataController.Values[aRowIndex, ATableView.GetColumnByFieldName('GOODSID').Index] := NewGoodsID;
+      AppUserTempConfigStorage.IntValues.SetValue(Self.Name + '_LastGoodsID', ParentID);
     end;
-
   finally
     if not ATableView.DataController.Filter.Active then
       ATableView.DataController.RefreshExternalData;
@@ -2334,15 +2239,18 @@ begin
       if (FLG_UseRRP or not VarIsNull(ATableView.DataController.Values[aRecIndex, Currency3Index])) then
         Currency3ID := ATableView.DataController.Values[aRecIndex, Currency3Index];
 
+      // 02.10.2026: produs pe RRP fara RRP in pricelist - nu se mai sare; CLOSE_REEVALUARE
+      // pastreaza RRP-ul din baza si actualizeaza costul (PRICE0) si indicativul (PRICE7)
       if (FLG_UseRRP) and (price3 = 0) then
       begin
-        meLog.Lines.Add(Format('[%s] - Produsul %d este cu RRP si nu are pret!', [FormatDateTime('yyyy/mm/dd hh:nn:ss',
-          now), goodsid]));
+        meLog.Lines.Add(Format('[%s] - Produsul %d este cu RRP, dar pricelistul nu are RRP - se pastreaza RRP-ul din baza',
+          [FormatDateTime('yyyy/mm/dd hh:nn:ss', now), goodsid]));
       end;
 
       if not Variants.VarIsNull(ATableView.DataController.Values[aRecIndex, Currency7Index]) then
         currency7id := ATableView.DataController.Values[aRecIndex, Currency7Index];
 
+      price0 := 0;
       if VarIsNumeric(ATableView.DataController.Values[aRecIndex, Price0Index]) and (ATableView.DataController.Values[aRecIndex,
         Price0Index] <> 0) then
       begin
@@ -2372,12 +2280,10 @@ begin
 
       if (Price7 > 0) then
       begin
-        if FLG_UseRRP and flg_in_price and (price3 = 0) then
-          MessageDlg('Eroare! Pret RRP = 0 si FLG_RRP este setat!', mtError, [mbOK], 0)
-        else
-          AddRecordToReevaluare(dmDB.IBCTrDefaultUpdate, DOCID, goodsid, IBCQuerySuppliers.FieldByName('CUSTOMERID').AsInteger,
-            supplier_goods_code, price0, currency0id.ToInteger, price3, Currency3ID.ToInteger, Price7, StrToIntDef(currency7id,
-            498), GoodsName, Barcode, flg_in_price, FLG_UseRRP);
+        // produsul pe RRP fara RRP in pricelist intra si el (vezi mesajul de mai sus)
+        AddRecordToReevaluare(dmDB.IBCTrDefaultUpdate, DOCID, goodsid, IBCQuerySuppliers.FieldByName('CUSTOMERID').AsInteger,
+          supplier_goods_code, price0, currency0id.ToInteger, price3, Currency3ID.ToInteger, Price7, StrToIntDef(currency7id,
+          498), GoodsName, Barcode, flg_in_price, FLG_UseRRP);
       end
       else
         AddRecordToReevaluareVinzare(dmDB.IBCTrDefaultUpdate, DOCID, goodsid, IBCQuerySuppliers.FieldByName('CUSTOMERID').AsInteger,
@@ -2973,6 +2879,9 @@ begin
           -1);
 
         dialog.Model := VarToStr(Values[FocusedRecordIndex, ATableView.GetColumnByFieldName('SUPPLIER_GOODS_MODEL').Index]);
+        if Assigned(ATableView.GetColumnByFieldName('PARENTGOODSID')) then
+          dialog.ParentGoodsID := StrToIntDef(VarToStr(Values[FocusedRecordIndex,
+            ATableView.GetColumnByFieldName('PARENTGOODSID').Index]), -1);
 
         if pcPricesAnalize.ActivePageIndex = 0 then
         begin

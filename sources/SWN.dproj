@@ -1647,6 +1647,23 @@
             <Form>frmCustomerCurrentDebtsDlg</Form>
         </DCCReference>
         <DCCReference Include="FiscalPrinter\FiscalPrinterUtilsUnit.pas"/>
+        <DCCReference Include="FiscalPrinter\FiscalDeviceUnit.pas"/>
+        <DCCReference Include="FiscalPrinter\TremolFiscalDevice.pas"/>
+        <DCCReference Include="FiscalPrinter\ECC\ECCApiClient.pas"/>
+        <DCCReference Include="FiscalPrinter\ECC\ECCConfigUnit.pas"/>
+        <DCCReference Include="FiscalPrinter\ECC\ECCTransactionStore.pas"/>
+        <DCCReference Include="FiscalPrinter\ECC\ECCFiscalDevice.pas"/>
+        <DCCReference Include="FiscalPrinter\ECC\ECCReconcileUnit.pas"/>
+        <DCCReference Include="FiscalPrinter\ECC\ECCDeliveryUnit.pas"/>
+        <DCCReference Include="FiscalPrinter\ECC\frmECCCouriersDialog.pas">
+            <Form>frmECCCouriersDlg</Form>
+        </DCCReference>
+        <DCCReference Include="FiscalPrinter\ECC\frmECCReconcileDialog.pas">
+            <Form>frmECCReconcileDlg</Form>
+        </DCCReference>
+        <DCCReference Include="FiscalPrinter\ECC\frmECCDiagnosticDialog.pas">
+            <Form>frmECCDiagnosticDlg</Form>
+        </DCCReference>
         <DCCReference Include="frames\frame35ServiceReturnToClientUnit.pas">
             <Form>frame35ServiceReturnToClient</Form>
             <DesignClass>TFrame</DesignClass>
@@ -3355,6 +3372,9 @@
         <DCCReference Include="frameUtils\78 - Pricelist\uLoadProductImages.pas"/>
         <DCCReference Include="frameUtils\78 - Pricelist\MamicoContentUnit.pas"/>
         <DCCReference Include="frameUtils\78 - Pricelist\ImperiaContentUnit.pas"/>
+        <DCCReference Include="frameUtils\78 - Pricelist\NexDistributionUnit.pas"/>
+        <DCCReference Include="frameUtils\78 - Pricelist\TriomacPriceListUnit.pas"/>
+        <DCCReference Include="frameUtils\78 - Pricelist\PriceGoodsCreateUnit.pas"/>
         <DCCReference Include="frameUtils\78 - Pricelist\ArvaliscomContentUnit.pas"/>
         <DCCReference Include="frameUtils\78 - Pricelist\PriceListContentTransferUnit.pas"/>
         <DCCReference Include="classes\Goods\frmModifyFilterParamsUnit.pas">
@@ -3626,7 +3646,6 @@
             <Form>frame133POS</Form>
         </DCCReference>
         <DCCReference Include="classes\POS\POSSaleUnit.pas"/>
-        <DCCReference Include="classes\POS\POSFiscalUnit.pas"/>
         <DCCReference Include="classes\POS\POSCheckoutUnit.pas"/>
         <DCCReference Include="frameUtils\133 - POS\frmPOSPaymentDialog.pas">
             <Form>frmPOSPaymentDlg</Form>
