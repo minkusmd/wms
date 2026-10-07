@@ -999,23 +999,62 @@ begin
     end;
   end;
 
-  // DMLink
-  if IBCQuerySuppliers.FieldByName('CustomerID').AsInteger = 229466 then
+  // DMLink: API direct (fara DLL), parsare si scriere in baza pe mai multe fire
+  if IBCQuerySuppliers.FieldByName('CustomerID').AsInteger = cDMLinkSupplierID then
   begin
-    var Importer := TDMLinkPriceListImport.Create(dmDB.IBCConnection, 229466, 10);
+    var ImportResult: TDMLinkImportResult;
+    var Importer := TDMLinkPriceListImport.Create(dmDB.IBCConnection, cDMLinkSupplierID, 10);
+    Importer.OnWait :=
+      procedure
+      begin
+        Application.ProcessMessages;
+      end;
+    Importer.OnProgress :=
+      procedure(AText: string)
+      begin
+        dxStatusBar1.SimplePanelStyle.Text := AText;
+      end;
+    // firele de lucru ruleaza cu ProcessMessages - fereastra principala nu primeste clicuri intre timp
+    Screen.Cursor := crHourGlass;
+    if Assigned(Application.MainForm) then
+      Application.MainForm.Enabled := False;
     try
-      var ImportResult := Importer.Execute;
-      var Msg := Format('Pricelist DMLink #%d creat: %d produse, %d imagini.',
-        [ImportResult.PLID, ImportResult.ProductsImported, ImportResult.ImagesImported]);
-      // DMLink pune uneori acelasi sku (ex. culoarea "Black") la mai multe produse - se sar
-      if ImportResult.DuplicateProducts > 0 then
-        Msg := Msg + sLineBreak + sLineBreak +
-          Format('Sarite %d produse cu cod (sku) repetat in API-ul DMLink:', [ImportResult.DuplicateProducts]) +
-          sLineBreak + ImportResult.DuplicateCodes;
-      ShowMessage(Msg);      IBCQueryPriceData.Refresh;
+      ImportResult := Importer.Execute;
     finally
+      if Assigned(Application.MainForm) then
+        Application.MainForm.Enabled := True;
+      Screen.Cursor := crDefault;
+      dxStatusBar1.SimplePanelStyle.Text := '';
       Importer.Free;
     end;
+    IBCQueryPriceData.Refresh;
+
+    var Msg := Format('Pricelist DMLink #%d creat in %.1f s:' + sLineBreak +
+      '  produse: %d, descrieri: %d' + sLineBreak +
+      '  produse cu imagini: %d (liste de imagini noi/schimbate: %d, %d URL-uri)' + sLineBreak +
+      '  descarcare %.1f s, parsare %.1f s (%d fire), salvare %.1f s (%d fire)',
+      [ImportResult.PLID, (ImportResult.DownloadMs + ImportResult.ParseMs + ImportResult.SaveMs) / 1000,
+       ImportResult.ProductsImported, ImportResult.Descriptions,
+       ImportResult.ProductsWithImages, ImportResult.ImagesChanged, ImportResult.ImageRows,
+       ImportResult.DownloadMs / 1000, ImportResult.ParseMs / 1000, ImportResult.ParseThreads,
+       ImportResult.SaveMs / 1000, ImportResult.DbThreads]);
+    if ImportResult.OutOfStockProducts > 0 then
+      Msg := Msg + sLineBreak + Format('  sarite fara stoc la DMLink: %d', [ImportResult.OutOfStockProducts]);
+    if ImportResult.InvalidProducts > 0 then
+      Msg := Msg + sLineBreak + Format('  elemente fara sku / invalide: %d', [ImportResult.InvalidProducts]);
+    // DMLink pune uneori acelasi sku (ex. culoarea "Black") la mai multe produse - se sar
+    if ImportResult.DuplicateProducts > 0 then
+      Msg := Msg + sLineBreak + sLineBreak +
+        Format('Sarite %d produse cu cod (sku) repetat in API-ul DMLink:', [ImportResult.DuplicateProducts]) +
+        sLineBreak + ImportResult.DuplicateCodes;
+    MessageDlg(Msg + sLineBreak + sLineBreak + 'Urmeaza descarcarea imaginilor nedescarcate si ' +
+      'copierea lor la produsele legate.', mtInformation, [mbOK], 0);
+
+    // imaginile (PNG in TS_PRICELIST_ITEMS_IMAGES.IMAGE) - doar randurile fara IMAGE, in fire
+    TDMLinkPriceListImport.DownloadImages(dmDB.IBCConnection, ImportResult.PLID);
+    // si mai departe in TS_GOODS_IMAGE / TS_GOODS_DSC, la produsele legate fara imagini
+    // (estimare + confirmare); pina la 5 oct 2026 pasul era doar butonul separat
+    TPriceListContentTransfer.Run(dmDB.IBCConnection, cDMLinkSupplierID, ImportResult.PLID);
   end;
 
   // Convel
@@ -1807,6 +1846,18 @@ begin
       IBCQueryPriceListImages.Refresh;
   end;
 
+  // DMLink (API): imaginile ramase nedescarcate ale pricelistului curent (si cele de la care a
+  // venit doar o parte), apoi copierea la produsele legate - fara import nou
+  if (IBCQuerySuppliers.FieldByName('CustomerID').AsInteger = cDMLinkSupplierID) and
+    IBCQueryPriceData.Active and not IBCQueryPriceData.IsEmpty then
+  begin
+    TDMLinkPriceListImport.DownloadImages(dmDB.IBCConnection, IBCQueryPriceData.FieldByName('PLID').AsInteger);
+    if IBCQueryPriceListImages.Active then
+      IBCQueryPriceListImages.Refresh;
+    TPriceListContentTransfer.Run(dmDB.IBCConnection, cDMLinkSupplierID,
+      IBCQueryPriceData.FieldByName('PLID').AsInteger);
+  end;
+
   // arvaliscom.md (ARVALISCOM)
   if IBCQuerySuppliers.FieldByName('CustomerID').AsInteger = cArvaliscomSupplierID then
   begin
@@ -2233,18 +2284,22 @@ begin
       if (Price7 = 0) and (price3 > 0) then
         FLG_UseRRP := True;
 
-//      if not FLG_UseRRP then
-//        price3 := 0;
-
       if (FLG_UseRRP or not VarIsNull(ATableView.DataController.Values[aRecIndex, Currency3Index])) then
         Currency3ID := ATableView.DataController.Values[aRecIndex, Currency3Index];
 
-      // 02.10.2026: produs pe RRP fara RRP in pricelist - nu se mai sare; CLOSE_REEVALUARE
-      // pastreaza RRP-ul din baza si actualizeaza costul (PRICE0) si indicativul (PRICE7)
       if (FLG_UseRRP) and (price3 = 0) then
       begin
-        meLog.Lines.Add(Format('[%s] - Produsul %d este cu RRP, dar pricelistul nu are RRP - se pastreaza RRP-ul din baza',
+        FLG_UseRRP := False;
+        meLog.Lines.Add(Format('[%s] - Produsul %d este cu RRP, dar pricelistul nu are RRP - se scoate RRP-ul (FLG_EPP = 0, PRICE3 = 0)',
           [FormatDateTime('yyyy/mm/dd hh:nn:ss', now), goodsid]));
+      end;
+
+      // fara pret indicativ si fara RRP nu ramine nicio baza pentru pretul de vinzare
+      if (Price7 = 0) and (price3 = 0) then
+      begin
+        meLog.Lines.Add(Format('[%s] - Produsul %d nu are in pricelist nici pret indicativ, nici RRP - nu intra in reevaluare',
+          [FormatDateTime('yyyy/mm/dd hh:nn:ss', now), goodsid]));
+        Continue;
       end;
 
       if not Variants.VarIsNull(ATableView.DataController.Values[aRecIndex, Currency7Index]) then
@@ -2280,7 +2335,7 @@ begin
 
       if (Price7 > 0) then
       begin
-        // produsul pe RRP fara RRP in pricelist intra si el (vezi mesajul de mai sus)
+        // produsul pe RRP fara RRP in pricelist intra fara RRP (vezi mesajul de mai sus)
         AddRecordToReevaluare(dmDB.IBCTrDefaultUpdate, DOCID, goodsid, IBCQuerySuppliers.FieldByName('CUSTOMERID').AsInteger,
           supplier_goods_code, price0, currency0id.ToInteger, price3, Currency3ID.ToInteger, Price7, StrToIntDef(currency7id,
           498), GoodsName, Barcode, flg_in_price, FLG_UseRRP);

@@ -86,7 +86,7 @@ msbuild SWN.dproj /p:Config=Release /p:Platform=Win32
 | `SWNService.exe` | `DB Service/SWNService.dpr` | Windows-служба для фоновых операций с БД |
 | `SWNServiceManager.exe` | `DB Service Manager/SWNServiceManager.dpr` | UI для управления службой и задачами |
 | `SWNUpdater.exe` | `WmsUpdater/SWNUpdater.dpr` | Автообновление приложения |
-| `WMSParsers.exe` | `Parsers/WMSParsers.dpr` | Парсеры сайтов поставщиков: цены (h-t.md — 262735, maximum.md — 229873) и контент Maximum (картинки + характеристики → `TS_PRICELIST_ITEMS_IMAGES` / `_DESCRIPTION`); окно + режим `/auto` для Task Scheduler. Новая задача = наследник `TParserJob` (для цен — `TSupplierPriceSource` + `TSupplierPriceJob`) + строка в `ParserRunnerUnit.ParserJobs`. Фрейм 124 в WMS использует те же юниты из `Parsers/`. В `wms project.groupproj` не входит |
+| `WMSParsers.exe` | `Parsers/WMSParsers.dpr` | Парсеры сайтов поставщиков: цены (h-t.md — 262735, maximum.md — 229873) и контент Maximum (картинки + характеристики → `TS_PRICELIST_ITEMS_IMAGES` / `_DESCRIPTION`); плюс **импорт прайс-листов по API** (Accent 198, DMLink 229466, Olis Grup 251465, NexDistribution 275640, Triomac 209280 — группа `/parser:pricelists`): новый прайс + 4 переоценки как в frame78 (`PriceListReevaluationUnit`, CLOSE_REEVALUARE) + картинки; задачи идут **параллельно**, каждая в своём TThread со своим соединением (`RunParserJobsParallel`), закрытия переоценок — по очереди; `/reevaluare:test` = переоценки с ROLLBACK. Окно + режим `/auto` для Task Scheduler (`install-pricelist-task.ps1`: 09:00 и 14:00). В конце каждого запуска (`RunParserJobsParallel` → `NotifyParserRun`) итог ценовых задач ставится в Telegram-канал `PRICELISTS` («Online :: Fantastic»), ошибки и подозрительные сайты — в `ERRORS` (через `SP_TELEGRAM_SEND`, отправляет SWNService; `/telegram:no` — отключить). Новая задача = наследник `TParserJob` (для цен — `TSupplierPriceSource` + `TSupplierPriceJob`) + строка в `ParserRunnerUnit.ParserJobs`. Фрейм 124 в WMS использует те же юниты из `Parsers/`. В `wms project.groupproj` не входит |
 
 ## Architecture
 
@@ -105,7 +105,7 @@ msbuild SWN.dproj /p:Config=Release /p:Platform=Win32
 - `sources/frameUtils/` — диалоговые утилиты для каждого типа документа (100+ папок, нумерованные по типу: `01 - Приходный кассовый ордер`, `09 - NAKLADNAIA`, и т.д.).
 - `sources/Print/` — система отчётов и печати (`ReportFunctions.pas`, `frmPrintWizardDialog.pas`, `frmPrintEngineDialog.pas`).
 - `sources/Security/` — аутентификация (`LoginDialog.pas`) и авторизация.
-- `sources/FiscalPrinter/` — интеграция с фискальным принтером (ZFPCOM).
+- `sources/FiscalPrinter/` — фискальные устройства за общим интерфейсом `IFiscalDevice` (`FiscalDeviceUnit.pas`, чек целиком): MCC Tremol только через сервер ZFPLab (`TremolFiscalDevice.pas`, не через `zfpcom.dll`) и облачная касса ECC Fiscal Partner (`FiscalPrinter/ECC/`, REST + журнал `TFP_ECC_TRANSACTION`). Устройство выбирается по `FP_DEVICES` (фирма + компьютер), тип — `FP_DEVICES.DEVICE_TYPE` (0 Tremol, 1 ECC).
 - `sources/SOAP/` — веб-сервисы (интеграция с поставщиками).
 
 ### Жизненный цикл форм/диалогов (`SWNBaseUnit.pas`)
@@ -135,7 +135,7 @@ msbuild SWN.dproj /p:Config=Release /p:Platform=Win32
 
 Три вспомогательных проекта — самостоятельные приложения со своими юнитами (не разделяют код с `sources/`; одноимённые файлы вроде `TaskClass.pas` дублируются в каждом проекте).
 
-- **`SWNService`** (`ServiceMain.pas`) — `TServiceSWN = class(TService)`. По таймеру (`TTimerThread`) прогоняет коллекцию задач `TSWNServiceTaskCollection` и действий `TServiceActionCollection`. Задача (`TSWNServiceTask`) — это вызов **хранимой процедуры** (`StoredProcedure`) по расписанию: `CalendarTarget` (день/неделя/месяц) + `RunMode` (`trmExactTime` — в конкретное время / `trmInterval` — с интервалом).
+- **`SWNService`** (`ServiceMain.pas`) — `TServiceSWN = class(TService)`. По таймеру (`TTimerThread`) прогоняет коллекцию задач `TSWNServiceTaskCollection` и действий `TServiceActionCollection`. Задача (`TSWNServiceTask`) — это вызов **хранимой процедуры** (`StoredProcedure`) по расписанию: `CalendarTarget` (день/неделя/месяц) + `RunMode` (`trmExactTime` — в конкретное время / `trmInterval` — с интервалом). Если имя процедуры начинается с `@`, вместо процедуры выполняется Delphi-джоб из `DB Service\ServiceJobsUnit.pas` на том же соединении (сейчас `@ECC_ONLINE` — `ECCOnlineFiscalUnit.pas`, фискализация онлайн-оплат на кассе ECC); лог джоба — `<рабочая папка>\<имя>.log`. Параллельно работает постоянный поток `TSWNTelegramService` (`DB Service\TelegramServiceUnit.pas`): `TIBCAlerter` (`EventHandler = ehNativeAlerter`) слушает `NEW_TELEGRAM` и отправляет очередь `TELEGRAM_MESSAGES` в Telegram (каналы `TELEGRAM_CHANNELS`, токен — `TS_API_CONFIG` / `TELEGRAM`); любая процедура ставит сообщение через `SP_TELEGRAM_SEND('ERRORS', ...)`; лог — `telegram.log`; DDL — `DB Model/telegram_messages.sql`.
 - **`SWNServiceManager`** (`frmMain.pas`, `TaskConfigDialog.pas`) — UI для настройки этих задач и параметров подключения к БД (`SetupConnectionDialog`, `SelectDBUserDialog`). Конфиг службы хранится в файле настроек (`DB Service Managersettings.dat` в корне репозитория).
 - **`SWNUpdater`** (`Main.pas`, `SwnUpdaterTools.pas`, `SWNValueStorageUnit.pas`) — автообновление `SWN.exe`.
 
@@ -151,11 +151,12 @@ msbuild SWN.dproj /p:Config=Release /p:Platform=Win32
 ### Внешние интеграции
 
 - **1C ERP** (`sources/classes/Export1C/`)
-- **Фискальные принтеры ZFPCOM** (`sources/FiscalPrinter/`)
+- **Фискальные устройства**: MCC Tremol (ZFPLab) и ECC Fiscal Partner (`sources/FiscalPrinter/`)
 - **MAIB** — платёжная система (`sources/classes/Banks/`)
 - **ЕЦБ** — курсы валют
 - **B2B API / SOAP** — поставщики
 - **Веб-магазины** (`sources/classes/WebShops/`, `WebCatalog/`)
+- **MIA Victoriabank** — мгновенные платежи по QR для заказов с сайта. Всё общение с банком — на стороне сайта (`fantastic.web`, см. его CLAUDE.md); WMS только читает состояние и просит через процедуры `WEB_MIA_VB_*` (`DB Model/mia_vb_payments.sql`): `sources/classes/WebMia/` (колонка «Plata MIA» и окно «Plata MIA…» во фрейме 24 — ссылка на оплату, SMS, возврат). Фискализация — `@ECC_ONLINE` через view `VW_WEB_MIA_PAYMENTS`. План и состояние: `Documents/plan-integrare-mia-victoriabank-2026-10-06.md`
 
 ## Key Conventions
 
@@ -172,6 +173,7 @@ NSIS-скрипт: `Install/SWN_Install.nsi`. Устанавливает в `Pro
 ## Other Directories
 
 - `DB Model/` — схема базы данных (Erwin `.DM1` файлы)
+- `DB Backup/` — backup инкрементальный через nbackup (L0 неделя / L1 день / L2 час / L3 15 мин, без блокировки базы): `nbackup-sw.ps1` (Task Scheduler на сервере БД, каждые 15 мин), `nbackup-sw-restore.ps1`, `install-nbackup-task.ps1`; см. README там же
 - `Consts/` — константы и конфигурационные файлы
 - `Reports/` — определения отчётов
 - `WebProjects/` — шаблоны и ресурсы для веб

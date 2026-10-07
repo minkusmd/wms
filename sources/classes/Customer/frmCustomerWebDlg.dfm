@@ -278,17 +278,6 @@ object frmCustomerWebDialog: TfrmCustomerWebDialog
       object tbsGoods: TTabSheet
         Caption = 'Produse'
         ImageIndex = 2
-        object cbFLG_PRICE_USD: TcxDBCheckBox
-          Left = 16
-          Top = 74
-          Caption = #1055#1086#1082#1072#1079#1099#1074#1072#1090#1100' '#1094#1077#1085#1099' '#1074' USD'
-          DataBinding.DataField = 'FLG_PRICE_USD'
-          DataBinding.DataSource = IBCDataSourceWEB
-          Properties.Alignment = taLeftJustify
-          Properties.ValueChecked = 1
-          Properties.ValueUnchecked = 0
-          TabOrder = 2
-        end
         object cbFLG_PRICE_BY_CLIENT: TcxDBCheckBox
           Left = 16
           Top = 45

@@ -53,6 +53,7 @@ function DealAxesForDocType(const ADocTypeID: Integer): string;
   Starile alese se salveaza la inchiderea dialogului cu OK, dupa document.
   Sub stari, daca deal-ul le are: datele comenzii web (client, telefon, metoda de
   plata, adresa, nota, UTM) - doar pentru citire (TDB_DEALS, scrise de site).
+  La comanda web (134) urmeaza analitica deal-ului: sumele din V_DEAL_ANALYTICS.
   ADataSet = datasetul editat de dialog (dmDB.IBCQueryDocs). Nu arunca exceptii. }
 procedure AttachDealToDialog(AForm: TForm; ADataSet: TDataSet);
 
@@ -438,6 +439,7 @@ type
     FInfoRows: TArray<TDealInfoRow>;
     function S(const AValue: Integer): Integer;
     procedure LoadInfo;
+    procedure LoadAnalytics;
     procedure BuildInfo(APanel: TPanel; ATop: Integer);
     procedure Layout(out APerRow, ARows, AComboW: Integer);
     procedure Build(APanel: TPanel);
@@ -628,6 +630,47 @@ begin
         InfoField('utm_campaign', V('UTM_CAMPAIGN'), 3),
         InfoField('utm_content', V('UTM_CONTENT'), 2),
         InfoField('utm_term', V('UTM_TERM'), 2))];
+  finally
+    q.Free;
+  end;
+end;
+
+{ tipurile de document in al caror dialog se arata analitica deal-ului }
+function DealAnalyticsForDocType(const ADocTypeID: Integer): Boolean;
+begin
+  Result := ADocTypeID = 134;
+end;
+
+{ analitica deal-ului: sumele din V_DEAL_ANALYTICS (MDL), ca in fisa deal-ului.
+  Adauga un rand la FInfoRows; doar pentru citire. }
+procedure TDealDialogBar.LoadAnalytics;
+var
+  q: TIBCQuery;
+
+  function M(const AField: string): string;
+  begin
+    Result := FormatFloat('#,##0.00', q.FieldByName(AField).AsFloat);
+  end;
+
+begin
+  if (FDealID <= 0) or not DealAnalyticsForDocType(FDocTypeID) then
+    Exit;
+  q := TIBCQuery.Create(nil);
+  try
+    q.Connection := dmDB.IBCConnection;
+    q.SQL.Text :=
+      'SELECT PROFORMA_SUM, OP_NET_SALE_SUM, OP_RETURN_SUM, PAID_SUM, BALANCE_DUE ' +
+      '  FROM V_DEAL_ANALYTICS WHERE DEAL_ID = :dealid';
+    q.ParamByName('dealid').AsLargeInt := FDealID;
+    q.Open;
+    if q.IsEmpty then
+      Exit;
+    FInfoRows := FInfoRows + [TDealInfoRow.Create(
+      InfoField('Proforme', M('PROFORMA_SUM'), 2),
+      InfoField('Vanzari nete', M('OP_NET_SALE_SUM'), 2),
+      InfoField('Retururi', M('OP_RETURN_SUM'), 2),
+      InfoField('Incasat', M('PAID_SUM'), 2),
+      InfoField('Rest de plata', M('BALANCE_DUE'), 2))];
   finally
     q.Free;
   end;
@@ -941,6 +984,11 @@ begin
       bar.LoadInfo;
     except
       bar.FInfoRows := nil;
+    end;
+    try
+      bar.LoadAnalytics;
+    except
+      { analitica e optionala: randurile deja incarcate raman }
     end;
     h := bar.S(8) + (rows + Length(bar.FInfoRows)) * bar.S(cBarRowH);
     SetLength(tops, AForm.ControlCount);

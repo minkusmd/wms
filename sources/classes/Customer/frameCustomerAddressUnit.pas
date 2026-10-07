@@ -27,12 +27,15 @@ type
     bbDelete: TdxBarButton;
     cxGridCustomerAddrRaion: TcxGridDBColumn;
     cxGridCustomerAddr_Oras: TcxGridDBColumn;
+    bbCloneAddr: TdxBarButton;
     procedure bbDeleteClick(Sender: TObject);
     procedure FrameEnter(Sender: TObject);
     procedure bbNewClick(Sender: TObject);
     procedure bbEditClick(Sender: TObject);
     procedure cxGridCustomerAddrKeyDown(Sender: TObject; var Key: Word; Shift:
         TShiftState);
+    procedure bbCloneAddrClick(Sender: TObject);
+    procedure IBCQueryCustomerAddrBeforePost(DataSet: TDataSet);
   private
     FConnection: TIBCConnection;
     FCustomerID: integer;
@@ -43,6 +46,7 @@ type
     procedure SetSelectTransaction(const Value: TIBCTransaction);
     procedure SetLocalUpdateTransaction(const Value: TIBCTransaction);
     procedure ShowAddrEditDialog(IsNewRecord: Boolean);
+    procedure CloneAddrWithSwappedType;
     { Private declarations }
   public
     { Public declarations }
@@ -60,7 +64,83 @@ uses
 
 {$R *.dfm}
 
+const
+  // tipurile de adresa (GET_ADDR_TYPES)
+  cAddrTypePhysical = 7662;   // Adresa fizica
+  cAddrTypeLegal = 7663;      // Adresa juridica
+
 { TframeCustomerAddr }
+
+procedure TframeCustomerAddr.bbCloneAddrClick(Sender: TObject);
+begin
+  CloneAddrWithSwappedType;
+end;
+
+{ Cloneaza adresa curenta cu tipul schimbat: fizica -> juridica, juridica -> fizica.
+  Inregistrarea noua intra, ca si cele adaugate din dialog, in cache-ul query-ului
+  (CachedUpdates) si se salveaza impreuna cu clientul. }
+procedure TframeCustomerAddr.CloneAddrWithSwappedType;
+const
+  // ADDRID il da generatorul, tipul se inverseaza
+  cCopyFields: array[0..9] of string = ('CUSTOMERID', 'COUNTRYID', 'COUNTRY_NAME', 'CITYID',
+    'CITY_NAME', 'DISTRICTID', 'DISTRICT_NAME', 'STREET', 'FULL_ADDRESS', 'COMMENTS');
+var
+  Values: array[0..9] of Variant;
+  NewTypeID, I: Integer;
+  NewTypeName: string;
+  Bookmark: TBookmark;
+  HasNewType: Boolean;
+begin
+  if not IBCQueryCustomerAddr.Active or IBCQueryCustomerAddr.IsEmpty then
+    Exit;
+  if IBCQueryCustomerAddr.State in dsEditModes then
+    IBCQueryCustomerAddr.Post;
+
+  case IBCQueryCustomerAddr.FieldByName('ADDRTYPEID').AsInteger of
+    cAddrTypePhysical:
+      begin
+        NewTypeID := cAddrTypeLegal;
+        NewTypeName := 'Adresa juridica';
+      end;
+    cAddrTypeLegal:
+      begin
+        NewTypeID := cAddrTypePhysical;
+        NewTypeName := 'Adresa fizica';
+      end;
+  else
+    ShowErrorDialog('Adrese clienti', 'Se pot clona doar adresele fizice si juridice.');
+    Exit;
+  end;
+
+  for I := Low(cCopyFields) to High(cCopyFields) do
+    Values[I] := IBCQueryCustomerAddr.FieldByName(cCopyFields[I]).Value;
+
+  // clientul are deja o adresa de tipul nou?
+  IBCQueryCustomerAddr.DisableControls;
+  Bookmark := IBCQueryCustomerAddr.GetBookmark;
+  try
+    HasNewType := IBCQueryCustomerAddr.Locate('ADDRTYPEID', NewTypeID, []);
+    IBCQueryCustomerAddr.GotoBookmark(Bookmark);
+  finally
+    IBCQueryCustomerAddr.FreeBookmark(Bookmark);
+    IBCQueryCustomerAddr.EnableControls;
+  end;
+  if HasNewType and (ShowAskDialog('Adrese clienti',
+    Format('Clientul are deja o inregistrare "%s". Adaugam inca una?', [NewTypeName])) <> mrYes) then
+    Exit;
+
+  IBCQueryCustomerAddr.Append;
+  try
+    for I := Low(cCopyFields) to High(cCopyFields) do
+      IBCQueryCustomerAddr.FieldByName(cCopyFields[I]).Value := Values[I];
+    IBCQueryCustomerAddr.FieldByName('ADDRTYPEID').AsInteger := NewTypeID;
+    IBCQueryCustomerAddr.FieldByName('ADDRTYPE_NAME').AsString := NewTypeName;
+    IBCQueryCustomerAddr.Post;
+  except
+    IBCQueryCustomerAddr.Cancel;
+    raise;
+  end;
+end;
 
 procedure TframeCustomerAddr.bbDeleteClick(Sender: TObject);
 begin
@@ -83,6 +163,14 @@ begin
   inherited Create(AOwner);
 end;
 
+{ Orice adresa salvata fara client primeste clientul deschis - altfel ApplyUpdates cade in
+  VW_TS_CUST_ADDR_BI cu "validation error ... TS_CUST_ADDR.CUSTOMERID ... null". }
+procedure TframeCustomerAddr.IBCQueryCustomerAddrBeforePost(DataSet: TDataSet);
+begin
+  if (FCustomerID > 0) and (DataSet.FieldByName('CUSTOMERID').AsInteger <= 0) then
+    DataSet.FieldByName('CUSTOMERID').AsInteger := FCustomerID;
+end;
+
 procedure TframeCustomerAddr.cxGridCustomerAddrKeyDown(Sender: TObject; var
     Key: Word; Shift: TShiftState);
 begin
@@ -93,6 +181,7 @@ procedure TframeCustomerAddr.FrameEnter(Sender: TObject);
 begin
     bbNew.Enabled := (FCustomerID > 0);
     bbEdit.Enabled := (FCustomerID > 0);
+    bbCloneAddr.Enabled := (FCustomerID > 0);
     bbDelete.Enabled := (FCustomerID > 0);
 end;
 

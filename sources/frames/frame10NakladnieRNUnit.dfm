@@ -407,7 +407,7 @@ inherited frame10NakladnieRN: Tframe10NakladnieRN
       Font.Style = []
       ParentFont = False
       TabOrder = 0
-      Properties.ActivePage = cxTabSheet1
+      Properties.ActivePage = tbCashback
       Properties.CustomButtons.Buttons = <>
       Properties.Images = dmAdditions.cxImageDocs
       Properties.TabPosition = tpBottom
@@ -842,10 +842,6 @@ inherited frame10NakladnieRN: Tframe10NakladnieRN
         Margins.Right = 2
         Margins.Bottom = 2
         Caption = 'cashback (&3)'
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object cxGrid1: TcxGrid
           Left = 0
           Top = 0
@@ -1399,6 +1395,15 @@ inherited frame10NakladnieRN: Tframe10NakladnieRN
       ShortCut = 24652
       OnClick = dxBarButton2Click
     end
+    object bbSendECC: TdxBarButton
+      Caption = 'Trimite la curier (ECC)'
+      Category = 0
+      Hint = 
+        'Trimite livrarea rezervei in aplicatia ECC a curierului: bonul i' +
+        'l emite curierul la predare'
+      Visible = ivAlways
+      OnClick = bbSendECCClick
+    end
     object dxBarSubItem1: TdxBarSubItem
       Caption = 'Creaza document nou...'
       Category = 0
@@ -1601,6 +1606,13 @@ inherited frame10NakladnieRN: Tframe10NakladnieRN
       DropDownMenu = frmSelectGoodsToAddDlg.dxBarPopupMenu1
       OnClick = bbSelectSupplierClick
     end
+    object bbAddToIncomingInvoice: TdxBarButton
+      Caption = 'Adauga in "Factura de Intrare"'
+      Category = 0
+      Hint = 'Adauga produsul intr-o factura de intrare deschisa'
+      Visible = ivAlways
+      OnClick = bbAddToIncomingInvoiceClick
+    end
     object dxBarSubItem5: TdxBarSubItem
       Caption = 'Livrare'
       Category = 0
@@ -1719,6 +1731,11 @@ inherited frame10NakladnieRN: Tframe10NakladnieRN
       item
         BeginGroup = True
         Visible = True
+        ItemName = 'bbSendECC'
+      end
+      item
+        BeginGroup = True
+        Visible = True
         ItemName = 'dxBarSubItem3'
       end
       item
@@ -1785,6 +1802,10 @@ inherited frame10NakladnieRN: Tframe10NakladnieRN
       item
         Visible = True
         ItemName = 'bbAddToSupplier'
+      end
+      item
+        Visible = True
+        ItemName = 'bbAddToIncomingInvoice'
       end
       item
         BeginGroup = True

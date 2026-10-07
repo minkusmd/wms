@@ -1,0 +1,4 @@
+20261001_233457 apply site | produse: 475, rinduri: 518, produse care primesc acum pozitia 1: 472, rinduri cu FLG_NEED2RECREATE=1 (devine 0): 46
+scrise: 473 produse, sarite: 2 | ramase dupa rulare: produse: 2, rinduri: 2, produse care primesc acum pozitia 1: 0, rinduri cu FLG_NEED2RECREATE=1 (devine 0): 0
+sarit 241150: rindul #1 s-a schimbat intre timp
+sarit 281133: rindul #1 s-a schimbat intre timp

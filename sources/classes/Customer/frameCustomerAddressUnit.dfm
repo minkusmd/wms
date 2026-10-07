@@ -25,6 +25,7 @@ object frameCustomerAddr: TframeCustomerAddr
       DataController.KeyFieldNames = 'ADDRID'
       OptionsBehavior.IncSearch = True
       OptionsBehavior.ImmediateEditor = False
+      OptionsData.Inserting = False
       OptionsSelection.InvertSelect = False
       OptionsView.ColumnAutoWidth = True
       OptionsView.GroupByBox = False
@@ -137,6 +138,7 @@ object frameCustomerAddr: TframeCustomerAddr
     CachedUpdates = True
     AutoCommit = False
     RefreshOptions = [roAfterInsert, roAfterUpdate]
+    BeforePost = IBCQueryCustomerAddrBeforePost
     Left = 64
     Top = 143
     ParamData = <
@@ -194,6 +196,12 @@ object frameCustomerAddr: TframeCustomerAddr
           ItemName = 'bbEdit'
         end
         item
+          UserDefine = [udPaintStyle]
+          UserPaintStyle = psCaptionGlyph
+          Visible = True
+          ItemName = 'bbCloneAddr'
+        end
+        item
           BeginGroup = True
           UserDefine = [udPaintStyle]
           UserPaintStyle = psCaptionGlyph
@@ -223,6 +231,17 @@ object frameCustomerAddr: TframeCustomerAddr
       ImageIndex = 91
       ShortCut = 115
       OnClick = bbEditClick
+    end
+    object bbCloneAddr: TdxBarButton
+      Caption = 'Cloneaza (fizica <-> juridica)'
+      Category = 0
+      Hint =
+        'Cloneaza adresa selectata cu tipul schimbat: fizica -> juridica' +
+        ', juridica -> fizica'
+      Visible = ivAlways
+      ImageIndex = 29
+      ShortCut = 16452
+      OnClick = bbCloneAddrClick
     end
     object bbDelete: TdxBarButton
       Caption = 'Sterge'

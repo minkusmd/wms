@@ -4,7 +4,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, SvcMgr, Dialogs, ExtCtrls,
-  AppSettingsClass, TaskClass, ServiceActionClass, UtilsUnit;
+  AppSettingsClass, TaskClass, ServiceActionClass, UtilsUnit, TelegramServiceUnit;
 
 type
   TServiceSWN = class(TService)
@@ -20,6 +20,8 @@ type
     fServiceSettings:TSWNServiceManagerSettings;
     fTaskList:TSWNServiceTaskCollection;
     fActionList:TServiceActionCollection;
+    // coada TELEGRAM_MESSAGES -> Telegram (fir permanent, TIBCAlerter)
+    fTelegram:TSWNTelegramService;
 
     // last value of timer
     fLastTime:TDateTime;
@@ -35,6 +37,7 @@ type
     procedure WhenActionThreadTerminated(const Action:TServiceAction; const Error:String);
 
     procedure ProcessTaskTimers;
+    procedure StopTelegram;
 
   public
     function GetServiceController: TServiceController; override;
@@ -47,8 +50,7 @@ var
 implementation
 
 uses
-  System.IniFiles;
-Uses Registry, DateUtils;
+  System.IniFiles, Registry, DateUtils, ServiceJobsUnit;
 
 {$R *.DFM}
 
@@ -70,6 +72,8 @@ begin
      for i := 0 to fTaskList.Count - 1 do
      begin
           task:=fTaskList[i];
+          // sarcinile dezactivate din Service Manager nu se ruleaza
+          if not task.Enabled then Continue;
 
           action:=TServiceAction.Create(task.Title,task.CalendarTarget,task.RunMode,task.StartHour,task.StartMinutes,task.StoredProcedure);
           fActionList.AddAction(action);
@@ -147,7 +151,8 @@ begin
      Result:=False;
      var ini:=TIniFile.Create('c:\windows\swnServiceManager.ini');
      try
-        fAppPath := ini.ReadString('Working Path', 'Path', 'D:\SWN Tools\');
+        // calea poate fi scrisa fara "\" final - fara el settings.dat nu se gasea
+        fAppPath := IncludeTrailingPathDelimiter(ini.ReadString('Working Path', 'Path', 'D:\SWN Tools\'));
         Result := True;
      finally
         ini.Free;
@@ -199,8 +204,17 @@ begin
      fTaskList:=TSWNServiceTaskCollection.Create;
 end;
 
+procedure TServiceSWN.StopTelegram;
+begin
+     if fTelegram=nil then Exit;
+     // trimiterea in curs poate dura pina la timeout-ul HTTP (30 s)
+     if fTelegram.Shutdown(35000) then fTelegram.Free;
+     fTelegram:=nil;
+end;
+
 procedure TServiceSWN.ServiceDestroy(Sender: TObject);
 begin
+     StopTelegram;
      fTimer.Terminate;
 
      fActionList.Free;
@@ -217,6 +231,11 @@ begin
           fServiceSettings.LoadFromFile(fAppPath+cFILENAME_AppSettings);
           fTaskList.LoadFromFile(fAppPath+cFILENAME_Tasks);
           CreateActionList;
+          // jurnalele job-urilor Delphi (sarcini "@NUME") stau linga settings.dat
+          ServiceJobsLogDir := fAppPath;
+
+          // notificarile Telegram (telegram.log); fara BOT_TOKEN firul doar asteapta
+          if fTelegram=nil then fTelegram:=TSWNTelegramService.Create(fServiceSettings);
 
           fTimer.Start;
 
@@ -233,6 +252,7 @@ end;
 procedure TServiceSWN.ServiceStop(Sender: TService; var Stopped: Boolean);
 begin
      fTimer.Suspended:=True;
+     StopTelegram;
      LogMessage('Service stopped!',EVENTLOG_SUCCESS);
      Stopped:=True;
 end;
@@ -245,6 +265,10 @@ begin
      begin
           S:=Format('Failed to execute action "%s"!',[Action.Title]) + sLineBreak + Error;
           LogMessage(S,EVENTLOG_ERROR_TYPE);
+          // si in canalul Telegram ERRORS
+          if fTelegram<>nil then
+             fTelegram.QueueLocal('ERRORS',
+                Format('SWNService: sarcina "%s" a esuat',[Action.Title]) + sLineBreak + Error);
      end
      else LogMessage(Format('Action "%s" executed succesuful!',[Action.Title]),EVENTLOG_SUCCESS);
 

@@ -11,14 +11,11 @@ object frameCustomerPhones: TframeCustomerPhones
     Height = 212
     Align = alClient
     TabOrder = 1
+    ExplicitLeft = -8
+    ExplicitTop = 36
     object cxGridDBTableView1: TcxGridDBTableView
       OnKeyDown = cxGridDBTableView1KeyDown
-      Navigator.Buttons.CustomButtons = <>
-      ScrollbarAnnotations.CustomAnnotations = <>
       DataController.DataSource = IBCDataSourceCustomerPhones
-      DataController.Summary.DefaultGroupSummaryItems = <>
-      DataController.Summary.FooterSummaryItems = <>
-      DataController.Summary.SummaryGroups = <>
       OptionsBehavior.IncSearch = True
       OptionsBehavior.ImmediateEditor = False
       OptionsView.ColumnAutoWidth = True
@@ -27,7 +24,6 @@ object frameCustomerPhones: TframeCustomerPhones
       object cxGridDBTableView1_ID: TcxGridDBColumn
         Caption = 'ID'
         DataBinding.FieldName = 'PHONEID'
-        DataBinding.IsNullValueType = True
         HeaderAlignmentHorz = taCenter
         MinWidth = 64
         Options.HorzSizing = False
@@ -35,7 +31,6 @@ object frameCustomerPhones: TframeCustomerPhones
       object cxGridDBTableView1_TIP_TELEFON: TcxGridDBColumn
         Caption = 'Tip telefon'
         DataBinding.FieldName = 'PHONETYPE'
-        DataBinding.IsNullValueType = True
         MinWidth = 138
         Options.HorzSizing = False
         Width = 138
@@ -43,7 +38,6 @@ object frameCustomerPhones: TframeCustomerPhones
       object cxGridDBTableView1_FLG_SMS: TcxGridDBColumn
         Caption = 'Sms'
         DataBinding.FieldName = 'FLG_SMS'
-        DataBinding.IsNullValueType = True
         PropertiesClassName = 'TcxCheckBoxProperties'
         Properties.ValueChecked = '1'
         Properties.ValueUnchecked = '0'
@@ -55,7 +49,6 @@ object frameCustomerPhones: TframeCustomerPhones
       object cxGridDBTableView1_NUMAR_TELEFON: TcxGridDBColumn
         Caption = 'Numar telefon'
         DataBinding.FieldName = 'PHONENUMBER'
-        DataBinding.IsNullValueType = True
         MinWidth = 120
         Options.HorzSizing = False
         Width = 120
@@ -63,7 +56,6 @@ object frameCustomerPhones: TframeCustomerPhones
       object cxGridDBTableView1_NOTE: TcxGridDBColumn
         Caption = 'Mentiuni'
         DataBinding.FieldName = 'COMMENT'
-        DataBinding.IsNullValueType = True
         Width = 362
       end
     end

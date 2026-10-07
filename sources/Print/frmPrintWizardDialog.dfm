@@ -160,7 +160,6 @@ object frmPrintWizardDlg: TfrmPrintWizardDlg
           LookAndFeel.NativeStyle = True
           LookAndFeel.ScrollbarMode = sbmClassic
           object cxGridReportsTable: TcxGridDBTableView
-            Navigator.Buttons.CustomButtons = <>
             Navigator.Buttons.First.Visible = True
             Navigator.Buttons.PriorPage.Visible = True
             Navigator.Buttons.Prior.Visible = True
@@ -177,14 +176,10 @@ object frmPrintWizardDlg: TfrmPrintWizardDlg
             Navigator.Buttons.SaveBookmark.Visible = True
             Navigator.Buttons.GotoBookmark.Visible = True
             Navigator.Buttons.Filter.Visible = True
-            ScrollbarAnnotations.CustomAnnotations = <>
             OnCellDblClick = cxGridReportsTableCellDblClick
             OnFocusedRecordChanged = cxGridReportsTableFocusedRecordChanged
             DataController.DataSource = IBCDataSourceReports
             DataController.KeyFieldNames = 'REPORTID'
-            DataController.Summary.DefaultGroupSummaryItems = <>
-            DataController.Summary.FooterSummaryItems = <>
-            DataController.Summary.SummaryGroups = <>
             DataController.OnDataChanged = cxGridReportsTableDataControllerDataChanged
             OptionsBehavior.IncSearch = True
             OptionsCustomize.ColumnFiltering = False
@@ -208,7 +203,6 @@ object frmPrintWizardDlg: TfrmPrintWizardDlg
             object cxGridReports_DT: TcxGridDBColumn
               Caption = #1060#1080#1088#1084#1072
               DataBinding.FieldName = 'DT'
-              DataBinding.IsNullValueType = True
               Visible = False
               HeaderAlignmentHorz = taCenter
               MinWidth = 50
@@ -219,7 +213,6 @@ object frmPrintWizardDlg: TfrmPrintWizardDlg
               AlternateCaption = #1050#1086#1076' '#1086#1090#1095#1077#1090#1072
               Caption = 'Cod'
               DataBinding.FieldName = 'REPORTID'
-              DataBinding.IsNullValueType = True
               HeaderAlignmentHorz = taCenter
               MinWidth = 50
               Options.Filtering = False
@@ -228,7 +221,6 @@ object frmPrintWizardDlg: TfrmPrintWizardDlg
               Width = 50
             end
             object cxGridReports_IMG: TcxGridDBColumn
-              DataBinding.IsNullValueType = True
               PropertiesClassName = 'TcxImageComboBoxProperties'
               Properties.DefaultImageIndex = 28
               Properties.Images = dmAdditions.cxImageList_SWN
@@ -247,14 +239,12 @@ object frmPrintWizardDlg: TfrmPrintWizardDlg
             object cxGridReports_TITLE: TcxGridDBColumn
               Caption = 'Denumire raport'
               DataBinding.FieldName = 'TITLE'
-              DataBinding.IsNullValueType = True
               Options.Moving = False
               VisibleForCustomization = False
             end
             object cxGridReports_TABSHEETINDEX: TcxGridDBColumn
               Caption = 'Suplimentar'
               DataBinding.FieldName = 'TABSHEETINDEX'
-              DataBinding.IsNullValueType = True
               PropertiesClassName = 'TcxLabelProperties'
               Properties.Alignment.Horz = taCenter
               OnGetDisplayText = cxGridReports_TABSHEETINDEXGetDisplayText
@@ -265,7 +255,6 @@ object frmPrintWizardDlg: TfrmPrintWizardDlg
             end
             object cxGridReports_DOCTYPEID: TcxGridDBColumn
               DataBinding.FieldName = 'DOCTYPE_TITLE'
-              DataBinding.IsNullValueType = True
               Visible = False
               MinWidth = 100
               Options.HorzSizing = False
@@ -278,7 +267,6 @@ object frmPrintWizardDlg: TfrmPrintWizardDlg
               AlternateCaption = #1054#1090#1082#1083#1102#1095#1077#1085
               Caption = 'Deconectat'
               DataBinding.FieldName = 'FLG_DISABLED'
-              DataBinding.IsNullValueType = True
               PropertiesClassName = 'TcxCheckBoxProperties'
               Properties.ValueChecked = 1
               Properties.ValueUnchecked = 0
@@ -291,7 +279,6 @@ object frmPrintWizardDlg: TfrmPrintWizardDlg
               AlternateCaption = #1053#1077#1090' '#1087#1088#1103#1084#1086#1081' '#1087#1077#1095#1072#1090#1080
               Caption = 'Tipar indirect'
               DataBinding.FieldName = 'FLG_NO_DIRECT_PRINT'
-              DataBinding.IsNullValueType = True
               PropertiesClassName = 'TcxCheckBoxProperties'
               Properties.ValueChecked = 1
               Properties.ValueUnchecked = 0
@@ -304,7 +291,6 @@ object frmPrintWizardDlg: TfrmPrintWizardDlg
               AlternateCaption = #1041#1099#1089#1090#1088#1099#1081' '#1076#1086#1089#1090#1091#1087
               Caption = 'In Meniu'
               DataBinding.FieldName = 'FLG_QUICK_ACCESS'
-              DataBinding.IsNullValueType = True
               PropertiesClassName = 'TcxCheckBoxProperties'
               Properties.ValueChecked = 1
               Properties.ValueUnchecked = 0
@@ -315,7 +301,6 @@ object frmPrintWizardDlg: TfrmPrintWizardDlg
             end
             object cxGridReports_REPORTGROUP_ORDERNO: TcxGridDBColumn
               DataBinding.FieldName = 'REPORTGROUP_ORDERNO'
-              DataBinding.IsNullValueType = True
               Visible = False
               OnGetDataText = cxGridReports_REPORTGROUP_ORDERNOGetDataText
               Options.ShowCaption = False
@@ -325,7 +310,6 @@ object frmPrintWizardDlg: TfrmPrintWizardDlg
             end
             object cxGridReports_REPORTGROUP_TITLE: TcxGridDBColumn
               DataBinding.FieldName = 'REPORTGROUP_TITLE'
-              DataBinding.IsNullValueType = True
               Visible = False
               VisibleForCustomization = False
               Width = 50
@@ -481,19 +465,15 @@ object frmPrintWizardDlg: TfrmPrintWizardDlg
               Align = alClient
               TabOrder = 1
               object cxGridPriceLabelsTable: TcxGridDBTableView
-                Navigator.Buttons.CustomButtons = <>
-                ScrollbarAnnotations.CustomAnnotations = <>
                 OnCellDblClick = cxGridPriceLabelsTableCellDblClick
                 OnFocusedRecordChanged = cxGridPriceLabelsTableFocusedRecordChanged
                 DataController.DataSource = IBCDataSource_TMP_GOODS
                 DataController.KeyFieldNames = 'GOODSID'
-                DataController.Summary.DefaultGroupSummaryItems = <>
                 DataController.Summary.FooterSummaryItems = <
                   item
                     Kind = skCount
                     Column = cxGridPriceLabelsTable_GOODSID
                   end>
-                DataController.Summary.SummaryGroups = <>
                 OptionsCustomize.ColumnFiltering = False
                 OptionsCustomize.ColumnHorzSizing = False
                 OptionsCustomize.ColumnMoving = False
@@ -515,7 +495,6 @@ object frmPrintWizardDlg: TfrmPrintWizardDlg
                 object cxGridPriceLabelsTable_GOODSID: TcxGridDBColumn
                   Caption = 'Cod'
                   DataBinding.FieldName = 'GOODSID'
-                  DataBinding.IsNullValueType = True
                   FooterAlignmentHorz = taRightJustify
                   MinWidth = 60
                   Options.HorzSizing = False
@@ -523,7 +502,6 @@ object frmPrintWizardDlg: TfrmPrintWizardDlg
                 end
                 object cxGridPriceLabelsTable_IMG: TcxGridDBColumn
                   DataBinding.FieldName = 'GOODS_TYPE_ID'
-                  DataBinding.IsNullValueType = True
                   PropertiesClassName = 'TcxImageComboBoxProperties'
                   Properties.Images = dmAdditions.cxImageList_SWN
                   Properties.Items = <>
@@ -537,18 +515,15 @@ object frmPrintWizardDlg: TfrmPrintWizardDlg
                 object cxGridPriceLabelsTable_TITLE: TcxGridDBColumn
                   Caption = 'Denumirea produsului'
                   DataBinding.FieldName = 'TITLE'
-                  DataBinding.IsNullValueType = True
                 end
                 object cxGridPriceLabelsTable_PARENT_TITLE: TcxGridDBColumn
                   DataBinding.FieldName = 'PARENT_TITLE'
-                  DataBinding.IsNullValueType = True
                   Visible = False
                   IsCaptionAssigned = True
                 end
                 object cxGridPriceLabelsTable_DISCOUNT: TcxGridDBColumn
                   Caption = 'REducerea, %'
                   DataBinding.FieldName = 'DISCOUNT'
-                  DataBinding.IsNullValueType = True
                   HeaderAlignmentHorz = taCenter
                   MinWidth = 70
                   Options.HorzSizing = False
@@ -604,12 +579,7 @@ object frmPrintWizardDlg: TfrmPrintWizardDlg
               Margins.Bottom = 2
               TabOrder = 0
               object cxGridPersonelTable: TcxGridDBTableView
-                Navigator.Buttons.CustomButtons = <>
-                ScrollbarAnnotations.CustomAnnotations = <>
                 DataController.DataSource = IBCDataSource_TMP_FIRMS
-                DataController.Summary.DefaultGroupSummaryItems = <>
-                DataController.Summary.FooterSummaryItems = <>
-                DataController.Summary.SummaryGroups = <>
                 OptionsCustomize.ColumnFiltering = False
                 OptionsCustomize.ColumnGrouping = False
                 OptionsData.Deleting = False
@@ -625,7 +595,6 @@ object frmPrintWizardDlg: TfrmPrintWizardDlg
                 object cxGridPersonel_CUSTOMERID: TcxGridDBColumn
                   Caption = 'Cod'
                   DataBinding.FieldName = 'CUSTOMERID'
-                  DataBinding.IsNullValueType = True
                   MinWidth = 50
                   Options.HorzSizing = False
                   Width = 50
@@ -633,7 +602,6 @@ object frmPrintWizardDlg: TfrmPrintWizardDlg
                 object cxGridPersonel_DISPLAYNAME: TcxGridDBColumn
                   Caption = 'Organizatia'
                   DataBinding.FieldName = 'DISPLAYNAME'
-                  DataBinding.IsNullValueType = True
                 end
               end
               object cxGridPersonelLevel: TcxGridLevel
@@ -651,12 +619,7 @@ object frmPrintWizardDlg: TfrmPrintWizardDlg
               Margins.Bottom = 2
               TabOrder = 1
               object cxGridUserGroupsTable: TcxGridDBTableView
-                Navigator.Buttons.CustomButtons = <>
-                ScrollbarAnnotations.CustomAnnotations = <>
                 DataController.DataSource = IBCDataSource_TMP_USERGROUPS
-                DataController.Summary.DefaultGroupSummaryItems = <>
-                DataController.Summary.FooterSummaryItems = <>
-                DataController.Summary.SummaryGroups = <>
                 OptionsCustomize.ColumnFiltering = False
                 OptionsCustomize.ColumnGrouping = False
                 OptionsData.Deleting = False
@@ -673,7 +636,6 @@ object frmPrintWizardDlg: TfrmPrintWizardDlg
                 object cxGridUserGroupsTable_GROUPID: TcxGridDBColumn
                   Caption = 'Cod'
                   DataBinding.FieldName = 'GROUPID'
-                  DataBinding.IsNullValueType = True
                   MinWidth = 50
                   Options.HorzSizing = False
                   Width = 50
@@ -681,7 +643,6 @@ object frmPrintWizardDlg: TfrmPrintWizardDlg
                 object cxGridUserGroupsTable_GROUP_NAME: TcxGridDBColumn
                   Caption = 'Grupe de utilizatori'
                   DataBinding.FieldName = 'GROUP_NAME'
-                  DataBinding.IsNullValueType = True
                 end
               end
               object cxGridUserGroupsLevel: TcxGridLevel

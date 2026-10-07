@@ -849,6 +849,7 @@ inherited frame25ScetFaktura: Tframe25ScetFaktura
         TabOrder = 1
         LookAndFeel.NativeStyle = True
         object cxGridReceiptsTable: TcxGridDBTableView
+          OnDblClick = cxGridReceiptsTableDblClick
           OnKeyDown = cxGridReceiptsTableKeyDown
           OnCustomDrawCell = cxGridReceiptsTableCustomDrawCell
           DataController.DataSource = IBCDataSourceReceipt
@@ -922,6 +923,15 @@ inherited frame25ScetFaktura: Tframe25ScetFaktura
             Options.HorzSizing = False
             Width = 64
           end
+          object cxGridReceipts_APARAT: TcxGridDBColumn
+            Caption = 'aparat'
+            DataBinding.FieldName = 'APARAT'
+            HeaderAlignmentHorz = taCenter
+            HeaderHint = 'Casa pe care a fost emis bonul: MCC Tremol (aparat fizic) sau casa ECC online'
+            MinWidth = 104
+            Options.HorzSizing = False
+            Width = 104
+          end
           object cxGridReceipts_SUMA: TcxGridDBColumn
             Caption = 'suma, lei'
             DataBinding.FieldName = 'SUMA'
@@ -989,6 +999,13 @@ inherited frame25ScetFaktura: Tframe25ScetFaktura
             MinWidth = 96
             Options.HorzSizing = False
             Width = 96
+          end
+          object cxGridReceipts_MEV_LINK: TcxGridDBColumn
+            Caption = 'link MEV'
+            DataBinding.FieldName = 'MEV_LINK'
+            HeaderHint = 'Verificarea bonului ECC pe site-ul SFS (dublu-clic deschide linkul)'
+            MinWidth = 64
+            Width = 160
           end
         end
         object cxGridReceiptLevel: TcxGridLevel
@@ -1748,6 +1765,13 @@ inherited frame25ScetFaktura: Tframe25ScetFaktura
         end
         item
           BeginGroup = True
+          Visible = True
+          UserDefine = [udPaintStyle]
+          UserPaintStyle = psCaptionGlyph
+          ItemName = 'bbPrintReceiptCopy'
+        end
+        item
+          BeginGroup = True
           UserDefine = [udPaintStyle]
           UserPaintStyle = psCaptionGlyph
           Visible = True
@@ -1893,6 +1917,16 @@ inherited frame25ScetFaktura: Tframe25ScetFaktura
       Visible = ivAlways
       ImageIndex = 47
       OnClick = bbActionPrintReceiptClick
+    end
+    object bbPrintReceiptCopy: TdxBarButton
+      Caption = 'Tipareste copia cecului...'
+      Category = 0
+      Hint = 
+        'Tipareste cecul ECC selectat (imaginea salvata la emitere) pe imprimanta aleasa; ' +
+        'nu emite un cec nou. Imprimanta aleasa ramine pentru cecurile ECC de pe acest calculator'
+      Visible = ivAlways
+      ImageIndex = 28
+      OnClick = bbPrintReceiptCopyClick
     end
     object bbCancelReceipt: TdxBarButton
       Caption = 'Anulare "Bon Fiscal"'
@@ -2510,17 +2544,34 @@ inherited frame25ScetFaktura: Tframe25ScetFaktura
       '  DOCID = :Old_DOCID AND NUMAR_BON = :Old_NUMAR_BON')
     SQLRefresh.Strings = (
       'SELECT '
-      ' *'
-      'FROM '
-      ' VW_DOCS_RECEIPT'
+      ' VW_DOCS_RECEIPT.*,'
+      ' (SELECT CASE WHEN R.ECC_TRANS_ID IS NOT NULL OR D.DEVICE_TYPE = 1'
+      '   THEN '#39'Casa ECC online'#39' ELSE '#39'MCC Tremol'#39' END'
+      '  FROM TDB_DOCS_RECEIPT R LEFT JOIN FP_DEVICES D ON D.FP_ID = R.FP_ID'
+      '  WHERE R.DOCID = VW_DOCS_RECEIPT.DOCID AND R.NUMAR_BON = VW_DOCS_RECEIPT.NUMAR_BON) AS APARAT,'
+      ' (SELECT R.ECC_TRANS_ID FROM TDB_DOCS_RECEIPT R'
+      '  WHERE R.DOCID = VW_DOCS_RECEIPT.DOCID AND R.NUMAR_BON = VW_DOCS_RECEIPT.NUMAR_BON) AS ECC_TRANS_ID,'
+      ' (SELECT E.MEV_LINK FROM TDB_DOCS_RECEIPT R'
+      '  JOIN TFP_ECC_TRANSACTION E ON E.TRANS_ID = R.ECC_TRANS_ID'
+      '  WHERE R.DOCID = VW_DOCS_RECEIPT.DOCID AND R.NUMAR_BON = VW_DOCS_RECEIPT.NUMAR_BON) AS MEV_LINK'
+      'FROM VW_DOCS_RECEIPT'
       'WHERE'
-      ' DOCID = :DOCID AND NUMAR_BON = :NUMAR_BON')
+      ' VW_DOCS_RECEIPT.DOCID = :DOCID AND VW_DOCS_RECEIPT.NUMAR_BON = :NUMAR_BON')
     Connection = dmDB.IBCConnection
     Transaction = dmDB.IBCTrDefaultSelect
     UpdateTransaction = dmDB.IBCTrDefaultUpdate
     SQL.Strings = (
       'SELECT '
-      ' *'
+      ' VW_DOCS_RECEIPT.*,'
+      ' (SELECT CASE WHEN R.ECC_TRANS_ID IS NOT NULL OR D.DEVICE_TYPE = 1'
+      '   THEN '#39'Casa ECC online'#39' ELSE '#39'MCC Tremol'#39' END'
+      '  FROM TDB_DOCS_RECEIPT R LEFT JOIN FP_DEVICES D ON D.FP_ID = R.FP_ID'
+      '  WHERE R.DOCID = VW_DOCS_RECEIPT.DOCID AND R.NUMAR_BON = VW_DOCS_RECEIPT.NUMAR_BON) AS APARAT,'
+      ' (SELECT R.ECC_TRANS_ID FROM TDB_DOCS_RECEIPT R'
+      '  WHERE R.DOCID = VW_DOCS_RECEIPT.DOCID AND R.NUMAR_BON = VW_DOCS_RECEIPT.NUMAR_BON) AS ECC_TRANS_ID,'
+      ' (SELECT E.MEV_LINK FROM TDB_DOCS_RECEIPT R'
+      '  JOIN TFP_ECC_TRANSACTION E ON E.TRANS_ID = R.ECC_TRANS_ID'
+      '  WHERE R.DOCID = VW_DOCS_RECEIPT.DOCID AND R.NUMAR_BON = VW_DOCS_RECEIPT.NUMAR_BON) AS MEV_LINK'
       'FROM VW_DOCS_RECEIPT')
     MasterFields = 'DOCID'
     DetailFields = 'DOCID'

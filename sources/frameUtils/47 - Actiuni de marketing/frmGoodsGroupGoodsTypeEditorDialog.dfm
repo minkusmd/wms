@@ -53,7 +53,7 @@ object frmGoodsGroupGoodsTypeEditorDlg: TfrmGoodsGroupGoodsTypeEditorDlg
     object Label1: TLabel
       Left = 16
       Top = 20
-      Width = 56
+      Width = 57
       Height = 15
       Caption = 'Tip produs'
     end
@@ -63,17 +63,17 @@ object frmGoodsGroupGoodsTypeEditorDlg: TfrmGoodsGroupGoodsTypeEditorDlg
       DataBinding.DataField = 'GOODSTYPEID'
       Properties.DropDownListStyle = lsFixedList
       Properties.DropDownRows = 16
+      Properties.IncrementalFilteringOptions = [ifoHighlightSearchText, ifoUseContainsOperator]
       Properties.KeyFieldNames = 'GOODSTYPEID'
       Properties.ListColumns = <
         item
-          Caption = #1053#1072#1080#1084#1077#1085#1086#1074#1072#1085#1080#1077
-          SortOrder = soAscending
-          FieldName = 'TITLE_RUS'
+          FieldName = 'TITLE'
         end
         item
-          Caption = 'Denumirea'
-          FieldName = 'TITLE'
+          FieldName = 'TITLE_RUS'
         end>
+      Properties.ListOptions.RowSelect = False
+      Properties.ListOptions.SyncMode = True
       Properties.ListSource = IBCDataSourceGT
       TabOrder = 0
       Width = 405

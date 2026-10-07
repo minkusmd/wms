@@ -178,6 +178,7 @@ object frmMainForm: TfrmMainForm
       OnCanFocusNode = cxTreeDocTypesCanFocusNode
       OnCanSelectNode = cxTreeDocTypesCanSelectNode
       OnCollapsing = cxTreeDocTypesCollapsing
+      OnClick = cxTreeDocTypesClick
       OnDblClick = cxTreeDocTypesDblClick
       OnDeletion = cxTreeDocTypesDeletion
       object cxTreeDocTypescxTreeListColumn1: TcxTreeListColumn
@@ -2963,6 +2964,13 @@ object frmMainForm: TfrmMainForm
       Visible = ivAlways
       OnClick = bbMCCClick
     end
+    object bbECCDiagnostic: TdxBarButton
+      Caption = 'Casa ECC - diagnostic'
+      Category = 0
+      Hint = 'Casa de marcat virtuala ECC Fiscal Partner: test API, bon de test, X/Z'
+      Visible = ivAlways
+      OnClick = bbECCDiagnosticClick
+    end
     object bbWorkStations: TdxBarButton
       Caption = 'Statii de lucru'
       Category = 0
@@ -3573,6 +3581,10 @@ object frmMainForm: TfrmMainForm
         end
         item
           Visible = True
+          ItemName = 'bbECCDiagnostic'
+        end
+        item
+          Visible = True
           ItemName = 'bbWorkStations'
         end
         item
@@ -3731,6 +3743,10 @@ object frmMainForm: TfrmMainForm
           BeginGroup = True
           Visible = True
           ItemName = 'bbApiConfig'
+        end
+        item
+          Visible = True
+          ItemName = 'bbTelegram'
         end>
     end
     object bbMainMenuAcs_UserGroups: TdxBarButton
@@ -3761,6 +3777,13 @@ object frmMainForm: TfrmMainForm
       Hint = 'Parametrii si credentialele API-urilor externe'
       Visible = ivAlways
       OnClick = bbApiConfigClick
+    end
+    object bbTelegram: TdxBarButton
+      Caption = 'Notificari Telegram'
+      Category = 3
+      Hint = 'Canalele si istoricul notificarilor Telegram (SWNService)'
+      Visible = ivAlways
+      OnClick = bbTelegramClick
     end
     object bbCreateNewVersion: TdxBarSubItem
       Caption = 'Ajutor'

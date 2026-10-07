@@ -499,6 +499,13 @@ object frameDelivery: TframeDelivery
           UserPaintStyle = psCaptionGlyph
           Visible = True
           ItemName = 'bbPrint'
+        end
+        item
+          BeginGroup = True
+          UserDefine = [udPaintStyle]
+          UserPaintStyle = psCaption
+          Visible = True
+          ItemName = 'bbSendECC'
         end>
       OneOnRow = True
       Row = 0
@@ -537,6 +544,13 @@ object frameDelivery: TframeDelivery
       Visible = ivAlways
       ImageIndex = 28
       OnClick = bbPrintClick
+    end
+    object bbSendECC: TdxBarButton
+      Caption = 'Trimite la curier (ECC)'
+      Category = 0
+      Hint = 'Trimite livrarea in aplicatia ECC a curierului: bonul il emite curierul la predare'
+      Visible = ivAlways
+      OnClick = bbSendECCClick
     end
   end
   object IBCQueryDelivery: TIBCQuery

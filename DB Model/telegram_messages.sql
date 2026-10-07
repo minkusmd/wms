@@ -1,0 +1,408 @@
+/* ============================================================================
+   TELEGRAM_MESSAGES - notificari Telegram pentru utilizatorii interni WMS
+   (plan: Documents/telegram-service-plan-2026-10-03.md)
+
+   Orice procedura / trigger pune un mesaj in coada prin
+       EXECUTE PROCEDURE SP_TELEGRAM_SEND('ERRORS', 'text', NULL, NULL, NULL, 0);
+   Triggerul AI face POST_EVENT 'NEW_TELEGRAM' (livrat la COMMIT), iar SWNService
+   (firul TSWNTelegramService, TelegramServiceUnit.pas) citeste randurile netrimise
+   si le trimite in chat-ul canalului (TELEGRAM_CHANNELS).
+
+   MSG_TEXT NULL + SOURCE_TABLE/SOURCE_ID = textul se construieste la trimitere,
+   dupa commit, de SP_TELEGRAM_BUILD_TEXT (comenzi 134, cereri de finantare 1791).
+
+   SOURCE_TABLE:  >0 = DOCTYPEID (SOURCE_ID = DOCID)
+                 -10 = SMS_MESSAGES (SOURCE_ID = SMSID) - alerta SMS netrimis
+                 -20 = SWNService (erori joburi / proceduri programate)
+                 -30 = WMSParsers (importuri de preturi / erori parsere)
+                  -1 = text liber
+
+   SENT_STATUS: 0 nou, 1 trimis, 2 de reincercat, 3 esuat, 4 ignorat
+                (canal inactiv / document sters)
+
+   Configurare: TS_API_CONFIG, API_CODE = 'TELEGRAM':
+       BOT_TOKEN       - tokenul de la @BotFather (completat din WMS, nu din script)
+       DEFAULT_CHAT_ID - chat-ul pentru mesajele fara canal / cu canal necunoscut
+
+   Script RE-RULABIL (3.10.2026). Rollback: telegram_messages_rollback.sql
+   ============================================================================ */
+
+SET TERM ^ ;
+
+/* --- 1. Tabele ------------------------------------------------------------ */
+EXECUTE BLOCK AS
+BEGIN
+  IF (NOT EXISTS (SELECT 1 FROM RDB$RELATIONS WHERE RDB$RELATION_NAME = 'TELEGRAM_CHANNELS')) THEN
+    EXECUTE STATEMENT
+      'CREATE TABLE TELEGRAM_CHANNELS (
+         CHANNEL_CODE DM_VARCHAR32 NOT NULL,
+         TITLE        DM_VARCHAR128,
+         CHAT_ID      DM_VARCHAR32,
+         THREAD_ID    DM_INTEGER,
+         FLG_SILENT   DM_BOOLEAN_NN DEFAULT 0,
+         FLG_ACTIVE   DM_BOOLEAN_NN DEFAULT 1,
+         NOTE         DM_VARCHAR255,
+         CONSTRAINT PK_TELEGRAM_CHANNELS PRIMARY KEY (CHANNEL_CODE)
+       )';
+
+  IF (NOT EXISTS (SELECT 1 FROM RDB$RELATIONS WHERE RDB$RELATION_NAME = 'TELEGRAM_MESSAGES')) THEN
+    EXECUTE STATEMENT
+      'CREATE TABLE TELEGRAM_MESSAGES (
+         TGMSGID        DM_INTEGER_NN,
+         DATA_CREATED   DM_DATETIME NOT NULL,
+         CHANNEL_CODE   DM_VARCHAR32,
+         MSG_TEXT       DM_VARCHAR4096,
+         PARSE_MODE     DM_VARCHAR10,
+         NEXT_SEND_TIME DM_DATETIME NOT NULL,
+         FLG_SENT       DM_BOOLEAN_NN DEFAULT 0,
+         RETRY_COUNT    DM_SMALLINT_NN DEFAULT 0,
+         DATA_DELIVERED DM_DATETIME,
+         SENT_STATUS    DM_INTEGER DEFAULT 0,
+         LAST_ERROR     DM_VARCHAR512,
+         TG_MESSAGE_ID  DM_BIGINT,
+         SOURCE_TABLE   DM_INTEGER,
+         SOURCE_ID      DM_INTEGER,
+         CREATED_BY     DM_INTEGER,
+         PRIORITY       DM_INTEGER DEFAULT 0,
+         CONSTRAINT PK_TELEGRAM_MESSAGES PRIMARY KEY (TGMSGID)
+       )';
+END^
+
+/* --- 2. Indecsi + generator ---------------------------------------------- */
+EXECUTE BLOCK AS
+BEGIN
+  -- coada: doar randurile netrimise (index partial, Firebird 5)
+  IF (NOT EXISTS (SELECT 1 FROM RDB$INDICES WHERE RDB$INDEX_NAME = 'IDX_TELEGRAM_MESSAGES_QUEUE')) THEN
+    EXECUTE STATEMENT
+      'CREATE INDEX IDX_TELEGRAM_MESSAGES_QUEUE ON TELEGRAM_MESSAGES (NEXT_SEND_TIME) WHERE FLG_SENT = 0';
+
+  IF (NOT EXISTS (SELECT 1 FROM RDB$INDICES WHERE RDB$INDEX_NAME = 'IDX_TELEGRAM_MESSAGES_SOURCE')) THEN
+    EXECUTE STATEMENT
+      'CREATE INDEX IDX_TELEGRAM_MESSAGES_SOURCE ON TELEGRAM_MESSAGES (SOURCE_TABLE, SOURCE_ID)';
+
+  IF (NOT EXISTS (SELECT 1 FROM RDB$INDICES WHERE RDB$INDEX_NAME = 'IDX_TELEGRAM_MESSAGES_CREATED')) THEN
+    EXECUTE STATEMENT
+      'CREATE DESCENDING INDEX IDX_TELEGRAM_MESSAGES_CREATED ON TELEGRAM_MESSAGES (DATA_CREATED)';
+
+  IF (NOT EXISTS (SELECT 1 FROM RDB$GENERATORS WHERE RDB$GENERATOR_NAME = 'SQ_TELEGRAM_MESSAGES_ID')) THEN
+    EXECUTE STATEMENT 'CREATE SEQUENCE SQ_TELEGRAM_MESSAGES_ID';
+END^
+
+/* tabelele create prin EXECUTE STATEMENT devin vizibile triggerelor abia dupa commit */
+COMMIT^
+
+/* --- 3. Triggere TELEGRAM_MESSAGES --------------------------------------- */
+CREATE OR ALTER TRIGGER TRG_TELEGRAM_MESSAGES_BI FOR TELEGRAM_MESSAGES
+ACTIVE BEFORE INSERT POSITION 0
+AS
+BEGIN
+  IF (NEW.TGMSGID IS NULL) THEN NEW.TGMSGID = NEXT VALUE FOR SQ_TELEGRAM_MESSAGES_ID;
+  NEW.DATA_CREATED = CURRENT_TIMESTAMP;
+  IF (NEW.NEXT_SEND_TIME IS NULL) THEN NEW.NEXT_SEND_TIME = NEW.DATA_CREATED;
+  NEW.FLG_SENT = COALESCE(NEW.FLG_SENT, 0);
+  NEW.RETRY_COUNT = COALESCE(NEW.RETRY_COUNT, 0);
+  NEW.SENT_STATUS = COALESCE(NEW.SENT_STATUS, 0);
+  NEW.PRIORITY = COALESCE(NEW.PRIORITY, 0);
+  NEW.SOURCE_TABLE = COALESCE(NEW.SOURCE_TABLE, -1);
+  NEW.CHANNEL_CODE = NULLIF(UPPER(TRIM(NEW.CHANNEL_CODE)), '');
+  NEW.PARSE_MODE = NULLIF(UPPER(TRIM(NEW.PARSE_MODE)), '');
+  NEW.CREATED_BY = COALESCE(NEW.CREATED_BY, RDB$GET_CONTEXT('USER_SESSION', 'UserID'));
+END^
+
+CREATE OR ALTER TRIGGER TRG_TELEGRAM_MESSAGES_BU FOR TELEGRAM_MESSAGES
+ACTIVE BEFORE UPDATE POSITION 0
+AS
+BEGIN
+  IF (NEW.FLG_SENT = 1 AND OLD.FLG_SENT = 0) THEN NEW.DATA_DELIVERED = CURRENT_TIMESTAMP;
+  IF (NEW.FLG_SENT = 0) THEN NEW.DATA_DELIVERED = NULL;
+END^
+
+CREATE OR ALTER TRIGGER TRG_TELEGRAM_MESSAGES_AI FOR TELEGRAM_MESSAGES
+ACTIVE AFTER INSERT POSITION 0
+AS
+BEGIN
+  POST_EVENT 'NEW_TELEGRAM';
+END^
+
+/* "Retrimite" din WMS: randul revine la netrimis -> trezim serviciul */
+CREATE OR ALTER TRIGGER TRG_TELEGRAM_MESSAGES_AU FOR TELEGRAM_MESSAGES
+ACTIVE AFTER UPDATE POSITION 0
+AS
+BEGIN
+  IF (NEW.FLG_SENT = 0 AND NEW.SENT_STATUS = 0 AND
+      (OLD.FLG_SENT = 1 OR OLD.SENT_STATUS <> 0)) THEN
+    POST_EVENT 'NEW_TELEGRAM';
+END^
+
+CREATE OR ALTER TRIGGER TRG_TELEGRAM_CHANNELS_BIU FOR TELEGRAM_CHANNELS
+ACTIVE BEFORE INSERT OR UPDATE POSITION 0
+AS
+BEGIN
+  NEW.CHANNEL_CODE = UPPER(TRIM(NEW.CHANNEL_CODE));
+  NEW.CHAT_ID = NULLIF(TRIM(NEW.CHAT_ID), '');
+END^
+
+/* --- 4. Functii / proceduri ---------------------------------------------- */
+
+/* escape pentru parse_mode=HTML */
+CREATE OR ALTER FUNCTION FN_TELEGRAM_HTML (S VARCHAR(4096))
+RETURNS VARCHAR(4096)
+DETERMINISTIC
+AS
+BEGIN
+  RETURN REPLACE(REPLACE(REPLACE(S, '&', '&amp;'), '<', '&lt;'), '>', '&gt;');
+END^
+
+/* suma fara zecimale inutile: 6869 / 6869.50 */
+CREATE OR ALTER FUNCTION FN_TELEGRAM_MONEY (V NUMERIC(18,4))
+RETURNS VARCHAR(32)
+DETERMINISTIC
+AS
+BEGIN
+  IF (V IS NULL) THEN RETURN '';
+  IF (V = TRUNC(V)) THEN RETURN CAST(CAST(V AS BIGINT) AS VARCHAR(32));
+  RETURN CAST(CAST(V AS NUMERIC(18,2)) AS VARCHAR(32));
+END^
+
+/* Punctul unic de intrare pentru proceduri / triggere. */
+CREATE OR ALTER PROCEDURE SP_TELEGRAM_SEND (
+  CHANNEL_CODE VARCHAR(32),
+  MSG_TEXT     VARCHAR(4096),
+  PARSE_MODE   VARCHAR(10) = NULL,
+  SOURCE_TABLE INTEGER = NULL,
+  SOURCE_ID    INTEGER = NULL,
+  PRIORITY     INTEGER = 0)
+SQL SECURITY DEFINER
+AS
+BEGIN
+  INSERT INTO TELEGRAM_MESSAGES (CHANNEL_CODE, MSG_TEXT, PARSE_MODE, SOURCE_TABLE, SOURCE_ID, PRIORITY)
+  VALUES (:CHANNEL_CODE, :MSG_TEXT, :PARSE_MODE, :SOURCE_TABLE, :SOURCE_ID, :PRIORITY);
+END^
+
+/* Textul mesajelor cu MSG_TEXT NULL; chemata de serviciu la trimitere.
+   MSG_TEXT NULL la iesire = nu mai e nimic de trimis (document sters). */
+CREATE OR ALTER PROCEDURE SP_TELEGRAM_BUILD_TEXT (
+  SOURCE_TABLE INTEGER,
+  SOURCE_ID    INTEGER)
+RETURNS (
+  MSG_TEXT   VARCHAR(4096),
+  PARSE_MODE VARCHAR(10))
+SQL SECURITY DEFINER
+AS
+DECLARE NL CHAR(1);
+DECLARE V_DOCTYPE INTEGER;
+DECLARE V_SUMA NUMERIC(18,4);
+DECLARE V_CUR VARCHAR(64);
+DECLARE V_FIRMA VARCHAR(1024);
+DECLARE V_DELETED TIMESTAMP;
+DECLARE V_NAME VARCHAR(1024);
+DECLARE V_PHONE VARCHAR(1024);
+DECLARE V_PAY VARCHAR(1024);
+DECLARE V_ADDR VARCHAR(1024);
+DECLARE V_UTM VARCHAR(1024);
+DECLARE V_CREDIT NUMERIC(18,4);
+DECLARE V_MONTHS INTEGER;
+DECLARE V_AVANS NUMERIC(18,4);
+DECLARE V_LUNAR NUMERIC(18,4);
+DECLARE V_TITLE VARCHAR(1024);
+DECLARE V_QTY NUMERIC(18,4);
+DECLARE V_LSUMA NUMERIC(18,4);
+DECLARE V_N INTEGER = 0;
+DECLARE V_TOTAL_LINES INTEGER;
+BEGIN
+  NL = ASCII_CHAR(10);
+  MSG_TEXT = NULL;
+  PARSE_MODE = 'HTML';
+
+  IF (SOURCE_TABLE IN (134, 1791)) THEN
+  BEGIN
+    SELECT D.DOCTYPEID, D.SUMA, C.TITLE, F.NAME, D.DELETED_DATE
+      FROM TDB_DOCS D
+      LEFT JOIN TS_CURRENCY C ON C.CURRENCYID = D.CURRENCYID
+      LEFT JOIN TS_CUSTOMER F ON F.CUSTOMERID = D.DT
+     WHERE D.DOCID = :SOURCE_ID
+      INTO :V_DOCTYPE, :V_SUMA, :V_CUR, :V_FIRMA, :V_DELETED;
+
+    IF (V_DOCTYPE IS NULL OR V_DELETED IS NOT NULL) THEN
+    BEGIN
+      SUSPEND;
+      EXIT;
+    END
+
+    /* contactul: deal-ul documentului (sincronizat din cos / "Cumpara acum") */
+    SELECT FIRST 1 NULLIF(TRIM(DL.CONTACT_NAME), ''), NULLIF(TRIM(DL.PHONE), ''),
+           NULLIF(TRIM(DL.PAYMENT_METHOD), ''), NULLIF(TRIM(DL.DELIVERY_ADDRESS), ''),
+           NULLIF(TRIM(DL.UTM_SOURCE), '') || COALESCE(' / ' || NULLIF(TRIM(DL.UTM_CAMPAIGN), ''), '')
+      FROM TDB_DEAL_DOCS DD
+      JOIN TDB_DEALS DL ON DL.DEAL_ID = DD.DEAL_ID
+     WHERE DD.DOCID = :SOURCE_ID
+     ORDER BY DD.DEAL_ID
+      INTO :V_NAME, :V_PHONE, :V_PAY, :V_ADDR, :V_UTM;
+
+    IF (V_DOCTYPE = 134) THEN
+    BEGIN
+      SELECT FIRST 1 COALESCE(NULLIF(TRIM(T.FULLNAME), ''), :V_NAME),
+             COALESCE(NULLIF(TRIM(T.PHONES), ''), :V_PHONE)
+        FROM RDB$DATABASE
+        LEFT JOIN TWEB_TRANSACTION T ON T.DOCID = :SOURCE_ID
+        INTO :V_NAME, :V_PHONE;
+
+      MSG_TEXT = _UTF8 X'F09F9B92' || ' <b>Comanda noua de pe site #' || SOURCE_ID || '</b>';
+    END
+    ELSE
+    BEGIN
+      SELECT FIRST 1 COALESCE(NULLIF(TRIM(CF.NPP), ''), :V_NAME),
+             COALESCE(NULLIF(TRIM(CF.CONTACT_TELEFON), ''), :V_PHONE),
+             CF.CREDIT_SUMA, CF.CREDIT_PERIOADA, CF.AVANS, CF.PLATA_LUNARA
+        FROM RDB$DATABASE
+        LEFT JOIN TWEB_CERERE_FINANTARE CF ON CF.DOCID = :SOURCE_ID
+        INTO :V_NAME, :V_PHONE, :V_CREDIT, :V_MONTHS, :V_AVANS, :V_LUNAR;
+
+      MSG_TEXT = _UTF8 X'F09F92B3' || ' <b>Cerere de finantare #' || SOURCE_ID || '</b>';
+    END
+
+    IF (V_FIRMA IS NOT NULL) THEN
+      MSG_TEXT = MSG_TEXT || NL || 'Firma: ' || FN_TELEGRAM_HTML(V_FIRMA);
+    IF (V_NAME IS NOT NULL OR V_PHONE IS NOT NULL) THEN
+      MSG_TEXT = MSG_TEXT || NL || 'Client: <b>' || FN_TELEGRAM_HTML(COALESCE(V_NAME, '-')) || '</b>'
+                 || COALESCE(', <code>' || FN_TELEGRAM_HTML(V_PHONE) || '</code>', '');
+    IF (V_DOCTYPE = 134 AND V_PAY IS NOT NULL) THEN
+      MSG_TEXT = MSG_TEXT || NL || 'Plata: ' || FN_TELEGRAM_HTML(V_PAY);
+    IF (V_DOCTYPE = 134 AND V_ADDR IS NOT NULL) THEN
+      MSG_TEXT = MSG_TEXT || NL || 'Adresa: ' || FN_TELEGRAM_HTML(V_ADDR);
+    IF (V_DOCTYPE = 1791 AND V_CREDIT IS NOT NULL) THEN
+      MSG_TEXT = MSG_TEXT || NL || 'Credit: ' || FN_TELEGRAM_MONEY(V_CREDIT) || ' ' || COALESCE(V_CUR, '')
+                 || COALESCE(', ' || V_MONTHS || ' luni', '')
+                 || IIF(COALESCE(V_AVANS, 0) <> 0, ', avans ' || FN_TELEGRAM_MONEY(V_AVANS), '')
+                 || IIF(COALESCE(V_LUNAR, 0) <> 0, ', lunar ' || FN_TELEGRAM_MONEY(V_LUNAR), '');
+
+    SELECT COUNT(*) FROM TDB_JURNAL J WHERE J.DOCID = :SOURCE_ID INTO :V_TOTAL_LINES;
+    IF (V_TOTAL_LINES > 0) THEN
+    BEGIN
+      MSG_TEXT = MSG_TEXT || NL;
+      FOR SELECT FIRST 10 G.TITLE, J.QTY, J.SUMA
+            FROM TDB_JURNAL J
+            JOIN TS_GOODS G ON G.GOODSID = J.GOODSID
+           WHERE J.DOCID = :SOURCE_ID
+           ORDER BY J.SUMA DESC
+          INTO :V_TITLE, :V_QTY, :V_LSUMA
+      DO
+      BEGIN
+        V_N = V_N + 1;
+        MSG_TEXT = MSG_TEXT || NL || _UTF8 X'E280A2' || ' ' || FN_TELEGRAM_HTML(LEFT(TRIM(V_TITLE), 150))
+                   || IIF(V_QTY <> 1, ' x ' || FN_TELEGRAM_MONEY(V_QTY), '')
+                   || ' - ' || FN_TELEGRAM_MONEY(V_LSUMA);
+      END
+      IF (V_TOTAL_LINES > V_N) THEN
+        MSG_TEXT = MSG_TEXT || NL || '... inca ' || (V_TOTAL_LINES - V_N) || ' pozitii';
+    END
+
+    MSG_TEXT = MSG_TEXT || NL || NL || 'Total: <b>' || FN_TELEGRAM_MONEY(V_SUMA) || ' ' || COALESCE(V_CUR, '') || '</b>';
+    IF (V_UTM IS NOT NULL) THEN
+      MSG_TEXT = MSG_TEXT || NL || 'Sursa: ' || FN_TELEGRAM_HTML(V_UTM);
+  END
+
+  SUSPEND;
+END^
+
+/* --- 5. Sursa: comenzi web (134) si cereri de finantare (1791) ----------- */
+/* Doar un INSERT in coada; textul se face la trimitere, dupa commit, cind
+   liniile, deal-ul si contactul sint deja salvate. Orice eroare e inghitita:
+   notificarea nu are voie sa opreasca crearea comenzii. */
+CREATE OR ALTER TRIGGER TDB_DOCS_AI_TELEGRAM FOR TDB_DOCS
+ACTIVE AFTER INSERT POSITION 950
+SQL SECURITY DEFINER
+AS
+BEGIN
+  IF (NEW.DOCTYPEID IN (134, 1791)) THEN
+  BEGIN
+    INSERT INTO TELEGRAM_MESSAGES (CHANNEL_CODE, MSG_TEXT, PARSE_MODE, SOURCE_TABLE, SOURCE_ID, PRIORITY)
+    VALUES ('WEB_ORDERS', NULL, 'HTML', NEW.DOCTYPEID, NEW.DOCID, 10);
+    WHEN ANY DO
+    BEGIN
+    END
+  END
+END^
+
+/* --- 6. Sursa: SMS netrimis (TRG_SMS_MESSAGES_AU0) ----------------------- */
+/* Corpul original + Telegram, o singura data pe SMS (emailul pleaca de pina
+   la 4 ori - la fiecare incercare esuata). */
+CREATE OR ALTER TRIGGER TRG_SMS_MESSAGES_AU0 FOR SMS_MESSAGES
+ACTIVE AFTER UPDATE POSITION 0
+AS
+BEGIN
+     /* Verificam daca ne trebuie trigerii  */
+     IF (RDB$GET_CONTEXT('USER_SESSION', 'DISSABLE_TRIGGERS')='YES') THEN EXIT;
+     /*-----------------------------------------------------------------------*/
+
+     /* daca nu s-a expediat SMS, notificam administratia */
+     IF (OLD.RETRY_COUNT<=3 AND OLD.FLG_SENT=0 and old.sent_status <> 0) THEN
+     BEGIN
+          INSERT INTO EMAIL_MESSAGES (EMAIL,SUBJECT, "BODY",SOURCE_TABLE)
+          VALUES ('sergiu@fantastic.md','SYSTEM ALERT - Nu pot trimite SMS','Nu pot trimite SMS la numarul '||OLD.PHONE||'. Verificati contragentul sau daca sunt bani pentru SMS-uri.',4);
+
+          /* Telegram: o singura alerta pe SMS; o eroare aici nu opreste update-ul */
+          BEGIN
+            IF (NOT EXISTS (SELECT 1 FROM TELEGRAM_MESSAGES
+                            WHERE SOURCE_TABLE = -10 AND SOURCE_ID = OLD.SMSID)) THEN
+            EXECUTE PROCEDURE SP_TELEGRAM_SEND('ERRORS',
+              _UTF8 X'E29AA0EFB88F' || ' <b>SMS netrimis</b>' || ASCII_CHAR(10) ||
+              'Numar: <code>' || FN_TELEGRAM_HTML(OLD.PHONE) || '</code>, status ' ||
+              COALESCE(OLD.SENT_STATUS, 0) || ASCII_CHAR(10) ||
+              FN_TELEGRAM_HTML(LEFT(OLD.SMS_TEXT, 200)) || ASCII_CHAR(10) ||
+              'Verificati contragentul sau daca sint bani pentru SMS-uri.',
+              'HTML', -10, OLD.SMSID, 5);
+            WHEN ANY DO
+            BEGIN
+            END
+          END
+     END
+END^
+
+/* --- 7. Seed canale + configurare (nu suprascrie valorile existente) ---- */
+EXECUTE BLOCK AS
+BEGIN
+  IF (NOT EXISTS (SELECT 1 FROM TELEGRAM_CHANNELS WHERE CHANNEL_CODE = 'WEB_ORDERS')) THEN
+    INSERT INTO TELEGRAM_CHANNELS (CHANNEL_CODE, TITLE, CHAT_ID, FLG_ACTIVE, NOTE)
+    VALUES ('WEB_ORDERS', 'Comenzi site si cereri de finantare', NULL, 1,
+            'Comenzile 134 si cererile 1791 (trigger TDB_DOCS_AI_TELEGRAM)');
+
+  IF (NOT EXISTS (SELECT 1 FROM TELEGRAM_CHANNELS WHERE CHANNEL_CODE = 'ERRORS')) THEN
+    INSERT INTO TELEGRAM_CHANNELS (CHANNEL_CODE, TITLE, CHAT_ID, FLG_ACTIVE, NOTE)
+    VALUES ('ERRORS', 'Erori sistem', NULL, 1,
+            'SMS netrimise, erori SWNService');
+
+  IF (NOT EXISTS (SELECT 1 FROM TELEGRAM_CHANNELS WHERE CHANNEL_CODE = 'PRICELISTS')) THEN
+    INSERT INTO TELEGRAM_CHANNELS (CHANNEL_CODE, TITLE, CHAT_ID, FLG_ACTIVE, NOTE)
+    SELECT 'PRICELISTS', 'Importuri de preturi (WMSParsers)',
+           (SELECT CHAT_ID FROM TELEGRAM_CHANNELS WHERE CHANNEL_CODE = 'WEB_ORDERS'), 1,
+           'Rezultatul rularilor WMSParsers (pricelisturi API, preturi h-t.md / maximum.md)'
+      FROM RDB$DATABASE;
+
+  IF (NOT EXISTS (SELECT 1 FROM TS_API_CONFIG
+                  WHERE API_CODE = 'TELEGRAM' AND PARAM_NAME = 'BOT_TOKEN')) THEN
+    INSERT INTO TS_API_CONFIG (API_CODE, PARAM_NAME, PARAM_VALUE, NOTE, UPDATED_BY)
+    VALUES ('TELEGRAM', 'BOT_TOKEN', NULL, 'Tokenul botului de la @BotFather', 'SYSTEM');
+
+  IF (NOT EXISTS (SELECT 1 FROM TS_API_CONFIG
+                  WHERE API_CODE = 'TELEGRAM' AND PARAM_NAME = 'DEFAULT_CHAT_ID')) THEN
+    INSERT INTO TS_API_CONFIG (API_CODE, PARAM_NAME, PARAM_VALUE, NOTE, UPDATED_BY)
+    VALUES ('TELEGRAM', 'DEFAULT_CHAT_ID', NULL,
+            'Chat-ul pentru mesajele fara canal (ex. -100xxxxxxxxxx)', 'SYSTEM');
+END^
+
+SET TERM ; ^
+
+COMMIT;
+
+/* --- 8. Drepturi ---------------------------------------------------------- */
+GRANT SELECT, INSERT, UPDATE, DELETE ON TELEGRAM_CHANNELS TO SWN;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TELEGRAM_MESSAGES TO SWN;
+GRANT USAGE ON SEQUENCE SQ_TELEGRAM_MESSAGES_ID TO SWN;
+GRANT EXECUTE ON PROCEDURE SP_TELEGRAM_SEND TO PUBLIC;
+GRANT EXECUTE ON PROCEDURE SP_TELEGRAM_BUILD_TEXT TO SWN;
+GRANT EXECUTE ON FUNCTION FN_TELEGRAM_HTML TO PUBLIC;
+GRANT EXECUTE ON FUNCTION FN_TELEGRAM_MONEY TO PUBLIC;
+GRANT SELECT ON TELEGRAM_MESSAGES TO TRIGGER TRG_SMS_MESSAGES_AU0;
+
+COMMIT;

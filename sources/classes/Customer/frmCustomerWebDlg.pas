@@ -27,7 +27,6 @@ type
     cbFLG_ENABLED: TcxDBCheckBox;
     cbFLG_NO_COMERCIALS: TcxDBCheckBox;
     tbsGoods: TTabSheet;
-    cbFLG_PRICE_USD: TcxDBCheckBox;
     cbFLG_PRICE_BY_CLIENT: TcxDBCheckBox;
     cbFLG_VIEW_REAL_STOCKS: TcxDBCheckBox;
     cbFLG_NO_FACEBOOK: TcxDBCheckBox;
@@ -242,6 +241,8 @@ begin
       IBCQueryWEB.FieldByName('FLG_NO_CREDIT').AsInteger := 0;
       IBCQueryWEB.FieldByName('FLG_NO_ADDS_GOODS').AsInteger := 0;
       IBCQueryWEB.FieldByName('FLG_PRICE_BY_CLIENT').AsInteger := 0;
+      // "Pret in USD" nu mai exista (7 oct 2026): pe site totul e in lei;
+      // bitul 7 din TS_CUST_WEB.FLAGS ramine mereu 0.
       IBCQueryWEB.FieldByName('FLG_PRICE_USD').AsInteger := 0;
 
       S := GetExistsingCustomerEMail(fMasterDataSet.FieldByName('CUSTOMERID')

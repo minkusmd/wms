@@ -18,7 +18,7 @@ uses
   cxPCdxBarPopupMenu, cxPC, cxVGrid, cxDBVGrid, cxInplaceContainer, Vcl.StdCtrls,
   DBAccess, IBC, MemDS, cxNavigator, dxBarBuiltInMenu, System.ImageList, Vcl.ImgList,
   cxDataControllerConditionalFormattingRulesManagerDialog, cxImageList, dxDateRanges, dxScrollbarAnnotations,
-  cxContainer, Vcl.Menus, cxButtons, cxImage, cxDBEdit, dxUIAClasses;
+  cxContainer, Vcl.Menus, cxButtons, cxImage, cxDBEdit, dxUIAClasses, cxTextEdit;
 
 type
   Tframe51ZaiavkaCredit = class(TSWNBaseFrame)
@@ -88,6 +88,8 @@ type
     cxDBImage2: TcxDBImage;
     cxButton1: TcxButton;
     cxButton2: TcxButton;
+    edScan1Name: TcxDBTextEdit;
+    edScan2Name: TcxDBTextEdit;
     procedure cxGridWZTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
     procedure cxGridWZTableKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure cxGridComponentsTableKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);

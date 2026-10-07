@@ -29,6 +29,8 @@ type
     IBCTrUpdate: TIBCTransaction;
     cxGridFPTable_FP_ID: TcxGridDBColumn;
     cxGridFPTable_SERIAL_NUMBER: TcxGridDBColumn;
+    cxGridFPTable_DEVICE_TYPE: TcxGridDBColumn;
+    cxGridFPTable_ECC_API_CODE: TcxGridDBColumn;
     cxGridFPTable_FIRMA_NAME: TcxGridDBColumn;
     cxGridFPTable_COMPUTER_NAME: TcxGridDBColumn;
     cxGridFPTable_SERVER_ADDRESS: TcxGridDBColumn;

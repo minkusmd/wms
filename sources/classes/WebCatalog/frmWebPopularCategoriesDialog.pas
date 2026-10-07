@@ -13,6 +13,12 @@ unit frmWebPopularCategoriesDialog;
   Bifa "Popular" din dialogul catalogului web (VW_TWEB_CATALOG.FLG_POPULAR) ramine valabila:
   o categorie bifata acolo apare aici la sfirsitul listei, fara ordine, si o primeste la salvare.
 
+  Lista e separata pe site (TWEB_POPULAR_CATEGORIES.SITEID, DB Model/web_sites_popular.sql):
+  selectorul "Site" de sus alege pentru care site se lucreaza. Bitul FLG_POPULAR din catalog
+  e comun bazei, de aceea se mai sincronizeaza doar pentru fantastic.md (site-ul 1); celelalte
+  site-uri citesc numai tabela (WEB_GET_POPULAR_CATEGORIES2). Pina la rularea scriptului
+  coloana lipseste, selectorul e inactiv si lista e cea comuna.
+
   Totul se lucreaza in memorie si se scrie intr-o singura tranzactie la "Salveaza";
   ORDERNO se renumeroteaza 1..N. Site-ul tine lista in cache 24h (homePopularCategories).
 }
@@ -34,6 +40,8 @@ type
   end;
 
   TfrmWebPopularCategoriesDlg = class(TSWNCustomForm)
+    lblSite: TLabel;
+    cmbSite: TComboBox;
     lblInfo: TLabel;
     lvCategories: TListView;
     btnUp: TButton;
@@ -61,11 +69,15 @@ type
     procedure edSearchKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure edDiscountKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+    procedure cmbSiteChange(Sender: TObject);
   private
     { Private declarations }
     fItems: TList<TPopularCategory>;
     fRemoved: TList<Integer>;
     fModified: Boolean;
+    fSiteID: Integer;        // site-ul ales (TWEB_SITE.SITEID); 1 = fantastic.md
+    fSiteColumn: Boolean;    // TWEB_POPULAR_CATEGORIES are coloana SITEID (scriptul a fost rulat)
+    procedure LoadSites;
     procedure LoadData;
     procedure ShowList(const ASelectIndex: Integer);
     function SelectedIndex: Integer;
@@ -84,7 +96,7 @@ type
 implementation
 
 uses
-  System.UITypes, Data.DB, IBC, DataModuleDB;
+  System.UITypes, System.StrUtils, Data.DB, IBC, DataModuleDB;
 
 {$R *.dfm}
 
@@ -104,14 +116,80 @@ begin
   inherited;
 end;
 
-procedure TfrmWebPopularCategoriesDlg.Prepare;
+// Site-urile din TWEB_SITE in selector. Fara coloana SITEID (scriptul nerulat) selectorul
+// ramine inactiv, cu un singur rind, si lista e cea comuna de pina acum.
+procedure TfrmWebPopularCategoriesDlg.LoadSites;
+var
+  Query: TIBCQuery;
 begin
+  fSiteID := 1;
+  fSiteColumn := False;
+  cmbSite.Items.Clear;
+  Query := TIBCQuery.Create(nil);
+  try
+    Query.Connection := dmDB.IBCConnection;
+    Query.Transaction := dmDB.IBCTrDefaultSelect;
+    try
+      Query.SQL.Text :=
+        'select 1 X from RDB$RELATION_FIELDS ' +
+        'where RDB$RELATION_NAME = ''TWEB_POPULAR_CATEGORIES'' and RDB$FIELD_NAME = ''SITEID''';
+      Query.Open;
+      fSiteColumn := not Query.Eof;
+      Query.Close;
+      if fSiteColumn then
+      begin
+        Query.SQL.Text := 'select SITEID, NAME, CODE from TWEB_SITE order by SITEID';
+        Query.Open;
+        while not Query.Eof do
+        begin
+          cmbSite.Items.AddObject(Format('%s  (%s)', [Trim(Query.FieldByName('NAME').AsString),
+            Trim(Query.FieldByName('CODE').AsString)]), TObject(Query.FieldByName('SITEID').AsInteger));
+          Query.Next;
+        end;
+        Query.Close;
+      end;
+    except
+      fSiteColumn := False;
+      cmbSite.Items.Clear;
+    end;
+  finally
+    Query.Free;
+  end;
+  if cmbSite.Items.Count = 0 then
+    cmbSite.Items.AddObject('toate site-urile (lista comuna)', TObject(1));
+  cmbSite.ItemIndex := 0;
+  cmbSite.Enabled := fSiteColumn and (cmbSite.Items.Count > 1);
+  fSiteID := Integer(cmbSite.Items.Objects[0]);
+end;
+
+procedure TfrmWebPopularCategoriesDlg.cmbSiteChange(Sender: TObject);
+begin
+  if cmbSite.ItemIndex < 0 then
+    Exit;
+  if Integer(cmbSite.Items.Objects[cmbSite.ItemIndex]) = fSiteID then
+    Exit;
+  if fModified and (MessageDlg('Modificarile pentru site-ul curent nu au fost salvate. Treceti la alt site fara salvare?',
+    mtConfirmation, [mbYes, mbNo], 0) <> mrYes) then
+  begin
+    cmbSite.ItemIndex := cmbSite.Items.IndexOfObject(TObject(fSiteID));
+    Exit;
+  end;
+  fSiteID := Integer(cmbSite.Items.Objects[cmbSite.ItemIndex]);
   LoadData;
   ShowList(0);
   fModified := False;
 end;
 
-// Reuniunea: categoriile cu FLG_POPULAR si rindurile din TWEB_POPULAR_CATEGORIES.
+procedure TfrmWebPopularCategoriesDlg.Prepare;
+begin
+  LoadSites;
+  LoadData;
+  ShowList(0);
+  fModified := False;
+end;
+
+// fantastic.md (site-ul 1): reuniunea dintre categoriile cu FLG_POPULAR si rindurile din
+// TWEB_POPULAR_CATEGORIES. Celelalte site-uri: doar rindurile lor din tabela.
 procedure TfrmWebPopularCategoriesDlg.LoadData;
 var
   Query: TIBCQuery;
@@ -123,13 +201,23 @@ begin
   try
     Query.Connection := dmDB.IBCConnection;
     Query.Transaction := dmDB.IBCTrDefaultSelect;
-    Query.SQL.Text :=
-      'select C.CATALOGID, C.TITLE, C.TITLE_RUS, P.CATEGORY_DISCOUNT, ' +
-      '  (select CP.TITLE from TWEB_CATALOG CP where CP.CATALOGID = C.PARENTID) PARENT_TITLE ' +
-      'from TWEB_CATALOG C ' +
-      'left join TWEB_POPULAR_CATEGORIES P on P.CATALOGID = C.CATALOGID ' +
-      'where (get_flg_value(C.FLAGS, 12) = 1) or (P.CATALOGID is not null) ' +
-      'order by P.ORDERNO nulls last, C.ORDERNO';
+    if fSiteColumn and (fSiteID <> 1) then
+      Query.SQL.Text := Format(
+        'select C.CATALOGID, C.TITLE, C.TITLE_RUS, P.CATEGORY_DISCOUNT, ' +
+        '  (select CP.TITLE from TWEB_CATALOG CP where CP.CATALOGID = C.PARENTID) PARENT_TITLE ' +
+        'from TWEB_POPULAR_CATEGORIES P ' +
+        'join TWEB_CATALOG C on C.CATALOGID = P.CATALOGID ' +
+        'where P.SITEID = %d ' +
+        'order by P.ORDERNO nulls last, C.ORDERNO', [fSiteID])
+    else
+      Query.SQL.Text :=
+        'select C.CATALOGID, C.TITLE, C.TITLE_RUS, P.CATEGORY_DISCOUNT, ' +
+        '  (select CP.TITLE from TWEB_CATALOG CP where CP.CATALOGID = C.PARENTID) PARENT_TITLE ' +
+        'from TWEB_CATALOG C ' +
+        'left join TWEB_POPULAR_CATEGORIES P on P.CATALOGID = C.CATALOGID' +
+        IfThen(fSiteColumn, ' and P.SITEID = 1') + ' ' +
+        'where (get_flg_value(C.FLAGS, 12) = 1) or (P.CATALOGID is not null) ' +
+        'order by P.ORDERNO nulls last, C.ORDERNO';
     Query.Open;
     while not Query.Eof do
     begin
@@ -473,25 +561,34 @@ begin
     Query.Transaction := Tr;
     Tr.StartTransaction;
     try
-      // scoase: rindul + bifa "Popular" de pe categorie
+      // scoase: rindul (al site-ului) + bifa "Popular" de pe categorie (doar fantastic.md)
       for I := 0 to fRemoved.Count - 1 do
       begin
-        Query.SQL.Text := 'delete from TWEB_POPULAR_CATEGORIES where CATALOGID = :ID';
+        Query.SQL.Text := 'delete from TWEB_POPULAR_CATEGORIES where CATALOGID = :ID' +
+          IfThen(fSiteColumn, Format(' and SITEID = %d', [fSiteID]));
         Query.ParamByName('ID').AsInteger := fRemoved[I];
         Query.Execute;
-        Query.SQL.Text :=
-          'update TWEB_CATALOG set FLAGS = set_flg_value(FLAGS, 12, 0) ' +
-          'where CATALOGID = :ID and get_flg_value(FLAGS, 12) = 1';
-        Query.ParamByName('ID').AsInteger := fRemoved[I];
-        Query.Execute;
+        if fSiteID = 1 then
+        begin
+          Query.SQL.Text :=
+            'update TWEB_CATALOG set FLAGS = set_flg_value(FLAGS, 12, 0) ' +
+            'where CATALOGID = :ID and get_flg_value(FLAGS, 12) = 1';
+          Query.ParamByName('ID').AsInteger := fRemoved[I];
+          Query.Execute;
+        end;
       end;
 
-      // ramase / adaugate: ordinea renumerotata 1..N, reducerea, bifa "Popular"
+      // ramase / adaugate: ordinea renumerotata 1..N, reducerea, bifa "Popular" (doar fantastic.md)
       for I := 0 to fItems.Count - 1 do
       begin
-        Query.SQL.Text :=
-          'update or insert into TWEB_POPULAR_CATEGORIES (CATALOGID, ORDERNO, CATEGORY_DISCOUNT) ' +
-          'values (:ID, :ORDERNO, :DISCOUNT) matching (CATALOGID)';
+        if fSiteColumn then
+          Query.SQL.Text := Format(
+            'update or insert into TWEB_POPULAR_CATEGORIES (SITEID, CATALOGID, ORDERNO, CATEGORY_DISCOUNT) ' +
+            'values (%d, :ID, :ORDERNO, :DISCOUNT) matching (SITEID, CATALOGID)', [fSiteID])
+        else
+          Query.SQL.Text :=
+            'update or insert into TWEB_POPULAR_CATEGORIES (CATALOGID, ORDERNO, CATEGORY_DISCOUNT) ' +
+            'values (:ID, :ORDERNO, :DISCOUNT) matching (CATALOGID)';
         Query.ParamByName('ID').AsInteger := fItems[I].CatalogID;
         Query.ParamByName('ORDERNO').AsInteger := I + 1;
         if fItems[I].Discount >= 0 then
@@ -503,11 +600,14 @@ begin
         end;
         Query.Execute;
 
-        Query.SQL.Text :=
-          'update TWEB_CATALOG set FLAGS = set_flg_value(FLAGS, 12, 1) ' +
-          'where CATALOGID = :ID and get_flg_value(FLAGS, 12) = 0';
-        Query.ParamByName('ID').AsInteger := fItems[I].CatalogID;
-        Query.Execute;
+        if fSiteID = 1 then
+        begin
+          Query.SQL.Text :=
+            'update TWEB_CATALOG set FLAGS = set_flg_value(FLAGS, 12, 1) ' +
+            'where CATALOGID = :ID and get_flg_value(FLAGS, 12) = 0';
+          Query.ParamByName('ID').AsInteger := fItems[I].CatalogID;
+          Query.Execute;
+        end;
       end;
 
       Tr.Commit;

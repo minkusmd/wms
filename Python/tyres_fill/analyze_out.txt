@@ -1,0 +1,24 @@
+﻿{
+ "total": 248,
+ "size_ok": 246,
+ "load_speed_ok": 246,
+ "season_Iarna": 105,
+ "donor_ok": 170,
+ "no_profile": 2,
+ "season_None": 42,
+ "season_All Season": 27,
+ "season_Vara": 74
+}
+conventie fara profil: [('185R14C ROAD VANTAGE 102/100Q ', '65 %')]
+
+--- sezon dedus din model: Counter({'model 10/10': 10, 'model 2/2': 3, 'model 1/1': 2, 'model 15/16': 1, 'model 34/34': 1, 'model 57/57': 1, 'model 86/86': 1})
+
+--- fara sezon (brand model (nr)):
+  ROVELO RWT-768 (12), ROVELO RWS-677 (9), JOYROAD RX826 (5), JOYROAD RX808 (3), HABILEAD AW33 (3), JOYROAD RX821 (2), HABILEAD RW501 (2), LEAO W DEFENDER UHP (1), ROADX RXMOTION DU71 (1), CONTINENTAL ContiSportContac 7 (1), MATADOR ? (1), MAXXIS ? (1), APLUS A502 (1)
+
+--- fara donor de imagini (brand model (nr)):
+  ROVELO RWT-768 (12), ROVELO RWS-677 (9), PIRELLI POWERGY WINTER (9), JOYROAD RX826 (5), HANKOOK W636 (4), LEAO ICE I-15 (4), JOYROAD RX808 (3), HABILEAD AW33 (3), WESTLAKE Z-401 A/S (3), SAILUN 4 SEASONS C (3), JOYROAD RX821 (2), HABILEAD RW501 (2), HILO ARCTIC S9 (2), GOODRIDE Z-401 A/S (2), SAILUN ICE BLAZER ALPINE EVO 1 (2), LEAO W DEFENDER UHP (1), ROADX RXMOTION DU71 (1), CONTINENTAL ContiSportContac 7 (1), DOUBLESTAR DLA01 A/S (1), WESTLAKE Z507 (1), TRIANGLE PL02 (1), TRIANGLE SNOWLINK PL02 (1), KUMHO HA32 A/S (1), MATADOR ? (1), MAXXIS ? (1), PIRELLI WINTER SOTTOZERO 3 (1), APLUS A502 (1), PIRELLI WINTER PZERO (1)
+
+--- nedescifrate (dimensiune sau indici):
+  391857 MATADOR | Matador Hectorra 5
+  391862 Maxxis | Maxxis HP5 Premitra

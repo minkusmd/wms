@@ -4,7 +4,7 @@ object frmFiscalPrinterEditDlg: TfrmFiscalPrinterEditDlg
   ActiveControl = cbFLG_ENABLED
   BorderStyle = bsDialog
   Caption = 'MCC'
-  ClientHeight = 597
+  ClientHeight = 717
   ClientWidth = 384
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -17,7 +17,7 @@ object frmFiscalPrinterEditDlg: TfrmFiscalPrinterEditDlg
   OnDestroy = FormDestroy
   DesignSize = (
     384
-    597)
+    717)
   PixelsPerInch = 96
   TextHeight = 15
   object dtDialogTitle: TDialogTitle
@@ -45,7 +45,7 @@ object frmFiscalPrinterEditDlg: TfrmFiscalPrinterEditDlg
     Left = 8
     Top = 72
     Width = 368
-    Height = 471
+    Height = 591
     Margins.Left = 8
     Margins.Top = 8
     Margins.Right = 8
@@ -203,10 +203,46 @@ object frmFiscalPrinterEditDlg: TfrmFiscalPrinterEditDlg
         ' calculatorul strain nu se face cautare automata.'
       WordWrap = True
     end
+    object rgDEVICE_TYPE: TcxDBRadioGroup
+      Left = 20
+      Top = 440
+      Caption = 'Tip aparat'
+      DataBinding.DataField = 'DEVICE_TYPE'
+      Properties.DefaultValue = 0
+      Properties.Items = <
+        item
+          Caption = 'MCC Tremol (server ZFPLab)'
+          Value = 0
+        end
+        item
+          Caption = 'Casa ECC Fiscal Partner (cloud)'
+          Value = 1
+        end>
+      Properties.OnChange = rgDEVICE_TYPEPropertiesChange
+      TabOrder = 8
+      Height = 70
+      Width = 321
+    end
+    object Label9: TLabel
+      Left = 20
+      Top = 518
+      Width = 300
+      Height = 15
+      Caption = 'Casa ECC (cod din Setari > Configurari API)'
+    end
+    object cmbECC_API_CODE: TcxDBComboBox
+      Left = 20
+      Top = 535
+      DataBinding.DataField = 'ECC_API_CODE'
+      Properties.CharCase = ecUpperCase
+      Properties.DropDownListStyle = lsFixedList
+      TabOrder = 9
+      Width = 321
+    end
   end
   object btnOk: TButton
     Left = 169
-    Top = 554
+    Top = 674
     Width = 90
     Height = 29
     Anchors = [akRight, akBottom]
@@ -217,7 +253,7 @@ object frmFiscalPrinterEditDlg: TfrmFiscalPrinterEditDlg
   end
   object btnCancel: TButton
     Left = 273
-    Top = 554
+    Top = 674
     Width = 90
     Height = 29
     Anchors = [akRight, akBottom]

@@ -4,7 +4,7 @@ object frmWebPopularCategoriesDlg: TfrmWebPopularCategoriesDlg
   BorderIcons = [biSystemMenu]
   BorderStyle = bsDialog
   Caption = 'Categorii populare pe site'
-  ClientHeight = 620
+  ClientHeight = 654
   ClientWidth = 900
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -15,9 +15,28 @@ object frmWebPopularCategoriesDlg: TfrmWebPopularCategoriesDlg
   Position = poScreenCenter
   OnCloseQuery = FormCloseQuery
   TextHeight = 17
+  object lblSite: TLabel
+    Left = 16
+    Top = 16
+    Width = 30
+    Height = 17
+    Caption = 'Site:'
+  end
+  object cmbSite: TComboBox
+    Left = 56
+    Top = 12
+    Width = 320
+    Height = 25
+    Hint = 'Lista e separata pentru fiecare site (TWEB_SITE)'
+    Style = csDropDownList
+    ParentShowHint = False
+    ShowHint = True
+    TabOrder = 9
+    OnChange = cmbSiteChange
+  end
   object lblInfo: TLabel
     Left = 16
-    Top = 12
+    Top = 46
     Width = 868
     Height = 34
     AutoSize = False
@@ -29,7 +48,7 @@ object frmWebPopularCategoriesDlg: TfrmWebPopularCategoriesDlg
   end
   object lblDiscount: TLabel
     Left = 760
-    Top = 232
+    Top = 266
     Width = 124
     Height = 17
     AutoSize = False
@@ -37,7 +56,7 @@ object frmWebPopularCategoriesDlg: TfrmWebPopularCategoriesDlg
   end
   object lvCategories: TListView
     Left = 16
-    Top = 56
+    Top = 90
     Width = 730
     Height = 400
     Columns = <
@@ -78,7 +97,7 @@ object frmWebPopularCategoriesDlg: TfrmWebPopularCategoriesDlg
   end
   object btnUp: TButton
     Left = 760
-    Top = 56
+    Top = 90
     Width = 124
     Height = 36
     Caption = 'Sus'
@@ -87,7 +106,7 @@ object frmWebPopularCategoriesDlg: TfrmWebPopularCategoriesDlg
   end
   object btnDown: TButton
     Left = 760
-    Top = 100
+    Top = 134
     Width = 124
     Height = 36
     Caption = 'Jos'
@@ -96,7 +115,7 @@ object frmWebPopularCategoriesDlg: TfrmWebPopularCategoriesDlg
   end
   object btnRemove: TButton
     Left = 760
-    Top = 160
+    Top = 194
     Width = 124
     Height = 36
     Caption = 'Scoate din lista'
@@ -105,7 +124,7 @@ object frmWebPopularCategoriesDlg: TfrmWebPopularCategoriesDlg
   end
   object edDiscount: TEdit
     Left = 760
-    Top = 254
+    Top = 288
     Width = 124
     Height = 25
     MaxLength = 3
@@ -115,7 +134,7 @@ object frmWebPopularCategoriesDlg: TfrmWebPopularCategoriesDlg
   end
   object btnApplyDiscount: TButton
     Left = 760
-    Top = 286
+    Top = 320
     Width = 124
     Height = 30
     Caption = 'Aplica reducerea'
@@ -124,7 +143,7 @@ object frmWebPopularCategoriesDlg: TfrmWebPopularCategoriesDlg
   end
   object gbAdd: TGroupBox
     Left = 16
-    Top = 468
+    Top = 502
     Width = 868
     Height = 90
     Caption = ' Adauga o categorie '
@@ -170,7 +189,7 @@ object frmWebPopularCategoriesDlg: TfrmWebPopularCategoriesDlg
   end
   object btnOK: TButton
     Left = 16
-    Top = 572
+    Top = 606
     Width = 200
     Height = 36
     Caption = 'Salveaza'
@@ -179,7 +198,7 @@ object frmWebPopularCategoriesDlg: TfrmWebPopularCategoriesDlg
   end
   object btnCancel: TButton
     Left = 684
-    Top = 572
+    Top = 606
     Width = 200
     Height = 36
     Cancel = True

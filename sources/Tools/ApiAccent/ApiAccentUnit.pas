@@ -66,6 +66,7 @@ type
     FGuid: string;
     FJSONBody: string;
     FOnSyncSaveRecord: TOnSyncSaveRecord;
+    FItemsInserted: Integer;
   protected
     IdHTTP: TIdHttp;
   public
@@ -74,7 +75,10 @@ type
     function Connect: boolean;
     procedure GetJSONProducts;
     procedure ParseJSON;
-    procedure GeneratePriceList(PriceCategoryID: integer);
+    // creeaza pricelistul (produsele cu stoc) si intoarce PLID-ul; la o eroare nu ramine nimic
+    function GeneratePriceList(PriceCategoryID: integer): Integer;
+    // cite articole a scris ultimul GeneratePriceList
+    property ItemsInserted: Integer read FItemsInserted;
     function SaveImageFromFtpToStream(IdFtp: TIdFtp; FilePath: string; ErrorList: TSTringlist): TMemoryStream;
 
     class function iif(Condition: boolean; TrueValue, FalseValue: Variant): Variant;
@@ -88,7 +92,7 @@ type
 implementation
 
 uses
-  System.IOUtils, System.JSON, System.Variants;
+  System.IOUtils, System.JSON, System.Variants, System.Math, Data.DB;
 
 class function TApiAccent.iif(Condition: boolean; TrueValue, FalseValue: Variant): Variant;
 begin
@@ -156,6 +160,7 @@ end;
 
 destructor TApiAccent.Destroy;
 begin
+  IdHTTP.Free;
   AccentProductList.Free;
   inherited;
 end;
@@ -220,7 +225,12 @@ begin
 
   JSONArray := TJSONArray.Create;
   JSONArray := TJSONArray(TJSONObject.ParseJSONValue(FJSONBody));
-  TFile.WriteAllText('accent.json', FJSONBody, TEncoding.UTF8);
+  // copie pentru depanare; in directorul temporar - directorul curent poate fi read-only
+  // (ex. System32 cind ruleaza din Task Scheduler)
+  try
+    TFile.WriteAllText(TPath.Combine(TPath.GetTempPath, 'accent.json'), FJSONBody, TEncoding.UTF8);
+  except
+  end;
 
   IsFolder := '0';
   MaxTransaction := 0;
@@ -339,16 +349,32 @@ begin
   end;
 end;
 
-procedure TApiAccent.GeneratePriceList(PriceCategoryID: integer);
+// text din JSON pentru pricelist: Trim, 'null' (valoarea JSON null citita cu .Value) = gol, taiat la ALen
+function PriceListText(const AValue: string; ALen: Integer): string;
+begin
+  Result := Trim(AValue);
+  if SameText(Result, 'null') then
+    Result := '';
+  Result := Copy(Result, 1, ALen);
+end;
+
+function TApiAccent.GeneratePriceList(PriceCategoryID: integer): Integer;
+const
+  // randuri trimise odata (IBDAC le imparte mai departe in EXECUTE BLOCK-uri)
+  cBatchRows = 500;
 var
-  I: integer;
+  I, N, K: integer;
   PLID: integer;
   q: TIBCQuery;
+  qItem: TIBCSQL;
   IBCTrLocal: TIBCTransaction;
+  Items: TList<TAccentProductRecord>;
 begin
+  FItemsInserted := 0;
   q := TIBCQuery.Create(nil);
+  qItem := TIBCSQL.Create(nil);
   IBCTrLocal := TIBCTransaction.Create(nil);
-
+  Items := TList<TAccentProductRecord>.Create;
   try
     IBCTrLocal.DefaultConnection := fConnection;
 
@@ -378,74 +404,79 @@ begin
     IBCTrLocal.Commit;
     {$endregion}
 
-    if not IBCTrLocal.Active then
-      IBCTrLocal.StartTransaction;
+    try
+      if not IBCTrLocal.Active then
+        IBCTrLocal.StartTransaction;
 
-    {$REGION 'Prepare detail table for inserting'}
-    q.SQL.Clear;
-    q.SQL.Add('insert into TS_PRICELIST_ITEMS (PLID,');
-    q.SQL.Add('SUPPLIER_GOODS_CODE,');
-    q.SQL.Add('SUPPLIER_GOODS_NAME,');
-
-//    if FFlgImportWithRRP then
-//    begin
-    q.SQL.Add('PRICE3,');
-    q.SQL.Add('CURRENCY3ID,');
-//    end;
-
-    q.SQL.Add('PRICE7,');
-    q.SQL.Add('CURRENCY7ID,');
-    q.SQL.Add('PRICE0,');
-    q.SQL.Add('CURRENCY0ID)');
-
-    q.SQL.Add('values (:PLID,');
-    q.SQL.Add(':SUPPLIER_GOODS_CODE,');
-    q.SQL.Add(':SUPPLIER_GOODS_NAME,');
-
-//    if FFlgImportWithRRP then
-//    begin
-    q.SQL.Add(':PRICE3,');
-
-//    end;
-    q.SQL.Add(':CURRENCY3ID,');
-
-    q.SQL.Add(':PRICE7,');
-    q.SQL.Add(':CURRENCY7ID,');
-    q.SQL.Add(':PRICE0,');
-    q.SQL.Add(':CURRENCY0ID)');
-    {$endregion}
-
-    {$region 'Add value from product list'}
-    for I := 0 to AccentProductList.Count - 1 do
-    begin
       // daca este cantitate in care din stocuri atunci adaugam produsul in price
-      if (AccentProductList[I].ProductQty > 0) then
+      for I := 0 to AccentProductList.Count - 1 do
+        if AccentProductList[I].ProductQty > 0 then
+          Items.Add(AccentProductList[I]);
+
+      {$REGION 'Articolele, in loturi (parametri-array IBDAC = EXECUTE BLOCK)'}
+      qItem.Connection := FConnection;
+      qItem.Transaction := IBCTrLocal;
+      qItem.AutoCommit := false;
+      qItem.SQL.Text :=
+        'insert into TS_PRICELIST_ITEMS (PLID, SUPPLIER_GOODS_CODE, SUPPLIER_GOODS_NAME, PRICE3, CURRENCY3ID, ' +
+        'PRICE7, CURRENCY7ID, PRICE0, CURRENCY0ID, SUPPLIER_GOODS_BRAND, SUPPLIER_GOODSTYPE, SUPPLIER_CATEGORY) ' +
+        Format('values (%d, :SUPPLIER_GOODS_CODE, :SUPPLIER_GOODS_NAME, :PRICE3, 498, :PRICE7, 840, :PRICE0, 840, ' +
+          ':SUPPLIER_GOODS_BRAND, :SUPPLIER_GOODSTYPE, :SUPPLIER_CATEGORY)', [PLID]);
+      qItem.ParamByName('SUPPLIER_GOODS_CODE').DataType := ftWideString;
+      qItem.ParamByName('SUPPLIER_GOODS_NAME').DataType := ftWideString;
+      qItem.ParamByName('PRICE3').DataType := ftFloat;
+      qItem.ParamByName('PRICE7').DataType := ftFloat;
+      qItem.ParamByName('PRICE0').DataType := ftFloat;
+      qItem.ParamByName('SUPPLIER_GOODS_BRAND').DataType := ftWideString;
+      qItem.ParamByName('SUPPLIER_GOODSTYPE').DataType := ftWideString;
+      qItem.ParamByName('SUPPLIER_CATEGORY').DataType := ftWideString;
+
+      I := 0;
+      while I < Items.Count do
       begin
-        q.ParamByName('PLID').AsInteger := PLID;
-        q.ParamByName('SUPPLIER_GOODS_CODE').Value := AccentProductList[I].ProductCode;
-        q.ParamByName('SUPPLIER_GOODS_NAME').Value := AccentProductList[I].ProductTitle;
-
-//        if FFlgImportWithRRP then
-//        begin
-        q.ParamByName('PRICE3').AsFloat := AccentProductList[I].ProductPricePromo;
-//        iif(AccentProductList[I].ProductPricePromo = 0, AccentProductList[I].ProductPriceOnline,
-//          AccentProductList[I].ProductPricePromo);
-//        end;
-        q.ParamByName('CURRENCY3ID').AsInteger := 498;
-
-        q.ParamByName('PRICE7').AsFloat := iif(AccentProductList[I].ProductPriceIndicativ = 0, 0, AccentProductList[I].ProductPriceIndicativ);
-        q.ParamByName('CURRENCY7ID').AsInteger := 840;
-
-        q.ParamByName('PRICE0').AsFloat := iif(AccentProductList[I].ProductCost = 0, 0, AccentProductList[I].ProductCost);
-        q.ParamByName('CURRENCY0ID').AsInteger := 840;
-
-        q.ExecSQL;
+        N := Min(cBatchRows, Items.Count - I);
+        qItem.Params.ValueCount := N;
+        for K := 0 to N - 1 do
+        begin
+          qItem.ParamByName('SUPPLIER_GOODS_CODE')[K].AsString := Items[I + K].ProductCode;
+          qItem.ParamByName('SUPPLIER_GOODS_NAME')[K].AsString := Items[I + K].ProductTitle;
+          qItem.ParamByName('PRICE3')[K].AsFloat := Items[I + K].ProductPricePromo;
+          qItem.ParamByName('PRICE7')[K].AsFloat := Items[I + K].ProductPriceIndicativ;
+          qItem.ParamByName('PRICE0')[K].AsFloat := Items[I + K].ProductCost;
+          // brandul (producername), tipul produsului (hardtypename) - coloana "tip prod price" din
+          // frame78 - si categoria (rootname, ca in frame91APIAccentUnit); categoria are 512 octeti =
+          // 128 caractere UTF8
+          qItem.ParamByName('SUPPLIER_GOODS_BRAND')[K].AsString := PriceListText(Items[I + K].VendorName, 128);
+          qItem.ParamByName('SUPPLIER_GOODSTYPE')[K].AsString := PriceListText(Items[I + K].GoodsType, 255);
+          qItem.ParamByName('SUPPLIER_CATEGORY')[K].AsString := PriceListText(Items[I + K].RootName, 128);
+        end;
+        qItem.Execute(N);
+        Inc(I, N);
       end;
-    end;
-    {$endregion}
+      {$endregion}
 
-    IBCTrLocal.Commit;
+      IBCTrLocal.Commit;
+      FItemsInserted := Items.Count;
+    except
+      if IBCTrLocal.Active then
+        IBCTrLocal.Rollback;
+      // nu lasam un pricelist gol (articolele s-au anulat)
+      try
+        IBCTrLocal.StartTransaction;
+        q.SQL.Text := 'delete from TS_PRICELISTS where PLID = :PLID';
+        q.ParamByName('PLID').AsInteger := PLID;
+        q.Execute;
+        IBCTrLocal.Commit;
+      except
+        if IBCTrLocal.Active then
+          IBCTrLocal.Rollback;
+      end;
+      raise;
+    end;
+    Result := PLID;
   finally
+    Items.Free;
+    qItem.Free;
     q.Free;
     IBCTrLocal.Free;
   end;

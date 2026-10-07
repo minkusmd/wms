@@ -1,14 +1,15 @@
 unit ParsersMainFormUnit;
 
-{ WMSParsers - fereastra principala: alegi joburile, modul de scriere si le rulezi pe rind.
-  Aceeasi rulare, fara fereastra, o face modul /auto (vezi WMSParsers.dpr). }
+{ WMSParsers - fereastra principala: alegi joburile, modul de scriere si le rulezi in paralel
+  (fiecare job in firul lui, cu conexiunea lui). Aceeasi rulare, fara fereastra, o face modul /auto
+  (vezi WMSParsers.dpr). }
 
 interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.CheckLst, SupplierPriceSyncUnit,
-  ParserJobUnit;
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.CheckLst, System.SyncObjs,
+  System.Generics.Collections, SupplierPriceSyncUnit, ParserJobUnit;
 
 type
   TfrmParsersMain = class(TForm)
@@ -25,6 +26,7 @@ type
     lblStatus: TLabel;
     mmLog: TMemo;
     procedure FormCreate(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure btnRunClick(Sender: TObject);
     procedure btnStopClick(Sender: TObject);
@@ -32,7 +34,9 @@ type
     { Private declarations }
     fRunning: Boolean;
     fStopRequested: Boolean;
-    fCurrentJob: TParserJob;
+    // joburile care ruleaza (adaugate / scoase din firele lor)
+    fJobs: TList<TParserJob>;
+    fJobsLock: TCriticalSection;
     procedure AddLog(const AMessage: string);
     procedure SetRunning(const Value: Boolean);
   public
@@ -54,6 +58,9 @@ var
   C: TParserJobClass;
   Options: TParserRunOptions;
 begin
+  fJobs := TList<TParserJob>.Create;
+  fJobsLock := TCriticalSection.Create;
+  OnDestroy := FormDestroy;
   clbParsers.Items.Clear;
   for C in ParserJobs do
     clbParsers.Items.Add(C.DisplayName);
@@ -68,6 +75,12 @@ begin
     rgMode.ItemIndex := 0;
   SetRunning(False);
   lblStatus.Caption := 'Alegeti joburile si apasati Ruleaza.';
+end;
+
+procedure TfrmParsersMain.FormDestroy(Sender: TObject);
+begin
+  fJobs.Free;
+  fJobsLock.Free;
 end;
 
 procedure TfrmParsersMain.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
@@ -94,26 +107,33 @@ begin
 end;
 
 procedure TfrmParsersMain.btnStopClick(Sender: TObject);
+var
+  Job: TParserJob;
 begin
   fStopRequested := True;
-  if Assigned(fCurrentJob) then
-    fCurrentJob.Cancel;
-  lblStatus.Caption := 'Se opreste dupa cererea curenta...';
+  fJobsLock.Enter;
+  try
+    for Job in fJobs do
+      Job.Cancel;
+  finally
+    fJobsLock.Leave;
+  end;
+  lblStatus.Caption := 'Se opreste dupa cererile curente...';
 end;
 
 procedure TfrmParsersMain.btnRunClick(Sender: TObject);
 var
-  Classes: TArray<TParserJobClass>;
+  Classes, Selected: TArray<TParserJobClass>;
   Options: TParserRunOptions;
-  Connection: TIBCConnection;
-  I, Selected: Integer;
+  Outcomes: TArray<TParserJobOutcome>;
+  I, Failed: Integer;
 begin
   Classes := ParserJobs;
-  Selected := 0;
+  Selected := nil;
   for I := 0 to clbParsers.Items.Count - 1 do
     if clbParsers.Checked[I] then
-      Inc(Selected);
-  if Selected = 0 then
+      Selected := Selected + [Classes[I]];
+  if Length(Selected) = 0 then
   begin
     MessageDlg('Bifati cel putin un job.', mtInformation, [mbOK], 0);
     Exit;
@@ -128,54 +148,71 @@ begin
   else
     Options.Mode := hsmDirectUpdate;
 
-  if MessageDlg(Format('Se ruleaza %d job(uri) pe serverul %s si se scrie in baza. Continuati?',
-    [Selected, Options.Server]), mtConfirmation, [mbYes, mbNo], 0) <> mrYes then
+  if MessageDlg(Format('Se ruleaza %d job(uri) in paralel pe serverul %s si se scrie in baza. Continuati?',
+    [Length(Selected), Options.Server]), mtConfirmation, [mbYes, mbNo], 0) <> mrYes then
     Exit;
 
   mmLog.Lines.Clear;
   fStopRequested := False;
   SetRunning(True);
   try
-    try
-      Connection := CreateParserConnection(Options.Server);
-    except
-      on E: Exception do
+    lblStatus.Caption := Format('Ruleaza %d job(uri) in paralel...', [Length(Selected)]);
+    Outcomes := RunParserJobsParallel(Selected, Options,
+      // din firele joburilor: liniile ajung pe ecran prin firul principal
+      procedure(const AMessage: string)
+      var
+        Line: string;
       begin
-        AddLog('Conectarea la baza a esuat: ' + E.Message);
-        Exit;
-      end;
-    end;
-    try
-      for I := 0 to High(Classes) do
+        Line := AMessage;
+        TThread.Queue(nil,
+          procedure
+          begin
+            AddLog(Line);
+          end);
+      end,
+      procedure(AJob: TParserJob)
       begin
-        if fStopRequested then
-          Break;
-        if not clbParsers.Checked[I] then
-          Continue;
-        lblStatus.Caption := 'Ruleaza: ' + Classes[I].DisplayName;
+        fJobsLock.Enter;
         try
-          RunParserJob(Connection, Classes[I], Options,
-            procedure(const AMessage: string)
-            begin
-              AddLog(AMessage);
-            end,
-            procedure(AJob: TParserJob)
-            begin
-              fCurrentJob := AJob;
-            end);
-        except
-          // eroarea e deja in jurnal; trecem la jobul urmator
+          fJobs.Add(AJob);
+          if fStopRequested then
+            AJob.Cancel;
+        finally
+          fJobsLock.Leave;
         end;
-      end;
-    finally
-      Connection.Free;
-    end;
+      end,
+      procedure(AJob: TParserJob)
+      begin
+        fJobsLock.Enter;
+        try
+          fJobs.Remove(AJob);
+        finally
+          fJobsLock.Leave;
+        end;
+      end,
+      procedure
+      begin
+        Application.ProcessMessages;
+      end);
+    // liniile ramase in coada
+    CheckSynchronize;
+
+    Failed := 0;
+    for I := 0 to High(Outcomes) do
+      if Outcomes[I].Error <> '' then
+        Inc(Failed);
     if fStopRequested then
       lblStatus.Caption := 'Oprit.'
     else
-      lblStatus.Caption := 'Gata. Jurnalele sint in ' + Options.LogDir;
+      lblStatus.Caption := Format('Gata: %d job(uri), %d cu erori. Jurnalele sint in %s',
+        [Length(Outcomes), Failed, Options.LogDir]);
   finally
-    fCurrentJob := nil;
+    fJobsLock.Enter;
+    try
+      fJobs.Clear;
+    finally
+      fJobsLock.Leave;
+    end;
     SetRunning(False);
   end;
 end;

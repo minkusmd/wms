@@ -45,7 +45,7 @@ type
 
 implementation
 
-uses SysUtils, IBC, IBCClasses;
+uses SysUtils, IBC, IBCClasses, ServiceJobsUnit;
 
 { TTimerThread }
 
@@ -114,10 +114,20 @@ begin
            trans:=TIBCTransaction.Create(nil);
            try
               trans.DefaultConnection:=conn;
-              trans.IsolationLevel:=iblReadCommitted;
-              trans.Params.Add('nowait');
+              // TPB scris explicit (iblCustom): pentru iblReadCommitted IBDAC pune singur
+              // read_consistency + NOWAIT, iar un parametru in plus da "invalid parameter in
+              // transaction parameter block" (rec_version - toate sarcinile picau, 3.10.2026).
+              // WAIT cu limita: o sarcina care atinge rinduri blocate de alta tranzactie (ex.
+              // SP_WEB_CREATE_CACHE_GOODS vs reevaluarile care sterg TDB_GOODS_FLAGS ->
+              // TWEB_CACHE_GOODS) asteapta pina la 60 s in loc sa cada imediat cu
+              // "update conflicts with concurrent update"; cu read_consistency (Firebird 5)
+              // instructiunea se reia singura dupa ce cealalta tranzactie se termina.
+              trans.IsolationLevel:=iblCustom;
               trans.Params.Add('read_committed');
-              trans.Params.Add('rec_version');
+              trans.Params.Add('read_consistency');
+              trans.Params.Add('write');
+              trans.Params.Add('wait');
+              trans.Params.Add('lock_timeout=60');
               try
                  trans.StartTransaction;
                  // query
@@ -131,14 +141,24 @@ begin
                        query.ParamByName('UserID').AsInteger:=fAppSettings.DBUserID;
                        query.Execute;
 
-                       // 2. execute procedure
-                       query.SQL.Text:='EXECUTE PROCEDURE '+fAction.StoredProcedure;
-                       query.Execute;
-                       // commit work
-                       trans.Commit;
+                       if IsServiceJob(fAction.StoredProcedure) then
+                       begin
+                            // 2a. job Delphi ("@NUME"): isi face singur tranzactiile scurte pe
+                            //     aceeasi conexiune (contextul PROC_USER_LOGIN ramine pe conexiune)
+                            trans.Commit;
+                            fExecError:=RunServiceJob(fAction.StoredProcedure, conn, fAppSettings.DBUserID);
+                       end
+                       else
+                       begin
+                            // 2. execute procedure
+                            query.SQL.Text:='EXECUTE PROCEDURE '+fAction.StoredProcedure;
+                            query.Execute;
+                            // commit work
+                            trans.Commit;
+                       end;
                     except on E:Exception do
                        begin
-                            trans.Rollback;
+                            if trans.Active then trans.Rollback;
                             fExecError:='Failed to execute procedure! '+E.Message;
                        end;
                     end;

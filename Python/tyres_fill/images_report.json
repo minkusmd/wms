@@ -1,0 +1,312 @@
+{
+ "1": {
+  "brand": "ROVELO",
+  "model": "RWT-768",
+  "goods": [
+   367617,
+   367618,
+   367619,
+   367620,
+   367621,
+   367622,
+   367623,
+   367627,
+   367612,
+   367613,
+   367615,
+   367616
+  ],
+  "file": "D:\\Projects\\MyProjects\\WMS\\Python\\tyres_fill\\imgs\\1.png",
+  "error": null,
+  "size": "550x870 617KB"
+ },
+ "2": {
+  "brand": "ROVELO",
+  "model": "RWS-677",
+  "goods": [
+   367624,
+   367625,
+   367626,
+   367628,
+   367614,
+   367629,
+   367630,
+   367631,
+   367632
+  ],
+  "file": "D:\\Projects\\MyProjects\\WMS\\Python\\tyres_fill\\imgs\\2.png",
+  "error": null,
+  "size": "550x870 560KB"
+ },
+ "3": {
+  "brand": "PIRELLI",
+  "model": "POWERGY WINTER",
+  "goods": [
+   367647,
+   367648,
+   367650,
+   367651,
+   367645,
+   368750,
+   368752,
+   368749,
+   369027
+  ],
+  "file": "D:\\Projects\\MyProjects\\WMS\\Python\\tyres_fill\\imgs\\3.png",
+  "error": null,
+  "size": "993x992 650KB"
+ },
+ "4": {
+  "brand": "JOYROAD",
+  "model": "RX826",
+  "goods": [
+   369837,
+   369845,
+   369846,
+   371656,
+   371661
+  ],
+  "file": "D:\\Projects\\MyProjects\\WMS\\Python\\tyres_fill\\imgs\\4.png",
+  "error": null,
+  "size": "750x750 404KB"
+ },
+ "5": {
+  "brand": "HANKOOK",
+  "model": "W636",
+  "goods": [
+   369671,
+   369672,
+   369673,
+   369674
+  ],
+  "file": "D:\\Projects\\MyProjects\\WMS\\Python\\tyres_fill\\imgs\\5.png",
+  "error": null,
+  "size": "940x832 453KB"
+ },
+ "6": {
+  "brand": "LEAO",
+  "model": "ICE I-15",
+  "goods": [
+   369847,
+   369848,
+   371658,
+   371662
+  ],
+  "file": "D:\\Projects\\MyProjects\\WMS\\Python\\tyres_fill\\imgs\\6.png",
+  "error": null,
+  "size": "600x600 238KB"
+ },
+ "7": {
+  "brand": "JOYROAD",
+  "model": "RX808",
+  "goods": [
+   369834,
+   369836,
+   371657
+  ],
+  "file": "D:\\Projects\\MyProjects\\WMS\\Python\\tyres_fill\\imgs\\7.png",
+  "error": null,
+  "size": "750x750 335KB"
+ },
+ "8": {
+  "brand": "HABILEAD",
+  "model": "AW33",
+  "goods": [
+   369838,
+   369840,
+   369841
+  ],
+  "file": "D:\\Projects\\MyProjects\\WMS\\Python\\tyres_fill\\imgs\\8.png",
+  "error": null,
+  "size": "394x525 197KB"
+ },
+ "9": {
+  "brand": "WESTLAKE",
+  "model": "Z-401 A/S",
+  "goods": [
+   373118,
+   373119,
+   373128
+  ],
+  "file": "D:\\Projects\\MyProjects\\WMS\\Python\\tyres_fill\\imgs\\9.png",
+  "error": null,
+  "size": "330x492 298KB"
+ },
+ "10": {
+  "brand": "SAILUN",
+  "model": "4 SEASONS C",
+  "goods": [
+   367949,
+   367953,
+   367954
+  ],
+  "file": "D:\\Projects\\MyProjects\\WMS\\Python\\tyres_fill\\imgs\\10.png",
+  "error": null,
+  "size": "600x600 189KB"
+ },
+ "11": {
+  "brand": "JOYROAD",
+  "model": "RX821",
+  "goods": [
+   369835,
+   371660
+  ],
+  "file": "D:\\Projects\\MyProjects\\WMS\\Python\\tyres_fill\\imgs\\11.png",
+  "error": null,
+  "size": "750x750 382KB"
+ },
+ "12": {
+  "brand": "HABILEAD",
+  "model": "RW501",
+  "goods": [
+   369839,
+   369844
+  ],
+  "file": "D:\\Projects\\MyProjects\\WMS\\Python\\tyres_fill\\imgs\\12.png",
+  "error": null,
+  "size": "600x600 304KB"
+ },
+ "13": {
+  "brand": "HILO",
+  "model": "ARCTIC S9",
+  "goods": [
+   369842,
+   369843
+  ],
+  "file": "D:\\Projects\\MyProjects\\WMS\\Python\\tyres_fill\\imgs\\13.png",
+  "error": null,
+  "size": "600x600 268KB"
+ },
+ "14": {
+  "brand": "Goodride",
+  "model": "Z-401 A/S",
+  "goods": [
+   373115,
+   373127
+  ],
+  "file": "D:\\Projects\\MyProjects\\WMS\\Python\\tyres_fill\\imgs\\14.png",
+  "error": null,
+  "size": "330x492 298KB"
+ },
+ "15": {
+  "brand": "SAILUN",
+  "model": "ICE BLAZER ALPINE EVO 1",
+  "goods": [
+   373134,
+   373135
+  ],
+  "file": "D:\\Projects\\MyProjects\\WMS\\Python\\tyres_fill\\imgs\\15.png",
+  "error": null,
+  "size": "666x666 322KB"
+ },
+ "16": {
+  "brand": "LEAO",
+  "model": "W DEFENDER UHP",
+  "goods": [
+   371659
+  ],
+  "file": "D:\\Projects\\MyProjects\\WMS\\Python\\tyres_fill\\imgs\\16.png",
+  "error": null,
+  "size": "580x925 702KB"
+ },
+ "17": {
+  "brand": "Roadx",
+  "model": "RXMOTION DU71",
+  "goods": [
+   376812
+  ],
+  "file": "D:\\Projects\\MyProjects\\WMS\\Python\\tyres_fill\\imgs\\17.png",
+  "error": null,
+  "size": "739x1200 916KB"
+ },
+ "18": {
+  "brand": "Continental",
+  "model": "ContiSportContac 7",
+  "goods": [
+   376823
+  ],
+  "file": "D:\\Projects\\MyProjects\\WMS\\Python\\tyres_fill\\imgs\\18.png",
+  "error": null,
+  "size": "1200x1200 813KB"
+ },
+ "19": {
+  "brand": "DOUBLESTAR",
+  "model": "DLA01 A/S",
+  "goods": [
+   373114
+  ],
+  "file": "D:\\Projects\\MyProjects\\WMS\\Python\\tyres_fill\\imgs\\19.png",
+  "error": null,
+  "size": "500x500 109KB"
+ },
+ "20": {
+  "brand": "WESTLAKE",
+  "model": "Z507",
+  "goods": [
+   373126
+  ],
+  "file": "D:\\Projects\\MyProjects\\WMS\\Python\\tyres_fill\\imgs\\20.png",
+  "error": null,
+  "size": "330x492 234KB"
+ },
+ "21": {
+  "brand": "Triangle",
+  "model": "PL02",
+  "goods": [
+   373136
+  ],
+  "file": "D:\\Projects\\MyProjects\\WMS\\Python\\tyres_fill\\imgs\\21.png",
+  "error": null,
+  "size": "947x1200 986KB"
+ },
+ "22": {
+  "brand": "Triangle",
+  "model": "SNOWLINK PL02",
+  "goods": [
+   373142
+  ],
+  "file": "D:\\Projects\\MyProjects\\WMS\\Python\\tyres_fill\\imgs\\22.png",
+  "error": null,
+  "size": "947x1200 986KB"
+ },
+ "23": {
+  "brand": "KUMHO",
+  "model": "HA32 A/S",
+  "goods": [
+   373131
+  ],
+  "file": "D:\\Projects\\MyProjects\\WMS\\Python\\tyres_fill\\imgs\\23.png",
+  "error": null,
+  "size": "1200x1200 1278KB"
+ },
+ "24": {
+  "brand": "PIRELLI",
+  "model": "WINTER SOTTOZERO 3",
+  "goods": [
+   367657
+  ],
+  "file": "D:\\Projects\\MyProjects\\WMS\\Python\\tyres_fill\\imgs\\24.png",
+  "error": null,
+  "size": "992x992 660KB"
+ },
+ "25": {
+  "brand": "APLUS",
+  "model": "A502",
+  "goods": [
+   367633
+  ],
+  "file": "D:\\Projects\\MyProjects\\WMS\\Python\\tyres_fill\\imgs\\25.png",
+  "error": null,
+  "size": "800x1168 688KB"
+ },
+ "26": {
+  "brand": "PIRELLI",
+  "model": "WINTER PZERO",
+  "goods": [
+   368753
+  ],
+  "file": "D:\\Projects\\MyProjects\\WMS\\Python\\tyres_fill\\imgs\\26.png",
+  "error": null,
+  "size": "992x992 817KB"
+ }
+}

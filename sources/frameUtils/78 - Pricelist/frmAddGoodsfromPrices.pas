@@ -113,6 +113,7 @@ type
     tvGoodsFounded_GOODS_TYPE: TcxGridDBColumn;
     tvGoodsFoundedVendor: TcxGridDBColumn;
     bbChangeInventoryCostingMethod: TdxBarButton;
+    bbCreateBasedOnSelectedGood: TdxBarButton;
     procedure SearchBox1InvokeSearch(Sender: TObject);
     procedure bbNewLinkClick(Sender: TObject);
     procedure bbNewGoodsClick(Sender: TObject);
@@ -126,6 +127,7 @@ type
     procedure dxBarLookupCombo1Exit(Sender: TObject);
     procedure SearchGoodsMemoKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure bbChangeInventoryCostingMethodClick(Sender: TObject);
+    procedure bbCreateBasedOnSelectedGoodClick(Sender: TObject);
 
   private
     fMergeDialog: TfrmMergeGoodsDlgEx;
@@ -151,6 +153,7 @@ type
     VendorID: Integer;
     GoodsTypeName: string;
     GoodsTypeID: Integer;
+    ParentGoodsID: Integer;   // mapa din rindul de pricelist (<= 0 = nesetata)
   end;
 
 var
@@ -162,6 +165,7 @@ uses
   DataModuleAdditions,
   DataModuleDB,
   frmSelectInventoryCostingMethodUnit,
+  PriceGoodsCreateUnit,
   System.Generics.Collections;
 
 {$R *.dfm}
@@ -486,6 +490,46 @@ begin
   finally
     dialog.Free;
   end;
+end;
+
+procedure TfrmAddGoodsFromPriceDlg.bbCreateBasedOnSelectedGoodClick(Sender:
+    TObject);
+var
+  Item: TPriceItemGoodsData;
+  Template: TTemplateGoods;
+  ParentID: Integer;
+begin
+  // produs nou din articolul de pricelist, cu mapa / tipul web / producatorul / flag-ul RRP
+  // luate din produsul selectat (aceeasi creare ca in frame78 - PriceGoodsCreateUnit)
+  if not IBCQuerySearch.Active or IBCQuerySearch.IsEmpty then
+  begin
+    MessageDlg('Selectati produsul pe baza caruia se creeaza produsul nou.', mtWarning, [mbOK], 0);
+    Exit;
+  end;
+
+  if not LoadTemplateGoods(IBCQuerySearch.FieldByName('GOODSID').AsInteger, SupplierID, Template) then
+    raise Exception.Create('Produsul selectat nu a fost gasit in nomenclator.');
+
+  if MessageDlg(Format('Cream produsul nou "%s"' + sLineBreak + 'pe baza produsului #%d %s?',
+    [SupplierGoodsName, Template.GoodsID, Template.Title]), mtConfirmation, [mbYes, mbNo], 0) <> mrYes then
+    Exit;
+
+  Item := Default(TPriceItemGoodsData);
+  Item.SupplierID := SupplierID;
+  Item.SupplierGoodsCode := SupplierGoodsCode;
+  Item.SupplierGoodsName := SupplierGoodsName;
+  Item.Model := Model;
+  Item.VendorID := VendorID;
+  Item.WebGoodsTypeID := GoodsTypeID;
+  Item.ParentGoodsID := ParentGoodsID;
+  Item.Price3 := PriceRRP;
+  Item.Currency3ID := CurrencyRRP;
+  Item.Price7 := Price7;
+  Item.Currency7ID := Currency7ID;
+
+  GoodsID := CreateGoodsFromPriceItem(Item, Template, ParentID);
+  AppUserTempConfigStorage.IntValues.SetValue(Self.Name + '_LastGoodsID', ParentID);
+  Close;
 end;
 
 procedure TfrmAddGoodsFromPriceDlg.dxBarLookupCombo1Exit(Sender: TObject);

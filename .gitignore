@@ -35,3 +35,12 @@ __recovery/
 DB Service Manager/settings.dat
 DB Service Manager/tasks.dat
 DB Service Managersettings.dat
+
+# Documentatia bancii pentru MIA Victoriabank: contine credentialele de test
+# ale altor comercianti - ramine doar local.
+/Mia VB/
+
+# Fisiere de lucru generate si cache Python
+/output/
+__pycache__/
+Python/tyres_fill/imgs/

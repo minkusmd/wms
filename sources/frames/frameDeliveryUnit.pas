@@ -21,6 +21,7 @@ type
     bbSaveDelivery: TdxBarButton;
     bbDeleteDelivery: TdxBarButton;
     bbPrint: TdxBarButton;
+    bbSendECC: TdxBarButton;
     IBCQueryDelivery: TIBCQuery;
     IBCDSDelivery: TIBCDataSource;
     IBCQueryDistricts: TIBCQuery;
@@ -64,6 +65,7 @@ type
     procedure cxDBVerticalGrid1DBMultiEditorRow2Editors1EditPropertiesInitPopup(Sender: TObject);
     procedure cxDBVerticalGrid1DBMultiEditorRow2Editors0EditPropertiesChange(Sender: TObject);
     procedure beCurierPropertiesButtonClick(Sender: TObject; AButtonIndex: Integer);
+    procedure bbSendECCClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -74,7 +76,7 @@ implementation
 
 {$R *.dfm}
 
-uses DataModuleDB;
+uses DataModuleDB, System.UITypes, ECCDeliveryUnit;
 
 procedure TframeDelivery.bbDeleteDeliveryClick(Sender: TObject);
 begin
@@ -124,6 +126,36 @@ begin
   finally
     PrintEngine.Free;
     ReportParams.Free;
+  end;
+end;
+
+// Livrarea cu plata la livrare pleaca in aplicatia ECC a curierului (faza 7 ECC Fiscal Partner):
+// curierul emite bonul la predare, iar @ECC_DELIVERY din SWNService inregistreaza bonul si incasarea.
+procedure TframeDelivery.bbSendECCClick(Sender: TObject);
+var
+  DocID: Integer;
+  Msg: string;
+begin
+  if IBCQueryDelivery.Active and (IBCQueryDelivery.State in [dsEdit, dsInsert]) then
+    IBCQueryDelivery.Post;
+  if IBCQueryDelivery.Active and not IBCQueryDelivery.IsEmpty then
+    DocID := IBCQueryDelivery.FieldByName('DOCID').AsInteger
+  else
+    DocID := dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger;
+  if ShowAskDialog('Livrare', 'Trimiteti livrarea in aplicatia ECC a curierului? Bonul fiscal il va emite ' +
+    'curierul la predarea marfii.') <> mrYes then
+    Exit;
+  Screen.Cursor := crHourGlass;
+  try
+    try
+      Msg := ECCSendDelivery(dmDB.IBCConnection, DocID, dmDB.CurrentUserID);
+    finally
+      Screen.Cursor := crDefault;
+    end;
+    MessageDlg(Msg, mtInformation, [mbOK], 0);
+  except
+    on E: Exception do
+      MessageDlg(E.Message, mtError, [mbOK], 0);
   end;
 end;
 

@@ -1,0 +1,264 @@
+object frmAddGoodsToIncomingInvoiceDlg: TfrmAddGoodsToIncomingInvoiceDlg
+  Left = 0
+  Top = 0
+  BorderIcons = [biSystemMenu, biMaximize]
+  Caption = 'Adauga in "Factura de Intrare"'
+  ClientHeight = 520
+  ClientWidth = 1000
+  Color = clBtnFace
+  Constraints.MinHeight = 400
+  Constraints.MinWidth = 760
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -12
+  Font.Name = 'Segoe UI'
+  Font.Style = []
+  Position = poOwnerFormCenter
+  TextHeight = 15
+  object pnlTop: TPanel
+    Left = 0
+    Top = 0
+    Width = 1000
+    Height = 52
+    Align = alTop
+    BevelOuter = bvNone
+    Color = clWindow
+    ParentBackground = False
+    TabOrder = 0
+    object lbGoods: TcxLabel
+      Left = 8
+      Top = 4
+      Caption = 'Produs'
+      ParentFont = False
+      Style.Font.Charset = DEFAULT_CHARSET
+      Style.Font.Color = clWindowText
+      Style.Font.Height = -13
+      Style.Font.Name = 'Segoe UI'
+      Style.Font.Style = [fsBold]
+      Style.IsFontAssigned = True
+    end
+    object lbInfo: TcxLabel
+      Left = 8
+      Top = 28
+      Caption =
+        'Facturile de intrare deschise ale firmei curente. Pretul propus ' +
+        '= pretul0 al produsului de la furnizorul facturii, in valuta fac' +
+        'turii.'
+      Style.TextColor = clGrayText
+    end
+  end
+  object cxGridDocs: TcxGrid
+    Left = 0
+    Top = 52
+    Width = 1000
+    Height = 383
+    Align = alClient
+    TabOrder = 1
+    object tvDocs: TcxGridDBTableView
+      Navigator.Buttons.CustomButtons = <>
+      ScrollbarAnnotations.CustomAnnotations = <>
+      OnCellDblClick = tvDocsCellDblClick
+      DataController.DataSource = dsDocs
+      DataController.KeyFieldNames = 'DOCID'
+      DataController.Summary.DefaultGroupSummaryItems = <>
+      DataController.Summary.FooterSummaryItems = <>
+      DataController.Summary.SummaryGroups = <>
+      OptionsData.Deleting = False
+      OptionsData.DeletingConfirmation = False
+      OptionsData.Editing = False
+      OptionsData.Inserting = False
+      OptionsSelection.CellSelect = False
+      OptionsView.ColumnAutoWidth = True
+      OptionsView.GroupByBox = False
+      OptionsView.Indicator = True
+      object tvDocsDOCID: TcxGridDBColumn
+        Caption = 'Nr. doc'
+        DataBinding.FieldName = 'DOCID'
+        HeaderAlignmentHorz = taCenter
+        Width = 70
+      end
+      object tvDocsDATA: TcxGridDBColumn
+        Caption = 'Data'
+        DataBinding.FieldName = 'DATA'
+        HeaderAlignmentHorz = taCenter
+        Width = 110
+      end
+      object tvDocsCT_NAME: TcxGridDBColumn
+        Caption = 'Furnizor'
+        DataBinding.FieldName = 'CT_NAME'
+        HeaderAlignmentHorz = taCenter
+        Width = 200
+      end
+      object tvDocsDTDEP_NAME: TcxGridDBColumn
+        Caption = 'Depozit'
+        DataBinding.FieldName = 'DTDEP_NAME'
+        HeaderAlignmentHorz = taCenter
+        Width = 110
+      end
+      object tvDocsSUMA: TcxGridDBColumn
+        Caption = 'Suma'
+        DataBinding.FieldName = 'SUMA'
+        HeaderAlignmentHorz = taCenter
+        Width = 80
+      end
+      object tvDocsCURRENCY_NAME: TcxGridDBColumn
+        Caption = 'Valuta'
+        DataBinding.FieldName = 'CURRENCY_NAME'
+        HeaderAlignmentHorz = taCenter
+        Width = 50
+      end
+      object tvDocsSUPPLIER_PRICE0: TcxGridDBColumn
+        Caption = 'Pret0 furnizor'
+        DataBinding.FieldName = 'SUPPLIER_PRICE0'
+        HeaderAlignmentHorz = taCenter
+        Width = 85
+      end
+      object tvDocsCURRENCY0_NAME: TcxGridDBColumn
+        Caption = 'Valuta pret0'
+        DataBinding.FieldName = 'CURRENCY0_NAME'
+        HeaderAlignmentHorz = taCenter
+        Width = 70
+      end
+      object tvDocsDOC_PRICE: TcxGridDBColumn
+        Caption = 'Pret in factura'
+        DataBinding.FieldName = 'DOC_PRICE'
+        HeaderAlignmentHorz = taCenter
+        Width = 85
+      end
+      object tvDocsQTY_IN_DOC: TcxGridDBColumn
+        Caption = 'Deja in factura'
+        DataBinding.FieldName = 'QTY_IN_DOC'
+        HeaderAlignmentHorz = taCenter
+        Width = 80
+      end
+      object tvDocsCREATED_BY_NAME: TcxGridDBColumn
+        Caption = 'Creat de'
+        DataBinding.FieldName = 'CREATED_BY_NAME'
+        HeaderAlignmentHorz = taCenter
+        Width = 120
+      end
+    end
+    object lvDocs: TcxGridLevel
+      GridView = tvDocs
+    end
+  end
+  object pnlBottom: TPanel
+    Left = 0
+    Top = 435
+    Width = 1000
+    Height = 44
+    Align = alBottom
+    BevelOuter = bvNone
+    TabOrder = 2
+    object lbQty: TcxLabel
+      Left = 8
+      Top = 12
+      Caption = 'Cantitatea'
+    end
+    object ceQty: TcxCalcEdit
+      Left = 76
+      Top = 10
+      EditValue = 0.000000000000000000
+      TabOrder = 1
+      Width = 100
+    end
+    object lbPrice: TcxLabel
+      Left = 200
+      Top = 12
+      Caption = 'Pretul'
+    end
+    object cePrice: TcxCalcEdit
+      Left = 244
+      Top = 10
+      EditValue = 0.000000000000000000
+      TabOrder = 3
+      Width = 120
+    end
+    object lbPriceCurrency: TcxLabel
+      Left = 370
+      Top = 12
+      Caption = ''
+    end
+  end
+  object RzDialogButtons1: TRzDialogButtons
+    Left = 0
+    Top = 479
+    Width = 1000
+    Height = 41
+    TabOrder = 3
+  end
+  object qDocs: TIBCQuery
+    KeyFields = 'DOCID'
+    SQL.Strings = (
+      'SELECT D.DOCID, D.DATA, D.CT, D.CT_NAME, D.DTDEP, D.DTDEP_NAME, D.CTDEP,'
+      '       D.SUMA, D.CURRENCYID, D.CURRENCY_NAME, D.RATE, D.FLG_ACNT,'
+      '       D.CREATED_BY_NAME,'
+      '       GF.PRICE0 SUPPLIER_PRICE0, GF.CURRENCY0_NAME,'
+      '       IIF(COALESCE(GF.PRICE0, 0) = 0, 0,'
+      '           IIF(GF.CURRENCY0ID = D.CURRENCYID, GF.PRICE0,'
+
+        '               ROUND(GF.PRICE0 * GF.EXCHANGE_RATE / IIF(COALESCE(D.' +
+        'RATE, 0) = 0, 1, D.RATE), 2))) DOC_PRICE,'
+      '       (SELECT SUM(J.QTY) FROM TDB_JURNAL J'
+
+        '        WHERE J.DOCID = D.DOCID AND J.GOODSID = :GOODSID AND J.GOODS' +
+        'COMPLECT_ID = -1) QTY_IN_DOC,'
+      '       IIF(GF.CURRENCY0ID IS NULL, 0, 1) FLG_SUPPLIER_GOODS'
+      'FROM VW_TDB_DOCS D'
+      'LEFT JOIN LATERAL ('
+
+        '  SELECT FIRST 1 F.PRICE0, COALESCE(F.CURRENCY0ID, 498) CURRENCY0' +
+        'ID,'
+      '         C.TITLE CURRENCY0_NAME, C.EXCHANGE_RATE'
+      '  FROM TS_GOODS_FOREIGN F'
+
+        '  LEFT JOIN TS_CURRENCY C ON C.CURRENCYID = COALESCE(F.CURRENCY0I' +
+        'D, 498)'
+      '  WHERE F.GOODSID = :GOODSID_F AND F.CUSTOMERID = D.CT'
+
+        '  ORDER BY IIF(COALESCE(F.PRICE0, 0) > 0, 0, 1), F.LAST_PRICE_DA' +
+        'TE DESC NULLS LAST'
+      ') GF ON 1 = 1'
+      'WHERE D.DOCTYPEID = :DOCTYPEID AND D.DT = :FIRMA'
+      '  AND D.FLG_CLOSED = 0 AND D.FLG_DEL = 0'
+      'ORDER BY FLG_SUPPLIER_GOODS DESC, D.DOCID DESC')
+    ReadOnly = True
+    Left = 72
+    Top = 152
+    ParamData = <
+      item
+        DataType = ftInteger
+        Name = 'GOODSID'
+        ParamType = ptInput
+        Value = nil
+      end
+      item
+        DataType = ftInteger
+        Name = 'GOODSID_F'
+        ParamType = ptInput
+        Value = nil
+      end
+      item
+        DataType = ftInteger
+        Name = 'DOCTYPEID'
+        ParamType = ptInput
+        Value = nil
+      end
+      item
+        DataType = ftInteger
+        Name = 'FIRMA'
+        ParamType = ptInput
+        Value = nil
+      end>
+  end
+  object dsDocs: TIBCDataSource
+    DataSet = qDocs
+    OnDataChange = dsDocsDataChange
+    Left = 152
+    Top = 152
+  end
+  object trWrite: TIBCTransaction
+    Left = 232
+    Top = 152
+  end
+end

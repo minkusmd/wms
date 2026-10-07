@@ -173,6 +173,7 @@ type
     cxGridNPN_DELIVERY_DATE: TcxGridDBColumn;
     cxGridComponents_FLG_FORCED: TcxGridDBColumn;
     dxBarButton2: TdxBarButton;
+    bbSendECC: TdxBarButton;
     dxBarSubItem1: TdxBarSubItem;
     dxBarSubItem2: TdxBarSubItem;
     dxBarSubItem3: TdxBarSubItem;
@@ -208,6 +209,7 @@ type
     bbDocumentTree: TdxBarButton;
     cxGridNPN_RESPONSIBLE_USERNAME: TcxGridDBColumn;
     bbSelectSupplier: TdxBarButton;
+    bbAddToIncomingInvoice: TdxBarButton;
     dxBarSubItem5: TdxBarSubItem;
     dxBarButton6: TdxBarButton;
     procedure bbNewGoodsClick(Sender: TObject);
@@ -272,6 +274,7 @@ type
     procedure cxPageControl1PageChanging(Sender: TObject; NewPage: TcxTabSheet; var AllowChange: Boolean);
     procedure dxBarButton1Click(Sender: TObject);
     procedure dxBarButton2Click(Sender: TObject);
+    procedure bbSendECCClick(Sender: TObject);
     procedure bbBankInClick(Sender: TObject);
     procedure bbVoucherGiftClick(Sender: TObject);
     procedure dxBarButton3Click(Sender: TObject);
@@ -281,6 +284,7 @@ type
     procedure bbVindutPrinPartenerClick(Sender: TObject);
     procedure bbDocumentTreeClick(Sender: TObject);
     procedure bbSelectSupplierClick(Sender: TObject);
+    procedure bbAddToIncomingInvoiceClick(Sender: TObject);
     procedure dxBarButton6Click(Sender: TObject);
   private
     { Private declarations }
@@ -367,10 +371,10 @@ type
 implementation
 
 uses
-  SWNGoodsServicesUnit,
+  SWNGoodsServicesUnit, ECCDeliveryUnit,
   DataModuleAdditions, DataModuleDB, DateUtils, SWNCommonDialogs, SWNConst, SWNDBErrors, SWNSecurity, SWNSecurityFlags,
   SWNTypes, SWNUtils, SWNValueStorageUnit, frm82SelectLivrareUnit, frmActiuneTVAInapoiDialog,
-  frmAddGoodsToSupplierOrderDlgUnit, frmApplyActiuneCodeDialog, frmApplyPromoCodeDialog, frmBringGoodsDialog,
+  frmAddGoodsToSupplierOrderDlgUnit, frmAddGoodsToIncomingInvoiceDlgUnit, frmApplyActiuneCodeDialog, frmApplyPromoCodeDialog, frmBringGoodsDialog,
   frmCalcProfitabilityContractDialog, frmCalcProfitabilityDialog, frmDocumentDeleteDialog, frmDocumentTreeUnit,
   frmGoodsForeignCodeDialog, frmSupplierPickupListDialog, frmMoneyIncomeDialog, frmOtgruzkaDialog, frmPrintEngineWindow, frmProduseCuReducereDialog,
   frmRNDocDialog, frmSelectGoodsSupplierUnit, frmSelectGoodsToAddDialog, frmSelectPartNumbersDialog,
@@ -540,6 +544,23 @@ begin
   finally
     d.Free;
   end;
+end;
+
+// Adauga produsul curent (cantitatea din document) intr-o factura de intrare
+// deschisa (DOCTYPEID 106, frame 9); pretul = PRICE0 de la furnizorul facturii.
+procedure Tframe10NakladnieRN.bbAddToIncomingInvoiceClick(Sender: TObject);
+var
+  DocID: Integer;
+begin
+  if dmDB.IBCQueryJurnal.IsEmpty then
+    Exit;
+
+  DocID := ShowAddGoodsToIncomingInvoiceDialog(Self,
+    dmDB.IBCQueryJurnal.FieldByName('GOODSID').AsInteger,
+    dmDB.IBCQueryJurnal.FieldByName('GOODS_NAME').AsString,
+    dmDB.IBCQueryJurnal.FieldByName('QTY').AsFloat);
+  if DocID > 0 then
+    ShowInfoDialog('Factura de intrare', Format('Produsul a fost adaugat in factura de intrare nr. %d.', [DocID]));
 end;
 
 procedure Tframe10NakladnieRN.bbApplyPromoCodeClick(Sender: TObject);
@@ -1475,6 +1496,34 @@ end;
 procedure Tframe10NakladnieRN.dxBarButton2Click(Sender: TObject);
 begin
   CreateCerereDeLivrare(dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger);
+end;
+
+// Livrarea rezervei selectate pleaca in aplicatia ECC a curierului (faza 7 ECC Fiscal Partner).
+// Livrarea trebuie sa fie salvata in document (curier + "Numerar" / "Card bancar"); curierul emite
+// bonul la predare, iar @ECC_DELIVERY din SWNService inregistreaza bonul si incasarea.
+procedure Tframe10NakladnieRN.bbSendECCClick(Sender: TObject);
+var
+  DocID: Integer;
+  Msg: string;
+begin
+  DocID := dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger;
+  if DocID <= 0 then
+    Exit;
+  if ShowAskDialog('Livrare', 'Trimiteti livrarea rezervei in aplicatia ECC a curierului? Bonul fiscal il va ' +
+    'emite curierul la predarea marfii.') <> mrYes then
+    Exit;
+  Screen.Cursor := crHourGlass;
+  try
+    try
+      Msg := ECCSendDelivery(dmDB.IBCConnection, DocID, dmDB.CurrentUserID);
+    finally
+      Screen.Cursor := crDefault;
+    end;
+    MessageDlg(Msg, mtInformation, [mbOK], 0);
+  except
+    on E: Exception do
+      MessageDlg(E.Message, mtError, [mbOK], 0);
+  end;
 end;
 
 procedure Tframe10NakladnieRN.dxBarButton3Click(Sender: TObject);
@@ -2472,6 +2521,10 @@ begin
 
   if (not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_VINZARE_R_V_Modifica_utilizatorul_in_document)) then
     bbChangeDocUser.Visible := ivNever;
+
+     // Adauga in "Factura de Intrare" - doar cu dreptul de modificare a facturilor de intrare
+  if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_НАКЛАДНЫЕ_ПТОУ_Изменить) then
+    bbAddToIncomingInvoice.Visible := ivNever;
 
      // Pretul clientului
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_НАКЛАДНЫЕ_РНОУ_Изменить_цены_по_колонке_клиента) or not

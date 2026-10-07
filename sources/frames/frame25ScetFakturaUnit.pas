@@ -94,6 +94,7 @@ type
     cxGridReceipts_FLAGS: TcxGridDBColumn;
     cxGridReceiptLevel: TcxGridLevel;
     bbCancelReceipt: TdxBarButton;
+    bbPrintReceiptCopy: TdxBarButton;
     cxGridInvoiceTable_IMG: TcxGridDBColumn;
     cxGridInvoiceTable_FLG_CANCELED: TcxGridDBColumn;
     bbNewInvoice: TdxBarButton;
@@ -106,6 +107,8 @@ type
     bbCustomerDebts: TdxBarButton;
     bbDebtsNotify: TdxBarButton;
     cxGridReceipts_PRIHOD_DOCID: TcxGridDBColumn;
+    cxGridReceipts_APARAT: TcxGridDBColumn;
+    cxGridReceipts_MEV_LINK: TcxGridDBColumn;
     cxGridSF_DT: TcxGridDBColumn;
     cxGridSF_CT: TcxGridDBColumn;
     bbDocComments: TdxBarButton;
@@ -231,6 +234,8 @@ type
     procedure bbDeleteGoodsClick(Sender: TObject);
     procedure dxBarPopupMenuPopup(Sender: TObject);
     procedure bbActionPrintReceiptClick(Sender: TObject);
+    procedure bbPrintReceiptCopyClick(Sender: TObject);
+    procedure cxGridReceiptsTableDblClick(Sender: TObject);
     procedure bbCancelInvoiceClick(Sender: TObject);
     procedure cxGridInvoiceTableCustomDrawCell(Sender: TcxCustomGridTableView; ACanvas: TcxCanvas; AViewInfo:
       TcxGridTableDataCellViewInfo; var ADone: Boolean);
@@ -407,7 +412,7 @@ uses
   frmDocumentDeleteDialog, frmDocumentImportBrowserDialog, SWNTypes,
   SWNCommonDialogs, uEditCecDlg, frmCustomersDlg, frmMoneyIncomeDialog,
   frmReceiptPrintDialogV2, frmGoodsACNTBrowser, EFacturaXmlBuilder, EFacturaApiClient, EFacturaManager,
-  Winapi.ShellAPI, System.IOUtils;
+  Winapi.ShellAPI, System.IOUtils, ECCFiscalDevice, ECCTransactionStore;
 
 {$R *.dfm}
 
@@ -457,6 +462,50 @@ begin
   end
   else
     ShowErrorDialog('Eroare', 'A fost depistat cec cu suma = 0!');
+end;
+
+// Copia cecului ECC: imaginea PNG salvata in jurnalul TFP_ECC_TRANSACTION la emitere,
+// tiparita la latimea unui bon de 80 mm pe imprimanta aleasa (memorata pe calculator).
+// La casa ECC nu se trimite nimic.
+procedure Tframe25ScetFaktura.bbPrintReceiptCopyClick(Sender: TObject);
+var
+  TransId: string;
+  Store: TECCTransactionStore;
+  Png: TMemoryStream;
+begin
+  if not IBCQueryReceipt.Active or IBCQueryReceipt.IsEmpty then
+    Exit;
+  TransId := Trim(IBCQueryReceipt.FieldByName('ECC_TRANS_ID').AsString);
+  if TransId = '' then
+  begin
+    ShowErrorDialog('Cec', 'Cecul selectat a fost emis pe aparatul fiscal MCC Tremol si se tipareste doar de aparat. ' +
+      'Copia se poate tipari numai pentru cecurile emise pe casa ECC online.');
+    Exit;
+  end;
+  Png := TMemoryStream.Create;
+  Store := TECCTransactionStore.Create(dmDB.IBCConnection);
+  try
+    if not Store.LoadPng(TransId, Png) then
+      ShowErrorDialog('Cec ECC', 'Imaginea bonului nu este salvata in jurnalul ECC. ' +
+        'Bonul poate fi descarcat din Service > Casa ECC (Jurnal, Arata PNG).')
+    else if ECCChooseReceiptPrinter then
+      ECCPrintPng(Png, 'Cec ECC ' + IBCQueryReceipt.FieldByName('NUMAR_BON').AsString);
+  finally
+    Store.Free;
+    Png.Free;
+  end;
+end;
+
+// Dublu-clic pe bonul ECC deschide verificarea lui pe site-ul SFS (link MEV).
+procedure Tframe25ScetFaktura.cxGridReceiptsTableDblClick(Sender: TObject);
+var
+  Link: string;
+begin
+  if not IBCQueryReceipt.Active or IBCQueryReceipt.IsEmpty then
+    Exit;
+  Link := Trim(IBCQueryReceipt.FieldByName('MEV_LINK').AsString);
+  if Link <> '' then
+    ShellExecute(0, 'open', PChar(Link), nil, nil, SW_SHOWNORMAL);
 end;
 
 procedure Tframe25ScetFaktura.bbPriceCol0Click(Sender: TObject);
@@ -1077,7 +1126,9 @@ begin
   begin
     ACanvas.Font.Color := clGrayText;
     ACanvas.Font.Style := ACanvas.Font.Style + [fsStrikeOut];
-  end;
+  end
+  else if (AViewInfo.Item = cxGridReceipts_APARAT) and VarToStr(AViewInfo.Value).Contains('ECC') then
+    ACanvas.Font.Style := ACanvas.Font.Style + [fsBold]; // bonurile ECC online se vad imediat
 end;
 
 procedure Tframe25ScetFaktura.cxGridReceiptsTableKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);

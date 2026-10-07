@@ -145,6 +145,26 @@ object frmFiscalPrintersSetupDlg: TfrmFiscalPrintersSetupDlg
           VisibleForCustomization = False
           Width = 120
         end
+        object cxGridFPTable_DEVICE_TYPE: TcxGridDBColumn
+          Caption = 'Tip'
+          DataBinding.FieldName = 'DEVICE_TYPE'
+          PropertiesClassName = 'TcxImageComboBoxProperties'
+          Properties.Items = <
+            item
+              Description = 'MCC Tremol'
+              Value = 0
+            end
+            item
+              Description = 'Casa ECC'
+              Value = 1
+            end>
+          Width = 90
+        end
+        object cxGridFPTable_ECC_API_CODE: TcxGridDBColumn
+          Caption = 'Cod ECC'
+          DataBinding.FieldName = 'ECC_API_CODE'
+          Width = 100
+        end
         object cxGridFPTable_FIRMA_NAME: TcxGridDBColumn
           Caption = 'Subdiviziune'
           DataBinding.FieldName = 'FIRMA_NAME'
@@ -281,10 +301,12 @@ object frmFiscalPrintersSetupDlg: TfrmFiscalPrintersSetupDlg
     SQLInsert.Strings = (
       'INSERT INTO FP_DEVICES'
       '  (FP_ID, FIRMA_ID, WS_ID, SERIAL_NUMBER, DESCRIPTION,'
-      '   FLG_ENABLED, SERVER_ADDRESS, COM_PORT, BAUD_RATE)'
+      '   FLG_ENABLED, SERVER_ADDRESS, COM_PORT, BAUD_RATE,'
+      '   DEVICE_TYPE, ECC_API_CODE)'
       'VALUES'
       '  (:FP_ID, :FIRMA_ID, :WS_ID, :SERIAL_NUMBER, :DESCRIPTION,'
-      '   :FLG_ENABLED, :SERVER_ADDRESS, :COM_PORT, :BAUD_RATE)')
+      '   :FLG_ENABLED, :SERVER_ADDRESS, :COM_PORT, :BAUD_RATE,'
+      '   :DEVICE_TYPE, :ECC_API_CODE)')
     SQLDelete.Strings = (
       'DELETE FROM FP_DEVICES'
       'WHERE'
@@ -300,26 +322,31 @@ object frmFiscalPrintersSetupDlg: TfrmFiscalPrintersSetupDlg
       '  FLG_ENABLED = :FLG_ENABLED, '
       '  SERVER_ADDRESS = :SERVER_ADDRESS, '
       '  COM_PORT = :COM_PORT, '
-      '  BAUD_RATE = :BAUD_RATE'
+      '  BAUD_RATE = :BAUD_RATE, '
+      '  DEVICE_TYPE = :DEVICE_TYPE, '
+      '  ECC_API_CODE = :ECC_API_CODE'
       'WHERE'
       '  FP_ID = :Old_FP_ID')
     SQLRefresh.Strings = (
       'SELECT '
-      ' FP_ID, '
-      ' FIRMA_ID, '
-      ' FIRMA_NAME, '
-      ' WS_ID, '
-      ' COMPUTER_NAME, '
-      ' SERIAL_NUMBER, '
-      ' DESCRIPTION, '
-      ' FLG_ENABLED, '
-      ' SERVER_ADDRESS, '
-      ' COM_PORT, '
-      ' BAUD_RATE'
+      ' V.FP_ID, '
+      ' V.FIRMA_ID, '
+      ' V.FIRMA_NAME, '
+      ' V.WS_ID, '
+      ' V.COMPUTER_NAME, '
+      ' V.SERIAL_NUMBER, '
+      ' V.DESCRIPTION, '
+      ' V.FLG_ENABLED, '
+      ' V.SERVER_ADDRESS, '
+      ' V.COM_PORT, '
+      ' V.BAUD_RATE, '
+      ' D.DEVICE_TYPE, '
+      ' D.ECC_API_CODE'
       'FROM '
-      ' VW_FP_DEVICES'
+      ' VW_FP_DEVICES V'
+      ' INNER JOIN FP_DEVICES D ON D.FP_ID = V.FP_ID'
       'WHERE'
-      ' FP_ID = :FP_ID')
+      ' V.FP_ID = :FP_ID')
     SQLLock.Strings = (
       'SELECT NULL FROM FP_DEVICES'
       'WHERE'
@@ -330,20 +357,24 @@ object frmFiscalPrintersSetupDlg: TfrmFiscalPrintersSetupDlg
     UpdateTransaction = IBCTrUpdate
     SQL.Strings = (
       'SELECT '
-      ' FP_ID, '
-      ' FIRMA_ID, '
-      ' FIRMA_NAME, '
-      ' WS_ID, '
-      ' COMPUTER_NAME, '
-      ' SERIAL_NUMBER, '
-      ' DESCRIPTION, '
-      ' FLG_ENABLED, '
-      ' SERVER_ADDRESS, '
-      ' COM_PORT, '
-      ' BAUD_RATE'
+      ' V.FP_ID, '
+      ' V.FIRMA_ID, '
+      ' V.FIRMA_NAME, '
+      ' V.WS_ID, '
+      ' V.COMPUTER_NAME, '
+      ' V.SERIAL_NUMBER, '
+      ' V.DESCRIPTION, '
+      ' V.FLG_ENABLED, '
+      ' V.SERVER_ADDRESS, '
+      ' V.COM_PORT, '
+      ' V.BAUD_RATE, '
+      ' D.DEVICE_TYPE, '
+      ' D.ECC_API_CODE'
       'FROM '
-      ' VW_FP_DEVICES')
+      ' VW_FP_DEVICES V'
+      ' INNER JOIN FP_DEVICES D ON D.FP_ID = V.FP_ID')
     AutoCommit = False
+    Options.SetFieldsReadOnly = False
     LockMode = lmLockImmediate
     RefreshOptions = [roAfterInsert, roAfterUpdate]
     Left = 64

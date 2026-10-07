@@ -20,7 +20,7 @@ uses
   StdCtrls,
   SysUtils,
   Variants,
-  Windows, {ZFPCOMLib_TLB,}
+  Windows,
   cxButtons,
   cxCalc,
   cxClasses,
@@ -54,8 +54,8 @@ uses
   Data.DB,
   Vcl.Menus,
   dxUIAClasses,
-  Tremol.FP,
-  Tremol.FP_core;
+  FiscalDeviceUnit,
+  ECCReceiptSendUnit;
 
 type
   TDocumentInfo = class
@@ -176,7 +176,13 @@ type
     fPrinterPort: string;
     fPrinterBoundRate: Integer;
     fFPServer: TFiscalPrinterServer;
-    fFPServerReachable: Boolean;
+    // aparatul fiscal al firmei (FP_DEVICES): MCC Tremol sau casa ECC Fiscal Partner
+    fDevice: IFiscalDevice;
+    fConnectError: string;
+    fLastPrinted: TFiscalReceiptResult;
+    // casa ECC: cum primeste clientul bonul (ales inainte de emitere) si bonul trimis
+    fSendChoice: TECCReceiptSendChoice;
+    fLastReceipt: TFiscalReceipt;
     fPrinterExists: Boolean;
     fCanPrintOnFP: Boolean;
     fCustomerIDNP: string;
@@ -200,6 +206,8 @@ type
     procedure TryOpenFiscalPrinter;
     procedure NotifyFiscalPrinterMissing(const AMessage: string);
     function DoPrintReceipt: Boolean;
+    function ReceiptDocID: Integer;
+    procedure SendReceiptToClient;
     procedure DoOpenTill;
     procedure AbortReceipt;
     procedure SetIsPersoanaJuridica(const Value: Boolean);
@@ -226,14 +234,12 @@ type
     procedure DisplayPrihodFacturaInfo;
     function CheckDocs: Boolean;
     procedure ApplyDocsInfo;
-    procedure HandleException(ex: Exception);
   protected
     { protected declarations }
     procedure Prepare; override;
     function IsFormDataPosted: Boolean; override;
   public
     { Public declarations }
-    fpc: FP;
     property PrintWithoutPrinter: Boolean read FPrintWithoutPrinter write SetPrintWithoutPrinter;
 
     // documentul Rashod
@@ -264,96 +270,6 @@ uses
 
 {$R *.dfm}
 { TfrmReceiptPrintDlg }
-
-procedure TfrmReceiptPrintV2Dlg.HandleException(ex: Exception);
-var
-  sx: SException;
-begin
-  if ex.ClassType.InheritsFrom(SException) then
-  begin
-    sx := ex as SException;
-               // Here are most important cases of errors
-    case sx.ErrType of
-      ServerAddressNotSet:
-        ShowMessage('Specify server ServerAddress property ');
-      ServerConnectionError:
-        ShowMessage('Connection from this app to the server is not established');
-      ServerDefsMismatch:
-        ShowMessage('The current library version and server definitions version do not match');
-      ServMismatchBetweenDefinitionAndFPResult:
-        ShowMessage('The current library version and the fiscal device firmware is not matching');
-      ServSockConnectionFailed:
-        ShowMessage('When the server can not connect to the fiscal device');
-      ServTCPAuth:
-        ShowMessage('Wrong device TCP password');
-      ServWaitOtherClientCmdProcessingTimeOut:
-        ShowMessage('Proccessing of other clients command is taking too long');
-      FPException:
-        begin
-                  //Check for the error is at the communication level
-          if sx.FPLibErrorCode > $100 then
-          begin
-
-                    //Possible communication error reasons
-            case sx.FPLibErrorCode of
-              $109:
-                ShowMessage('The fiscal device is missing');
-              $10A:
-                ShowMessage('The fiscal device is busy');
-              $102:
-                ShowMessage('Timeout while reading data from the fiscal device');
-              $10F:
-                ShowMessage('The connection with the device is not available');
-              $110:
-                ShowMessage('Out of paper');
-              $111:
-                ShowMessage('Fiscal device has already opened connection from another client');
-              $112:
-                ShowMessage('Wrong ZFP network password');
-              $113:
-                ShowMessage('Fiscal device is waiting for network password');
-            end;
-          end
-                //The error is at the device command processing level
-          else
-          begin
-    {
-            Possible reasons:
-            sx.STE1 =                                              sx.STE2 =
-                $30 OK                                                   $30 OK
-                $31 Out of paper, printer failure                        $31 Invalid command
-                $32 Registers overflow                                   $32 Illegal command
-                $33 Clock failure or incorrect date&time                 $33 Z daily report is not zero
-                $34 Opened fiscal receipt                                $34 Syntax error
-                $35 Payment residue account                              $35 Input registers overflow
-                $36 Opened non-fiscal receipt                            $36 Zero input registers
-                $37 Registered payment but receipt is not closed         $37 Unavailable transaction for correction
-                $38 Fiscal memory failure                                $38 Insufficient amount on hand
-                $39 Incorrect password                                   $3A No access
-                $3a Missing external display
-                $3b 24hours block – missing Z report
-                $3c Overheated printer thermal head.
-                $3d Interrupt power supply in fiscal receipt (one time until status is read)
-                $3e Overflow EJ
-                $3f Insufficient conditions
-     }
-            if (sx.ste1 = $30) and (sx.ste2 = $32) then
-              ShowMessage('sx.STE1 = $30 - command is OK  AND  sx.STE2 = $32 - command is Illegal in current context');
-
-            if (sx.ste1 = $30) and (sx.ste2 = $33) then
-              ShowMessage('sx.STE1 = $30 - command is OK  AND sx.STE2 = $33 - make Z report');
-
-            if (sx.ste1 = $34) and (sx.ste2 = $32) then
-              ShowMessage('sx.STE1 = $34 - Opened fiscal receipt  AND  sx.STE2 = $32 - command is Illegal in current context');
-          end;
-        end
-    else
-      ShowMessage(sx.GetMessage);
-    end;
-  end
-  else
-    ShowMessage(ex.Message);
-end;
 
 procedure TfrmReceiptPrintV2Dlg.AbortReceipt;
 begin
@@ -512,6 +428,7 @@ end;
 procedure TfrmReceiptPrintV2Dlg.btnPrintReceiptClick(Sender: TObject);
 var
   S, S2: string;
+  Confirmed: Boolean;
 begin
     // fara MCC gasita bonul fiscal nu poate fi tiparit
   if not (fPrinterExists and fCanPrintOnFP) then
@@ -542,7 +459,14 @@ begin
       S := S + 'cu card bancar';
     S := S + #13#10 + 'in suma de ' + FormatFloat('0,00.00', StrToCurr(edPaySuma.Text)) + ' Lei?';
 
-    if ShowAskDialog('Bon fiscal', 'Tipar ' + S2 + ' bon fiscal pentru ' + S) = mrYes then
+    // casa ECC: operatorul alege si cum primeste clientul bonul (tiparit / e-mail / Viber / SMS);
+    // MCC Tremol tipareste singur bonul, deci ramine intrebarea simpla
+    fSendChoice := Default(TECCReceiptSendChoice);
+    if fDevice.Kind = fdkECC then
+      Confirmed := ECCChooseReceiptSend('Emiteti ' + S2 + ' bon fiscal pentru ' + S, ReceiptDocID, fSendChoice)
+    else
+      Confirmed := ShowAskDialog('Bon fiscal', 'Tipar ' + S2 + ' bon fiscal pentru ' + S) = mrYes;
+    if Confirmed then
     begin
       btnPrintReceipt.Enabled := False;
       tbsPrintProgress.TabVisible := True;
@@ -552,8 +476,20 @@ begin
       if (fPrinterExists and fCanPrintOnFP) then
       begin
         if DoPrintReceipt then
-          SaveReceiptToDB2(fFactura_DOCID, fNumarBon, fIsPersoanaJuridica, GetIsBonPartial, GetIsNumerar, fDataBon, fReceiptSuma);
-        fReceiptPrinted := True;
+        begin
+          if SaveReceiptToDB2(fFactura_DOCID, fNumarBon, fIsPersoanaJuridica, GetIsBonPartial, GetIsNumerar, fDataBon,
+            fReceiptSuma) then
+            // ECC: rindul din TDB_DOCS_RECEIPT se leaga de tranzactia din jurnal
+            fDevice.ConfirmRegistered(fLastPrinted, fTargetFacturaDocInfo.DocID, fReceiptSuma);
+          SendReceiptToClient;
+        end
+        else if not fReceiptPrinted then
+        begin
+          // nimic tiparit: se poate corecta si reincerca
+          tbsPrintProgress.TabVisible := False;
+          cxPageControl.ActivePage := tbsReceipt;
+          btnPrintReceipt.Enabled := True;
+        end;
       end
       else
       begin
@@ -739,33 +675,41 @@ end;
 
 procedure TfrmReceiptPrintV2Dlg.TryOpenFiscalPrinter;
 var
-//    FP: TZekaFP;
-  N: Cardinal;
-  BaundRate: Word;
-  COMPort: Word;
-  fFactoryNumber: string;
-  D: TDateTime;
-//    TaxPerc: ITaxNumbers;
+  N: Int64;
   Query: TIBCQuery;
+  Status: TFiscalDeviceStatus;
 begin
+  // conectarea s-a facut in Prepare; aici doar starea aparatului
+  if (fDevice = nil) or not fDevice.Connected then
+  begin
+    if fConnectError = '' then
+      fConnectError := cFISCAL_PRINTER_NotFoundMessage;
+    NotifyFiscalPrinterMissing(fConnectError);
+    Exit;
+  end;
 
   try
-//            FP.Setup(fPrinterPort, fPrinterBoundRate, 3, 1000);
-    fFactoryNumber := fpc.ReadSerialAndFiscalNums.SerialNum;
+    Status := fDevice.ReadStatus;
 
-    Query := TIBCQuery.Create(Self);
-    try
-      Query.Connection := dmDB.IBCConnection;
-      Query.SQL.Text := 'SELECT CANPRINT FPDeviceFound from SP_CANPRINTFPDEVICE(:FIRMAID, :SERIAL_NUMBER)';
-      Query.ParamByName('FIRMAID').AsInteger := dmDB.FirmaInfo.FirmaID;
-      Query.ParamByName('SERIAL_NUMBER').AsString := fFactoryNumber;
-      Query.Open;
-      fCanPrintOnFP := Query.FieldByName('FPDeviceFound').AsInteger = 1;
-    finally
-      Query.Free;
+    if fDevice.Kind = fdkECC then
+      // casa ECC e legata de firma direct in FP_DEVICES; nu are numar de serie de verificat
+      fCanPrintOnFP := True
+    else
+    begin
+      Query := TIBCQuery.Create(Self);
+      try
+        Query.Connection := dmDB.IBCConnection;
+        Query.SQL.Text := 'SELECT CANPRINT FPDeviceFound from SP_CANPRINTFPDEVICE(:FIRMAID, :SERIAL_NUMBER)';
+        Query.ParamByName('FIRMAID').AsInteger := dmDB.FirmaInfo.FirmaID;
+        Query.ParamByName('SERIAL_NUMBER').AsString := Status.SerialNumber;
+        Query.Open;
+        fCanPrintOnFP := Query.FieldByName('FPDeviceFound').AsInteger = 1;
+      finally
+        Query.Free;
+      end;
     end;
 
-    if (fCanPrintOnFP) and (fFactoryNumber <> '') then
+    if (fCanPrintOnFP) and (Status.SerialNumber <> '') then
       fPrinterExists := True;
 
     if (fCanPrintOnFP) and fPrinterExists then
@@ -774,35 +718,34 @@ begin
       lbInfo1.Visible := True;
       lbInfo2.Visible := True;
 
-      lbInfo1.Caption := 'Fiscal Number: ' + fpc.ReadSerialAndFiscalNums.FMNum;
-//          lbInfo2.Caption := 'Tax Number: ' + fpc.ReadSerialAndFiscalNums.uniECR_UniqueNum;
+      lbInfo1.Caption := 'Fiscal Number: ' + Status.FiscalNumber;
 
       lbPrinterInfo.Font.Color := clGreen;
-      if fFPServer.IsRemote then
-        lbPrinterInfo.Caption := 'MCC ' + fFactoryNumber + ' in ' + fPrinterPort + ' pe ' + fFPServer.ServerAddress
+      if fDevice.Kind = fdkECC then
+        lbPrinterInfo.Caption := 'Casa ECC ' + Status.Location
       else
-        lbPrinterInfo.Caption := 'MCC ' + fFactoryNumber + ' in ' + fPrinterPort;
+        lbPrinterInfo.Caption := 'MCC ' + Status.SerialNumber + ' ' + Status.Location;
       fPrinterExists := True;
 
-      D := fpc.ReadDateTime;
-      lbFP_DateTime.Caption := FormatDateTime('dd MMMM yyyy, HH:NN', D);
+      if Status.DeviceTime > 0 then
+      begin
+        lbFP_DateTime.Caption := FormatDateTime('dd MMMM yyyy, HH:NN', Status.DeviceTime);
 
         // check time differences
-      N := MinutesBetween(Now, D);
-      if N >= cFISCAL_PRINTER_MaxMinutesDifferenceAllowed then
-      begin
-        lbFP_DateTime.Caption := lbFP_DateTime.Caption + ' (Diferenta in minute: ' + IntToStr(N) + ')';
-        lbFPDateTimeWarning.Visible := True;
+        N := MinutesBetween(Now, Status.DeviceTime);
+        if N >= cFISCAL_PRINTER_MaxMinutesDifferenceAllowed then
+        begin
+          lbFP_DateTime.Caption := lbFP_DateTime.Caption + ' (Diferenta in minute: ' + IntToStr(N) + ')';
+          lbFPDateTimeWarning.Visible := True;
+        end;
       end;
 
-        // get fiscal groups (TVA groups)
-
-      var VatRates := fpc.ReadVATrates;
-      if (VatRates.VATrateA <> 20) then
+      // grupa fiscala A trebuie sa fie 20 % (toate liniile cu TVA se tiparesc in clasa A)
+      if (fDevice.Kind = fdkTremol) and (Status.VatRateA <> 20) then
       begin
         fPrinterExists := False;
 
-    // disable print
+        // disable print
         btnNextToReceipt.Enabled := False;
         btnPrintReceipt.Enabled := False;
         cmbFR_PersoanaType.Enabled := False;
@@ -822,12 +765,9 @@ begin
         NotifyFiscalPrinterMissing(cFISCAL_PRINTER_NotFoundMessage);
     end;
   except
-      // motivul concret ajuta la depanare: eroare de baza de date, port ocupat, MCC oprita
+    // motivul concret ajuta la depanare: eroare de baza de date, port ocupat, MCC oprita
     on E: Exception do
-      if fFPServerReachable then
-        NotifyFiscalPrinterMissing(cFISCAL_PRINTER_NotFoundMessage + ' (' + E.Message + ')')
-      else
-        NotifyFiscalPrinterMissing(cFISCAL_PRINTER_ServerNotRespondingMessage + ': ' + fFPServer.ServerAddress);
+      NotifyFiscalPrinterMissing(cFISCAL_PRINTER_NotFoundMessage + ' (' + E.Message + ')');
   end;
 end;
 
@@ -898,165 +838,118 @@ end;
 
 procedure TfrmReceiptPrintV2Dlg.DoOpenTill;
 begin
-  fpc.SafeBoxOpen;
+  if (fDevice = nil) or not fDevice.Connected then
+  begin
+    MessageDlg(cFISCAL_PRINTER_NotFoundMessage, mtError, [mbOK], 0);
+    Exit;
+  end;
+  try
+    fDevice.OpenDrawer;
+  except
+    on E: Exception do
+      MessageDlg(E.Message, mtError, [mbOK], 0);
+  end;
 end;
 
+// True = bonul e tiparit si numarul lui e cunoscut (se poate salva in baza).
+// fReceiptPrinted = True din clipa in care bonul exista fiscal, chiar daca rezultatul e False.
 function TfrmReceiptPrintV2Dlg.DoPrintReceipt: Boolean;
 var
-  N: Double;
   i: Integer;
-  GoodsTitle: string;
-  GoodsQTY: Double;
-  GoodsPrice: Double;
-  GoodsVAT: Integer;
-  hasError: Boolean;
   paySuma: Currency;
-  taxGroup: Integer;
+  Receipt: TFiscalReceipt;
+  Printed: TFiscalReceiptResult;
+  NumarText: string;
 begin
   Result := False;
-  hasError := False;
-
   fReceiptPrinted := False;
   fNumarBon := -1;
   fDataBon := 0;
   paySuma := StrToCurr(edPaySuma.Text);
 
-//        fpc.OpenFiscalBon(Ord(fIsPersoanaJuridica) + 1, '0000', 0, 0);
-  try
-    fpc.OpenReceipt_V2(1, '0000', fpt_Step_by_step_printing);
-  except
-    on se: SException do
-    begin
-      HandleException(se);
-      raise;
-    end;
-  end;
-
+  Receipt.Clear;
+  // legatura cu factura pentru jurnalul ECC; o factura poate avea mai multe bonuri partiale,
+  // deci SourceRef ramine gol (fara unicitate pe sursa)
+  Receipt.DocID := fFactura_DOCID;
+  Receipt.SourceType := 1;
   if cmbCekType.ItemIndex = 0 then
-     // Bon complet
+    // Bon complet
     for i := 0 to cxGridTable.DataController.RecordCount - 1 do
-    begin
-      GoodsTitle := cxGridTable.DataController.Values[i, cxGridTable_TITLE.Index];
-      GoodsQTY := cxGridTable.DataController.Values[i, cxGridTable_QTY.Index];
-      GoodsPrice := cxGridTable.DataController.Values[i, cxGridTable_RPICE.Index];
-      GoodsVAT := cxGridTable.DataController.Values[i, cxGridTable_TVA.Index];
+      Receipt.AddLine(cxGridTable.DataController.Values[i, cxGridTable_TITLE.Index],
+        cxGridTable.DataController.Values[i, cxGridTable_QTY.Index],
+        cxGridTable.DataController.Values[i, cxGridTable_RPICE.Index],
+        cxGridTable.DataController.Values[i, cxGridTable_TVA.Index])
+  else
+    // Bon partial: o singura linie cu suma aleasa; in avansuri TVA este intotdeauna 20%
+    Receipt.AddLine(cmbHalfReceipeText.Text, 1, paySuma, 20);
 
-      case GoodsVAT of
-        20:
-          taxGroup := 0; // VAT=20%
-        10:
-          taxGroup := 1;   // VAT=10% Horeca
-        8:
-          taxGroup := 2;  // VAT=8%
-        0:
-          taxGroup := 3; // Fara tva
-      else
-        taxGroup := 0;
-      end;
+  // TVA 0: o singura intrebare, inainte de a atinge aparatul; "Nu" opreste bonul
+  // (pina in sep 2026 "Nu" tiparea linia cu TVA 20%)
+  if Receipt.HasZeroVat and (SWNUtils.ShowAskDialog('SWN', 'Va fi tiparit cecul cu TVA 0!', 'Continuati?') <> mrYes) then
+    Exit;
 
-      if (taxGroup = 3) and (SWNUtils.ShowAskDialog('SWN', 'Va fi tiparit cecul cu TVA 0!', 'Continuati?') = mrYes) then
-      begin
-        try
-          fpc.SellPLUwithSpecifiedVAT(GoodsTitle, vatc_VAT_Class_E, GoodsPrice, GoodsQTY, 0, 0, '', '');
-        except
-          on se: SException do
-          begin
-            HandleException(se);
-            hasError := True;
-            Break;
-          end;
-        end;
-      end
-      else
-      begin
-        try
-          fpc.SellPLUwithSpecifiedVAT(GoodsTitle, vatc_VAT_class_A, GoodsPrice, GoodsQTY, 0, 0, '', '');
-        except
-          on se: SException do
-          begin
-            HandleException(se);
-            hasError := True;
-            Break;
-          end;
-        end;
-      end;
-    end
-  else             // Bon partial, print only 1 item with selected sum
-  begin
-    GoodsVAT := 20;                 // in avansuri TVA intotdeauna este 20%
-    case GoodsVAT of
-      20:
-        taxGroup := 0;  // VAT=20%
-      10:
-        taxGroup := 2;  // VAT=10% Horeca
-      8:
-        taxGroup := 1;  // VAT=8%
-      0:
-        taxGroup := 3;  // fara tva
-    else
-      taxGroup := 0;
-    end;
+  case cmbFR_PaymentType.ItemIndex of
+    0: // NUMERAR
+      Receipt.AddPayment(fpkCash, paySuma);
+  else // CARD BANCAR
+    Receipt.AddPayment(fpkCard, paySuma);
+  end;
 
-    if (taxGroup = 3) and (SWNUtils.ShowAskDialog('SWN', 'Va fi tiparit cecul cu TVA 0!', 'Continuati?') = mrYes) then
+  // ECC: la e-mail / Viber / SMS bonul nu se mai tipareste pe PC
+  Receipt.NoPaperPrint := fSendChoice.Kind <> rskPrint;
+  fLastReceipt := Receipt;
+
+  // o exceptie = pe aparat nu a ramas nimic (bonul deschis a fost anulat)
+  try
+    Printed := fDevice.PrintReceipt(Receipt);
+  except
+    on E: Exception do
     begin
-      try
-        fpc.SellPLUwithSpecifiedVAT(cmbHalfReceipeText.Text, vatc_VAT_Class_E, paySuma, { qty } 1, 0, 0, '', '');
-      except
-        on se: SException do
-        begin
-          hasError := True;
-          HandleException(se);
-          raise;
-        end;
-      end;
-    end
-    else
-    begin
-      try
-        fpc.SellPLUwithSpecifiedVAT(cmbHalfReceipeText.Text, vatc_VAT_Class_A, paySuma, { qty } 1, 0, 0, '', '');
-      except
-        on se: SException do
-        begin
-          hasError := True;
-          HandleException(se);
-          raise;
-        end;
-      end;
+      MessageDlg(E.Message, mtError, [mbOK], 0);
+      Exit;
     end;
   end;
 
-  if not hasError then
+  fLastPrinted := Printed;
+
+  // ECC: cererea a plecat, dar rezultatul nu e cunoscut - NU se repeta din acest dialog
+  if Printed.State = frsPending then
   begin
-    try
-      case cmbFR_PaymentType.ItemIndex of
-        0: // NUMERAR
-          fpc.Payment_V2_1(ptv21_NUMERAR, c_Without_Change, paySuma, ct_Empty);
-        1: // CARD BANCAR
-          fpc.Payment_V2_1(ptv21_CARD_PLATA, c_Without_Change, paySuma, ct_Empty);
-      end;
-      fpc.CloseReceipt;
-    except
-      on se: SException do
-      begin
-        hasError := True;
-        HandleException(se);
-      end;
-    end;
-    N := fpc.ReadLastReceiptNum.DailyReceiptCounter;
     fReceiptPrinted := True;
-    fNumarBon := trunc(N);
-    fDataBon := fpc.ReadDateTime;
-    fReceiptSuma := paySuma;
-
-    AddSummaryReceipt(fNumarBon, fDataBon, paySuma, fIsPersoanaJuridica, cmbCekType.ItemIndex = 1, cmbFR_PaymentType.ItemIndex
-      = 0, dmDB.CurrentUserFullName, True);
-
-    tbsReceipt.TabVisible := False;
-    tbsReceiptSummary.TabVisible := True;
-    cxPageControl.ActivePage := tbsReceiptSummary;
-
-    Result := True; // bonul este imprimat fara erori
+    MessageDlg(Printed.Warning, mtWarning, [mbOK], 0);
+    Exit;
   end;
+
+  // de aici bonul exista fiscal
+  fReceiptPrinted := True;
+  fReceiptSuma := paySuma;
+  fNumarBon := Printed.Number;
+  fDataBon := Printed.DateTime;
+  if Printed.Warning <> '' then
+    MessageDlg(Printed.Warning, mtInformation, [mbOK], 0);
+
+  if Printed.State = frsNumberUnknown then
+  begin
+    NumarText := '';
+    if not InputQuery('Bon fiscal', Printed.Warning + #13#10#13#10 + 'Numarul bonului de pe hirtie:', NumarText) or
+      (StrToIntDef(Trim(NumarText), 0) <= 0) then
+    begin
+      MessageDlg('Bonul fiscal a fost tiparit, dar NU a fost inregistrat in WMS: numarul lui nu este cunoscut. ' +
+        'Inregistrati-l manual dupa numarul de pe hirtie.', mtWarning, [mbOK], 0);
+      Exit;
+    end;
+    fNumarBon := StrToInt(Trim(NumarText));
+    fLastPrinted.Number := fNumarBon;
+  end;
+
+  AddSummaryReceipt(fNumarBon, fDataBon, paySuma, fIsPersoanaJuridica, cmbCekType.ItemIndex = 1, cmbFR_PaymentType.ItemIndex
+    = 0, dmDB.CurrentUserFullName, True);
+
+  tbsReceipt.TabVisible := False;
+  tbsReceiptSummary.TabVisible := True;
+  cxPageControl.ActivePage := tbsReceiptSummary;
+
+  Result := True; // bonul este imprimat, numarul e cunoscut
 end;
 
 procedure TfrmReceiptPrintV2Dlg.FormCreate(Sender: TObject);
@@ -1097,20 +990,14 @@ end;
 
 procedure TfrmReceiptPrintV2Dlg.FormDestroy(Sender: TObject);
 begin
-    // eliberam MCC pentru celelalte calculatoare din retea
-  if Assigned(fpc) then
-  try
-    fpc.ServerCloseDeviceConnection;
-  except
-      // serverul poate fi deja inaccesibil - nu are rost sa deranjam utilizatorul
-  end;
+  // aparatul elibereaza singur MCC pentru celelalte calculatoare din retea
+  fDevice := nil;
 
   fRashodDocInfo.Free;
   fPrihodDocInfo.Free;
   fFacturaDocInfo.Free;
   fTargetPrihodDocInfo.Free;
   fTargetFacturaDocInfo.Free;
-  FreeAndNil(fpc);
 end;
 
 function TfrmReceiptPrintV2Dlg.GetIsBonPartial: Boolean;
@@ -1161,8 +1048,6 @@ begin
 end;
 
 procedure TfrmReceiptPrintV2Dlg.Prepare;
-var
-  fpConnection: TTremolConnection;
 begin
   // settings
   fPrinterPort := AppConfigStorage.TextValues.GetValue(cSETTINGS_AppFiscalPrinterComPortV2, cFISCAL_PRINTER_DefaultCOMportV2);
@@ -1208,34 +1093,27 @@ begin
 
 
 
-    // MCC poate fi atasata la acest calculator sau la altul din reteaua locala -
-    // adresa serverului ZFPLab se ia din configurarea MCC (FP_DEVICES)
-  fFPServer := GetFiscalPrinterServer(dmDB.FirmaInfo.FirmaID);
-
-  fpc := FP.Create;
-  fpc.ServerAddress := fFPServer.ServerAddress;
-
-    //Initializing server definitions
-  fFPServerReachable := True;
+  // aparatul fiscal al firmei pentru acest calculator (FP_DEVICES). MCC poate fi atasata
+  // la acest calculator sau la altul din reteaua locala; portul COM nu se mai configureaza
+  // manual (vezi ConnectTremolFiscalPrinter). Fara aparat documentul se deschide totusi,
+  // dar tiparul e interzis cu mesajul din fConnectError (vezi TryOpenFiscalPrinter).
+  fConnectError := '';
   try
-    fpc.ApplyClientLibraryDefinitions();
+    fDevice := CreateFiscalDevice(dmDB.FirmaInfo.FirmaID);
+    fFPServer := fDevice.Info.Server;
+    // fara rind in FP_DEVICES ar ramine doar MCC locala, pe care SP_CANPRINTFPDEVICE oricum
+    // o refuza pentru firma curenta - nu ne mai conectam la ea degeaba
+    if not fDevice.Info.Found then
+      fConnectError := 'Pentru firma curenta (' + dmDB.CurrentFirmaName + ') nu este configurat niciun aparat ' +
+        'fiscal activ: nici MCC, nici casa ECC (Nomenclatoare > MCC).'
+    else
+      fDevice.Connect(fConnectError);
   except
-    on se: SException do
-        // serverul ZFPLab nu raspunde. Nu blocam deschiderea documentului, dar tiparul va fi
-        // interzis cu un mesaj care arata adresa (vezi TryOpenFiscalPrinter).
-      fFPServerReachable := False;
-  end;
-
-    // Portul COM nu se mai configureaza manual. Pentru MCC locala se incearca portul
-    // memorat, iar daca pe el nu raspunde nimic - serverul ZFPLab cauta singur
-    // echipamentul (finddevice()). Pentru MCC din retea portul vine din FP_DEVICES:
-    // scanarea porturilor unui calculator strain nu se face.
-  fpConnection := ConnectTremolFiscalPrinter(fpc, fFPServer);
-  fFPServerReachable := fFPServerReachable and fpConnection.ServerReachable;
-  if fpConnection.Connected then
-  begin
-    fPrinterPort := fpConnection.Port;
-    fPrinterBoundRate := fpConnection.BaudRate;
+    on E: Exception do
+    begin
+      fDevice := nil;
+      fConnectError := E.Message;
+    end;
   end;
 
   fCustomerIDNP := dmDB.FirmaInfo.FiscalCode;
@@ -1341,6 +1219,33 @@ begin
       end;
       Query.Close;
     end;
+
+    // bonurile de pe documentele-parinte (lantul PARENTDOCID): de ex. bonul ECC emis automat
+    // la plata online pe Web-Order 134 (134 -> 115 -> 107 -> 112). Suma lor e deja fiscalizata.
+    Query.SQL.Text :=
+      'WITH RECURSIVE A AS (' +
+      '  SELECT DOCID, PARENTDOCID, 0 AS LVL FROM TDB_DOCS WHERE DOCID = :DOCID ' +
+      '  UNION ALL ' +
+      '  SELECT P.DOCID, P.PARENTDOCID, A.LVL + 1 FROM TDB_DOCS P INNER JOIN A ON P.DOCID = A.PARENTDOCID ' +
+      '  WHERE A.LVL < 10) ' +
+      'SELECT R.* FROM VW_DOCS_RECEIPT R INNER JOIN A ON R.DOCID = A.DOCID ' +
+      'WHERE A.LVL > 0 AND R.FLG_CANCELED = 0';
+    if fFactura_DOCID <> -1 then
+      Query.ParamByName('DOCID').AsInteger := fFactura_DOCID
+    else
+      Query.ParamByName('DOCID').AsInteger := fRASHOD_DOCID;
+    Query.ExecSQL;
+    while not Query.Eof do
+    begin
+      AddSummaryReceipt(Query.FieldByName('NUMAR_BON').AsInteger, Query.FieldByName('DATA_ELIBERARII').AsDateTime,
+        Query.FieldByName('SUMA').AsCurrency, Query.FieldByName('FLG_PERSOANA_JURIDICA').AsInteger = 1, Query.FieldByName
+        ('FLG_BON_PARTIAL').AsInteger = 1, Query.FieldByName('FLG_NUMERAR').AsInteger = 1,
+        Query.FieldByName('USER_NAME').AsString + ' (pe documentul ' + Query.FieldByName('DOCID').AsString + ')');
+      fSumaPartial := fSumaPartial + Query.FieldByName('SUMA').AsCurrency;
+      allowFullReceipt := False;
+      Query.Next;
+    end;
+    Query.Close;
 
     // fTotalSuma
     // SumaPartial
@@ -1474,6 +1379,33 @@ begin
     end;
   finally
     Query.Free;
+  end;
+end;
+
+// documentul din care se propune contactul clientului (e-mail / telefon)
+function TfrmReceiptPrintV2Dlg.ReceiptDocID: Integer;
+begin
+  Result := fFactura_DOCID;
+  if Result <= 0 then
+    Result := fTargetFacturaDocInfo.DocID;
+end;
+
+// Bonul ECC ajunge la client pe calea aleasa la emitere. Esecul nu schimba nimic:
+// bonul e emis si inregistrat, copia se poate tipari din factura.
+procedure TfrmReceiptPrintV2Dlg.SendReceiptToClient;
+var
+  Msg: string;
+begin
+  if (fSendChoice.Kind = rskPrint) or (fDevice = nil) or (fDevice.Kind <> fdkECC) then
+    Exit;
+  try
+    Msg := ECCSendReceipt(fSendChoice, ReceiptDocID, fLastReceipt, fLastPrinted, fReceiptSuma);
+    if Msg <> '' then
+      MessageDlg(Msg, mtInformation, [mbOK], 0);
+  except
+    on E: Exception do
+      MessageDlg('Bonul fiscal este emis, dar nu a fost trimis clientului: ' + E.Message + #13#10#13#10 +
+        'Il puteti tipari din factura: tab-ul "Cecuri MCC" > "Tipareste copia cecului...".', mtWarning, [mbOK], 0);
   end;
 end;
 

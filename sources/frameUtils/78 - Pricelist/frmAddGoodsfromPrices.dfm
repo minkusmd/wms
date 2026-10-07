@@ -451,6 +451,10 @@ object frmAddGoodsFromPriceDlg: TfrmAddGoodsFromPriceDlg
           ItemName = 'bbMergeSelectedGoods'
         end
         item
+          Visible = True
+          ItemName = 'bbCreateBasedOnSelectedGood'
+        end
+        item
           BeginGroup = True
           UserDefine = [udWidth]
           UserWidth = 125
@@ -649,6 +653,13 @@ object frmAddGoodsFromPriceDlg: TfrmAddGoodsFromPriceDlg
       Hint = 'Schimba tipul de evidenta'
       Visible = ivAlways
       OnClick = bbChangeInventoryCostingMethodClick
+    end
+    object bbCreateBasedOnSelectedGood: TdxBarButton
+      Caption = 'New Button'
+      Category = 0
+      Hint = 'New Button'
+      Visible = ivAlways
+      OnClick = bbCreateBasedOnSelectedGoodClick
     end
     object dxBarControlContainerItem1: TdxBarControlContainerItem
       Caption = 'Search'

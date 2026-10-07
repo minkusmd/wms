@@ -148,6 +148,9 @@ end;
 procedure TfrmApiConfigDlg.IBCQueryConfigNewRecord(DataSet: TDataSet);
 begin
     DataSet.FieldByName('FLG_ACTIVE').AsInteger := 1;
+    // UPDATED_AT e NOT NULL, deci campul e Required si Post-ul il cere; valoarea reala o pune
+    // trigger-ul TS_API_CONFIG_BI (coloana nici nu e in SQLInsert)
+    DataSet.FieldByName('UPDATED_AT').AsDateTime := Now;
 end;
 
 { Codul API si numele parametrului se normalizeaza la majuscule: codul le cauta

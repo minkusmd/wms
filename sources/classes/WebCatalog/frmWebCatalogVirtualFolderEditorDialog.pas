@@ -3,9 +3,17 @@ unit frmWebCatalogVirtualFolderEditorDialog;
 {
   Editorul unei mape virtuale (TWEB_CATALOG_VIRTUAL, prin VW_TWEB_CATALOG_VIRTUAL).
 
-  O mapa virtuala = pagina categoriei-parinte cu un filtru de atribut
-  pre-aplicat (FILTERID + CSV de FILTERPARAMIDS), slug propriu (segmentul 4 din
-  ruta /category/...), H1/meta proprii si o imagine pentru grila de tile-uri.
+  O mapa virtuala = pagina categoriei-parinte cu unul sau mai multe filtre de
+  atribut pre-aplicate, slug propriu (segmentul 4 din ruta /category/...),
+  H1/meta proprii si o imagine pentru grila de tile-uri.
+
+  Atributele (ex. anvelope: Latime 225 + Inaltime 55 + Diametru R19) se
+  combina cu SI; valorile aceluiasi atribut cu SAU. Stocare, fara coloane noi:
+    FILTERID       = primul atribut
+    FILTERPARAMIDS = CSV-ul valorilor lui, apoi restul atributelor in gramatica
+                     site-ului: "12790;1259(12873);1249(12822)"
+  O mapa cu un singur atribut arata exact ca inainte ("12844").
+  Acelasi format il citeste site-ul: models/CatalogVirtualFolder.php.
 
   Imaginea sta in tabelul lateral TWEB_CATALOG_VIRTUAL_IMAGE si se poate
   adauga doar dupa ce mapa a fost salvata o data (ID-ul vine din generator).
@@ -22,6 +30,14 @@ uses
     DB, DBAccess, IBC, MemDS, Vcl.Menus;
 
 type
+    { un atribut al mapei: filtrul si valorile lui (CSV de FILTERPARAMID) }
+    TVirtualFolderFilter = record
+        FilterID: Integer;
+        ParamIDs: string;
+    end;
+
+    TVirtualFolderFilters = TArray<TVirtualFolderFilter>;
+
     TfrmWebCatalogVirtualFolderEditorDlg = class(TSWNMasteredFormClass)
         dtDialogTitle: TDialogTitle;
         pnClient: TPanel;
@@ -50,8 +66,9 @@ type
         edMETA_DESCRIPTION_RUS: TcxDBMemo;
         cbFLG_ENABLED: TcxDBCheckBox;
         cbFLG_TILE: TcxDBCheckBox;
-        lbFilterValue: TLabel;
+        lstFilters: TListBox;
         btnChooseFilter: TcxButton;
+        btnRemoveFilter: TcxButton;
         btnFillSlug: TcxButton;
         imgBIG_IMAGE: TcxDBImage;
         btnOk: TButton;
@@ -59,13 +76,20 @@ type
         IBCQueryImage: TIBCQuery;
         IBCDataSourceImage: TIBCDataSource;
         procedure btnChooseFilterClick(Sender: TObject);
+        procedure btnRemoveFilterClick(Sender: TObject);
+        procedure lstFiltersDblClick(Sender: TObject);
         procedure btnFillSlugClick(Sender: TObject);
     private
         { Private declarations }
         fCreateNewRecord: Boolean;
         fCatalogID: Integer;
+        fFilters: TVirtualFolderFilters;
         function CheckValues: Boolean;
-        procedure UpdateFilterLabel;
+        function FilterCaption(const AFilter: TVirtualFolderFilter): string;
+        function PickFilter(var AFilter: TVirtualFolderFilter): Boolean;
+        function ApplyFilters(const AFilters: TVirtualFolderFilters): Boolean;
+        procedure LoadFilters;
+        procedure RefreshFilterList(const ASelect: Integer);
         procedure OpenImageDataSet;
         procedure SetCreateNewRecord(const Value: Boolean);
         procedure SetCatalogID(const Value: Integer);
@@ -81,12 +105,88 @@ type
         property CatalogID: Integer read fCatalogID write SetCatalogID;
     end;
 
+{ FILTERID + FILTERPARAMIDS <-> lista de atribute (formatul e descris in antet) }
+function ParseVirtualFolderFilters(const AFilterID: Integer; const AParamIDs: string): TVirtualFolderFilters;
+procedure BuildVirtualFolderFilters(const AFilters: TVirtualFolderFilters; out AFilterID: Integer;
+    out AParamIDs: string);
+
 implementation
 
 {$R *.dfm}
 
 uses
     DataModuleDB, SWNUtils, SWNConst, frmSelectCatalogFilterValueDialog;
+
+const
+    { lungimea coloanei TWEB_CATALOG_VIRTUAL.FILTERPARAMIDS }
+    cMaxFilterParamIDsLen = 200;
+
+var
+    { categoria de produse aleasa ultima data in picker: la mai multe atribute
+      (si la mai multe mape la rand) nu se mai cauta de fiecare data }
+    gLastGoodsTypeID: Integer = 0;
+
+function ParseVirtualFolderFilters(const AFilterID: Integer; const AParamIDs: string): TVirtualFolderFilters;
+var
+    Parts: TArray<string>;
+    i, p: Integer;
+    s: string;
+    f: TVirtualFolderFilter;
+begin
+    Result := nil;
+    Parts := AParamIDs.Split([';']);
+    for i := 0 to High(Parts) do
+    begin
+        s := StringReplace(Parts[i], ' ', '', [rfReplaceAll]);
+        if s = '' then
+            Continue;
+        p := Pos('(', s);
+        if p > 0 then
+        begin
+            f.FilterID := StrToIntDef(Copy(s, 1, p - 1), 0);
+            f.ParamIDs := Copy(s, p + 1, MaxInt);
+            if f.ParamIDs.EndsWith(')') then
+                SetLength(f.ParamIDs, Length(f.ParamIDs) - 1);
+        end
+        else
+        begin
+            f.FilterID := AFilterID;
+            f.ParamIDs := s;
+        end;
+        if (f.FilterID > 0) and (f.ParamIDs <> '') then
+            Result := Result + [f];
+    end;
+end;
+
+procedure BuildVirtualFolderFilters(const AFilters: TVirtualFolderFilters; out AFilterID: Integer;
+    out AParamIDs: string);
+var
+    i: Integer;
+begin
+    AFilterID := 0;
+    AParamIDs := '';
+    if Length(AFilters) = 0 then
+        Exit;
+    AFilterID := AFilters[0].FilterID;
+    AParamIDs := AFilters[0].ParamIDs;
+    for i := 1 to High(AFilters) do
+        AParamIDs := AParamIDs + Format(';%d(%s)', [AFilters[i].FilterID, AFilters[i].ParamIDs]);
+end;
+
+{ adauga valorile lipsa din ANew in CSV-ul AExisting }
+function MergeParamIDs(const AExisting, ANew: string): string;
+var
+    Item: string;
+begin
+    Result := AExisting;
+    for Item in ANew.Split([',']) do
+        if (Item <> '') and (Pos(',' + Item + ',', ',' + Result + ',') = 0) then
+        begin
+            if Result <> '' then
+                Result := Result + ',';
+            Result := Result + Item;
+        end;
+end;
 
 { TfrmWebCatalogVirtualFolderEditorDlg }
 
@@ -194,25 +294,126 @@ begin
         ShowErrorDialog(cMSG_GeneralInputError_Title, cMSG_GeneralInputError_Text, ErrorStr);
 end;
 
-procedure TfrmWebCatalogVirtualFolderEditorDlg.btnChooseFilterClick(Sender: TObject);
+function TfrmWebCatalogVirtualFolderEditorDlg.PickFilter(var AFilter: TVirtualFolderFilter): Boolean;
 var
     d: TfrmSelectCatalogFilterValueDlg;
 begin
     d := TfrmSelectCatalogFilterValueDlg.Create(Self);
     try
-        d.FilterID := fMasterDataSet.FieldByName('FILTERID').AsInteger;
-        d.ParamIDs := fMasterDataSet.FieldByName('FILTERPARAMIDS').AsString;
-        if d.ShowModal = mrOk then
+        d.GoodsTypeID := gLastGoodsTypeID;
+        d.FilterID := AFilter.FilterID;
+        d.ParamIDs := AFilter.ParamIDs;
+        Result := d.ShowModal = mrOk;
+        if Result then
         begin
-            if not(fMasterDataSet.State in dsEditModes) then
-                fMasterDataSet.Edit;
-            fMasterDataSet.FieldByName('FILTERID').AsInteger := d.FilterID;
-            fMasterDataSet.FieldByName('FILTERPARAMIDS').AsString := d.ParamIDs;
-            UpdateFilterLabel;
+            AFilter.FilterID := d.FilterID;
+            AFilter.ParamIDs := d.ParamIDs;
+            gLastGoodsTypeID := d.GoodsTypeID;
         end;
     finally
         d.Free;
     end;
+end;
+
+{ scrie lista in FILTERID / FILTERPARAMIDS; False daca nu incape in coloana }
+function TfrmWebCatalogVirtualFolderEditorDlg.ApplyFilters(const AFilters: TVirtualFolderFilters): Boolean;
+var
+    FilterID: Integer;
+    ParamIDs: string;
+begin
+    BuildVirtualFolderFilters(AFilters, FilterID, ParamIDs);
+    Result := Length(ParamIDs) <= cMaxFilterParamIDsLen;
+    if not Result then
+    begin
+        ShowMessage(Format('Prea multe atribute / valori: lista nu incape in %d de caractere.',
+            [cMaxFilterParamIDsLen]));
+        Exit;
+    end;
+
+    if not(fMasterDataSet.State in dsEditModes) then
+        fMasterDataSet.Edit;
+    fMasterDataSet.FieldByName('FILTERID').AsInteger := FilterID;
+    fMasterDataSet.FieldByName('FILTERPARAMIDS').AsString := ParamIDs;
+    fFilters := AFilters;
+end;
+
+{ Atribut nou; daca atributul ales exista deja in lista, valoarea se adauga la
+  el (valorile aceluiasi atribut se combina cu SAU). }
+procedure TfrmWebCatalogVirtualFolderEditorDlg.btnChooseFilterClick(Sender: TObject);
+var
+    f: TVirtualFolderFilter;
+    List: TVirtualFolderFilters;
+    i, idx: Integer;
+begin
+    f.FilterID := 0;
+    f.ParamIDs := '';
+    if not PickFilter(f) then
+        Exit;
+
+    List := Copy(fFilters);
+    idx := -1;
+    for i := 0 to High(List) do
+        if List[i].FilterID = f.FilterID then
+            idx := i;
+    if idx >= 0 then
+        List[idx].ParamIDs := MergeParamIDs(List[idx].ParamIDs, f.ParamIDs)
+    else
+    begin
+        List := List + [f];
+        idx := High(List);
+    end;
+
+    if ApplyFilters(List) then
+        RefreshFilterList(idx);
+end;
+
+{ dublu-clic = schimba valoarea atributului selectat }
+procedure TfrmWebCatalogVirtualFolderEditorDlg.lstFiltersDblClick(Sender: TObject);
+var
+    f: TVirtualFolderFilter;
+    List: TVirtualFolderFilters;
+    i, idx, other: Integer;
+begin
+    idx := lstFilters.ItemIndex;
+    if (idx < 0) or (idx > High(fFilters)) then
+        Exit;
+    f := fFilters[idx];
+    if not PickFilter(f) then
+        Exit;
+
+    List := Copy(fFilters);
+    other := -1;
+    for i := 0 to High(List) do
+        if (i <> idx) and (List[i].FilterID = f.FilterID) then
+            other := i;
+    if other >= 0 then
+    begin
+        { atributul ales exista deja pe alt rand: valoarea trece acolo }
+        List[other].ParamIDs := MergeParamIDs(List[other].ParamIDs, f.ParamIDs);
+        Delete(List, idx, 1);
+        if other > idx then
+            Dec(other);
+        idx := other;
+    end
+    else
+        List[idx] := f;
+
+    if ApplyFilters(List) then
+        RefreshFilterList(idx);
+end;
+
+procedure TfrmWebCatalogVirtualFolderEditorDlg.btnRemoveFilterClick(Sender: TObject);
+var
+    List: TVirtualFolderFilters;
+    idx: Integer;
+begin
+    idx := lstFilters.ItemIndex;
+    if (idx < 0) or (idx > High(fFilters)) then
+        Exit;
+    List := Copy(fFilters);
+    Delete(List, idx, 1);
+    if ApplyFilters(List) then
+        RefreshFilterList(idx);
 end;
 
 procedure TfrmWebCatalogVirtualFolderEditorDlg.btnFillSlugClick(Sender: TObject);
@@ -305,7 +506,7 @@ begin
         end;
 
         OpenImageDataSet;
-        UpdateFilterLabel;
+        LoadFilters;
     except
         fMasterDataSet.Cancel;
         fMasterDataSet.UpdateTransaction.Rollback;
@@ -323,7 +524,37 @@ begin
     fCreateNewRecord := Value;
 end;
 
-procedure TfrmWebCatalogVirtualFolderEditorDlg.UpdateFilterLabel;
+procedure TfrmWebCatalogVirtualFolderEditorDlg.LoadFilters;
+begin
+    fFilters := ParseVirtualFolderFilters(fMasterDataSet.FieldByName('FILTERID').AsInteger,
+        fMasterDataSet.FieldByName('FILTERPARAMIDS').AsString);
+    RefreshFilterList(0);
+end;
+
+procedure TfrmWebCatalogVirtualFolderEditorDlg.RefreshFilterList(const ASelect: Integer);
+var
+    i: Integer;
+begin
+    lstFilters.Items.BeginUpdate;
+    try
+        lstFilters.Items.Clear;
+        for i := 0 to High(fFilters) do
+            lstFilters.Items.Add(FilterCaption(fFilters[i]));
+    finally
+        lstFilters.Items.EndUpdate;
+    end;
+    if lstFilters.Items.Count > 0 then
+    begin
+        if ASelect < lstFilters.Items.Count then
+            lstFilters.ItemIndex := ASelect
+        else
+            lstFilters.ItemIndex := lstFilters.Items.Count - 1;
+    end;
+    btnRemoveFilter.Enabled := lstFilters.Items.Count > 0;
+end;
+
+{ "Latime: 225" - denumirea filtrului si valorile lui }
+function TfrmWebCatalogVirtualFolderEditorDlg.FilterCaption(const AFilter: TVirtualFolderFilter): string;
 var
     Query: TIBCQuery;
     FilterID: Integer;
@@ -331,14 +562,8 @@ var
     FilterName: string;
     ParamValues: string;
 begin
-    FilterID := fMasterDataSet.FieldByName('FILTERID').AsInteger;
-    ParamIDs := Trim(fMasterDataSet.FieldByName('FILTERPARAMIDS').AsString);
-
-    if (FilterID <= 0) or (ParamIDs = '') then
-    begin
-        lbFilterValue.Caption := '<nu este ales nici un atribut>';
-        Exit;
-    end;
+    FilterID := AFilter.FilterID;
+    ParamIDs := AFilter.ParamIDs;
 
     FilterName := '';
     ParamValues := '';
@@ -362,9 +587,12 @@ begin
     end;
 
     if FilterName = '' then
-        lbFilterValue.Caption := Format('atribut %d (%s)', [FilterID, ParamIDs])
+        Result := Format('atribut %d (%s)', [FilterID, ParamIDs])
+    else if ParamValues = '' then
+        { filtrele native (ex. 10 Producatori) nu au valorile in TS_FILTER_PARAMS }
+        Result := Format('%s: (%s)', [FilterName, ParamIDs])
     else
-        lbFilterValue.Caption := Format('%s: %s', [FilterName, ParamValues]);
+        Result := Format('%s: %s', [FilterName, ParamValues]);
 end;
 
 procedure TfrmWebCatalogVirtualFolderEditorDlg.WhenCancelForm;

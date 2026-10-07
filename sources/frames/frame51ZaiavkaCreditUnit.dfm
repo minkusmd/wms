@@ -646,7 +646,7 @@ inherited frame51ZaiavkaCredit: Tframe51ZaiavkaCredit
           DataBinding.DataSource = IBCDataSourceInfo
           Properties.GraphicClassName = 'TdxSmartImage'
           TabOrder = 2
-          Height = 225
+          Height = 190
           Width = 209
         end
         object cxDBImage2: TcxDBImage
@@ -656,7 +656,31 @@ inherited frame51ZaiavkaCredit: Tframe51ZaiavkaCredit
           DataBinding.DataSource = IBCDataSourceInfo
           Properties.GraphicClassName = 'TdxSmartImage'
           TabOrder = 4
-          Height = 225
+          Height = 190
+          Width = 217
+        end
+        object edScan1Name: TcxDBTextEdit
+          Left = 600
+          Top = 210
+          Hint = 'Numele fisierului incarcat de client (buletin, fata)'
+          DataBinding.DataField = 'SCAN1_NAME'
+          DataBinding.DataSource = IBCDataSourceInfo
+          ParentShowHint = False
+          Properties.ReadOnly = True
+          ShowHint = True
+          TabOrder = 6
+          Width = 209
+        end
+        object edScan2Name: TcxDBTextEdit
+          Left = 824
+          Top = 210
+          Hint = 'Numele fisierului incarcat de client (buletin, verso)'
+          DataBinding.DataField = 'SCAN2_NAME'
+          DataBinding.DataSource = IBCDataSourceInfo
+          ParentShowHint = False
+          Properties.ReadOnly = True
+          ShowHint = True
+          TabOrder = 7
           Width = 217
         end
         object cxButton1: TcxButton
@@ -774,7 +798,7 @@ inherited frame51ZaiavkaCredit: Tframe51ZaiavkaCredit
       
         ' IIF(SCAN2 IS NOT NULL AND OCTET_LENGTH(SCAN2)>0,1,0) FLG_HAS_SC' +
         'AN2,'
-      ' scan1, scan2'
+      ' scan1, scan2, SCAN1_NAME, SCAN2_NAME'
       'FROM TWEB_CERERE_FINANTARE')
     MasterFields = 'DOCID'
     DetailFields = 'DOCID'

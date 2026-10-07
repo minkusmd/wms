@@ -13,6 +13,10 @@ unit frmWebPopularBrandsDialog;
   BRANDID = TS_SYSS.SYSSID = TS_GOODS.VENDOR_ID = TS_BRANDS_IMAGE.BRANDID.
   Tabela se creeaza cu DB Model/web_popular_brands.sql.
 
+  Lista e separata pe site (TWEB_POPULAR_BRANDS.SITEID, DB Model/web_sites_popular.sql):
+  selectorul "Site" de sus alege pentru care site se lucreaza. Pina la rularea scriptului
+  coloana lipseste, selectorul e inactiv si lista e cea comuna.
+
   Totul se lucreaza in memorie si se scrie intr-o singura tranzactie la "Salveaza";
   ORDERNO se renumeroteaza 1..N.
 }
@@ -34,6 +38,8 @@ type
   end;
 
   TfrmWebPopularBrandsDlg = class(TSWNCustomForm)
+    lblSite: TLabel;
+    cmbSite: TComboBox;
     lblInfo: TLabel;
     lvBrands: TListView;
     btnUp: TButton;
@@ -61,12 +67,16 @@ type
     procedure lvBrandsKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure edSearchKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+    procedure cmbSiteChange(Sender: TObject);
   private
     { Private declarations }
     fItems: TList<TPopularBrand>;
     fRemoved: TList<Integer>;
     fModified: Boolean;
     fTableMissing: Boolean;
+    fSiteID: Integer;        // site-ul ales (TWEB_SITE.SITEID); 1 = fantastic.md
+    fSiteColumn: Boolean;    // TWEB_POPULAR_BRANDS are coloana SITEID (scriptul a fost rulat)
+    procedure LoadSites;
     procedure LoadData;
     procedure ShowList(const ASelectIndex: Integer);
     procedure ShowLogo;
@@ -87,7 +97,7 @@ type
 implementation
 
 uses
-  System.UITypes, System.IOUtils, Data.DB, IBC, DataModuleDB;
+  System.UITypes, System.IOUtils, System.StrUtils, Data.DB, IBC, DataModuleDB;
 
 {$R *.dfm}
 
@@ -117,9 +127,74 @@ begin
   inherited;
 end;
 
+// Site-urile din TWEB_SITE in selector. Fara coloana SITEID (scriptul nerulat) selectorul
+// ramine inactiv, cu un singur rind, si lista e cea comuna de pina acum.
+procedure TfrmWebPopularBrandsDlg.LoadSites;
+var
+  Query: TIBCQuery;
+begin
+  fSiteID := 1;
+  fSiteColumn := False;
+  cmbSite.Items.Clear;
+  Query := TIBCQuery.Create(nil);
+  try
+    Query.Connection := dmDB.IBCConnection;
+    Query.Transaction := dmDB.IBCTrDefaultSelect;
+    try
+      Query.SQL.Text :=
+        'select 1 X from RDB$RELATION_FIELDS ' +
+        'where RDB$RELATION_NAME = ''TWEB_POPULAR_BRANDS'' and RDB$FIELD_NAME = ''SITEID''';
+      Query.Open;
+      fSiteColumn := not Query.Eof;
+      Query.Close;
+      if fSiteColumn then
+      begin
+        Query.SQL.Text := 'select SITEID, NAME, CODE from TWEB_SITE order by SITEID';
+        Query.Open;
+        while not Query.Eof do
+        begin
+          cmbSite.Items.AddObject(Format('%s  (%s)', [Trim(Query.FieldByName('NAME').AsString),
+            Trim(Query.FieldByName('CODE').AsString)]), TObject(Query.FieldByName('SITEID').AsInteger));
+          Query.Next;
+        end;
+        Query.Close;
+      end;
+    except
+      fSiteColumn := False;
+      cmbSite.Items.Clear;
+    end;
+  finally
+    Query.Free;
+  end;
+  if cmbSite.Items.Count = 0 then
+    cmbSite.Items.AddObject('toate site-urile (lista comuna)', TObject(1));
+  cmbSite.ItemIndex := 0;
+  cmbSite.Enabled := fSiteColumn and (cmbSite.Items.Count > 1);
+  fSiteID := Integer(cmbSite.Items.Objects[0]);
+end;
+
+procedure TfrmWebPopularBrandsDlg.cmbSiteChange(Sender: TObject);
+begin
+  if cmbSite.ItemIndex < 0 then
+    Exit;
+  if Integer(cmbSite.Items.Objects[cmbSite.ItemIndex]) = fSiteID then
+    Exit;
+  if fModified and (MessageDlg('Modificarile pentru site-ul curent nu au fost salvate. Treceti la alt site fara salvare?',
+    mtConfirmation, [mbYes, mbNo], 0) <> mrYes) then
+  begin
+    cmbSite.ItemIndex := cmbSite.Items.IndexOfObject(TObject(fSiteID));
+    Exit;
+  end;
+  fSiteID := Integer(cmbSite.Items.Objects[cmbSite.ItemIndex]);
+  LoadData;
+  ShowList(0);
+  fModified := False;
+end;
+
 procedure TfrmWebPopularBrandsDlg.Prepare;
 begin
   try
+    LoadSites;
     LoadData;
   except
     on E: Exception do
@@ -152,6 +227,7 @@ begin
       Format(cSqlProducts, ['P.BRANDID']) + ' PRODUCTS ' +
       'from TWEB_POPULAR_BRANDS P ' +
       'join TS_SYSS S on S.SYSSID = P.BRANDID ' +
+      IfThen(fSiteColumn, Format('where P.SITEID = %d ', [fSiteID])) +
       'order by P.ORDERNO nulls last, S.TITLE';
     Query.Open;
     while not Query.Eof do
@@ -606,17 +682,23 @@ begin
     try
       for I := 0 to fRemoved.Count - 1 do
       begin
-        Query.SQL.Text := 'delete from TWEB_POPULAR_BRANDS where BRANDID = :ID';
+        Query.SQL.Text := 'delete from TWEB_POPULAR_BRANDS where BRANDID = :ID' +
+          IfThen(fSiteColumn, Format(' and SITEID = %d', [fSiteID]));
         Query.ParamByName('ID').AsInteger := fRemoved[I];
         Query.Execute;
       end;
 
       for I := 0 to fItems.Count - 1 do
       begin
-        // ordinea renumerotata 1..N
-        Query.SQL.Text :=
-          'update or insert into TWEB_POPULAR_BRANDS (BRANDID, ORDERNO) ' +
-          'values (:ID, :ORDERNO) matching (BRANDID)';
+        // ordinea renumerotata 1..N, pe site-ul ales
+        if fSiteColumn then
+          Query.SQL.Text := Format(
+            'update or insert into TWEB_POPULAR_BRANDS (SITEID, BRANDID, ORDERNO) ' +
+            'values (%d, :ID, :ORDERNO) matching (SITEID, BRANDID)', [fSiteID])
+        else
+          Query.SQL.Text :=
+            'update or insert into TWEB_POPULAR_BRANDS (BRANDID, ORDERNO) ' +
+            'values (:ID, :ORDERNO) matching (BRANDID)';
         Query.ParamByName('ID').AsInteger := fItems[I].BrandID;
         Query.ParamByName('ORDERNO').AsInteger := I + 1;
         Query.Execute;

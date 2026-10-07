@@ -69,9 +69,21 @@ type
       ASupplierID: Integer);
 
     // acelasi mecanism (fire, coada, salvare in TS_PRICELIST_ITEMS_IMAGES / _DESCRIPTION,
-    // fereastra de progres) pentru alt site: AFetch descarca un articol, ASiteName apare in mesaje
+    // fereastra de progres) pentru alt site: AFetch descarca un articol, ASiteName apare in mesaje.
+    // AAskMode = False: fara intrebarea "doar fara continut / toate" - se iau toate articolele din
+    // AItems (apelantul le-a filtrat deja). ADelayMs = pauza dupa fiecare articol, pe fir
+    // (-1 = cea pentru site-uri, cDelayBetweenItemsMs; 0 pentru fisiere statice, ex. DMLink).
     class procedure RunForPriceItemsEx(AItems: TDataSet; AConnection: TIBCConnection;
-      ASupplierID: Integer; AFetch: TContentFetchFunc; const ASiteName: string);
+      ASupplierID: Integer; AFetch: TContentFetchFunc; const ASiteName: string;
+      const AAskMode: Boolean = True; const ADelayMs: Integer = -1);
+
+    // acelasi lucru fara interfata (WMSParsers, poate rula in orice fir): ACodes / ALinks paralele;
+    // AThreadCount fire, fiecare cu conexiunea lui (clona lui AConnection), descarca, converteste
+    // in PNG si scrie - fara un fir unic de scriere. AOnlyMissing sare codurile care au deja
+    // descriere si imagine. AOnLog e apelat sub lacat, din firele de lucru. Intoarce imaginile salvate.
+    class function RunForItemsSilent(const ACodes, ALinks: TArray<string>; AConnection: TIBCConnection;
+      ASupplierID: Integer; AFetch: TContentFetchFunc; AOnlyMissing: Boolean; AThreadCount, ADelayMs: Integer;
+      const AOnLog: TProc<string>; const AIsCancelled: TFunc<Boolean>): Integer;
   end;
 
 // functii HTTP comune (THTTPClient configurat ca pentru mamico, descarcare pagina / octeti)
@@ -90,8 +102,8 @@ implementation
 
 uses
   System.RegularExpressions, System.NetEncoding, System.Net.HttpClient, System.Net.URLClient,
-  System.SyncObjs, System.Generics.Collections, System.UITypes, System.StrUtils,
-  Vcl.Graphics, Vcl.Forms, Vcl.Controls, Vcl.StdCtrls, Vcl.Dialogs;
+  System.SyncObjs, System.Generics.Collections, System.UITypes, System.StrUtils, System.Math,
+  Winapi.ActiveX, Vcl.Graphics, Vcl.Forms, Vcl.Controls, Vcl.StdCtrls, Vcl.Dialogs;
 
 const
   cBaseUrl = 'https://mamico.md';
@@ -525,6 +537,7 @@ type
     Results: TThreadedQueue<TMamicoItemResult>;
     Fetch: TContentFetchFunc;
     SiteName: string;
+    DelayMs: Integer;                                // pauza dupa fiecare articol, pe fir
     constructor Create;
     destructor Destroy; override;
     function IsCancelled: Boolean;
@@ -599,7 +612,7 @@ begin
         FJob.Results.PushItem(R);
 
         Waited := 0;
-        while (Waited < cDelayBetweenItemsMs) and not FJob.IsCancelled do
+        while (Waited < FJob.DelayMs) and not FJob.IsCancelled do
         begin
           Sleep(50);
           Inc(Waited, 50);
@@ -772,7 +785,7 @@ end;
 
 class procedure TMamicoContentLoader.RunForPriceItemsEx(AItems: TDataSet;
   AConnection: TIBCConnection; ASupplierID: Integer; AFetch: TContentFetchFunc;
-  const ASiteName: string);
+  const ASiteName: string; const AAskMode: Boolean; const ADelayMs: Integer);
 var
   Job: TMamicoJob;
   Workers: TArray<TMamicoWorker>;
@@ -788,16 +801,25 @@ begin
     Exit;
   end;
 
-  Answer := MessageDlg('Descarcarea caracteristicilor si imaginilor de pe ' + ASiteName + '.' + sLineBreak +
-    sLineBreak + 'Da - doar articolele fara continut' + sLineBreak +
-    'Nu - toate articolele (continutul existent se inlocuieste)',
-    mtConfirmation, [mbYes, mbNo, mbCancel], 0);
-  if Answer = mrCancel then
-    Exit;
+  if AAskMode then
+  begin
+    Answer := MessageDlg('Descarcarea caracteristicilor si imaginilor de pe ' + ASiteName + '.' + sLineBreak +
+      sLineBreak + 'Da - doar articolele fara continut' + sLineBreak +
+      'Nu - toate articolele (continutul existent se inlocuieste)',
+      mtConfirmation, [mbYes, mbNo, mbCancel], 0);
+    if Answer = mrCancel then
+      Exit;
+  end
+  else
+    Answer := mrNo; // toate articolele primite
 
   Job := TMamicoJob.Create;
   Job.Fetch := AFetch;
   Job.SiteName := ASiteName;
+  if ADelayMs >= 0 then
+    Job.DelayMs := ADelayMs
+  else
+    Job.DelayMs := cDelayBetweenItemsMs;
   Form := nil;
   try
     Existing := nil;
@@ -898,6 +920,188 @@ begin
     Form.Free;
     Job.Free;
   end;
+end;
+
+class function TMamicoContentLoader.RunForItemsSilent(const ACodes, ALinks: TArray<string>;
+  AConnection: TIBCConnection; ASupplierID: Integer; AFetch: TContentFetchFunc; AOnlyMissing: Boolean;
+  AThreadCount, ADelayMs: Integer; const AOnLog: TProc<string>; const AIsCancelled: TFunc<Boolean>): Integer;
+var
+  Existing: TStringList;
+  List: TList<TMamicoWorkItem>;
+  Item: TMamicoWorkItem;
+  Work: TArray<TMamicoWorkItem>;
+  Template: TIBCConnection;
+  Threads: TArray<TThread>;
+  LogLock: TCriticalSection;
+  NextIndex, Saved, Found, Failed, Done, Total, Skipped, I: Integer;
+  // variabile (nu proceduri locale): metodele anonime ale firelor le pot captura
+  Log: TProc<string>;
+  Cancelled: TFunc<Boolean>;
+  OnLog: TProc<string>;
+  IsCancelled: TFunc<Boolean>;
+begin
+  Result := 0;
+  OnLog := AOnLog;
+  IsCancelled := AIsCancelled;
+  Log :=
+    procedure(S: string)
+    begin
+      if not Assigned(OnLog) then
+        Exit;
+      LogLock.Enter;
+      try
+        OnLog(S);
+      finally
+        LogLock.Leave;
+      end;
+    end;
+  Cancelled :=
+    function: Boolean
+    begin
+      Result := Assigned(IsCancelled) and IsCancelled();
+    end;
+  Skipped := 0;
+  Existing := nil;
+  List := TList<TMamicoWorkItem>.Create;
+  try
+    if AOnlyMissing then
+      Existing := LoadCodesWithContent(AConnection, ASupplierID);
+    for I := 0 to High(ACodes) do
+    begin
+      Item.Code := Trim(ACodes[I]);
+      if Item.Code = '' then
+        Continue;
+      if Assigned(Existing) and (Existing.IndexOf(Item.Code) >= 0) then
+      begin
+        Inc(Skipped);
+        Continue;
+      end;
+      if I <= High(ALinks) then
+        Item.Link := Trim(ALinks[I])
+      else
+        Item.Link := '';
+      List.Add(Item);
+    end;
+    Work := List.ToArray;
+  finally
+    List.Free;
+    Existing.Free;
+  end;
+
+  Total := Length(Work);
+  if Assigned(AOnLog) then
+    AOnLog(Format('Imagini: %d articole de procesat in %d fire, %d sarite (au deja continut)',
+      [Total, Min(AThreadCount, Total), Skipped]));
+  if Total = 0 then
+    Exit;
+
+  NextIndex := 0;
+  Saved := 0;
+  Found := 0;
+  Failed := 0;
+  Done := 0;
+  LogLock := TCriticalSection.Create;
+  Template := TIBCConnection.Create(nil);
+  try
+    // doar proprietatile conexiunii; evenimentele (dialoguri, VCL) nu au ce cauta in fire
+    Template.Assign(AConnection);
+    Template.LoginPrompt := False;
+    Template.ConnectDialog := nil;
+    Template.OnError := nil;
+    Template.OnLogin := nil;
+    Template.BeforeConnect := nil;
+    Template.AfterConnect := nil;
+    Template.BeforeDisconnect := nil;
+    Template.AfterDisconnect := nil;
+
+    SetLength(Threads, Max(1, Min(AThreadCount, Total)));
+    for I := 0 to High(Threads) do
+    begin
+      Threads[I] := TThread.CreateAnonymousThread(
+        procedure
+        var
+          Http: THTTPClient;
+          Conn: TIBCConnection;
+          Index, N: Integer;
+          R: TMamicoItemResult;
+          Lines: TArray<string>;
+          S: string;
+        begin
+          // TWICImage (conversia in PNG) are nevoie de COM in fiecare fir
+          CoInitialize(nil);
+          Http := nil;
+          Conn := nil;
+          try
+            try
+              Http := CreateMamicoHttp;
+              Conn := TIBCConnection.Create(nil);
+              Conn.Assign(Template);
+              Conn.Connect;
+              while not Cancelled do
+              begin
+                Index := TInterlocked.Increment(NextIndex) - 1;
+                if Index >= Total then
+                  Break;
+                R := nil;
+                try
+                  try
+                    R := AFetch(Http, Work[Index].Code, Work[Index].Link);
+                    if R.Found then
+                    begin
+                      TInterlocked.Add(Saved, SaveItem(Conn, ASupplierID, R));
+                      TInterlocked.Increment(Found);
+                    end
+                    else
+                      TInterlocked.Increment(Failed);
+                  except
+                    on E: Exception do
+                    begin
+                      TInterlocked.Increment(Failed);
+                      if R = nil then
+                        R := TMamicoItemResult.Create(Work[Index].Code);
+                      R.Log.Add(Format('%s: EROARE %s', [Work[Index].Code, E.Message]));
+                    end;
+                  end;
+                  Lines := R.Log.ToStringArray;
+                finally
+                  R.Free;
+                end;
+                for S in Lines do
+                  Log(S);
+                N := TInterlocked.Increment(Done);
+                if N mod 250 = 0 then
+                  Log(Format('Imagini: %d / %d articole, %d imagini salvate', [N, Total,
+                    TInterlocked.CompareExchange(Saved, 0, 0)]));
+                if ADelayMs > 0 then
+                  Sleep(ADelayMs);
+              end;
+            except
+              on E: Exception do
+                Log('Imagini: EROARE in firul de lucru: ' + E.Message);
+            end;
+          finally
+            Conn.Free;
+            Http.Free;
+            CoUninitialize;
+          end;
+        end);
+      Threads[I].FreeOnTerminate := False;
+      Threads[I].Start;
+    end;
+    for I := 0 to High(Threads) do
+    begin
+      Threads[I].WaitFor;
+      Threads[I].Free;
+    end;
+  finally
+    Template.Free;
+    LogLock.Free;
+  end;
+
+  Result := Saved;
+  if Assigned(AOnLog) then
+    AOnLog(Format('Imagini %s: %d / %d articole, gasite %d, imagini salvate %d, negasite/erori %d',
+      [IfThen(Done < Total, 'oprit', 'gata'), Done, Total, Found, Saved, Failed]));
 end;
 
 end.

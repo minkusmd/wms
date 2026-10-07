@@ -1,0 +1,762 @@
+{
+ "date": "2026-10-02",
+ "TS_GOODS_TYPE": [
+  {
+   "GOODSTYPEID": 2217,
+   "TITLE": "rola pentru feliat pizza ",
+   "TITLE_RUS": "рулет для нарезки пиццы",
+   "DESCRIPTION": null,
+   "SEARCH_KEYS": null,
+   "USERID": 441,
+   "FLG_LANG_UNIQUE": null,
+   "SHORT_TITLE": "rola pentru feliat pizza ",
+   "FLAGS": null,
+   "GOODS_FOLDERID": null,
+   "PGTID": null
+  },
+  {
+   "GOODSTYPEID": 2237,
+   "TITLE": "Aparat de gatit sosuri",
+   "TITLE_RUS": "Апарат для приготовления соусов",
+   "DESCRIPTION": null,
+   "SEARCH_KEYS": null,
+   "USERID": 196,
+   "FLG_LANG_UNIQUE": null,
+   "SHORT_TITLE": "Aparat de gatit sosuri",
+   "FLAGS": 2,
+   "GOODS_FOLDERID": null,
+   "PGTID": null
+  },
+  {
+   "GOODSTYPEID": 2367,
+   "TITLE": "Antigel",
+   "TITLE_RUS": "Антифриз",
+   "DESCRIPTION": null,
+   "SEARCH_KEYS": null,
+   "USERID": 204,
+   "FLG_LANG_UNIQUE": null,
+   "SHORT_TITLE": "Antigel",
+   "FLAGS": null,
+   "GOODS_FOLDERID": null,
+   "PGTID": null
+  },
+  {
+   "GOODSTYPEID": 2567,
+   "TITLE": "Mini Termal Fogger",
+   "TITLE_RUS": "Производитель дыма",
+   "DESCRIPTION": null,
+   "SEARCH_KEYS": null,
+   "USERID": 497,
+   "FLG_LANG_UNIQUE": null,
+   "SHORT_TITLE": "Mini Termal Fogger",
+   "FLAGS": null,
+   "GOODS_FOLDERID": null,
+   "PGTID": null
+  },
+  {
+   "GOODSTYPEID": 2574,
+   "TITLE": "Set universal de accesorii pentru aparatul de curatat cu aburi",
+   "TITLE_RUS": "Универсальный набор аксессуаров для пароочистителя",
+   "DESCRIPTION": null,
+   "SEARCH_KEYS": null,
+   "USERID": 525,
+   "FLG_LANG_UNIQUE": null,
+   "SHORT_TITLE": "Set universal de accesorii pentru aparatul de curatat cu aburi",
+   "FLAGS": null,
+   "GOODS_FOLDERID": null,
+   "PGTID": null
+  },
+  {
+   "GOODSTYPEID": 2598,
+   "TITLE": "Pigtail",
+   "TITLE_RUS": "Pigtail",
+   "DESCRIPTION": null,
+   "SEARCH_KEYS": null,
+   "USERID": 204,
+   "FLG_LANG_UNIQUE": null,
+   "SHORT_TITLE": "Pigtail",
+   "FLAGS": null,
+   "GOODS_FOLDERID": null,
+   "PGTID": null
+  },
+  {
+   "GOODSTYPEID": 2662,
+   "TITLE": "Boiler indirect",
+   "TITLE_RUS": "Бойлер косвенного нагрева",
+   "DESCRIPTION": null,
+   "SEARCH_KEYS": null,
+   "USERID": 204,
+   "FLG_LANG_UNIQUE": null,
+   "SHORT_TITLE": "Boiler indirect",
+   "FLAGS": 2,
+   "GOODS_FOLDERID": null,
+   "PGTID": null
+  },
+  {
+   "GOODSTYPEID": 2663,
+   "TITLE": "Kit montare boiler",
+   "TITLE_RUS": "монтажный комплект для бойлера",
+   "DESCRIPTION": null,
+   "SEARCH_KEYS": null,
+   "USERID": 204,
+   "FLG_LANG_UNIQUE": null,
+   "SHORT_TITLE": "Kit montare boiler",
+   "FLAGS": null,
+   "GOODS_FOLDERID": null,
+   "PGTID": null
+  },
+  {
+   "GOODSTYPEID": 2887,
+   "TITLE": "Motor pe benzina, motoblocuri",
+   "TITLE_RUS": "Мотор для мотоблоков, бензиновый",
+   "DESCRIPTION": null,
+   "SEARCH_KEYS": null,
+   "USERID": 204,
+   "FLG_LANG_UNIQUE": null,
+   "SHORT_TITLE": "Motor pe benzina, motoblocuri",
+   "FLAGS": 1,
+   "GOODS_FOLDERID": null,
+   "PGTID": null
+  },
+  {
+   "GOODSTYPEID": 2889,
+   "TITLE": "Furtun de inalta presiune pentru spalare",
+   "TITLE_RUS": "Шланг высокого давления для мойки",
+   "DESCRIPTION": null,
+   "SEARCH_KEYS": null,
+   "USERID": 204,
+   "FLG_LANG_UNIQUE": null,
+   "SHORT_TITLE": "Furtun de inalta presiune pentru spalare",
+   "FLAGS": 1,
+   "GOODS_FOLDERID": null,
+   "PGTID": null
+  },
+  {
+   "GOODSTYPEID": 2891,
+   "TITLE": "Pistol de spalat de inalta presiune",
+   "TITLE_RUS": "Пистолет для мойки высокого давления",
+   "DESCRIPTION": null,
+   "SEARCH_KEYS": null,
+   "USERID": 204,
+   "FLG_LANG_UNIQUE": null,
+   "SHORT_TITLE": "Pistol de spalat de inalta presiune",
+   "FLAGS": 1,
+   "GOODS_FOLDERID": null,
+   "PGTID": null
+  },
+  {
+   "GOODSTYPEID": 2892,
+   "TITLE": "Perie orizontala pentru masina de spalat cu presiune",
+   "TITLE_RUS": "Горизонтальная щетка для мойки высокого давления",
+   "DESCRIPTION": null,
+   "SEARCH_KEYS": null,
+   "USERID": 204,
+   "FLG_LANG_UNIQUE": null,
+   "SHORT_TITLE": "Perie orizontala pentru masina de spalat cu presiune",
+   "FLAGS": 1,
+   "GOODS_FOLDERID": null,
+   "PGTID": null
+  },
+  {
+   "GOODSTYPEID": 2893,
+   "TITLE": "Perie pentru masina de spalat cu presiune",
+   "TITLE_RUS": "Щетка для мойки высокого давления",
+   "DESCRIPTION": null,
+   "SEARCH_KEYS": null,
+   "USERID": 204,
+   "FLG_LANG_UNIQUE": null,
+   "SHORT_TITLE": "Perie pentru masina de spalat cu presiune",
+   "FLAGS": 1,
+   "GOODS_FOLDERID": null,
+   "PGTID": null
+  },
+  {
+   "GOODSTYPEID": 2899,
+   "TITLE": "Cap cu fir de nylon",
+   "TITLE_RUS": "Голова с нейлоновой нитью",
+   "DESCRIPTION": null,
+   "SEARCH_KEYS": null,
+   "USERID": 204,
+   "FLG_LANG_UNIQUE": null,
+   "SHORT_TITLE": "Cap cu fir de nylon",
+   "FLAGS": 1,
+   "GOODS_FOLDERID": null,
+   "PGTID": null
+  },
+  {
+   "GOODSTYPEID": 2906,
+   "TITLE": "Rola de taiere pentru taietorul de faianta",
+   "TITLE_RUS": "Режущий ролик для плиткореза",
+   "DESCRIPTION": null,
+   "SEARCH_KEYS": null,
+   "USERID": 204,
+   "FLG_LANG_UNIQUE": null,
+   "SHORT_TITLE": "Rola de taiere pentru taietorul de faianta",
+   "FLAGS": 1,
+   "GOODS_FOLDERID": null,
+   "PGTID": null
+  },
+  {
+   "GOODSTYPEID": 2908,
+   "TITLE": "Casti pentru apararea urechilor",
+   "TITLE_RUS": "Наушники для защиты слуха",
+   "DESCRIPTION": null,
+   "SEARCH_KEYS": null,
+   "USERID": 204,
+   "FLG_LANG_UNIQUE": null,
+   "SHORT_TITLE": "Căști pentru urechi",
+   "FLAGS": 0,
+   "GOODS_FOLDERID": null,
+   "PGTID": null
+  },
+  {
+   "GOODSTYPEID": 2965,
+   "TITLE": "Scaun-șezlong gonflabil",
+   "TITLE_RUS": "Надувное кресло-шезлонг",
+   "DESCRIPTION": null,
+   "SEARCH_KEYS": null,
+   "USERID": 497,
+   "FLG_LANG_UNIQUE": null,
+   "SHORT_TITLE": "Scaun-șezlong gonflabil",
+   "FLAGS": 1,
+   "GOODS_FOLDERID": null,
+   "PGTID": null
+  },
+  {
+   "GOODSTYPEID": 3019,
+   "TITLE": "Upgrade kit",
+   "TITLE_RUS": "Upgrade kit",
+   "DESCRIPTION": null,
+   "SEARCH_KEYS": null,
+   "USERID": 204,
+   "FLG_LANG_UNIQUE": null,
+   "SHORT_TITLE": "Upgrade kit",
+   "FLAGS": 2,
+   "GOODS_FOLDERID": null,
+   "PGTID": null
+  },
+  {
+   "GOODSTYPEID": 3028,
+   "TITLE": "Accesorii conditioner",
+   "TITLE_RUS": "Аксессуары для кондиционера",
+   "DESCRIPTION": null,
+   "SEARCH_KEYS": null,
+   "USERID": 204,
+   "FLG_LANG_UNIQUE": null,
+   "SHORT_TITLE": "Accesorii conditioner",
+   "FLAGS": 0,
+   "GOODS_FOLDERID": null,
+   "PGTID": null
+  },
+  {
+   "GOODSTYPEID": 3131,
+   "TITLE": "Masina de gravurat",
+   "TITLE_RUS": "Гравировальный апарат",
+   "DESCRIPTION": null,
+   "SEARCH_KEYS": null,
+   "USERID": 204,
+   "FLG_LANG_UNIQUE": null,
+   "SHORT_TITLE": "Masina de gravurat",
+   "FLAGS": 2,
+   "GOODS_FOLDERID": null,
+   "PGTID": null
+  },
+  {
+   "GOODSTYPEID": 3186,
+   "TITLE": "Set capete",
+   "TITLE_RUS": "Набор головок",
+   "DESCRIPTION": null,
+   "SEARCH_KEYS": null,
+   "USERID": 409,
+   "FLG_LANG_UNIQUE": null,
+   "SHORT_TITLE": "Set capete",
+   "FLAGS": 2,
+   "GOODS_FOLDERID": null,
+   "PGTID": null
+  },
+  {
+   "GOODSTYPEID": 3234,
+   "TITLE": "Broasca cu chei",
+   "TITLE_RUS": "Сердцевина с ключами",
+   "DESCRIPTION": null,
+   "SEARCH_KEYS": null,
+   "USERID": 409,
+   "FLG_LANG_UNIQUE": null,
+   "SHORT_TITLE": "Broasca cu chei",
+   "FLAGS": 2,
+   "GOODS_FOLDERID": null,
+   "PGTID": null
+  },
+  {
+   "GOODSTYPEID": 3240,
+   "TITLE": "Filtru cu reductor",
+   "TITLE_RUS": "Фильтр с редуктором",
+   "DESCRIPTION": null,
+   "SEARCH_KEYS": null,
+   "USERID": 409,
+   "FLG_LANG_UNIQUE": null,
+   "SHORT_TITLE": "Filtru cu reductor",
+   "FLAGS": 2,
+   "GOODS_FOLDERID": null,
+   "PGTID": null
+  },
+  {
+   "GOODSTYPEID": 3245,
+   "TITLE": "Ventilator axial",
+   "TITLE_RUS": "Осевой вентилятор",
+   "DESCRIPTION": null,
+   "SEARCH_KEYS": null,
+   "USERID": 409,
+   "FLG_LANG_UNIQUE": null,
+   "SHORT_TITLE": "Ventilator axial",
+   "FLAGS": 2,
+   "GOODS_FOLDERID": null,
+   "PGTID": null
+  },
+  {
+   "GOODSTYPEID": 3275,
+   "TITLE": "Pompa pentru anvelope",
+   "TITLE_RUS": "Нассос для колес",
+   "DESCRIPTION": null,
+   "SEARCH_KEYS": null,
+   "USERID": 204,
+   "FLG_LANG_UNIQUE": null,
+   "SHORT_TITLE": "Pompa pentru anvelope",
+   "FLAGS": 2,
+   "GOODS_FOLDERID": null,
+   "PGTID": null
+  },
+  {
+   "GOODSTYPEID": 3289,
+   "TITLE": "Sisteme video de Monitorizare Copii",
+   "TITLE_RUS": "Видеоняня ",
+   "DESCRIPTION": null,
+   "SEARCH_KEYS": null,
+   "USERID": 600,
+   "FLG_LANG_UNIQUE": null,
+   "SHORT_TITLE": "Sisteme video de Monitorizare Copii",
+   "FLAGS": 2,
+   "GOODS_FOLDERID": null,
+   "PGTID": null
+  },
+  {
+   "GOODSTYPEID": 3292,
+   "TITLE": "Haine pentru copii",
+   "TITLE_RUS": "Одежда для детей ",
+   "DESCRIPTION": null,
+   "SEARCH_KEYS": null,
+   "USERID": 600,
+   "FLG_LANG_UNIQUE": null,
+   "SHORT_TITLE": "Haine pentru copii",
+   "FLAGS": 2,
+   "GOODS_FOLDERID": null,
+   "PGTID": null
+  },
+  {
+   "GOODSTYPEID": 3379,
+   "TITLE": "Mobilier medical",
+   "TITLE_RUS": "Медецинская мебель ",
+   "DESCRIPTION": null,
+   "SEARCH_KEYS": null,
+   "USERID": 600,
+   "FLG_LANG_UNIQUE": null,
+   "SHORT_TITLE": "Mobilier medical",
+   "FLAGS": 2,
+   "GOODS_FOLDERID": null,
+   "PGTID": null
+  },
+  {
+   "GOODSTYPEID": 3444,
+   "TITLE": "Instrumente cu coarde",
+   "TITLE_RUS": "Струнные инструменты",
+   "DESCRIPTION": null,
+   "SEARCH_KEYS": null,
+   "USERID": 600,
+   "FLG_LANG_UNIQUE": null,
+   "SHORT_TITLE": "Instrumente cu coarde",
+   "FLAGS": 2,
+   "GOODS_FOLDERID": null,
+   "PGTID": null
+  },
+  {
+   "GOODSTYPEID": 3447,
+   "TITLE": "Instrumente de suflat",
+   "TITLE_RUS": "Духовые инструменты",
+   "DESCRIPTION": null,
+   "SEARCH_KEYS": null,
+   "USERID": 600,
+   "FLG_LANG_UNIQUE": null,
+   "SHORT_TITLE": "Instrumente de suflat",
+   "FLAGS": 2,
+   "GOODS_FOLDERID": null,
+   "PGTID": null
+  },
+  {
+   "GOODSTYPEID": 3528,
+   "TITLE": "Palnie",
+   "TITLE_RUS": "Воронка",
+   "DESCRIPTION": null,
+   "SEARCH_KEYS": "pilnie, лейка",
+   "USERID": 204,
+   "FLG_LANG_UNIQUE": null,
+   "SHORT_TITLE": "Palnie",
+   "FLAGS": 2,
+   "GOODS_FOLDERID": null,
+   "PGTID": null
+  },
+  {
+   "GOODSTYPEID": 3529,
+   "TITLE": "Periuta din silicon",
+   "TITLE_RUS": "Кисточка силиконовая",
+   "DESCRIPTION": null,
+   "SEARCH_KEYS": null,
+   "USERID": 204,
+   "FLG_LANG_UNIQUE": null,
+   "SHORT_TITLE": "Periuta din silicon",
+   "FLAGS": 2,
+   "GOODS_FOLDERID": null,
+   "PGTID": null
+  },
+  {
+   "GOODSTYPEID": 3531,
+   "TITLE": "Aparat de taiat taietei",
+   "TITLE_RUS": "Лапшерезка",
+   "DESCRIPTION": null,
+   "SEARCH_KEYS": null,
+   "USERID": 204,
+   "FLG_LANG_UNIQUE": null,
+   "SHORT_TITLE": "Aparat de taiat taietei",
+   "FLAGS": 2,
+   "GOODS_FOLDERID": null,
+   "PGTID": null
+  },
+  {
+   "GOODSTYPEID": 3538,
+   "TITLE": "Set pentru vin",
+   "TITLE_RUS": "Набор для вина",
+   "DESCRIPTION": null,
+   "SEARCH_KEYS": null,
+   "USERID": 204,
+   "FLG_LANG_UNIQUE": null,
+   "SHORT_TITLE": "Set pentru vin",
+   "FLAGS": 2,
+   "GOODS_FOLDERID": null,
+   "PGTID": null
+  },
+  {
+   "GOODSTYPEID": 3547,
+   "TITLE": "Pic de nailon",
+   "TITLE_RUS": "Нейлоновый медиатор ",
+   "DESCRIPTION": "Pic Нейлоновый медиатор Pic de nailon ",
+   "SEARCH_KEYS": "Pic ,Нейлоновый медиатор , Pic de nailon ",
+   "USERID": 600,
+   "FLG_LANG_UNIQUE": null,
+   "SHORT_TITLE": "Pic de nailon",
+   "FLAGS": 2,
+   "GOODS_FOLDERID": null,
+   "PGTID": null
+  },
+  {
+   "GOODSTYPEID": 3557,
+   "TITLE": "Dispozitiv de taiere sticla",
+   "TITLE_RUS": "Резак для стекла",
+   "DESCRIPTION": null,
+   "SEARCH_KEYS": null,
+   "USERID": 204,
+   "FLG_LANG_UNIQUE": null,
+   "SHORT_TITLE": "Dispozitiv de taiere sticla",
+   "FLAGS": 2,
+   "GOODS_FOLDERID": null,
+   "PGTID": null
+  },
+  {
+   "GOODSTYPEID": 3564,
+   "TITLE": "Jucării pentru nisip",
+   "TITLE_RUS": "Игрушки для песочницы",
+   "DESCRIPTION": "Игрушки для песочницы ,Jucării pentru nisip",
+   "SEARCH_KEYS": "Игрушки для песочницы , Jucării pentru nisip",
+   "USERID": 600,
+   "FLG_LANG_UNIQUE": null,
+   "SHORT_TITLE": "Jucării pentru nisip",
+   "FLAGS": 2,
+   "GOODS_FOLDERID": null,
+   "PGTID": null
+  },
+  {
+   "GOODSTYPEID": 3576,
+   "TITLE": "Corzi",
+   "TITLE_RUS": "Струны",
+   "DESCRIPTION": null,
+   "SEARCH_KEYS": null,
+   "USERID": 605,
+   "FLG_LANG_UNIQUE": null,
+   "SHORT_TITLE": "Corzi",
+   "FLAGS": 0,
+   "GOODS_FOLDERID": null,
+   "PGTID": null
+  },
+  {
+   "GOODSTYPEID": 3578,
+   "TITLE": "Echipament sportiv",
+   "TITLE_RUS": "Спортивное оборудование",
+   "DESCRIPTION": null,
+   "SEARCH_KEYS": null,
+   "USERID": 605,
+   "FLG_LANG_UNIQUE": null,
+   "SHORT_TITLE": "Echipament sportiv",
+   "FLAGS": 0,
+   "GOODS_FOLDERID": null,
+   "PGTID": null
+  },
+  {
+   "GOODSTYPEID": 3591,
+   "TITLE": "Difuzor aromatic",
+   "TITLE_RUS": "Ароматический дифузор",
+   "DESCRIPTION": null,
+   "SEARCH_KEYS": null,
+   "USERID": 204,
+   "FLG_LANG_UNIQUE": null,
+   "SHORT_TITLE": "Difuzor aromatic",
+   "FLAGS": 2,
+   "GOODS_FOLDERID": null,
+   "PGTID": null
+  },
+  {
+   "GOODSTYPEID": 3647,
+   "TITLE": "OPC drum",
+   "TITLE_RUS": "OPC drum",
+   "DESCRIPTION": null,
+   "SEARCH_KEYS": null,
+   "USERID": 204,
+   "FLG_LANG_UNIQUE": null,
+   "SHORT_TITLE": "OPC drum",
+   "FLAGS": 0,
+   "GOODS_FOLDERID": null,
+   "PGTID": null
+  },
+  {
+   "GOODSTYPEID": 3648,
+   "TITLE": "Interfoane",
+   "TITLE_RUS": "Домофоны",
+   "DESCRIPTION": null,
+   "SEARCH_KEYS": null,
+   "USERID": 409,
+   "FLG_LANG_UNIQUE": null,
+   "SHORT_TITLE": "Interfoane",
+   "FLAGS": 2,
+   "GOODS_FOLDERID": null,
+   "PGTID": null
+  },
+  {
+   "GOODSTYPEID": 3713,
+   "TITLE": "Upper Fuser Roller",
+   "TITLE_RUS": "Upper Fuser Roller",
+   "DESCRIPTION": null,
+   "SEARCH_KEYS": null,
+   "USERID": 204,
+   "FLG_LANG_UNIQUE": null,
+   "SHORT_TITLE": "Upper Fuser Roller",
+   "FLAGS": 2,
+   "GOODS_FOLDERID": null,
+   "PGTID": null
+  },
+  {
+   "GOODSTYPEID": 3719,
+   "TITLE": "USB Receiver",
+   "TITLE_RUS": "USB Receiver",
+   "DESCRIPTION": null,
+   "SEARCH_KEYS": null,
+   "USERID": 204,
+   "FLG_LANG_UNIQUE": null,
+   "SHORT_TITLE": "USB Receiver",
+   "FLAGS": 2,
+   "GOODS_FOLDERID": null,
+   "PGTID": null
+  },
+  {
+   "GOODSTYPEID": 3724,
+   "TITLE": "Forme de hirtie pentru copt",
+   "TITLE_RUS": "Бумажные вкладыши для выпечки",
+   "DESCRIPTION": null,
+   "SEARCH_KEYS": null,
+   "USERID": 204,
+   "FLG_LANG_UNIQUE": null,
+   "SHORT_TITLE": "Forme de hirtie pentru copt",
+   "FLAGS": 0,
+   "GOODS_FOLDERID": null,
+   "PGTID": null
+  }
+ ],
+ "TS_GOODS_TYPE_IMAGE": [
+  {
+   "GOODSTYPEID": 2887,
+   "IMAGE": null,
+   "MENU_IMAGE": null
+  },
+  {
+   "GOODSTYPEID": 2567,
+   "IMAGE": null,
+   "MENU_IMAGE": null
+  },
+  {
+   "GOODSTYPEID": 2574,
+   "IMAGE": null,
+   "MENU_IMAGE": null
+  },
+  {
+   "GOODSTYPEID": 3647,
+   "IMAGE": null,
+   "MENU_IMAGE": null
+  },
+  {
+   "GOODSTYPEID": 3648,
+   "IMAGE": null,
+   "MENU_IMAGE": null
+  },
+  {
+   "GOODSTYPEID": 2367,
+   "IMAGE": null,
+   "MENU_IMAGE": null
+  },
+  {
+   "GOODSTYPEID": 3019,
+   "IMAGE": null,
+   "MENU_IMAGE": null
+  },
+  {
+   "GOODSTYPEID": 3275,
+   "IMAGE": null,
+   "MENU_IMAGE": null
+  },
+  {
+   "GOODSTYPEID": 2598,
+   "IMAGE": null,
+   "MENU_IMAGE": null
+  },
+  {
+   "GOODSTYPEID": 2662,
+   "IMAGE": null,
+   "MENU_IMAGE": null
+  },
+  {
+   "GOODSTYPEID": 2663,
+   "IMAGE": null,
+   "MENU_IMAGE": null
+  },
+  {
+   "GOODSTYPEID": 3186,
+   "IMAGE": null,
+   "MENU_IMAGE": null
+  },
+  {
+   "GOODSTYPEID": 2906,
+   "IMAGE": null,
+   "MENU_IMAGE": null
+  },
+  {
+   "GOODSTYPEID": 2237,
+   "IMAGE": null,
+   "MENU_IMAGE": null
+  },
+  {
+   "GOODSTYPEID": 2891,
+   "IMAGE": null,
+   "MENU_IMAGE": null
+  },
+  {
+   "GOODSTYPEID": 2889,
+   "IMAGE": null,
+   "MENU_IMAGE": null
+  },
+  {
+   "GOODSTYPEID": 2892,
+   "IMAGE": null,
+   "MENU_IMAGE": null
+  },
+  {
+   "GOODSTYPEID": 2893,
+   "IMAGE": null,
+   "MENU_IMAGE": null
+  },
+  {
+   "GOODSTYPEID": 2899,
+   "IMAGE": null,
+   "MENU_IMAGE": null
+  },
+  {
+   "GOODSTYPEID": 2965,
+   "IMAGE": null,
+   "MENU_IMAGE": null
+  },
+  {
+   "GOODSTYPEID": 3131,
+   "IMAGE": null,
+   "MENU_IMAGE": null
+  },
+  {
+   "GOODSTYPEID": 3028,
+   "IMAGE": null,
+   "MENU_IMAGE": null
+  },
+  {
+   "GOODSTYPEID": 3234,
+   "IMAGE": null,
+   "MENU_IMAGE": null
+  },
+  {
+   "GOODSTYPEID": 3240,
+   "IMAGE": null,
+   "MENU_IMAGE": null
+  },
+  {
+   "GOODSTYPEID": 3245,
+   "IMAGE": null,
+   "MENU_IMAGE": null
+  },
+  {
+   "GOODSTYPEID": 3289,
+   "IMAGE": null,
+   "MENU_IMAGE": null
+  },
+  {
+   "GOODSTYPEID": 3379,
+   "IMAGE": null,
+   "MENU_IMAGE": null
+  },
+  {
+   "GOODSTYPEID": 3528,
+   "IMAGE": null,
+   "MENU_IMAGE": null
+  },
+  {
+   "GOODSTYPEID": 3529,
+   "IMAGE": null,
+   "MENU_IMAGE": null
+  },
+  {
+   "GOODSTYPEID": 3531,
+   "IMAGE": null,
+   "MENU_IMAGE": null
+  },
+  {
+   "GOODSTYPEID": 3564,
+   "IMAGE": null,
+   "MENU_IMAGE": null
+  },
+  {
+   "GOODSTYPEID": 3576,
+   "IMAGE": null,
+   "MENU_IMAGE": null
+  },
+  {
+   "GOODSTYPEID": 3578,
+   "IMAGE": null,
+   "MENU_IMAGE": null
+  },
+  {
+   "GOODSTYPEID": 3591,
+   "IMAGE": null,
+   "MENU_IMAGE": null
+  }
+ ]
+}

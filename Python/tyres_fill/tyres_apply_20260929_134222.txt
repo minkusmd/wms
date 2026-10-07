@@ -1,0 +1,1239 @@
+369671  W636 205/65 R-16 T 99
+     -> CODE  205/65R16 W636 99T
+     -> TITLE Anvelopa HANKOOK 205/65R16 W636 99T, Iarna   [sezon: text]
+     205 | 65 % | R16 | Iarna | 99 (775 kg) | T (190 km/h)
+     imagini: lipsa (faza B)
+369672  W636 215/65 R-17 T 103
+     -> CODE  215/65R17 W636 103T
+     -> TITLE Anvelopa HANKOOK 215/65R17 W636 103T, Iarna   [sezon: text]
+     215 | 65 % | R17 | Iarna | 103 (875 kg) | T (190 km/h)
+     imagini: lipsa (faza B)
+369673  W636 225/60 R-17 T 99
+     -> CODE  225/60R17 W636 99T
+     -> TITLE Anvelopa HANKOOK 225/60R17 W636 99T, Iarna   [sezon: text]
+     225 | 60 % | R17 | Iarna | 99 (775 kg) | T (190 km/h)
+     imagini: lipsa (faza B)
+369674  W636 225/65 R-17 T 106
+     -> CODE  225/65R17 W636 106T
+     -> TITLE Anvelopa HANKOOK 225/65R17 W636 106T, Iarna   [sezon: text]
+     225 | 65 % | R17 | Iarna | 106 (950 kg) | T (190 km/h)
+     imagini: lipsa (faza B)
+369675  RW10 265/65 R-17 T 112
+     -> CODE  265/65R17 RW10 112T
+     -> TITLE Anvelopa HANKOOK 265/65R17 RW10 112T, Iarna   [sezon: model 15/16]
+     265 | 65 % | R17 | Iarna | 112 (1120 kg) | T (190 km/h)
+     imagini: de la 341635
+369676  W330 245/50 R-18 V 104
+     -> CODE  245/50R18 W330 104V
+     -> TITLE Anvelopa HANKOOK 245/50R18 W330 104V, Iarna   [sezon: text]
+     245 | 50 % | R18 | Iarna | 104 (900 kg) | V (240 km/h)
+     imagini: de la 362328
+369677  W330 255/35 R-20 W 97
+     -> CODE  255/35R20 W330 97W
+     -> TITLE Anvelopa HANKOOK 255/35R20 W330 97W, Iarna   [sezon: text]
+     255 | 35 % | R20 | Iarna | 97 (730 kg) | W (270 km/h)
+     imagini: de la 362328
+369678  W330 285/40 R-20 V 108
+     -> CODE  285/40R20 W330 108V
+     -> TITLE Anvelopa HANKOOK 285/40R20 W330 108V, Iarna   [sezon: text]
+     285 | 40 % | R20 | Iarna | 108 (1000 kg) | V (240 km/h)
+     imagini: de la 362328
+369679  W330 265/40 R-22 W 106
+     -> CODE  265/40R22 W330 106W
+     -> TITLE Anvelopa HANKOOK 265/40R22 W330 106W, Iarna   [sezon: text]
+     265 | 40 % | R22 | Iarna | 106 (950 kg) | W (270 km/h)
+     imagini: de la 362328
+369680  W330 315/35 R-22 V 111
+     -> CODE  315/35R22 W330 111V
+     -> TITLE Anvelopa HANKOOK 315/35R22 W330 111V, Iarna   [sezon: text]
+     315 | 35 % | R22 | Iarna | 111 (1090 kg) | V (240 km/h)
+     imagini: de la 362328
+369834  RX808 185/65 R-14 H 90
+     -> CODE  185/65R14 RX808 90H
+     -> TITLE Anvelopa JOYROAD 185/65R14 RX808 90H, Iarna   [sezon: confirmat]
+     185 | 65 % | R14 | Iarna | 90 (600 kg) | H (210 km/h)
+     imagini: lipsa (faza B)
+369835  RX821 225/50 R-17 T 94
+     -> CODE  225/50R17 RX821 94T
+     -> TITLE Anvelopa JOYROAD 225/50R17 RX821 94T, Iarna   [sezon: confirmat]
+     225 | 50 % | R17 | Iarna | 94 (670 kg) | T (190 km/h)
+     imagini: lipsa (faza B)
+369836  RX808 235/55 R-17 V 103
+     -> CODE  235/55R17 RX808 103V
+     -> TITLE Anvelopa JOYROAD 235/55R17 RX808 103V, Iarna   [sezon: confirmat]
+     235 | 55 % | R17 | Iarna | 103 (875 kg) | V (240 km/h)
+     imagini: lipsa (faza B)
+369837  RX826 235/50 R-18 T 97
+     -> CODE  235/50R18 RX826 97T
+     -> TITLE Anvelopa JOYROAD 235/50R18 RX826 97T, Iarna   [sezon: confirmat]
+     235 | 50 % | R18 | Iarna | 97 (730 kg) | T (190 km/h)
+     imagini: lipsa (faza B)
+369838  AW33 225/55 R-18 H 98
+     -> CODE  225/55R18 AW33 98H
+     -> TITLE Anvelopa HABILEAD 225/55R18 AW33 98H, Iarna   [sezon: confirmat]
+     225 | 55 % | R18 | Iarna | 98 (750 kg) | H (210 km/h)
+     imagini: lipsa (faza B)
+369839  RW501 235/55 R-18 H 100
+     -> CODE  235/55R18 RW501 100H
+     -> TITLE Anvelopa HABILEAD 235/55R18 RW501 100H, Iarna   [sezon: confirmat]
+     235 | 55 % | R18 | Iarna | 100 (800 kg) | H (210 km/h)
+     imagini: lipsa (faza B)
+369840  AW33 245/40 R-18 H 97
+     -> CODE  245/40R18 AW33 97H
+     -> TITLE Anvelopa HABILEAD 245/40R18 AW33 97H, Iarna   [sezon: confirmat]
+     245 | 40 % | R18 | Iarna | 97 (730 kg) | H (210 km/h)
+     imagini: lipsa (faza B)
+369841  AW33 245/50 R-18 H 101
+     -> CODE  245/50R18 AW33 101H
+     -> TITLE Anvelopa HABILEAD 245/50R18 AW33 101H, Iarna   [sezon: confirmat]
+     245 | 50 % | R18 | Iarna | 101 (825 kg) | H (210 km/h)
+     imagini: lipsa (faza B)
+369842  ARCTIC S9 235/60 R-18 S 107
+     -> CODE  235/60R18 ARCTIC S9 107S
+     -> TITLE Anvelopa HILO 235/60R18 ARCTIC S9 107S, Iarna   [sezon: text]
+     235 | 60 % | R18 | Iarna | 107 (975 kg) | S (180 km/h)
+     imagini: lipsa (faza B)
+369843  ARCTIC S9 225/55 R-19 H 103
+     -> CODE  225/55R19 ARCTIC S9 103H
+     -> TITLE Anvelopa HILO 225/55R19 ARCTIC S9 103H, Iarna   [sezon: text]
+     225 | 55 % | R19 | Iarna | 103 (875 kg) | H (210 km/h)
+     imagini: lipsa (faza B)
+369844  RW501 245/45 R-19 H 102
+     -> CODE  245/45R19 RW501 102H
+     -> TITLE Anvelopa HABILEAD 245/45R19 RW501 102H, Iarna   [sezon: confirmat]
+     245 | 45 % | R19 | Iarna | 102 (850 kg) | H (210 km/h)
+     imagini: lipsa (faza B)
+369845  RX826 255/50 R-19 H 107
+     -> CODE  255/50R19 RX826 107H
+     -> TITLE Anvelopa JOYROAD 255/50R19 RX826 107H, Iarna   [sezon: confirmat]
+     255 | 50 % | R19 | Iarna | 107 (975 kg) | H (210 km/h)
+     imagini: lipsa (faza B)
+369846  RX826 255/55 R-19 H 111
+     -> CODE  255/55R19 RX826 111H
+     -> TITLE Anvelopa JOYROAD 255/55R19 RX826 111H, Iarna   [sezon: confirmat]
+     255 | 55 % | R19 | Iarna | 111 (1090 kg) | H (210 km/h)
+     imagini: lipsa (faza B)
+369847  ICE I-15 245/45 R-20 T 99
+     -> CODE  245/45R20 ICE I-15 99T
+     -> TITLE Anvelopa LEAO 245/45R20 ICE I-15 99T, Iarna   [sezon: text]
+     245 | 45 % | R20 | Iarna | 99 (775 kg) | T (190 km/h)
+     imagini: lipsa (faza B)
+369848  ICE I-15 255/45 R-21 S 102
+     -> CODE  255/45R21 ICE I-15 102S
+     -> TITLE Anvelopa LEAO 255/45R21 ICE I-15 102S, Iarna   [sezon: text]
+     255 | 45 % | R21 | Iarna | 102 (850 kg) | S (180 km/h)
+     imagini: lipsa (faza B)
+371656  RX826 215/60 R-17 T 96
+     -> CODE  215/60R17 RX826 96T
+     -> TITLE Anvelopa JOYROAD 215/60R17 RX826 96T, Iarna   [sezon: confirmat]
+     215 | 60 % | R17 | Iarna | 96 (710 kg) | T (190 km/h)
+     imagini: lipsa (faza B)
+371657  RX808 225/45 R-17 V 94
+     -> CODE  225/45R17 RX808 94V
+     -> TITLE Anvelopa JOYROAD 225/45R17 RX808 94V, Iarna   [sezon: confirmat]
+     225 | 45 % | R17 | Iarna | 94 (670 kg) | V (240 km/h)
+     imagini: lipsa (faza B)
+371658  ICE I-15 265/65 R-17 T 112
+     -> CODE  265/65R17 ICE I-15 112T
+     -> TITLE Anvelopa LEAO 265/65R17 ICE I-15 112T, Iarna   [sezon: text]
+     265 | 65 % | R17 | Iarna | 112 (1120 kg) | T (190 km/h)
+     imagini: lipsa (faza B)
+371659  W DEFENDER UHP 245/45 R-18 H 100
+     -> CODE  245/45R18 W DEFENDER UHP 100H
+     -> TITLE Anvelopa LEAO 245/45R18 W DEFENDER UHP 100H, Iarna   [sezon: confirmat]
+     245 | 45 % | R18 | Iarna | 100 (800 kg) | H (210 km/h)
+     imagini: lipsa (faza B)
+371660  RX821 225/50 R-18 H 95
+     -> CODE  225/50R18 RX821 95H
+     -> TITLE Anvelopa JOYROAD 225/50R18 RX821 95H, Iarna   [sezon: confirmat]
+     225 | 50 % | R18 | Iarna | 95 (690 kg) | H (210 km/h)
+     imagini: lipsa (faza B)
+371661  RX826 235/50 R-19 H 99
+     -> CODE  235/50R19 RX826 99H
+     -> TITLE Anvelopa JOYROAD 235/50R19 RX826 99H, Iarna   [sezon: confirmat]
+     235 | 50 % | R19 | Iarna | 99 (775 kg) | H (210 km/h)
+     imagini: lipsa (faza B)
+371662  ICE I-15 255/45 R-20 T 101
+     -> CODE  255/45R20 ICE I-15 101T
+     -> TITLE Anvelopa LEAO 255/45R20 ICE I-15 101T, Iarna   [sezon: text]
+     255 | 45 % | R20 | Iarna | 101 (825 kg) | T (190 km/h)
+     imagini: lipsa (faza B)
+376812  225/50 R 18 RXMOTION DU71 99Y XL
+     -> CODE  225/50R18 RXMOTION DU71 99Y XL
+     -> TITLE Anvelopa Roadx 225/50R18 RXMOTION DU71 99Y XL, Vara   [sezon: confirmat]
+     225 | 50 % | R18 | Vara | 99 (775 kg) | Y (300 km/h)
+     imagini: lipsa (faza B)
+376823  285/30 R 21 ContiSportContac 7 100Y XL FR MGT
+     -> CODE  285/30R21 ContiSportContact 7 100Y XL
+     -> TITLE Anvelopa Continental 285/30R21 ContiSportContact 7 100Y XL, Vara   [sezon: confirmat]
+     285 | 30 % | R21 | Vara | 100 (800 kg) | Y (300 km/h)
+     imagini: lipsa (faza B)
+373114  ШИНА   225/45R19  DLA01 A/S  96W ALL SEASON/ANVELOPA PNEUMATICA
+     -> CODE  225/45R19 DLA01 A/S 96W
+     -> TITLE Anvelopa DOUBLESTAR 225/45R19 DLA01 A/S 96W, All Season   [sezon: text]
+     225 | 45 % | R19 | All Season | 96 (710 kg) | W (270 km/h)
+     imagini: lipsa (faza B)
+373115  ШИНА   225/50R18  Z-401 A/S  95W ALL SEASON/ANVELOPA PNEUMATICA
+     -> CODE  225/50R18 Z-401 A/S 95W
+     -> TITLE Anvelopa Goodride 225/50R18 Z-401 A/S 95W, All Season   [sezon: text]
+     225 | 50 % | R18 | All Season | 95 (690 kg) | W (270 km/h)
+     imagini: lipsa (faza B)
+373118  ШИНА   235/50R18  Z-401 A/S  101W ALL SEASON ELITE/ANVELOPA PNEUMATICA
+     -> CODE  235/50R18 Z-401 A/S 101W
+     -> TITLE Anvelopa WESTLAKE 235/50R18 Z-401 A/S 101W, All Season   [sezon: text]
+     235 | 50 % | R18 | All Season | 101 (825 kg) | W (270 km/h)
+     imagini: lipsa (faza B)
+373119  ШИНА   235/55R18  Z-401 A/S  100V ALL SEASON ELITE/ANVELOPA PNEUMATICA
+     -> CODE  235/55R18 Z-401 A/S 100V
+     -> TITLE Anvelopa WESTLAKE 235/55R18 Z-401 A/S 100V, All Season   [sezon: text]
+     235 | 55 % | R18 | All Season | 100 (800 kg) | V (240 km/h)
+     imagini: lipsa (faza B)
+373121  ШИНА   235/55R18  RXFROST WU01  104H ЗИМА/ANVELOPA PNEUMATICA P-U AUTO P-U IARNA
+     -> CODE  235/55R18 RXFROST WU01 104H
+     -> TITLE Anvelopa Roadx 235/55R18 RXFROST WU01 104H, Iarna   [sezon: text]
+     235 | 55 % | R18 | Iarna | 104 (900 kg) | H (210 km/h)
+     imagini: de la 200387
+373122  ШИНА   245/40R18  RXFROST WU01  97H ЗИМА/ANVELOPA PNEUMATICA P-U AUTO P-U IARNA
+     -> CODE  245/40R18 RXFROST WU01 97H
+     -> TITLE Anvelopa Roadx 245/40R18 RXFROST WU01 97H, Iarna   [sezon: text]
+     245 | 40 % | R18 | Iarna | 97 (730 kg) | H (210 km/h)
+     imagini: de la 200387
+373123  ШИНА   255/55R18  RXFROST WU01  109H ЗИМА/ANVELOPA PNEUMATICA P-U AUTO P-U IARNA
+     -> CODE  255/55R18 RXFROST WU01 109H
+     -> TITLE Anvelopa Roadx 255/55R18 RXFROST WU01 109H, Iarna   [sezon: text]
+     255 | 55 % | R18 | Iarna | 109 (1030 kg) | H (210 km/h)
+     imagini: de la 200387
+373126  ШИНА   235/40R18  Z507  95V ЗИМА/ANVELOPA PNEUMATICA P-U AUTO P-U IARNA
+     -> CODE  235/40R18 Z507 95V
+     -> TITLE Anvelopa WESTLAKE 235/40R18 Z507 95V, Iarna   [sezon: text]
+     235 | 40 % | R18 | Iarna | 95 (690 kg) | V (240 km/h)
+     imagini: lipsa (faza B)
+373136  ШИНА   255/45R19  PL02  104V ЗИМА/ANVELOPA PNEUMATICA P-U AUTO P-U IARNA
+     -> CODE  255/45R19 PL02 104V
+     -> TITLE Anvelopa Triangle 255/45R19 PL02 104V, Iarna   [sezon: text]
+     255 | 45 % | R19 | Iarna | 104 (900 kg) | V (240 km/h)
+     imagini: lipsa (faza B)
+373142  ШИНА   275/45R21  SNOWLINK PL02  110V ЗИМА/ANVELOPA PNEUMATICA P-U AUTO P-U IARNA
+     -> CODE  275/45R21 SNOWLINK PL02 110V
+     -> TITLE Anvelopa Triangle 275/45R21 SNOWLINK PL02 110V, Iarna   [sezon: text]
+     275 | 45 % | R21 | Iarna | 110 (1060 kg) | V (240 km/h)
+     imagini: lipsa (faza B)
+373127  ШИНА   235/60R17  Z-401 A/S  102V ALL SEASON/ANVELOPA PNEUMATICA
+     -> CODE  235/60R17 Z-401 A/S 102V
+     -> TITLE Anvelopa Goodride 235/60R17 Z-401 A/S 102V, All Season   [sezon: text]
+     235 | 60 % | R17 | All Season | 102 (850 kg) | V (240 km/h)
+     imagini: lipsa (faza B)
+373128  ШИНА   235/55R17  Z-401 A/S  103W ALL SEASON ELITE/ANVELOPA PNEUMATICA
+     -> CODE  235/55R17 Z-401 A/S 103W
+     -> TITLE Anvelopa WESTLAKE 235/55R17 Z-401 A/S 103W, All Season   [sezon: text]
+     235 | 55 % | R17 | All Season | 103 (875 kg) | W (270 km/h)
+     imagini: lipsa (faza B)
+373131  ШИНА   235/50R19  HA32 A/S  103W ALL SEASON/ANVELOPA PNEUMATICA
+     -> CODE  235/50R19 HA32 A/S 103W
+     -> TITLE Anvelopa KUMHO 235/50R19 HA32 A/S 103W, All Season   [sezon: text]
+     235 | 50 % | R19 | All Season | 103 (875 kg) | W (270 km/h)
+     imagini: lipsa (faza B)
+373134  ШИНА   255/50R19  ICE BLAZER ALPINE EVO 1  107V ЗИМА/ANVELOPA PNEUMATICA P-U AUTO P-U IARNA
+     -> CODE  255/50R19 ICE BLAZER ALPINE EVO 1 107V
+     -> TITLE Anvelopa SAILUN 255/50R19 ICE BLAZER ALPINE EVO 1 107V, Iarna   [sezon: text]
+     255 | 50 % | R19 | Iarna | 107 (975 kg) | V (240 km/h)
+     imagini: lipsa (faza B)
+373135  ШИНА   255/55R19  ICE BLAZER ALPINE EVO 1  111V ЗИМА/ANVELOPA PNEUMATICA P-U AUTO P-U IARNA
+     -> CODE  255/55R19 ICE BLAZER ALPINE EVO 1 111V
+     -> TITLE Anvelopa SAILUN 255/55R19 ICE BLAZER ALPINE EVO 1 111V, Iarna   [sezon: text]
+     255 | 55 % | R19 | Iarna | 111 (1090 kg) | V (240 km/h)
+     imagini: lipsa (faza B)
+386802  Шина GRENLANDER 205/50 ZR17 GREENWING A/S 93W XL All Season/anvelopa pneumatica
+     -> CODE  205/50ZR17 GREENWING A/S 93W XL
+     -> TITLE Anvelopa GRENLANDER 205/50ZR17 GREENWING A/S 93W XL, All Season   [sezon: text]
+     205 | 50 % | R17 | All Season | 93 (650 kg) | W (270 km/h)
+     imagini: de la 386800
+386804  Шина GRENLANDER 215/50 ZR17 GREENWING A/S 95W XL All Season/anvelopa pneumatica
+     -> CODE  215/50ZR17 GREENWING A/S 95W XL
+     -> TITLE Anvelopa GreenLander 215/50ZR17 GREENWING A/S 95W XL, All Season   [sezon: text]
+     215 | 50 % | R17 | All Season | 95 (690 kg) | W (270 km/h)
+     imagini: de la 386800
+386805  Шина GRENLANDER 225/45 ZR19 GREENWING A/S 96W XL All Season/anvelopa pneumatica
+     -> CODE  225/45ZR19 GREENWING A/S 96W XL
+     -> TITLE Anvelopa GRENLANDER 225/45ZR19 GREENWING A/S 96W XL, All Season   [sezon: text]
+     225 | 45 % | R19 | All Season | 96 (710 kg) | W (270 km/h)
+     imagini: de la 386800
+386808  Шина GRENLANDER 255/40 ZR20 GREENWING A/S 101W XL All Season/anvelopa pneumatica
+     -> CODE  255/40ZR20 GREENWING A/S 101W XL
+     -> TITLE Anvelopa GreenLander 255/40ZR20 GREENWING A/S 101W XL, All Season   [sezon: text]
+     255 | 40 % | R20 | All Season | 101 (825 kg) | W (270 km/h)
+     imagini: de la 386800
+386809  Шина GRENLANDER 255/55 R18 GREENWING A/S 105V All Season/anvelopa pneumatica
+     -> CODE  255/55R18 GREENWING A/S 105V
+     -> TITLE Anvelopa GreenLander 255/55R18 GREENWING A/S 105V, All Season   [sezon: text]
+     255 | 55 % | R18 | All Season | 105 (925 kg) | V (240 km/h)
+     imagini: de la 386800
+386810  Шина GRENLANDER 185/75 R16C GREENTOUR A/S 104/102 R All Season/anvelopa pneumatica
+     -> CODE  185/75R16C GREENTOUR A/S 104/102R
+     -> TITLE Anvelopa GreenLander 185/75R16C GREENTOUR A/S 104/102R, All Season   [sezon: text]
+     185 | 75 % | R16C | All Season | 104/102 (900/850 kg) | R (170 km/h)
+     imagini: de la 353530
+386811  Шина GRENLANDER 205/65 R16C GREENTOUR A/S 107/105 R All Season/anvelopa pneumatica
+     -> CODE  205/65R16C GREENTOUR A/S 107/105R
+     -> TITLE Anvelopa GreenLander 205/65R16C GREENTOUR A/S 107/105R, All Season   [sezon: text]
+     205 | 65 % | R16C | All Season | 107/105 (975/925 kg) | R (170 km/h)
+     imagini: de la 353530
+386812  Шина GRENLANDER 215/60 R17C GREENTOUR A/S 109/107 T All Season/anvelopa pneumatica
+     -> CODE  215/60R17C GREENTOUR A/S 109/107T
+     -> TITLE Anvelopa GreenLander 215/60R17C GREENTOUR A/S 109/107T, All Season   [sezon: text]
+     215 | 60 % | R17C | All Season | 109/107 (1030/975 kg) | T (190 km/h)
+     imagini: de la 353530
+386814  Шина GRENLANDER 185/60R14 ICEHAWKE I 82T /anvelopa pneum. p/u auto
+     -> CODE  185/60R14 ICEHAWKE I 82T
+     -> TITLE Anvelopa GreenLander 185/60R14 ICEHAWKE I 82T, Iarna   [sezon: text]
+     185 | 60 % | R14 | Iarna | 82 (475 kg) | T (190 km/h)
+     imagini: de la 339514
+381944  195/55 R 16  HECTORRA 5 87H
+     -> CODE  195/55R16 HECTORRA 5 87H
+     -> TITLE Anvelopa MATADOR 195/55R16 HECTORRA 5 87H, Vara   [sezon: model 34/34]
+     195 | 55 % | R16 | Vara | 87 (545 kg) | H (210 km/h)
+     imagini: de la 320378
+381956  255/40 R 21 RainSport 5 102Y XL FR TL Uniroyal anvelope
+     -> CODE  255/40R21 RainSport 5 102Y XL
+     -> TITLE Anvelopa Uniroyal 255/40R21 RainSport 5 102Y XL, Vara   [sezon: model 57/57]
+     255 | 40 % | R21 | Vara | 102 (850 kg) | Y (300 km/h)
+     imagini: de la 318817
+372743  Шина GRENLANDER 165/70R14 ICEHAWKE I 81T/anvelopa pneum. p/u auto
+     -> CODE  165/70R14 ICEHAWKE I 81T
+     -> TITLE Anvelopa GreenLander 165/70R14 ICEHAWKE I 81T, Iarna   [sezon: text]
+     165 | 70 % | R14 | Iarna | 81 (462 kg) | T (190 km/h)
+     imagini: de la 339514
+372747  Шина GRENLANDER 275/40R22 ICEHAWKE II 107H XL/anvelopa pneum. p/u auto
+     -> CODE  275/40R22 ICEHAWKE II 107H XL
+     -> TITLE Anvelopa GreenLander 275/40R22 ICEHAWKE II 107H XL, Iarna   [sezon: text]
+     275 | 40 % | R22 | Iarna | 107 (975 kg) | H (210 km/h)
+     imagini: de la 328549
+392799  Шина GRENLANDER 225/55R19 ICEHAWKE I 99H /anvelopa pneum. p/u auto
+     -> CODE  225/55R19 ICEHAWKE I 99H
+     -> TITLE Anvelopa GRENLANDER 225/55R19 ICEHAWKE I 99H, Iarna   [sezon: text]
+     225 | 55 % | R19 | Iarna | 99 (775 kg) | H (210 km/h)
+     imagini: de la 339514
+392800  Шина GRENLANDER 255/50R19 Winter GL868 107H XL/anvelopa pneum. p/u auto
+     -> CODE  255/50R19 Winter GL868 107H XL
+     -> TITLE Anvelopa GRENLANDER 255/50R19 Winter GL868 107H XL, Iarna   [sezon: text]
+     255 | 50 % | R19 | Iarna | 107 (975 kg) | H (210 km/h)
+     imagini: de la 339513
+392801  Шина GRENLANDER 265/65R17 Winter GL868 112T/anvelopa pneum. p/u auto
+     -> CODE  265/65R17 Winter GL868 112T
+     -> TITLE Anvelopa GRENLANDER 265/65R17 Winter GL868 112T, Iarna   [sezon: text]
+     265 | 65 % | R17 | Iarna | 112 (1120 kg) | T (190 km/h)
+     imagini: de la 339513
+392802  Шина GRENLANDER 275/40R22 ICEHAWKE II 107H XL/anvelopa pneum. p/u auto
+     -> CODE  275/40R22 ICEHAWKE II 107H XL
+     -> TITLE Anvelopa GreenLander 275/40R22 ICEHAWKE II 107H XL, Iarna   [sezon: text]
+     275 | 40 % | R22 | Iarna | 107 (975 kg) | H (210 km/h)
+     imagini: de la 328549
+392804  Шина GRENLANDER 185/75R16C Winter GL989 104/102 R anvelopa pneum. p/u auto
+     -> CODE  185/75R16C Winter GL989 104/102R
+     -> TITLE Anvelopa GRENLANDER 185/75R16C Winter GL989 104/102R, Iarna   [sezon: text]
+     185 | 75 % | R16C | Iarna | 104/102 (900/850 kg) | R (170 km/h)
+     imagini: de la 331566
+392805  Шина GRENLANDER 205/65R16C Winter GL989 107/105 R anvelopa pneum. p/u auto
+     -> CODE  205/65R16C Winter GL989 107/105R
+     -> TITLE Anvelopa GRENLANDER 205/65R16C Winter GL989 107/105R, Iarna   [sezon: text]
+     205 | 65 % | R16C | Iarna | 107/105 (975/925 kg) | R (170 km/h)
+     imagini: de la 331566
+392806  Шина GRENLANDER 185/60 R15 COLO H02 88H XL лето-vara/anvelopa pneumatica
+     -> CODE  185/60R15 COLO H02 88H XL
+     -> TITLE Anvelopa GRENLANDER 185/60R15 COLO H02 88H XL, Vara   [sezon: text]
+     185 | 60 % | R15 | Vara | 88 (560 kg) | H (210 km/h)
+     imagini: de la 353527
+392807  Шина GRENLANDER 195/55 R15 COLO H02 85V лето-vara/anvelopa pneumatica
+     -> CODE  195/55R15 COLO H02 85V
+     -> TITLE Anvelopa GRENLANDER 195/55R15 COLO H02 85V, Vara   [sezon: text]
+     195 | 55 % | R15 | Vara | 85 (515 kg) | V (240 km/h)
+     imagini: de la 353527
+392808  Шина GRENLANDER 195/55 R16 COLO H02 91V XL лето-vara/anvelopa pneumatica
+     -> CODE  195/55R16 COLO H02 91V XL
+     -> TITLE Anvelopa GRENLANDER 195/55R16 COLO H02 91V XL, Vara   [sezon: text]
+     195 | 55 % | R16 | Vara | 91 (615 kg) | V (240 km/h)
+     imagini: de la 353527
+392809  Шина GRENLANDER 205/40 R17 L-ZEAL56 84W XL лето-vara/anvelopa pneumatica
+     -> CODE  205/40R17 L-ZEAL56 84W XL
+     -> TITLE Anvelopa GRENLANDER 205/40R17 L-ZEAL56 84W XL, Vara   [sezon: text]
+     205 | 40 % | R17 | Vara | 84 (500 kg) | W (270 km/h)
+     imagini: de la 351370
+392810  Шина GRENLANDER 205/60 R16 COLO H02 96V XL лето-vara/anvelopa pneumatica
+     -> CODE  205/60R16 COLO H02 96V XL
+     -> TITLE Anvelopa GRENLANDER 205/60R16 COLO H02 96V XL, Vara   [sezon: text]
+     205 | 60 % | R16 | Vara | 96 (710 kg) | V (240 km/h)
+     imagini: de la 353527
+392811  Шина GRENLANDER 205/65 R15 COLO H02 94V лето-vara/anvelopa pneumatica
+     -> CODE  205/65R15 COLO H02 94V
+     -> TITLE Anvelopa GRENLANDER 205/65R15 COLO H02 94V, Vara   [sezon: text]
+     205 | 65 % | R15 | Vara | 94 (670 kg) | V (240 km/h)
+     imagini: de la 353527
+392812  Шина GRENLANDER 215/55 ZR16 COLO H02 97W XL лето-vara/anvelopa pneumatica
+     -> CODE  215/55ZR16 COLO H02 97W XL
+     -> TITLE Anvelopa GRENLANDER 215/55ZR16 COLO H02 97W XL, Vara   [sezon: text]
+     215 | 55 % | R16 | Vara | 97 (730 kg) | W (270 km/h)
+     imagini: de la 353527
+392813  Шина GRENLANDER 215/60 R17 MAHO 77 100H XL лето-vara/anvelopa pneumatica
+     -> CODE  215/60R17 MAHO 77 100H XL
+     -> TITLE Anvelopa GRENLANDER 215/60R17 MAHO 77 100H XL, Vara   [sezon: text]
+     215 | 60 % | R17 | Vara | 100 (800 kg) | H (210 km/h)
+     imagini: de la 350353
+392814  Шина GRENLANDER 215/65 R16 COLO H02 98H лето-vara/anvelopa pneumatica
+     -> CODE  215/65R16 COLO H02 98H
+     -> TITLE Anvelopa GRENLANDER 215/65R16 COLO H02 98H, Vara   [sezon: text]
+     215 | 65 % | R16 | Vara | 98 (750 kg) | H (210 km/h)
+     imagini: de la 353527
+392815  Шина GRENLANDER 225/55 R16 COLO H01 95V лето-vara/anvelopa pneumatica
+     -> CODE  225/55R16 COLO H01 95V
+     -> TITLE Anvelopa GRENLANDER 225/55R16 COLO H01 95V, Vara   [sezon: text]
+     225 | 55 % | R16 | Vara | 95 (690 kg) | V (240 km/h)
+     imagini: de la 320835
+392816  Шина GRENLANDER 225/50 R17 ENRI U08 98W XL лето-vara/anvelopa pneumatica
+     -> CODE  225/50R17 ENRI U08 98W XL
+     -> TITLE Anvelopa GRENLANDER 225/50R17 ENRI U08 98W XL, Vara   [sezon: text]
+     225 | 50 % | R17 | Vara | 98 (750 kg) | W (270 km/h)
+     imagini: de la 287190
+392817  Шина GRENLANDER 225/50 R17 L-ZEAL56 98W XL лето-vara/anvelopa pneumatica
+     -> CODE  225/50R17 L-ZEAL56 98W XL
+     -> TITLE Anvelopa GRENLANDER 225/50R17 L-ZEAL56 98W XL, Vara   [sezon: text]
+     225 | 50 % | R17 | Vara | 98 (750 kg) | W (270 km/h)
+     imagini: de la 351370
+392819  Шина GRENLANDER 225/55 ZR16 COLO H02 99W XL лето-vara/anvelopa pneumatica
+     -> CODE  225/55ZR16 COLO H02 99W XL
+     -> TITLE Anvelopa GRENLANDER 225/55ZR16 COLO H02 99W XL, Vara   [sezon: text]
+     225 | 55 % | R16 | Vara | 99 (775 kg) | W (270 km/h)
+     imagini: de la 353527
+392820  Шина GRENLANDER 225/50 ZR18 L-ZEAL56 99W XL лето-vara/anvelopa pneumatica
+     -> CODE  225/50ZR18 L-ZEAL56 99W XL
+     -> TITLE Anvelopa GRENLANDER 225/50ZR18 L-ZEAL56 99W XL, Vara   [sezon: text]
+     225 | 50 % | R18 | Vara | 99 (775 kg) | W (270 km/h)
+     imagini: de la 351370
+392821  Шина GRENLANDER 225/45 ZR19 ENRI U08 96W XL лето-vara/anvelopa pneumatica
+     -> CODE  225/45ZR19 ENRI U08 96W XL
+     -> TITLE Anvelopa GRENLANDER 225/45ZR19 ENRI U08 96W XL, Vara   [sezon: text]
+     225 | 45 % | R19 | Vara | 96 (710 kg) | W (270 km/h)
+     imagini: de la 287190
+395634  Шина GRENLANDER 245/30 ZR20 L-ZEAL56 95W XL лето-vara/anvelopa pneumatica
+     -> CODE  245/30ZR20 L-ZEAL56 95W XL
+     -> TITLE Anvelopa GRENLANDER 245/30ZR20 L-ZEAL56 95W XL, Vara   [sezon: text]
+     245 | 30 % | R20 | Vara | 95 (690 kg) | W (270 km/h)
+     imagini: de la 351370
+395635  Шина GRENLANDER 245/40 ZR20 ENRI U08 99W XL передние лето-vara
+     -> CODE  245/40ZR20 ENRI U08 99W XL
+     -> TITLE Anvelopa GRENLANDER 245/40ZR20 ENRI U08 99W XL, Vara   [sezon: text]
+     245 | 40 % | R20 | Vara | 99 (775 kg) | W (270 km/h)
+     imagini: de la 287190
+395636  Шина GRENLANDER 245/40 ZR20 L-ZEAL56 99W XL лето-vara/anvelopa pneumatica
+     -> CODE  245/40ZR20 L-ZEAL56 99W XL
+     -> TITLE Anvelopa GRENLANDER 245/40ZR20 L-ZEAL56 99W XL, Vara   [sezon: text]
+     245 | 40 % | R20 | Vara | 99 (775 kg) | W (270 km/h)
+     imagini: de la 351370
+395638  Шина GRENLANDER 255/50 R20 L-ZEAL56 109V XL лето-vara/anvelopa pneumatica
+     -> CODE  255/50R20 L-ZEAL56 109V XL
+     -> TITLE Anvelopa GRENLANDER 255/50R20 L-ZEAL56 109V XL, Vara   [sezon: text]
+     255 | 50 % | R20 | Vara | 109 (1030 kg) | V (240 km/h)
+     imagini: de la 351370
+395639  Шина GRENLANDER 265/50 R20 L-ZEAL56 111V XL лето-vara/anvelopa pneumatica
+     -> CODE  265/50R20 L-ZEAL56 111V XL
+     -> TITLE Anvelopa GRENLANDER 265/50R20 L-ZEAL56 111V XL, Vara   [sezon: text]
+     265 | 50 % | R20 | Vara | 111 (1090 kg) | V (240 km/h)
+     imagini: de la 351370
+395640  Шина GRENLANDER 275/50 R20 L-ZEAL56 113V XL лето-vara/anvelopa pneumatica
+     -> CODE  275/50R20 L-ZEAL56 113V XL
+     -> TITLE Anvelopa GRENLANDER 275/50R20 L-ZEAL56 113V XL, Vara   [sezon: text]
+     275 | 50 % | R20 | Vara | 113 (1150 kg) | V (240 km/h)
+     imagini: de la 351370
+395642  Шина GRENLANDER 275/35 ZR20 ENRI U08 102W XL лето-vara/anvelopa pneumatica
+     -> CODE  275/35ZR20 ENRI U08 102W XL
+     -> TITLE Anvelopa GRENLANDER 275/35ZR20 ENRI U08 102W XL, Vara   [sezon: text]
+     275 | 35 % | R20 | Vara | 102 (850 kg) | W (270 km/h)
+     imagini: de la 287190
+395643  Шина GRENLANDER 285/50 R20 L-ZEAL56 116V XL лето-vara/anvelopa pneumatica
+     -> CODE  285/50R20 L-ZEAL56 116V XL
+     -> TITLE Anvelopa GRENLANDER 285/50R20 L-ZEAL56 116V XL, Vara   [sezon: text]
+     285 | 50 % | R20 | Vara | 116 (1250 kg) | V (240 km/h)
+     imagini: de la 351370
+395644  Шина GRENLANDER 285/50 R20 MAHO 79 116V XL лето-vara/anvelopa pneumatica
+     -> CODE  285/50R20 MAHO 79 116V XL
+     -> TITLE Anvelopa GRENLANDER 285/50R20 MAHO 79 116V XL, Vara   [sezon: text]
+     285 | 50 % | R20 | Vara | 116 (1250 kg) | V (240 km/h)
+     imagini: de la 283580
+395645  Шина GRENLANDER 305/40 R20 L-ZEAL56 112V XL лето-vara/anvelopa pneumatica
+     -> CODE  305/40R20 L-ZEAL56 112V XL
+     -> TITLE Anvelopa GRENLANDER 305/40R20 L-ZEAL56 112V XL, Vara   [sezon: text]
+     305 | 40 % | R20 | Vara | 112 (1120 kg) | V (240 km/h)
+     imagini: de la 351370
+395646  Шина GRENLANDER 315/35 ZR20 L-ZEAL56 110W XL лето-vara/anvelopa pneumatica
+     -> CODE  315/35ZR20 L-ZEAL56 110W XL
+     -> TITLE Anvelopa GRENLANDER 315/35ZR20 L-ZEAL56 110W XL, Vara   [sezon: text]
+     315 | 35 % | R20 | Vara | 110 (1060 kg) | W (270 km/h)
+     imagini: de la 351370
+395647  Шина TRACMAX 255/40R20 X-privilo S360 101V XL /anvelopa pneum. p/u auto
+     -> CODE  255/40R20 X-privilo S360 101V XL
+     -> TITLE Anvelopa TRACMAX 255/40R20 X-privilo S360 101V XL, Iarna   [sezon: model 2/2]
+     255 | 40 % | R20 | Iarna | 101 (825 kg) | V (240 km/h)
+     imagini: de la 373113
+395648  Шина GRENLANDER 235/45 R19 L-ZEAL56 95W лето-vara/anvelopa pneumatica
+     -> CODE  235/45R19 L-ZEAL56 95W
+     -> TITLE Anvelopa GreenLander 235/45R19 L-ZEAL56 95W, Vara   [sezon: text]
+     235 | 45 % | R19 | Vara | 95 (690 kg) | W (270 km/h)
+     imagini: de la 351370
+395650  Шина GRENLANDER 235/55 R19 L-ZEAL56 105V XL лето-vara/anvelopa pneumatica
+     -> CODE  235/55R19 L-ZEAL56 105V XL
+     -> TITLE Anvelopa GreenLander 235/55R19 L-ZEAL56 105V XL, Vara   [sezon: text]
+     235 | 55 % | R19 | Vara | 105 (925 kg) | V (240 km/h)
+     imagini: de la 351370
+395651  Шина GRENLANDER 245/40 ZR19 L-ZEAL56 98W XL лето-vara/anvelopa pneumatica
+     -> CODE  245/40ZR19 L-ZEAL56 98W XL
+     -> TITLE Anvelopa GreenLander 245/40ZR19 L-ZEAL56 98W XL, Vara   [sezon: text]
+     245 | 40 % | R19 | Vara | 98 (750 kg) | W (270 km/h)
+     imagini: de la 351370
+395652  Шина GRENLANDER 255/35 ZR19 ENRI U08 96W XL лето-vara/anvelopa pneumatica
+     -> CODE  255/35ZR19 ENRI U08 96W XL
+     -> TITLE Anvelopa GreenLander 255/35ZR19 ENRI U08 96W XL, Vara   [sezon: text]
+     255 | 35 % | R19 | Vara | 96 (710 kg) | W (270 km/h)
+     imagini: de la 287190
+395653  Шина GRENLANDER 255/50 R19 ENRI U08 107V XL лето-vara/anvelopa pneumatica
+     -> CODE  255/50R19 ENRI U08 107V XL
+     -> TITLE Anvelopa GreenLander 255/50R19 ENRI U08 107V XL, Vara   [sezon: text]
+     255 | 50 % | R19 | Vara | 107 (975 kg) | V (240 km/h)
+     imagini: de la 287190
+395654  Шина GRENLANDER 255/50 R19 L-ZEAL56 103V лето-vara/anvelopa pneumatica
+     -> CODE  255/50R19 L-ZEAL56 103V
+     -> TITLE Anvelopa GreenLander 255/50R19 L-ZEAL56 103V, Vara   [sezon: text]
+     255 | 50 % | R19 | Vara | 103 (875 kg) | V (240 km/h)
+     imagini: de la 351370
+395656  Шина GRENLANDER 255/55 R19 L-ZEAL56 111V XL лето-vara/anvelopa pneumatica
+     -> CODE  255/55R19 L-ZEAL56 111V XL
+     -> TITLE Anvelopa GreenLander 255/55R19 L-ZEAL56 111V XL, Vara   [sezon: text]
+     255 | 55 % | R19 | Vara | 111 (1090 kg) | V (240 km/h)
+     imagini: de la 351370
+395658  Шина GRENLANDER 265/50 R19 L-ZEAL56 110V XL лето-vara/anvelopa pneumatica
+     -> CODE  265/50R19 L-ZEAL56 110V XL
+     -> TITLE Anvelopa GreenLander 265/50R19 L-ZEAL56 110V XL, Vara   [sezon: text]
+     265 | 50 % | R19 | Vara | 110 (1060 kg) | V (240 km/h)
+     imagini: de la 351370
+395659  Шина GRENLANDER 275/30 ZR19 L-ZEAL56 96W XL лето-vara/anvelopa pneumatica
+     -> CODE  275/30ZR19 L-ZEAL56 96W XL
+     -> TITLE Anvelopa GreenLander 275/30ZR19 L-ZEAL56 96W XL, Vara   [sezon: text]
+     275 | 30 % | R19 | Vara | 96 (710 kg) | W (270 km/h)
+     imagini: de la 351370
+395660  Шина GRENLANDER 275/35 ZR19 L-ZEAL56 100Y XL лето-vara/anvelopa pneumatica
+     -> CODE  275/35ZR19 L-ZEAL56 100Y XL
+     -> TITLE Anvelopa GreenLander 275/35ZR19 L-ZEAL56 100Y XL, Vara   [sezon: text]
+     275 | 35 % | R19 | Vara | 100 (800 kg) | Y (300 km/h)
+     imagini: de la 351370
+395661  Шина GRENLANDER 275/45 R19 L-ZEAL56 108V XL лето-vara/anvelopa pneumatica
+     -> CODE  275/45R19 L-ZEAL56 108V XL
+     -> TITLE Anvelopa GreenLander 275/45R19 L-ZEAL56 108V XL, Vara   [sezon: text]
+     275 | 45 % | R19 | Vara | 108 (1000 kg) | V (240 km/h)
+     imagini: de la 351370
+395662  Шина GRENLANDER 285/45 R19 ENRI U08 111V XL лето-vara/anvelopa pneumatica
+     -> CODE  285/45R19 ENRI U08 111V XL
+     -> TITLE Anvelopa GreenLander 285/45R19 ENRI U08 111V XL, Vara   [sezon: text]
+     285 | 45 % | R19 | Vara | 111 (1090 kg) | V (240 km/h)
+     imagini: de la 287190
+395663  Шина GRENLANDER 245/35 R21 L-ZEAL56 96W XL лето-vara/anvelopa pneumatica
+     -> CODE  245/35R21 L-ZEAL56 96W XL
+     -> TITLE Anvelopa GRENLANDER 245/35R21 L-ZEAL56 96W XL, Vara   [sezon: text]
+     245 | 35 % | R21 | Vara | 96 (710 kg) | W (270 km/h)
+     imagini: de la 351370
+395664  Шина GRENLANDER 275/30 ZR21 L-ZEAL56 98W XL лето-vara/anvelopa pneumatica
+     -> CODE  275/30ZR21 L-ZEAL56 98W XL
+     -> TITLE Anvelopa GRENLANDER 275/30ZR21 L-ZEAL56 98W XL, Vara   [sezon: text]
+     275 | 30 % | R21 | Vara | 98 (750 kg) | W (270 km/h)
+     imagini: de la 351370
+395665  Шина GRENLANDER 275/45 ZR21 L-ZEAL56 110W XL лето-vara/anvelopa pneumatica
+     -> CODE  275/45ZR21 L-ZEAL56 110W XL
+     -> TITLE Anvelopa GRENLANDER 275/45ZR21 L-ZEAL56 110W XL, Vara   [sezon: text]
+     275 | 45 % | R21 | Vara | 110 (1060 kg) | W (270 km/h)
+     imagini: de la 351370
+395666  Шина GRENLANDER 275/50 R21 L-ZEAL56 113V XL лето-vara/anvelopa pneumatica
+     -> CODE  275/50R21 L-ZEAL56 113V XL
+     -> TITLE Anvelopa GRENLANDER 275/50R21 L-ZEAL56 113V XL, Vara   [sezon: text]
+     275 | 50 % | R21 | Vara | 113 (1150 kg) | V (240 km/h)
+     imagini: de la 351370
+395667  Шина GRENLANDER 295/35 ZR21 ENRI U08 107W XL лето-vara/anvelopa pneumatica
+     -> CODE  295/35ZR21 ENRI U08 107W XL
+     -> TITLE Anvelopa GRENLANDER 295/35ZR21 ENRI U08 107W XL, Vara   [sezon: text]
+     295 | 35 % | R21 | Vara | 107 (975 kg) | W (270 km/h)
+     imagini: de la 287190
+395668  Шина GRENLANDER 295/40 ZR21 ENRI U08 111W XL лето-vara/anvelopa pneumatica
+     -> CODE  295/40ZR21 ENRI U08 111W XL
+     -> TITLE Anvelopa GRENLANDER 295/40ZR21 ENRI U08 111W XL, Vara   [sezon: text]
+     295 | 40 % | R21 | Vara | 111 (1090 kg) | W (270 km/h)
+     imagini: de la 287190
+395669  Шина GRENLANDER 255/30 R22 L-ZEAL56 95W XL лето-vara/anvelopa pneumatica
+     -> CODE  255/30R22 L-ZEAL56 95W XL
+     -> TITLE Anvelopa GreenLander 255/30R22 L-ZEAL56 95W XL, Vara   [sezon: text]
+     255 | 30 % | R22 | Vara | 95 (690 kg) | W (270 km/h)
+     imagini: de la 351370
+395670  Шина GRENLANDER 265/30 ZR22 L-ZEAL56 97W XL лето-vara/anvelopa pneumatica
+     -> CODE  265/30ZR22 L-ZEAL56 97W XL
+     -> TITLE Anvelopa GreenLander 265/30ZR22 L-ZEAL56 97W XL, Vara   [sezon: text]
+     265 | 30 % | R22 | Vara | 97 (730 kg) | W (270 km/h)
+     imagini: de la 351370
+395671  Шина GRENLANDER 265/40 R22 DIAS ZERO 106V XL лето-vara/anvelopa pneumatica
+     -> CODE  265/40R22 DIAS ZERO 106V XL
+     -> TITLE Anvelopa GreenLander 265/40R22 DIAS ZERO 106V XL, Vara   [sezon: text]
+     265 | 40 % | R22 | Vara | 106 (950 kg) | V (240 km/h)
+     imagini: de la 283576
+395672  Шина GRENLANDER 265/45 ZR22 L-ZEAL56 110W XL лето-vara/anvelopa pneumatica
+     -> CODE  265/45ZR22 L-ZEAL56 110W XL
+     -> TITLE Anvelopa GreenLander 265/45ZR22 L-ZEAL56 110W XL, Vara   [sezon: text]
+     265 | 45 % | R22 | Vara | 110 (1060 kg) | W (270 km/h)
+     imagini: de la 351370
+395675  Шина GRENLANDER 285/50 R22 L-ZEAL56 118V XL лето-vara/anvelopa pneumatica
+     -> CODE  285/50R22 L-ZEAL56 118V XL
+     -> TITLE Anvelopa GreenLander 285/50R22 L-ZEAL56 118V XL, Vara   [sezon: text]
+     285 | 50 % | R22 | Vara | 118 (1320 kg) | V (240 km/h)
+     imagini: de la 351370
+395676  Шина GRENLANDER 295/40 R22 L-ZEAL56 112V XL лето-vara/anvelopa pneumatica
+     -> CODE  295/40R22 L-ZEAL56 112V XL
+     -> TITLE Anvelopa GreenLander 295/40R22 L-ZEAL56 112V XL, Vara   [sezon: text]
+     295 | 40 % | R22 | Vara | 112 (1120 kg) | V (240 km/h)
+     imagini: de la 351370
+395678  Шина GRENLANDER 235/45 R18 L-ZEAL56 98W XL лето-vara/anvelopa pneumatica
+     -> CODE  235/45R18 L-ZEAL56 98W XL
+     -> TITLE Anvelopa GRENLANDER 235/45R18 L-ZEAL56 98W XL, Vara   [sezon: text]
+     235 | 45 % | R18 | Vara | 98 (750 kg) | W (270 km/h)
+     imagini: de la 351370
+395679  Шина GRENLANDER 235/45 ZR18 ENRI U08 98W XL лето-vara/anvelopa pneumatica
+     -> CODE  235/45ZR18 ENRI U08 98W XL
+     -> TITLE Anvelopa GRENLANDER 235/45ZR18 ENRI U08 98W XL, Vara   [sezon: text]
+     235 | 45 % | R18 | Vara | 98 (750 kg) | W (270 km/h)
+     imagini: de la 287190
+395680  Шина GRENLANDER 235/50 R18 ENRI U08 97V лето-vara/anvelopa pneumatica
+     -> CODE  235/50R18 ENRI U08 97V
+     -> TITLE Anvelopa GRENLANDER 235/50R18 ENRI U08 97V, Vara   [sezon: text]
+     235 | 50 % | R18 | Vara | 97 (730 kg) | V (240 km/h)
+     imagini: de la 287190
+395681  Шина GRENLANDER 235/60 R18 MAHO 79 107H XL лето-vara/anvelopa pneumatica
+     -> CODE  235/60R18 MAHO 79 107H XL
+     -> TITLE Anvelopa GRENLANDER 235/60R18 MAHO 79 107H XL, Vara   [sezon: text]
+     235 | 60 % | R18 | Vara | 107 (975 kg) | H (210 km/h)
+     imagini: de la 283580
+395683  Шина GRENLANDER 245/40 R18 L-ZEAL56 97W XL лето-vara/anvelopa pneumatica
+     -> CODE  245/40R18 L-ZEAL56 97W XL
+     -> TITLE Anvelopa GRENLANDER 245/40R18 L-ZEAL56 97W XL, Vara   [sezon: text]
+     245 | 40 % | R18 | Vara | 97 (730 kg) | W (270 km/h)
+     imagini: de la 351370
+395686  Шина GRENLANDER 255/35 ZR18 L-ZEAL56 94W XL лето-vara/anvelopa pneumatica
+     -> CODE  255/35ZR18 L-ZEAL56 94W XL
+     -> TITLE Anvelopa GRENLANDER 255/35ZR18 L-ZEAL56 94W XL, Vara   [sezon: text]
+     255 | 35 % | R18 | Vara | 94 (670 kg) | W (270 km/h)
+     imagini: de la 351370
+395687  Шина GRENLANDER 255/40 ZR18 L-ZEAL56 99W XL лето-vara/anvelopa pneumatica
+     -> CODE  255/40ZR18 L-ZEAL56 99W XL
+     -> TITLE Anvelopa GRENLANDER 255/40ZR18 L-ZEAL56 99W XL, Vara   [sezon: text]
+     255 | 40 % | R18 | Vara | 99 (775 kg) | W (270 km/h)
+     imagini: de la 351370
+395688  Шина GRENLANDER 255/50 R18 L-ZEAL56 106V XL лето-vara/anvelopa pneumatica
+     -> CODE  255/50R18 L-ZEAL56 106V XL
+     -> TITLE Anvelopa GRENLANDER 255/50R18 L-ZEAL56 106V XL, Vara   [sezon: text]
+     255 | 50 % | R18 | Vara | 106 (950 kg) | V (240 km/h)
+     imagini: de la 351370
+395689  Шина GRENLANDER 265/35 ZR18 L-ZEAL56 97W XL лето-vara/anvelopa pneumatica
+     -> CODE  265/35ZR18 L-ZEAL56 97W XL
+     -> TITLE Anvelopa GRENLANDER 265/35ZR18 L-ZEAL56 97W XL, Vara   [sezon: text]
+     265 | 35 % | R18 | Vara | 97 (730 kg) | W (270 km/h)
+     imagini: de la 351370
+395690  Шина GRENLANDER 265/40 ZR18 L-ZEAL56 101W XL лето-vara/anvelopa pneumatica
+     -> CODE  265/40ZR18 L-ZEAL56 101W XL
+     -> TITLE Anvelopa GRENLANDER 265/40ZR18 L-ZEAL56 101W XL, Vara   [sezon: text]
+     265 | 40 % | R18 | Vara | 101 (825 kg) | W (270 km/h)
+     imagini: de la 351370
+395691  Шина GRENLANDER 265/60 R18 MAHO 79 110H лето-vara/anvelopa pneumatica
+     -> CODE  265/60R18 MAHO 79 110H
+     -> TITLE Anvelopa GRENLANDER 265/60R18 MAHO 79 110H, Vara   [sezon: text]
+     265 | 60 % | R18 | Vara | 110 (1060 kg) | H (210 km/h)
+     imagini: de la 283580
+395694  Шина GRENLANDER 245/45 R17 L-ZEAL56 99W XL лето-vara/anvelopa pneumatica
+     -> CODE  245/45R17 L-ZEAL56 99W XL
+     -> TITLE Anvelopa GRENLANDER 245/45R17 L-ZEAL56 99W XL, Vara   [sezon: text]
+     245 | 45 % | R17 | Vara | 99 (775 kg) | W (270 km/h)
+     imagini: de la 351370
+395696  Шина GRENLANDER 255/65 R17 MAHO 79 110H лето-vara/anvelopa pneumatica
+     -> CODE  255/65R17 MAHO 79 110H
+     -> TITLE Anvelopa GRENLANDER 255/65R17 MAHO 79 110H, Vara   [sezon: text]
+     255 | 65 % | R17 | Vara | 110 (1060 kg) | H (210 km/h)
+     imagini: de la 283580
+395697  Шина GRENLANDER 265/65 R17 MAHO 77 112H лето-vara/anvelopa pneumatica
+     -> CODE  265/65R17 MAHO 77 112H
+     -> TITLE Anvelopa GRENLANDER 265/65R17 MAHO 77 112H, Vara   [sezon: text]
+     265 | 65 % | R17 | Vara | 112 (1120 kg) | H (210 km/h)
+     imagini: de la 350353
+395698  Шина GRENLANDER 205/50 ZR16 COLO H02 91W XL лето-vara/anvelopa pneumatica
+     -> CODE  205/50ZR16 COLO H02 91W XL
+     -> TITLE Anvelopa GRENLANDER 205/50ZR16 COLO H02 91W XL, Vara   [sezon: text]
+     205 | 50 % | R16 | Vara | 91 (615 kg) | W (270 km/h)
+     imagini: de la 353527
+395701  Шина GRENLANDER 245/70 R16 MAHO 77 111H XL лето-vara/anvelopa pneumatica
+     -> CODE  245/70R16 MAHO 77 111H XL
+     -> TITLE Anvelopa GRENLANDER 245/70R16 MAHO 77 111H XL, Vara   [sezon: text]
+     245 | 70 % | R16 | Vara | 111 (1090 kg) | H (210 km/h)
+     imagini: de la 350353
+395702  Шина GRENLANDER 185/75 R16C L-STRONG36 104/102R лето-vara/anvelopa pneumatica
+     -> CODE  185/75R16C L-STRONG36 104/102R
+     -> TITLE Anvelopa GRENLANDER 185/75R16C L-STRONG36 104/102R, Vara   [sezon: text]
+     185 | 75 % | R16C | Vara | 104/102 (900/850 kg) | R (170 km/h)
+     imagini: de la 241886
+395703  Шина GRENLANDER 185/65 R15 GREENWING A/S 92T XL All Season/anvelopa pneumatica
+     -> CODE  185/65R15 GREENWING A/S 92T XL
+     -> TITLE Anvelopa GRENLANDER 185/65R15 GREENWING A/S 92T XL, All Season   [sezon: text]
+     185 | 65 % | R15 | All Season | 92 (630 kg) | T (190 km/h)
+     imagini: de la 386800
+395704  Шина GRENLANDER 195/70 R15C L-STRONG36 104/102R лето-vara/anvelopa pneumatica
+     -> CODE  195/70R15C L-STRONG36 104/102R
+     -> TITLE Anvelopa GRENLANDER 195/70R15C L-STRONG36 104/102R, Vara   [sezon: text]
+     195 | 70 % | R15C | Vara | 104/102 (900/850 kg) | R (170 km/h)
+     imagini: de la 241886
+395705  Шина GRENLANDER 165/70 R14C B L-MAX9 89/87R лето-vara/anvelopa pneumatica
+     -> CODE  165/70R14C L-MAX9 89/87R
+     -> TITLE Anvelopa GRENLANDER 165/70R14C L-MAX9 89/87R, Vara   [sezon: text]
+     165 | 70 % | R14C | Vara | 89/87 (580/545 kg) | R (170 km/h)
+     imagini: de la 295866
+395706  Шина GRENLANDER 185R14C L-STRONG36 102/100R лето-vara/anvelopa pneumatica
+     -> CODE  185R14C L-STRONG36 102/100R
+     -> TITLE Anvelopa GRENLANDER 185R14C L-STRONG36 102/100R, Vara   [sezon: text]
+     185 | 80 % | R14C | Vara | 102/100 (850/800 kg) | R (170 km/h)
+     imagini: de la 241886
+395708  Шина GRENLANDER 195R14C B L-MAX9 106/104R лето-vara/anvelopa pneumatica
+     -> CODE  195R14C L-MAX9 106/104R
+     -> TITLE Anvelopa GRENLANDER 195R14C L-MAX9 106/104R, Vara   [sezon: text]
+     195 | 80 % | R14C | Vara | 106/104 (950/900 kg) | R (170 km/h)
+     imagini: de la 295866
+367617  RWT-768 185/65 R-15 T 88
+     -> CODE  185/65R15 RWT-768 88T
+     -> TITLE Anvelopa ROVELO 185/65R15 RWT-768 88T, Iarna   [sezon: confirmat]
+     185 | 65 % | R15 | Iarna | 88 (560 kg) | T (190 km/h)
+     imagini: lipsa (faza B)
+367618  RWT-768 195/65 R-15 T 91
+     -> CODE  195/65R15 RWT-768 91T
+     -> TITLE Anvelopa ROVELO 195/65R15 RWT-768 91T, Iarna   [sezon: confirmat]
+     195 | 65 % | R15 | Iarna | 91 (615 kg) | T (190 km/h)
+     imagini: lipsa (faza B)
+367619  RWT-768 205/65 R-15 T 94
+     -> CODE  205/65R15 RWT-768 94T
+     -> TITLE Anvelopa ROVELO 205/65R15 RWT-768 94T, Iarna   [sezon: confirmat]
+     205 | 65 % | R15 | Iarna | 94 (670 kg) | T (190 km/h)
+     imagini: lipsa (faza B)
+367620  RWT-768 195/55 R-16 H 87
+     -> CODE  195/55R16 RWT-768 87H
+     -> TITLE Anvelopa ROVELO 195/55R16 RWT-768 87H, Iarna   [sezon: confirmat]
+     195 | 55 % | R16 | Iarna | 87 (545 kg) | H (210 km/h)
+     imagini: lipsa (faza B)
+367621  RWT-768 205/55 R-16 T 91
+     -> CODE  205/55R16 RWT-768 91T
+     -> TITLE Anvelopa ROVELO 205/55R16 RWT-768 91T, Iarna   [sezon: confirmat]
+     205 | 55 % | R16 | Iarna | 91 (615 kg) | T (190 km/h)
+     imagini: lipsa (faza B)
+367622  RWT-768 205/60 R-16 T 91
+     -> CODE  205/60R16 RWT-768 91T
+     -> TITLE Anvelopa ROVELO 205/60R16 RWT-768 91T, Iarna   [sezon: confirmat]
+     205 | 60 % | R16 | Iarna | 91 (615 kg) | T (190 km/h)
+     imagini: lipsa (faza B)
+367623  RWT-768 215/65 R-16 H 98
+     -> CODE  215/65R16 RWT-768 98H
+     -> TITLE Anvelopa ROVELO 215/65R16 RWT-768 98H, Iarna   [sezon: confirmat]
+     215 | 65 % | R16 | Iarna | 98 (750 kg) | H (210 km/h)
+     imagini: lipsa (faza B)
+367624  RWS-677 215/70 R-16 S 100
+     -> CODE  215/70R16 RWS-677 100S
+     -> TITLE Anvelopa ROVELO 215/70R16 RWS-677 100S, Iarna   [sezon: confirmat]
+     215 | 70 % | R16 | Iarna | 100 (800 kg) | S (180 km/h)
+     imagini: lipsa (faza B)
+367625  RWS-677 215/55 R-17 T 94
+     -> CODE  215/55R17 RWS-677 94T
+     -> TITLE Anvelopa ROVELO 215/55R17 RWS-677 94T, Iarna   [sezon: confirmat]
+     215 | 55 % | R17 | Iarna | 94 (670 kg) | T (190 km/h)
+     imagini: lipsa (faza B)
+367626  RWS-677 215/65 R-17 T 99
+     -> CODE  215/65R17 RWS-677 99T
+     -> TITLE Anvelopa ROVELO 215/65R17 RWS-677 99T, Iarna   [sezon: confirmat]
+     215 | 65 % | R17 | Iarna | 99 (775 kg) | T (190 km/h)
+     imagini: lipsa (faza B)
+367627  RWT-768 225/50 R-17 H 98
+     -> CODE  225/50R17 RWT-768 98H
+     -> TITLE Anvelopa ROVELO 225/50R17 RWT-768 98H, Iarna   [sezon: confirmat]
+     225 | 50 % | R17 | Iarna | 98 (750 kg) | H (210 km/h)
+     imagini: lipsa (faza B)
+367628  RWS-677 225/65 R-17 S 102
+     -> CODE  225/65R17 RWS-677 102S
+     -> TITLE Anvelopa ROVELO 225/65R17 RWS-677 102S, Iarna   [sezon: confirmat]
+     225 | 65 % | R17 | Iarna | 102 (850 kg) | S (180 km/h)
+     imagini: lipsa (faza B)
+367612  RWT-768 175/65 R-14 T 82
+     -> CODE  175/65R14 RWT-768 82T
+     -> TITLE Anvelopa ROVELO 175/65R14 RWT-768 82T, Iarna   [sezon: confirmat]
+     175 | 65 % | R14 | Iarna | 82 (475 kg) | T (190 km/h)
+     imagini: lipsa (faza B)
+367613  RWT-768 185/65 R-14 T 86
+     -> CODE  185/65R14 RWT-768 86T
+     -> TITLE Anvelopa ROVELO 185/65R14 RWT-768 86T, Iarna   [sezon: confirmat]
+     185 | 65 % | R14 | Iarna | 86 (530 kg) | T (190 km/h)
+     imagini: lipsa (faza B)
+367614  RWS-677 185/70 R-14 T 88
+     -> CODE  185/70R14 RWS-677 88T
+     -> TITLE Anvelopa ROVELO 185/70R14 RWS-677 88T, Iarna   [sezon: confirmat]
+     185 | 70 % | R14 | Iarna | 88 (560 kg) | T (190 km/h)
+     imagini: lipsa (faza B)
+367615  RWT-768 185/55 R-15 H 82
+     -> CODE  185/55R15 RWT-768 82H
+     -> TITLE Anvelopa ROVELO 185/55R15 RWT-768 82H, Iarna   [sezon: confirmat]
+     185 | 55 % | R15 | Iarna | 82 (475 kg) | H (210 km/h)
+     imagini: lipsa (faza B)
+367616  RWT-768 185/60 R-15 T 84
+     -> CODE  185/60R15 RWT-768 84T
+     -> TITLE Anvelopa ROVELO 185/60R15 RWT-768 84T, Iarna   [sezon: confirmat]
+     185 | 60 % | R15 | Iarna | 84 (500 kg) | T (190 km/h)
+     imagini: lipsa (faza B)
+368043  ARCTIC EVO 235/50 R-20 T 104
+     -> CODE  235/50R20 ARCTIC EVO 104T
+     -> TITLE Anvelopa SAILUN 235/50R20 ARCTIC EVO 104T, Iarna   [sezon: text]
+     235 | 50 % | R20 | Iarna | 104 (900 kg) | T (190 km/h)
+     imagini: de la 277391
+368044  ARCTIC EVO 245/45 R-20 T 103
+     -> CODE  245/45R20 ARCTIC EVO 103T
+     -> TITLE Anvelopa SAILUN 245/45R20 ARCTIC EVO 103T, Iarna   [sezon: text]
+     245 | 45 % | R20 | Iarna | 103 (875 kg) | T (190 km/h)
+     imagini: de la 277391
+368045  ARCTIC EVO 255/40 R-20 T 101
+     -> CODE  255/40R20 ARCTIC EVO 101T
+     -> TITLE Anvelopa SAILUN 255/40R20 ARCTIC EVO 101T, Iarna   [sezon: text]
+     255 | 40 % | R20 | Iarna | 101 (825 kg) | T (190 km/h)
+     imagini: de la 277391
+368046  ARCTIC EVO 265/45 R-20 T 108
+     -> CODE  265/45R20 ARCTIC EVO 108T
+     -> TITLE Anvelopa SAILUN 265/45R20 ARCTIC EVO 108T, Iarna   [sezon: text]
+     265 | 45 % | R20 | Iarna | 108 (1000 kg) | T (190 km/h)
+     imagini: de la 277391
+368047  4 SEASONS PRO 275/45 R-20 Y 110
+     -> CODE  275/45R20 4 SEASONS PRO 110Y
+     -> TITLE Anvelopa SAILUN 275/45R20 4 SEASONS PRO 110Y, All Season   [sezon: text]
+     275 | 45 % | R20 | All Season | 110 (1060 kg) | Y (300 km/h)
+     imagini: de la 341887
+368048  ARCTIC EVO 285/45 R-20 T 112
+     -> CODE  285/45R20 ARCTIC EVO 112T
+     -> TITLE Anvelopa SAILUN 285/45R20 ARCTIC EVO 112T, Iarna   [sezon: text]
+     285 | 45 % | R20 | Iarna | 112 (1120 kg) | T (190 km/h)
+     imagini: de la 277391
+368049  ARCTIC EVO 285/50 R-20 T 116
+     -> CODE  285/50R20 ARCTIC EVO 116T
+     -> TITLE Anvelopa SAILUN 285/50R20 ARCTIC EVO 116T, Iarna   [sezon: text]
+     285 | 50 % | R20 | Iarna | 116 (1250 kg) | T (190 km/h)
+     imagini: de la 277391
+368050  ARCTIC EVO 305/40 R-20 T 112
+     -> CODE  305/40R20 ARCTIC EVO 112T
+     -> TITLE Anvelopa SAILUN 305/40R20 ARCTIC EVO 112T, Iarna   [sezon: text]
+     305 | 40 % | R20 | Iarna | 112 (1120 kg) | T (190 km/h)
+     imagini: de la 277391
+368051  ARCTIC EVO 275/40 R-21 T 107
+     -> CODE  275/40R21 ARCTIC EVO 107T
+     -> TITLE Anvelopa SAILUN 275/40R21 ARCTIC EVO 107T, Iarna   [sezon: text]
+     275 | 40 % | R21 | Iarna | 107 (975 kg) | T (190 km/h)
+     imagini: de la 277391
+368052  ARCTIC EVO 285/40 R-21 T 109
+     -> CODE  285/40R21 ARCTIC EVO 109T
+     -> TITLE Anvelopa SAILUN 285/40R21 ARCTIC EVO 109T, Iarna   [sezon: text]
+     285 | 40 % | R21 | Iarna | 109 (1030 kg) | T (190 km/h)
+     imagini: de la 277391
+368053  ARCTIC EVO 285/45 R-21 T 113
+     -> CODE  285/45R21 ARCTIC EVO 113T
+     -> TITLE Anvelopa SAILUN 285/45R21 ARCTIC EVO 113T, Iarna   [sezon: text]
+     285 | 45 % | R21 | Iarna | 113 (1150 kg) | T (190 km/h)
+     imagini: de la 277391
+368054  ARCTIC EVO 315/35 R-21 T 111
+     -> CODE  315/35R21 ARCTIC EVO 111T
+     -> TITLE Anvelopa SAILUN 315/35R21 ARCTIC EVO 111T, Iarna   [sezon: text]
+     315 | 35 % | R21 | Iarna | 111 (1090 kg) | T (190 km/h)
+     imagini: de la 277391
+368055  ARCTIC EVO 265/40 R-22 T 106
+     -> CODE  265/40R22 ARCTIC EVO 106T
+     -> TITLE Anvelopa SAILUN 265/40R22 ARCTIC EVO 106T, Iarna   [sezon: text]
+     265 | 40 % | R22 | Iarna | 106 (950 kg) | T (190 km/h)
+     imagini: de la 277391
+367647  POWERGY WINTER 205/55 R-16 H 91
+     -> CODE  205/55R16 POWERGY WINTER 91H
+     -> TITLE Anvelopa PIRELLI 205/55R16 POWERGY WINTER 91H, Iarna   [sezon: text]
+     205 | 55 % | R16 | Iarna | 91 (615 kg) | H (210 km/h)
+     imagini: lipsa (faza B)
+367648  POWERGY WINTER 215/55 R-17 V 98
+     -> CODE  215/55R17 POWERGY WINTER 98V
+     -> TITLE Anvelopa PIRELLI 215/55R17 POWERGY WINTER 98V, Iarna   [sezon: text]
+     215 | 55 % | R17 | Iarna | 98 (750 kg) | V (240 km/h)
+     imagini: lipsa (faza B)
+367649  SCORPION WINTER 225/60 R-17 V 103
+     -> CODE  225/60R17 SCORPION WINTER 103V
+     -> TITLE Anvelopa PIRELLI 225/60R17 SCORPION WINTER 103V, Iarna   [sezon: text]
+     225 | 60 % | R17 | Iarna | 103 (875 kg) | V (240 km/h)
+     imagini: de la 329330
+367650  POWERGY WINTER 225/55 R-18 V 102
+     -> CODE  225/55R18 POWERGY WINTER 102V
+     -> TITLE Anvelopa PIRELLI 225/55R18 POWERGY WINTER 102V, Iarna   [sezon: text]
+     225 | 55 % | R18 | Iarna | 102 (850 kg) | V (240 km/h)
+     imagini: lipsa (faza B)
+367651  POWERGY WINTER 235/55 R-19 V 105
+     -> CODE  235/55R19 POWERGY WINTER 105V
+     -> TITLE Anvelopa PIRELLI 235/55R19 POWERGY WINTER 105V, Iarna   [sezon: text]
+     235 | 55 % | R19 | Iarna | 105 (925 kg) | V (240 km/h)
+     imagini: lipsa (faza B)
+367652  SCORPION WINTER 235/60 R-19 H 107
+     -> CODE  235/60R19 SCORPION WINTER 107H
+     -> TITLE Anvelopa PIRELLI 235/60R19 SCORPION WINTER 107H, Iarna   [sezon: text]
+     235 | 60 % | R19 | Iarna | 107 (975 kg) | H (210 km/h)
+     imagini: de la 329330
+367653  SCORPION WINTER 295/40 R-20 V 106
+     -> CODE  295/40R20 SCORPION WINTER 106V
+     -> TITLE Anvelopa PIRELLI 295/40R20 SCORPION WINTER 106V, Iarna   [sezon: text]
+     295 | 40 % | R20 | Iarna | 106 (950 kg) | V (240 km/h)
+     imagini: de la 329330
+367654  SCORPION WINTER 305/40 R-20 V 112
+     -> CODE  305/40R20 SCORPION WINTER 112V
+     -> TITLE Anvelopa PIRELLI 305/40R20 SCORPION WINTER 112V, Iarna   [sezon: text]
+     305 | 40 % | R20 | Iarna | 112 (1120 kg) | V (240 km/h)
+     imagini: de la 329330
+367655  SCORPION WINTER 275/45 R-21 V 107
+     -> CODE  275/45R21 SCORPION WINTER 107V
+     -> TITLE Anvelopa PIRELLI 275/45R21 SCORPION WINTER 107V, Iarna   [sezon: text]
+     275 | 45 % | R21 | Iarna | 107 (975 kg) | V (240 km/h)
+     imagini: de la 329330
+367656  SCORPION WINTER 275/50 R-21 V 113
+     -> CODE  275/50R21 SCORPION WINTER 113V
+     -> TITLE Anvelopa PIRELLI 275/50R21 SCORPION WINTER 113V, Iarna   [sezon: text]
+     275 | 50 % | R21 | Iarna | 113 (1150 kg) | V (240 km/h)
+     imagini: de la 329330
+367657  WINTER SOTTOZERO 3 315/30 R-21 V 105
+     -> CODE  315/30R21 WINTER SOTTOZERO 3 105V
+     -> TITLE Anvelopa PIRELLI 315/30R21 WINTER SOTTOZERO 3 105V, Iarna   [sezon: text]
+     315 | 30 % | R21 | Iarna | 105 (925 kg) | V (240 km/h)
+     imagini: lipsa (faza B)
+367658  SCORPION WINTER 315/40 R-21 V 111
+     -> CODE  315/40R21 SCORPION WINTER 111V
+     -> TITLE Anvelopa PIRELLI 315/40R21 SCORPION WINTER 111V, Iarna   [sezon: text]
+     315 | 40 % | R21 | Iarna | 111 (1090 kg) | V (240 km/h)
+     imagini: de la 329330
+367659  ARCTIC SUV 215/60 R-17 T 100
+     -> CODE  215/60R17 ARCTIC 100T
+     -> TITLE Anvelopa SAILUN 215/60R17 ARCTIC 100T, Iarna   [sezon: text]
+     215 | 60 % | R17 | Iarna | 100 (800 kg) | T (190 km/h)
+     imagini: de la 277402
+367660  ARCTIC EVO 225/45 R-19 V 96
+     -> CODE  225/45R19 ARCTIC EVO 96V
+     -> TITLE Anvelopa SAILUN 225/45R19 ARCTIC EVO 96V, Iarna   [sezon: text]
+     225 | 45 % | R19 | Iarna | 96 (710 kg) | V (240 km/h)
+     imagini: de la 277391
+367661  W462 225/50 R-17 H 94
+     -> CODE  225/50R17 W462 94H
+     -> TITLE Anvelopa HANKOOK 225/50R17 W462 94H, Iarna   [sezon: text]
+     225 | 50 % | R17 | Iarna | 94 (670 kg) | H (210 km/h)
+     imagini: de la 341372
+367956  4 SEASONS 215/55 R-17 W 98
+     -> CODE  215/55R17 4 SEASONS 98W
+     -> TITLE Anvelopa SAILUN 215/55R17 4 SEASONS 98W, All Season   [sezon: text]
+     215 | 55 % | R17 | All Season | 98 (750 kg) | W (270 km/h)
+     imagini: de la 341881
+367957  4 SEASONS 225/45 R-17 W 94
+     -> CODE  225/45R17 4 SEASONS 94W
+     -> TITLE Anvelopa SAILUN 225/45R17 4 SEASONS 94W, All Season   [sezon: text]
+     225 | 45 % | R17 | All Season | 94 (670 kg) | W (270 km/h)
+     imagini: de la 341881
+367958  4 SEASONS PRO 225/65 R-17 V 106
+     -> CODE  225/65R17 4 SEASONS PRO 106V
+     -> TITLE Anvelopa SAILUN 225/65R17 4 SEASONS PRO 106V, All Season   [sezon: text]
+     225 | 65 % | R17 | All Season | 106 (950 kg) | V (240 km/h)
+     imagini: de la 341887
+367959  4 SEASONS PRO 235/55 R-17 W 103
+     -> CODE  235/55R17 4 SEASONS PRO 103W
+     -> TITLE Anvelopa SAILUN 235/55R17 4 SEASONS PRO 103W, All Season   [sezon: text]
+     235 | 55 % | R17 | All Season | 103 (875 kg) | W (270 km/h)
+     imagini: de la 341887
+367960  ARCTIC SUV 235/65 R-17 T 104
+     -> CODE  235/65R17 ARCTIC 104T
+     -> TITLE Anvelopa SAILUN 235/65R17 ARCTIC 104T, Iarna   [sezon: text]
+     235 | 65 % | R17 | Iarna | 104 (900 kg) | T (190 km/h)
+     imagini: de la 277402
+367961  ARCTIC SUV 265/65 R-17 S 112
+     -> CODE  265/65R17 ARCTIC 112S
+     -> TITLE Anvelopa SAILUN 265/65R17 ARCTIC 112S, Iarna   [sezon: text]
+     265 | 65 % | R17 | Iarna | 112 (1120 kg) | S (180 km/h)
+     imagini: de la 277402
+367962  4 SEASONS PRO 215/55 R-18 V 99
+     -> CODE  215/55R18 4 SEASONS PRO 99V
+     -> TITLE Anvelopa SAILUN 215/55R18 4 SEASONS PRO 99V, All Season   [sezon: text]
+     215 | 55 % | R18 | All Season | 99 (775 kg) | V (240 km/h)
+     imagini: de la 341887
+367963  4 SEASONS PRO 235/60 R-18 W 107
+     -> CODE  235/60R18 4 SEASONS PRO 107W
+     -> TITLE Anvelopa SAILUN 235/60R18 4 SEASONS PRO 107W, All Season   [sezon: text]
+     235 | 60 % | R18 | All Season | 107 (975 kg) | W (270 km/h)
+     imagini: de la 341887
+367964  WST2 265/65 R-18 T 114
+     -> CODE  265/65R18 WST2 114T
+     -> TITLE Anvelopa SAILUN 265/65R18 WST2 114T, Iarna   [sezon: model 1/1]
+     265 | 65 % | R18 | Iarna | 114 (1180 kg) | T (190 km/h)
+     imagini: de la 333295
+367629  RWS-677 225/60 R-18 T 100
+     -> CODE  225/60R18 RWS-677 100T
+     -> TITLE Anvelopa ROVELO 225/60R18 RWS-677 100T, Iarna   [sezon: confirmat]
+     225 | 60 % | R18 | Iarna | 100 (800 kg) | T (190 km/h)
+     imagini: lipsa (faza B)
+367630  RWS-677 235/55 R-18 H 100
+     -> CODE  235/55R18 RWS-677 100H
+     -> TITLE Anvelopa ROVELO 235/55R18 RWS-677 100H, Iarna   [sezon: confirmat]
+     235 | 55 % | R18 | Iarna | 100 (800 kg) | H (210 km/h)
+     imagini: lipsa (faza B)
+367631  RWS-677 235/60 R-18 T 107
+     -> CODE  235/60R18 RWS-677 107T
+     -> TITLE Anvelopa ROVELO 235/60R18 RWS-677 107T, Iarna   [sezon: confirmat]
+     235 | 60 % | R18 | Iarna | 107 (975 kg) | T (190 km/h)
+     imagini: lipsa (faza B)
+367632  RWS-677 235/55 R-19 H 101
+     -> CODE  235/55R19 RWS-677 101H
+     -> TITLE Anvelopa ROVELO 235/55R19 RWS-677 101H, Iarna   [sezon: confirmat]
+     235 | 55 % | R19 | Iarna | 101 (825 kg) | H (210 km/h)
+     imagini: lipsa (faza B)
+367633  A502 265/45 R-21 V 108
+     -> CODE  265/45R21 A502 108V
+     -> TITLE Anvelopa APLUS 265/45R21 A502 108V, Iarna   [sezon: confirmat]
+     265 | 45 % | R21 | Iarna | 108 (1000 kg) | V (240 km/h)
+     imagini: lipsa (faza B)
+367634  W330 265/45 R-21 V 108
+     -> CODE  265/45R21 W330 108V
+     -> TITLE Anvelopa HANKOOK 265/45R21 W330 108V, Iarna   [sezon: text]
+     265 | 45 % | R21 | Iarna | 108 (1000 kg) | V (240 km/h)
+     imagini: de la 362328
+367635  W330 275/45 R-20 V 110
+     -> CODE  275/45R20 W330 110V
+     -> TITLE Anvelopa HANKOOK 275/45R20 W330 110V, Iarna   [sezon: text]
+     275 | 45 % | R20 | Iarna | 110 (1060 kg) | V (240 km/h)
+     imagini: de la 362328
+367636  DT966 385/65 R-22.5 K 160
+     -> CODE  385/65R22.5 DT966 160K
+     -> TITLE Anvelopa INNING 385/65R22.5 DT966 160K, Vara   [sezon: model 1/1]
+     385 | 65 % | R22.5 | Vara | 160 (4500 kg) | K (110 km/h)
+     imagini: de la 277709
+367637  LW31 195/55 R-16 H 87
+     -> CODE  195/55R16 LW31 87H
+     -> TITLE Anvelopa LAUFENN 195/55R16 LW31 87H, Iarna   [sezon: model 10/10]
+     195 | 55 % | R16 | Iarna | 87 (545 kg) | H (210 km/h)
+     imagini: de la 362324
+367638  LW31 205/55 R-16 H 91
+     -> CODE  205/55R16 LW31 91H
+     -> TITLE Anvelopa LAUFENN 205/55R16 LW31 91H, Iarna   [sezon: model 10/10]
+     205 | 55 % | R16 | Iarna | 91 (615 kg) | H (210 km/h)
+     imagini: de la 362324
+367639  LY31 235/65 R-16C R 121
+     -> CODE  235/65R16C LY31 121R
+     -> TITLE Anvelopa LAUFENN 235/65R16C LY31 121R, Iarna   [sezon: model 2/2]
+     235 | 65 % | R16C | Iarna | 121 (1450 kg) | R (170 km/h)
+     imagini: de la 362299
+367640  LW31 225/65 R-17 H 106
+     -> CODE  225/65R17 LW31 106H
+     -> TITLE Anvelopa LAUFENN 225/65R17 LW31 106H, Iarna   [sezon: model 10/10]
+     225 | 65 % | R17 | Iarna | 106 (950 kg) | H (210 km/h)
+     imagini: de la 362324
+367641  LW31 235/65 R-17 H 108
+     -> CODE  235/65R17 LW31 108H
+     -> TITLE Anvelopa LAUFENN 235/65R17 LW31 108H, Iarna   [sezon: model 10/10]
+     235 | 65 % | R17 | Iarna | 108 (1000 kg) | H (210 km/h)
+     imagini: de la 362324
+367642  LW31 225/45 R-18 V 95
+     -> CODE  225/45R18 LW31 95V
+     -> TITLE Anvelopa LAUFENN 225/45R18 LW31 95V, Iarna   [sezon: model 10/10]
+     225 | 45 % | R18 | Iarna | 95 (690 kg) | V (240 km/h)
+     imagini: de la 362324
+367643  LW31 225/55 R-18 V 98
+     -> CODE  225/55R18 LW31 98V
+     -> TITLE Anvelopa LAUFENN 225/55R18 LW31 98V, Iarna   [sezon: model 10/10]
+     225 | 55 % | R18 | Iarna | 98 (750 kg) | V (240 km/h)
+     imagini: de la 362324
+367644  LW31 235/60 R-18 H 107
+     -> CODE  235/60R18 LW31 107H
+     -> TITLE Anvelopa LAUFENN 235/60R18 LW31 107H, Iarna   [sezon: model 10/10]
+     235 | 60 % | R18 | Iarna | 107 (975 kg) | H (210 km/h)
+     imagini: de la 362324
+367645  POWERGY WINTER 195/65 R-15 H 95
+     -> CODE  195/65R15 POWERGY WINTER 95H
+     -> TITLE Anvelopa PIRELLI 195/65R15 POWERGY WINTER 95H, Iarna   [sezon: text]
+     195 | 65 % | R15 | Iarna | 95 (690 kg) | H (210 km/h)
+     imagini: lipsa (faza B)
+368040  ARCTIC EVO 235/45 R-19 T 95
+     -> CODE  235/45R19 ARCTIC EVO 95T
+     -> TITLE Anvelopa SAILUN 235/45R19 ARCTIC EVO 95T, Iarna   [sezon: text]
+     235 | 45 % | R19 | Iarna | 95 (690 kg) | T (190 km/h)
+     imagini: de la 277391
+368041  4 SEASONS PRO 245/45 R-19 Y 102
+     -> CODE  245/45R19 4 SEASONS PRO 102Y
+     -> TITLE Anvelopa SAILUN 245/45R19 4 SEASONS PRO 102Y, All Season   [sezon: text]
+     245 | 45 % | R19 | All Season | 102 (850 kg) | Y (300 km/h)
+     imagini: de la 341887
+368042  ARCTIC EVO 235/45 R-20 T 100
+     -> CODE  235/45R20 ARCTIC EVO 100T
+     -> TITLE Anvelopa SAILUN 235/45R20 ARCTIC EVO 100T, Iarna   [sezon: text]
+     235 | 45 % | R20 | Iarna | 100 (800 kg) | T (190 km/h)
+     imagini: de la 277391
+367942  W330 225/60 R-18 H 104
+     -> CODE  225/60R18 W330 104H
+     -> TITLE Anvelopa HANKOOK 225/60R18 W330 104H, Iarna   [sezon: text]
+     225 | 60 % | R18 | Iarna | 104 (900 kg) | H (210 km/h)
+     imagini: de la 362328
+367943  W330 255/55 R-20 V 110
+     -> CODE  255/55R20 W330 110V
+     -> TITLE Anvelopa HANKOOK 255/55R20 W330 110V, Iarna   [sezon: text]
+     255 | 55 % | R20 | Iarna | 110 (1060 kg) | V (240 km/h)
+     imagini: de la 362328
+367944  W330 275/40 R-21 V 107
+     -> CODE  275/40R21 W330 107V
+     -> TITLE Anvelopa HANKOOK 275/40R21 W330 107V, Iarna   [sezon: text]
+     275 | 40 % | R21 | Iarna | 107 (975 kg) | V (240 km/h)
+     imagini: de la 362328
+367945  LW31 205/65 R-15 T 94
+     -> CODE  205/65R15 LW31 94T
+     -> TITLE Anvelopa LAUFENN 205/65R15 LW31 94T, Iarna   [sezon: model 10/10]
+     205 | 65 % | R15 | Iarna | 94 (670 kg) | T (190 km/h)
+     imagini: de la 362324
+367946  LW31 215/55 R-16 H 91
+     -> CODE  215/55R16 LW31 91H
+     -> TITLE Anvelopa LAUFENN 215/55R16 LW31 91H, Iarna   [sezon: model 10/10]
+     215 | 55 % | R16 | Iarna | 91 (615 kg) | H (210 km/h)
+     imagini: de la 362324
+367947  LY31 215/65 R-16C T 109
+     -> CODE  215/65R16C LY31 109T
+     -> TITLE Anvelopa LAUFENN 215/65R16C LY31 109T, Iarna   [sezon: model 2/2]
+     215 | 65 % | R16C | Iarna | 109 (1030 kg) | T (190 km/h)
+     imagini: de la 362299
+367948  LW31 235/55 R-17 V 103
+     -> CODE  235/55R17 LW31 103V
+     -> TITLE Anvelopa LAUFENN 235/55R17 LW31 103V, Iarna   [sezon: model 10/10]
+     235 | 55 % | R17 | Iarna | 103 (875 kg) | V (240 km/h)
+     imagini: de la 362324
+367949  4 SEASONS C 195/70 R-15C T 104
+     -> CODE  195/70R15C 4 SEASONS C 104T
+     -> TITLE Anvelopa SAILUN 195/70R15C 4 SEASONS C 104T, All Season   [sezon: text]
+     195 | 70 % | R15C | All Season | 104 (900 kg) | T (190 km/h)
+     imagini: lipsa (faza B)
+367950  COMMERCIO ICE 205/70 R-15C R 106
+     -> CODE  205/70R15C COMMERCIO ICE 106R
+     -> TITLE Anvelopa SAILUN 205/70R15C COMMERCIO ICE 106R, Iarna   [sezon: text]
+     205 | 70 % | R15C | Iarna | 106 (950 kg) | R (170 km/h)
+     imagini: de la 333301
+367951  ARCTIC 195/60 R-16 T 89
+     -> CODE  195/60R16 ARCTIC 89T
+     -> TITLE Anvelopa SAILUN 195/60R16 ARCTIC 89T, Iarna   [sezon: text]
+     195 | 60 % | R16 | Iarna | 89 (580 kg) | T (190 km/h)
+     imagini: de la 277402
+367952  COMMERCIO ICE 205/65 R-16C R 107
+     -> CODE  205/65R16C COMMERCIO ICE 107R
+     -> TITLE Anvelopa SAILUN 205/65R16C COMMERCIO ICE 107R, Iarna   [sezon: text]
+     205 | 65 % | R16C | Iarna | 107 (975 kg) | R (170 km/h)
+     imagini: de la 333301
+367953  4 SEASONS C 225/75 R-16C R 121
+     -> CODE  225/75R16C 4 SEASONS C 121R
+     -> TITLE Anvelopa SAILUN 225/75R16C 4 SEASONS C 121R, All Season   [sezon: text]
+     225 | 75 % | R16C | All Season | 121 (1450 kg) | R (170 km/h)
+     imagini: lipsa (faza B)
+367954  4 SEASONS C 235/65 R-16C R 121
+     -> CODE  235/65R16C 4 SEASONS C 121R
+     -> TITLE Anvelopa SAILUN 235/65R16C 4 SEASONS C 121R, All Season   [sezon: text]
+     235 | 65 % | R16C | All Season | 121 (1450 kg) | R (170 km/h)
+     imagini: lipsa (faza B)
+367955  ARCTIC 205/55 R-17 T 91
+     -> CODE  205/55R17 ARCTIC 91T
+     -> TITLE Anvelopa SAILUN 205/55R17 ARCTIC 91T, Iarna   [sezon: text]
+     205 | 55 % | R17 | Iarna | 91 (615 kg) | T (190 km/h)
+     imagini: de la 277402
+368750  POWERGY WINTER 235/55 R-18 H 104
+     -> CODE  235/55R18 POWERGY WINTER 104H
+     -> TITLE Anvelopa PIRELLI 235/55R18 POWERGY WINTER 104H, Iarna   [sezon: text]
+     235 | 55 % | R18 | Iarna | 104 (900 kg) | H (210 km/h)
+     imagini: lipsa (faza B)
+368751  SCORPION WINTER 2 225/55 R-19 V 103
+     -> CODE  225/55R19 SCORPION WINTER 2 103V
+     -> TITLE Anvelopa PIRELLI 225/55R19 SCORPION WINTER 2 103V, Iarna   [sezon: text]
+     225 | 55 % | R19 | Iarna | 103 (875 kg) | V (240 km/h)
+     imagini: de la 306984
+368752  POWERGY WINTER 235/50 R-19 V 103
+     -> CODE  235/50R19 POWERGY WINTER 103V
+     -> TITLE Anvelopa PIRELLI 235/50R19 POWERGY WINTER 103V, Iarna   [sezon: text]
+     235 | 50 % | R19 | Iarna | 103 (875 kg) | V (240 km/h)
+     imagini: lipsa (faza B)
+368753  WINTER PZERO 245/50 R-19 H 105
+     -> CODE  245/50R19 WINTER PZERO 105H
+     -> TITLE Anvelopa PIRELLI 245/50R19 WINTER PZERO 105H, Iarna   [sezon: text]
+     245 | 50 % | R19 | Iarna | 105 (925 kg) | H (210 km/h)
+     imagini: lipsa (faza B)
+368754  WINTER PRO MAX 235/40 R-19 Y 96
+     -> CODE  235/40R19 WINTER PRO MAX 96Y
+     -> TITLE Anvelopa Tourador 235/40R19 WINTER PRO MAX 96Y, Iarna   [sezon: text]
+     235 | 40 % | R19 | Iarna | 96 (710 kg) | Y (300 km/h)
+     imagini: de la 302057
+368755  W330 315/35 R-21 W 111
+     -> CODE  315/35R21 W330 111W
+     -> TITLE Anvelopa HANKOOK 315/35R21 W330 111W, Iarna   [sezon: text]
+     315 | 35 % | R21 | Iarna | 111 (1090 kg) | W (270 km/h)
+     imagini: de la 362328
+368749  POWERGY WINTER 215/65 R-17 H 103
+     -> CODE  215/65R17 POWERGY WINTER 103H
+     -> TITLE Anvelopa PIRELLI 215/65R17 POWERGY WINTER 103H, Iarna   [sezon: text]
+     215 | 65 % | R17 | Iarna | 103 (875 kg) | H (210 km/h)
+     imagini: lipsa (faza B)
+369027  POWERGY WINTER 215/60 R-17 V 100
+     -> CODE  215/60R17 POWERGY WINTER 100V
+     -> TITLE Anvelopa PIRELLI 215/60R17 POWERGY WINTER 100V, Iarna   [sezon: text]
+     215 | 60 % | R17 | Iarna | 100 (800 kg) | V (240 km/h)
+     imagini: lipsa (faza B)
+369028  SCORPION WINTER 2 235/55 R-19 V 105
+     -> CODE  235/55R19 SCORPION WINTER 2 105V
+     -> TITLE Anvelopa PIRELLI 235/55R19 SCORPION WINTER 2 105V, Iarna   [sezon: text]
+     235 | 55 % | R19 | Iarna | 105 (925 kg) | V (240 km/h)
+     imagini: de la 306984
+369029  WINMASTER PROX ARW3 235/50 R-19 V 103
+     -> CODE  235/50R19 WINMASTER PROX ARW3 103V
+     -> TITLE Anvelopa Arivo 235/50R19 WINMASTER PROX ARW3 103V, Iarna   [sezon: model 86/86]
+     235 | 50 % | R19 | Iarna | 103 (875 kg) | V (240 km/h)
+     imagini: de la 332925
+369030  SCORPION WINTER 2 235/55 R-20 H 105
+     -> CODE  235/55R20 SCORPION WINTER 2 105H
+     -> TITLE Anvelopa PIRELLI 235/55R20 SCORPION WINTER 2 105H, Iarna   [sezon: text]
+     235 | 55 % | R20 | Iarna | 105 (925 kg) | H (210 km/h)
+     imagini: de la 306984
+369031  SCORPION WINTER 265/45 R-20 V 104
+     -> CODE  265/45R20 SCORPION WINTER 104V
+     -> TITLE Anvelopa PIRELLI 265/45R20 SCORPION WINTER 104V, Iarna   [sezon: text]
+     265 | 45 % | R20 | Iarna | 104 (900 kg) | V (240 km/h)
+     imagini: de la 329330
+369032  SCORPION WINTER 275/45 R-20 V 110
+     -> CODE  275/45R20 SCORPION WINTER 110V
+     -> TITLE Anvelopa PIRELLI 275/45R20 SCORPION WINTER 110V, Iarna   [sezon: text]
+     275 | 45 % | R20 | Iarna | 110 (1060 kg) | V (240 km/h)
+     imagini: de la 329330
+369033  SCORPION WINTER 275/55 R-20 V 117
+     -> CODE  275/55R20 SCORPION WINTER 117V
+     -> TITLE Anvelopa PIRELLI 275/55R20 SCORPION WINTER 117V, Iarna   [sezon: text]
+     275 | 55 % | R20 | Iarna | 117 (1285 kg) | V (240 km/h)
+     imagini: de la 329330
+369034  SCORPION WINTER 2 235/50 R-21 V 104
+     -> CODE  235/50R21 SCORPION WINTER 2 104V
+     -> TITLE Anvelopa PIRELLI 235/50R21 SCORPION WINTER 2 104V, Iarna   [sezon: text]
+     235 | 50 % | R21 | Iarna | 104 (900 kg) | V (240 km/h)
+     imagini: de la 306984
+369035  W330 265/40 R-21 V 105
+     -> CODE  265/40R21 W330 105V
+     -> TITLE Anvelopa HANKOOK 265/40R21 W330 105V, Iarna   [sezon: text]
+     265 | 40 % | R21 | Iarna | 105 (925 kg) | V (240 km/h)
+     imagini: de la 362328
+369036  SCORPION WINTER 285/45 R-22 V 114
+     -> CODE  285/45R22 SCORPION WINTER 114V
+     -> TITLE Anvelopa PIRELLI 285/45R22 SCORPION WINTER 114V, Iarna   [sezon: text]
+     285 | 45 % | R22 | Iarna | 114 (1180 kg) | V (240 km/h)
+     imagini: de la 329330
+
+=== sarite ===
+391857  fara dimensiune/indici in denumire  | Matador Hectorra 5
+391862  fara dimensiune/indici in denumire  | Maxxis HP5 Premitra
+
+=== valori noi in TS_FILTER_PARAMS ===
+1258  118 (1320 kg)
+
+{"produse": 246, "cu_donor": 170, "descrieri": 1476, "filtre": 1476, "imagini": 501}

@@ -3,16 +3,58 @@ unit frmPrintWizardDialog;
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  SWNBaseUnit, frmPrintEngineWindow, Dialogs, DialogTitle, jpeg, Menus,
-  cxStyles, cxCustomData,
-  DB, cxDBData, DBAccess, IBC, dxBar,
-  StdCtrls, cxGridLevel, cxGridCustomTableView, cxGridTableView,
-  cxGridDBTableView, cxGrid, cxPC, ExtCtrls,
-  cxButtons, cxCheckBox,
-  cxGridPopupMenu, cxGraphics, cxLookAndFeels, cxLookAndFeelPainters, dxBarBuiltInMenu, cxControls, cxFilter, cxData,
-  cxDataStorage, cxEdit, cxNavigator, dxDateRanges, dxScrollbarAnnotations, cxImageComboBox, cxLabel, cxContainer,
-  cxGridCustomPopupMenu, cxClasses, MemDS, cxGridCustomView, dxUIAClasses;
+  Windows,
+  Messages,
+  SysUtils,
+  Variants,
+  Classes,
+  Graphics,
+  Controls,
+  Forms,
+  SWNBaseUnit,
+  frmPrintEngineWindow,
+  Dialogs,
+  DialogTitle,
+  jpeg,
+  Menus,
+  cxStyles,
+  cxCustomData,
+  DB,
+  cxDBData,
+  DBAccess,
+  IBC,
+  dxBar,
+  StdCtrls,
+  cxGridLevel,
+  cxGridCustomTableView,
+  cxGridTableView,
+  cxGridDBTableView,
+  cxGrid,
+  cxPC,
+  ExtCtrls,
+  cxButtons,
+  cxCheckBox,
+  cxGridPopupMenu,
+  cxGraphics,
+  cxLookAndFeels,
+  cxLookAndFeelPainters,
+  dxBarBuiltInMenu,
+  cxControls,
+  cxFilter,
+  cxData,
+  cxDataStorage,
+  cxEdit,
+  cxNavigator,
+  dxDateRanges,
+  dxScrollbarAnnotations,
+  cxImageComboBox,
+  cxLabel,
+  cxContainer,
+  cxGridCustomPopupMenu,
+  cxClasses,
+  MemDS,
+  cxGridCustomView,
+  dxUIAClasses;
 
 type
   TOnPrintWizardSetupReportParams = procedure(const ReportParams: TReportParamsList) of object;
@@ -111,13 +153,16 @@ type
     procedure btnBackClick(Sender: TObject);
     procedure cxGridReportsTableDataControllerDataChanged(Sender: TObject);
     procedure btnPrintClick(Sender: TObject);
-    procedure cxGridReportsTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
+    procedure cxGridReportsTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo;
+      AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
     procedure cxPageControlChange(Sender: TObject);
     procedure bbEditReportClick(Sender: TObject);
-    procedure cxGridReportsTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
+    procedure cxGridReportsTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord:
+      TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
     procedure bbNewReportClick(Sender: TObject);
     procedure bbDeleteReportClick(Sender: TObject);
-    procedure cxGridReports_TABSHEETINDEXGetDisplayText(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord; var AText: string);
+    procedure cxGridReports_TABSHEETINDEXGetDisplayText(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord;
+      var AText: string);
     procedure bbCopyReportClick(Sender: TObject);
     procedure bbChangeOrderClick(Sender: TObject);
     procedure bbShowByDocTypeClick(Sender: TObject);
@@ -125,21 +170,26 @@ type
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure bbPriceLabel_AddClick(Sender: TObject);
     procedure bbPriceLabel_RemoveClick(Sender: TObject);
-    procedure cxGridPriceLabelsTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
-    procedure cxGridPriceLabelsTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
+    procedure cxGridPriceLabelsTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo:
+      TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
+    procedure cxGridPriceLabelsTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord,
+      AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
     procedure bbPriceLabel_ImportFromDocClick(Sender: TObject);
     procedure bbShowGroupedReportsClick(Sender: TObject);
     procedure bbPriceLabel_Menu_GroupByFolderClick(Sender: TObject);
     procedure bbPriceLabel_ImportFromStockClick(Sender: TObject);
-    procedure cxGridReports_REPORTGROUP_ORDERNOGetDataText(Sender: TcxCustomGridTableItem; ARecordIndex: Integer; var AText: string);
+    procedure cxGridReports_REPORTGROUP_ORDERNOGetDataText(Sender: TcxCustomGridTableItem; ARecordIndex: Integer; var
+      AText: string);
     procedure dxBarPopupMenuReportsPopup(Sender: TObject);
     procedure bbReportCollapseAllGroupsClick(Sender: TObject);
     procedure bbReportExpandAllGroupsClick(Sender: TObject);
     procedure bbSetupDiscountClick(Sender: TObject);
     procedure bbSearchReportClick(Sender: TObject);
     procedure bbCancelSearchClick(Sender: TObject);
-    procedure cxGridReportsTableStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
-    procedure cxGridReportsTableStylesGetGroupStyle(Sender: TcxGridTableView; ARecord: TcxCustomGridRecord; ALevel: Integer; var AStyle: TcxStyle);
+    procedure cxGridReportsTableStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
+      AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
+    procedure cxGridReportsTableStylesGetGroupStyle(Sender: TcxGridTableView; ARecord: TcxCustomGridRecord; ALevel:
+      Integer; var AStyle: TcxStyle);
   private
     { Private declarations }
     fViewParamsTab: Boolean;
@@ -170,7 +220,8 @@ type
     // report params related procs
     // 1. Etichete de pret
     procedure PriceLabel_ShowAddGoodsDialog;
-    procedure PriceLable_WhenBurstAddGoods(const GoodsID: integer; const GoodsTitle: string; var Added: Boolean; var Count: integer);
+    procedure PriceLable_WhenBurstAddGoods(const GoodsID: integer; const GoodsTitle: string; var Added: Boolean; var
+      Count: integer);
     function PriceLable_WhenCheckIfGoodsExists(const GoodsID: integer): Boolean;
     procedure PriceLabel_DeleteCurrentGoods;
     procedure PriceLabel_GridSelectionChanged;
@@ -194,16 +245,27 @@ type
     destructor Destroy; override;
     procedure ShowReportsFromGroupOnly(const ReportGroup: integer);
     property QuickAccessReportsChanged: Boolean read fQuickAccessReportsChanged;
-    property OnPrintWizardSetupReportParams: TOnPrintWizardSetupReportParams read FOnPrintWizardSetupReportParams write SetOnPrintWizardSetupReportParams;
+    property OnPrintWizardSetupReportParams: TOnPrintWizardSetupReportParams read FOnPrintWizardSetupReportParams write
+      SetOnPrintWizardSetupReportParams;
   end;
 
 implementation
 
 uses
-  DataModuleDB, SWNUtils, frmReportEditorDialog, DataModuleAdditions,
-  frmChangeOrderNoDialog, frmCopyReportDialog, SWNValueStorageUnit, SWNSecurity,
-  frmGoods, SWNDBErrors, frmDocumentImportBrowserDialog,
-  frmSelectStockDialog, SWNSecurityFlags, frmPriceLabelsDiscountDialog,
+  DataModuleDB,
+  SWNUtils,
+  frmReportEditorDialog,
+  DataModuleAdditions,
+  frmChangeOrderNoDialog,
+  frmCopyReportDialog,
+  SWNValueStorageUnit,
+  SWNSecurity,
+  frmGoods,
+  SWNDBErrors,
+  frmDocumentImportBrowserDialog,
+  frmSelectStockDialog,
+  SWNSecurityFlags,
+  frmPriceLabelsDiscountDialog,
   SWNSearchUnit;
 
 {$R *.dfm}
@@ -376,18 +438,21 @@ begin
   fQuickAccessReportsChanged := False;
 end;
 
-procedure TfrmPrintWizardDlg.cxGridPriceLabelsTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
+procedure TfrmPrintWizardDlg.cxGridPriceLabelsTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo:
+  TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
 begin
   if cxGridPriceLabelsTable.DataController.FocusedRecordIndex >= 0 then
     PriceLabel_DeleteCurrentGoods;
 end;
 
-procedure TfrmPrintWizardDlg.cxGridPriceLabelsTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
+procedure TfrmPrintWizardDlg.cxGridPriceLabelsTableFocusedRecordChanged(Sender: TcxCustomGridTableView;
+  APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
 begin
   PriceLabel_GridSelectionChanged;
 end;
 
-procedure TfrmPrintWizardDlg.cxGridReportsTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
+procedure TfrmPrintWizardDlg.cxGridReportsTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo:
+  TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
 begin
   if btnPrint.Enabled then
   begin
@@ -396,18 +461,21 @@ begin
   end;
 end;
 
-procedure TfrmPrintWizardDlg.cxGridReports_REPORTGROUP_ORDERNOGetDataText(Sender: TcxCustomGridTableItem; ARecordIndex: Integer; var AText: string);
+procedure TfrmPrintWizardDlg.cxGridReports_REPORTGROUP_ORDERNOGetDataText(Sender: TcxCustomGridTableItem; ARecordIndex:
+  Integer; var AText: string);
 var
   s: string;
 begin
-  if VarIsNumeric(cxGridReportsTable.DataController.Values[ARecordIndex, cxGridReports_REPORTGROUP_ORDERNO.Index]) and VarIsStr(cxGridReportsTable.DataController.Values[ARecordIndex, cxGridReports_REPORTGROUP_TITLE.Index]) then
+  if VarIsNumeric(cxGridReportsTable.DataController.Values[ARecordIndex, cxGridReports_REPORTGROUP_ORDERNO.Index]) and
+    VarIsStr(cxGridReportsTable.DataController.Values[ARecordIndex, cxGridReports_REPORTGROUP_TITLE.Index]) then
   begin
     s := cxGridReportsTable.DataController.Values[ARecordIndex, cxGridReports_REPORTGROUP_TITLE.Index];
     AText := Format('%s', [s]);
   end;
 end;
 
-procedure TfrmPrintWizardDlg.cxGridReports_TABSHEETINDEXGetDisplayText(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord; var AText: string);
+procedure TfrmPrintWizardDlg.cxGridReports_TABSHEETINDEXGetDisplayText(Sender: TcxCustomGridTableItem; ARecord:
+  TcxCustomGridRecord; var AText: string);
 begin
   if ARecord.Values[cxGridReports_TABSHEETINDEX.Index] > 0 then
     AText := 'Parametri'
@@ -420,12 +488,14 @@ begin
   fParamsViewed := False;
 end;
 
-procedure TfrmPrintWizardDlg.cxGridReportsTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
+procedure TfrmPrintWizardDlg.cxGridReportsTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord,
+  AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
 begin
   SelectionChanged;
 end;
 
-procedure TfrmPrintWizardDlg.cxGridReportsTableStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
+procedure TfrmPrintWizardDlg.cxGridReportsTableStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord:
+  TcxCustomGridRecord; AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
 begin
   if VarIsNumeric(ARecord.Values[cxGridReports_FLG_DISABLED.Index]) then
   begin
@@ -437,7 +507,8 @@ begin
 
 end;
 
-procedure TfrmPrintWizardDlg.cxGridReportsTableStylesGetGroupStyle(Sender: TcxGridTableView; ARecord: TcxCustomGridRecord; ALevel: Integer; var AStyle: TcxStyle);
+procedure TfrmPrintWizardDlg.cxGridReportsTableStylesGetGroupStyle(Sender: TcxGridTableView; ARecord:
+  TcxCustomGridRecord; ALevel: Integer; var AStyle: TcxStyle);
 begin
   if ALevel = 0 then
     AStyle := dmAdditions.cxStyle_Bold
@@ -581,7 +652,8 @@ end;
 
 procedure TfrmPrintWizardDlg.LoadStates;
 begin
-  if AppUserConfigStorage.BooleanValues.GetValue(cSETTINGS_UserSaveFormPos) and AppUserConfigStorage.FormPositions.ReadFormPos(Self) then
+  if AppUserConfigStorage.BooleanValues.GetValue(cSETTINGS_UserSaveFormPos) and AppUserConfigStorage.FormPositions.ReadFormPos
+    (Self) then
     Self.Position := poDesigned;
 
   AppUserConfigStorage.OpenSection(Self.Name);
@@ -622,19 +694,28 @@ procedure TfrmPrintWizardDlg.PrepareData(const CustomerSearch: string);
 var
   S: string;
   groupIndex: integer;
+  isSysAdmin: Boolean;
 begin
   IBCQueryReports.Close;
 
-  S := 'SELECT VW_TS_REPORTS2.* FROM VW_TS_REPORTS2';
-  S := S + ' WHERE (BIN_AND(ACC$MASK,:GROUPMASK)>0)';
+  isSysAdmin := SWNSecurityManager.LoggedUser.IsSuperAdminUser;
 
-  // doar rapoartele atribuite intreprinderii curente (TS_REPORTS2_DT) - si pentru administrator;
-  // administratorul vede in plus rapoartele neatribuite nici unei intreprinderi, ca sa le poata configura
-  S := S + ' AND (EXISTS(SELECT 1 FROM TS_REPORTS2_DT D WHERE D.REPORTID=VW_TS_REPORTS2.REPORTID AND D.CUSTOMERID=' +
-    IntToStr(fDT) + ')';
-  if UserHasUserGroup(cUserGroup_Администратор) then
-    S := S + ' OR NOT EXISTS(SELECT 1 FROM TS_REPORTS2_DT D WHERE D.REPORTID=VW_TS_REPORTS2.REPORTID)';
-  S := S + ')';
+  S := 'SELECT VW_TS_REPORTS2.* FROM VW_TS_REPORTS2 WHERE (1=1)';
+
+  // SysAdmin vede toate rapoartele (indiferent de grupe si de intreprindere),
+  // ca sa le poata da drepturi celorlalti utilizatori
+  if not isSysAdmin then
+  begin
+    S := S + ' AND (BIN_AND(ACC$MASK,:GROUPMASK)>0)';
+
+    // doar rapoartele atribuite intreprinderii curente (TS_REPORTS2_DT) - si pentru administrator;
+    // administratorul vede in plus rapoartele neatribuite nici unei intreprinderi, ca sa le poata configura
+    S := S + ' AND (EXISTS(SELECT 1 FROM TS_REPORTS2_DT D WHERE D.REPORTID=VW_TS_REPORTS2.REPORTID AND D.CUSTOMERID=' +
+      IntToStr(fDT) + ')';
+    if UserHasUserGroup(cUserGroup_Администратор) then
+      S := S + ' OR NOT EXISTS(SELECT 1 FROM TS_REPORTS2_DT D WHERE D.REPORTID=VW_TS_REPORTS2.REPORTID)';
+    S := S + ')';
+  end;
 
      // Afiseaza dupa tipul documentului
   if fShowByDocType then
@@ -661,7 +742,8 @@ begin
   S := S + ' ORDERNO, TITLE';
 
   IBCQueryReports.SQL.Text := S;
-  IBCQueryReports.ParamByName('GROUPMASK').AsInteger := SWNSecurityManager.UserGroupsAccMask;
+  if not isSysAdmin then
+    IBCQueryReports.ParamByName('GROUPMASK').AsInteger := SWNSecurityManager.UserGroupsAccMask;
   if fShowByDocType then
     IBCQueryReports.ParamByName('DOCTYPEID').AsInteger := fDocTypeID;
   if fReportGroup > 0 then
@@ -705,7 +787,8 @@ var
   toDelete: Boolean;
 begin
   toDelete := False;
-  if (cxGridPriceLabelsTable.DataController.RecordCount > 0) and (ShowAskDialogVerification('Rapoarte', 'Doriti sa importati lista de produse din documentul ales ?', 'Produsele curente sa fie sterse?', '', toDelete) <> mrYes) then
+  if (cxGridPriceLabelsTable.DataController.RecordCount > 0) and (ShowAskDialogVerification('Rapoarte',
+    'Doriti sa importati lista de produse din documentul ales ?', 'Produsele curente sa fie sterse?', '', toDelete) <> mrYes) then
     Exit;
 
   Query := TIBCQuery.Create(Self);
@@ -842,7 +925,8 @@ begin
   Query := TIBCQuery.Create(Self);
   try
     Query.Transaction := IBCTrReportUpdate;
-    Query.SQL.Text := 'INSERT INTO TMP_GOODS (GOODSID) SELECT GOODSID FROM TS_GOODS_STOCK WHERE DT=:DT AND DTDEP=:StockID AND QTY>0';
+    Query.SQL.Text :=
+      'INSERT INTO TMP_GOODS (GOODSID) SELECT GOODSID FROM TS_GOODS_STOCK WHERE DT=:DT AND DTDEP=:StockID AND QTY>0';
     Query.ParamByName('DT').AsInteger := dmDB.CurrentFirma;
     Query.ParamByName('StockID').AsInteger := StockID;
     Query.ExecSQL;
@@ -852,7 +936,8 @@ begin
   end;
 end;
 
-procedure TfrmPrintWizardDlg.PriceLable_WhenBurstAddGoods(const GoodsID: integer; const GoodsTitle: string; var Added: Boolean; var Count: integer);
+procedure TfrmPrintWizardDlg.PriceLable_WhenBurstAddGoods(const GoodsID: integer; const GoodsTitle: string; var Added:
+  Boolean; var Count: integer);
 begin
   IBCQuery_TMP_GOODS.Append;
   try
@@ -1030,7 +1115,8 @@ begin
         for i := 0 to cxGridPriceLabelsTable.Controller.SelectedRecordCount - 1 do
         begin
           N := cxGridPriceLabelsTable.Controller.SelectedRecords[i].RecordIndex;
-          Query.ParamByName('GOODSID').AsInteger := cxGridPriceLabelsTable.DataController.Values[N, cxGridPriceLabelsTable_GOODSID.Index];
+          Query.ParamByName('GOODSID').AsInteger := cxGridPriceLabelsTable.DataController.Values[N,
+            cxGridPriceLabelsTable_GOODSID.Index];
           Query.Execute;
         end;
       end;
@@ -1061,7 +1147,8 @@ begin
       begin
                 // Firma selectata
         if cxGridPersonelTable.DataController.RecNo > 0 then
-          fReportParams.SetParamValue('TARGET_DT', cxGridPersonelTable.DataController.Values[cxGridPersonelTable.DataController.RecNo - 1, cxGridPersonel_CUSTOMERID.Index])
+          fReportParams.SetParamValue('TARGET_DT', cxGridPersonelTable.DataController.Values[cxGridPersonelTable.DataController.RecNo
+            - 1, cxGridPersonel_CUSTOMERID.Index])
         else
           fReportParams.SetParamValue('TARGET_DT', 0);
 
@@ -1070,7 +1157,8 @@ begin
         begin
           if S <> '' then
             S := S + ',';
-          S := S + IntToStr(cxGridUserGroupsTable.DataController.Values[cxGridUserGroupsTable.Controller.SelectedRows[i].RecordIndex, cxGridUserGroupsTable_GROUPID.Index]);
+          S := S + IntToStr(cxGridUserGroupsTable.DataController.Values[cxGridUserGroupsTable.Controller.SelectedRows[i].RecordIndex,
+            cxGridUserGroupsTable_GROUPID.Index]);
         end;
         fReportParams.SetParamValue('USER_GROUPS', S);
         fReportParams.SetParamValue('SHOW_ADMIN', Ord(not cbParam_UserGroups_HideAdmins.Checked));

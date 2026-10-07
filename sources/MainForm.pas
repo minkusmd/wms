@@ -182,6 +182,7 @@ type
     bbWebPopularBrands: TdxBarButton;
     bbWebBlockedIp: TdxBarButton;
     bbApiConfig: TdxBarButton;
+    bbTelegram: TdxBarButton;
     bbDeals: TdxBarButton;
     bbDealOfCurrentDoc: TdxBarButton;
     bbDealPayments: TdxBarButton;
@@ -289,6 +290,7 @@ type
     bbPriceRules: TdxBarButton;
     dxBarSubItem3: TdxBarSubItem;
     bbMCC: TdxBarButton;
+    bbECCDiagnostic: TdxBarButton;
     bbWorkStations: TdxBarButton;
     bbPOSTerminals: TdxBarButton;
     bbWebUrlManager: TdxBarButton;
@@ -375,6 +377,7 @@ type
     procedure bbQuickLinksPopup(Sender: TObject);
     procedure bbRefreshDocumentsClick(Sender: TObject);
     procedure cxTreeDocTypesDblClick(Sender: TObject);
+    procedure cxTreeDocTypesClick(Sender: TObject);
     procedure bbProcuriClick(Sender: TObject);
     procedure bbKitTemplatesClick(Sender: TObject);
     procedure bbService_FiscalPrinterClick(Sender: TObject);
@@ -413,6 +416,7 @@ type
     procedure bbWebPopularBrandsClick(Sender: TObject);
     procedure bbWebBlockedIpClick(Sender: TObject);
     procedure bbApiConfigClick(Sender: TObject);
+    procedure bbTelegramClick(Sender: TObject);
     procedure bbDealsClick(Sender: TObject);
     procedure bbDealOfCurrentDocClick(Sender: TObject);
     procedure bbDealPaymentsClick(Sender: TObject);
@@ -483,6 +487,7 @@ type
     procedure bbPromoPerDayClick(Sender: TObject);
     procedure bbPriceRulesClick(Sender: TObject);
     procedure bbMCCClick(Sender: TObject);
+    procedure bbECCDiagnosticClick(Sender: TObject);
     procedure bbWorkStationsClick(Sender: TObject);
     procedure bbPOSTerminalsClick(Sender: TObject);
     procedure bbWebUrlManagerClick(Sender: TObject);
@@ -527,6 +532,7 @@ type
   private    { Private declarations }
     FPendingDocsTimer: TTimer;
     FPendingDocCounts: array[0..1] of Integer; { aliniat cu cPendingDocTypes }
+    FLastPendingRefreshTick: UInt64; { GetTickCount64 al ultimei verificari la cerere }
     fInShutdown: Boolean;
     fCurrentFrameFilterFields: TFrameFilterFields;
     fCurrentFrameDataFilter: TFrameDataFilteringInfo;
@@ -680,6 +686,7 @@ type
     procedure ShowWebFirstPageGoodsGroups;
     procedure PendingDocsTimerTimer(Sender: TObject);
     procedure RefreshPendingDocsIndicator;
+    procedure RefreshPendingDocsIndicatorNow;
     function PendingDocCount(const ADocTypeID: Integer): Integer;
     procedure RefreshUsdRateCaption;
   public    { Public declarations }
@@ -858,6 +865,9 @@ uses
   frmFirmsLocksLogDialog,
   frmFiscalPrinterServiceDialogV2,
   frmFiscalPrintersSetupDialog,
+  frmECCDiagnosticDialog,
+  FiscalPrinterUtilsUnit,
+  FiscalDeviceUnit,
   frmGlobalCallHistoryUnit,
   frmGoods,
   frmGoodsACNTBrowser,
@@ -909,6 +919,7 @@ uses
   frmWebBlogDialog,
   frmBlockedIpDialog,
   frmApiConfigDialog,
+  frmTelegramDialog,
   SWNDealsUnit,
   frmWebCatalogDialog,
   frmWebPopularCategoriesDialog,
@@ -1736,6 +1747,18 @@ begin
   end;
 end;
 
+procedure TfrmMainForm.bbTelegramClick(Sender: TObject);
+var
+  dialog: TfrmTelegramDlg;
+begin
+  dialog := TfrmTelegramDlg.Create(Self);
+  try
+    dialog.ShowModal;
+  finally
+    dialog.Free;
+  end;
+end;
+
 procedure TfrmMainForm.bbDealsClick(Sender: TObject);
 begin
   ShowDealsBrowser(Self);
@@ -2128,6 +2151,12 @@ begin
   Allow := false;
 end;
 
+procedure TfrmMainForm.cxTreeDocTypesClick(Sender: TObject);
+begin
+  // click pe arbore, si pe nodul deja selectat: verificam imediat documentele noi
+  RefreshPendingDocsIndicatorNow;
+end;
+
 procedure TfrmMainForm.cxTreeDocTypesDblClick(Sender: TObject);
 begin
   if Assigned(cxTreeDocTypes.FocusedNode) then
@@ -2165,6 +2194,9 @@ var
   Frame: TSWNBaseFrame;
   DocID: Integer;
 begin
+  // schimbarea tipului de document: verificam imediat documentele noi (Web-Order 134,
+  // Cerere de Finantare 1791), nu doar la timer
+  RefreshPendingDocsIndicatorNow;
     // Kind se schimba documentul activ in copacul documentelor
   if Assigned(AFocusedNode) then
   begin
@@ -2829,6 +2861,11 @@ begin
   end;
 end;
 
+procedure TfrmMainForm.bbECCDiagnosticClick(Sender: TObject);
+begin
+  TfrmECCDiagnosticDlg.Execute(Self);
+end;
+
 procedure TfrmMainForm.bbPOSTerminalsClick(Sender: TObject);
 var
   dialog: TfrmPOSTerminalsSetupDlg;
@@ -3046,6 +3083,24 @@ procedure TfrmMainForm.PendingDocsTimerTimer(Sender: TObject);
 begin
   if fInShutdown then
     Exit;
+  RefreshPendingDocsIndicator;
+end;
+
+procedure TfrmMainForm.RefreshPendingDocsIndicatorNow;
+// Verificarea la cerere: click pe arbore sau schimbarea tipului de document. Un click pe alt
+// nod declanseaza si OnClick si OnFocusedNodeChanged - pragul de 1 s evita a doua interogare.
+// Timerul reporneste, ca urmatoarea verificare automata sa fie peste cPendingDocsRefreshMs.
+begin
+  if fInShutdown then
+    Exit;
+  if (FLastPendingRefreshTick <> 0) and (GetTickCount64 - FLastPendingRefreshTick < 1000) then
+    Exit;
+  FLastPendingRefreshTick := GetTickCount64;
+  if Assigned(FPendingDocsTimer) then
+  begin
+    FPendingDocsTimer.Enabled := False;
+    FPendingDocsTimer.Enabled := True;
+  end;
   RefreshPendingDocsIndicator;
 end;
 
@@ -4203,6 +4258,8 @@ begin
     bbActiveUsers.Visible := ivNever;
     // >> credentialele API-urilor externe
     bbApiConfig.Visible := ivNever;
+    // >> canalele / istoricul notificarilor Telegram
+    bbTelegram.Visible := ivNever;
     // >> SQL Repository
     bbSQLRepository.Visible := ivNever;
     // >> Nomenclatoare - Service+
@@ -4306,6 +4363,7 @@ begin
     bbMainMenuRef_Customers.Visible := ivNever;
     bbMainMenuRef_Enterprises.Visible := ivNever;
     bbMCC.Visible := ivNever;
+    bbECCDiagnostic.Visible := ivNever;
     bbWorkStations.Visible := ivNever;
     bbPOSTerminals.Visible := ivNever;
     bbAutoTransport.Visible := ivNever;
@@ -5237,6 +5295,14 @@ end;
 
 procedure TfrmMainForm.ShowServiceFiscalPrinter;
 begin
+  // casa ECC Fiscal Partner: X, Z, depuneri, retrageri si jurnalul sint in dialogul ECC
+  var DeviceInfo := GetFiscalDeviceInfo(dmDB.FirmaInfo.FirmaID);
+  if DeviceInfo.DeviceType = cFiscalDeviceTypeECC then
+  begin
+    TfrmECCDiagnosticDlg.Execute(Self, DeviceInfo.EccApiCode);
+    Exit;
+  end;
+
   // MCC se acceseaza numai prin serverul ZFPLab (localhost:4444 sau FP_DEVICES), nu direct prin zfpcom.dll
   begin
     var dialog := TfrmFiscalPrinterServiceV2Dlg.Create(Self);

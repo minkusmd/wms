@@ -63,7 +63,7 @@ type
 implementation
 
 uses
-  System.UITypes, POSFiscalUnit;
+  System.UITypes, FiscalDeviceUnit;
 
 {$R *.dfm}
 
@@ -252,9 +252,26 @@ begin
   Result := fNewShiftID > 0;
 end;
 
+// Aparatul fiscal al casei, conectat. nil + ErrorText daca nu e disponibil.
+function ConnectPOSFiscal(const FirmaID: Integer; out ErrorText: string): IFiscalDevice;
+begin
+  Result := nil;
+  try
+    Result := CreateFiscalDevice(FirmaID);
+    if not Result.Connect(ErrorText) then
+      Result := nil;
+  except
+    on E: Exception do
+    begin
+      Result := nil;
+      ErrorText := E.Message;
+    end;
+  end;
+end;
+
 function TfrmPOSShiftDlg.ExecCashMove(const Suma: Currency): Boolean;
 var
-  Fiscal: TPOSFiscal;
+  Fiscal: IFiscalDevice;
   ErrorText: string;
   Kind: Integer;
 begin
@@ -271,22 +288,19 @@ begin
   if (Kind = -1) and (Suma > fSummary.ExpectedCash) then
     raise EPOSError.CreateFmt('In sertar sint doar %s lei.', [FormatFloat(cMoneyFormat, fSummary.ExpectedCash)]);
 
-  Fiscal := TPOSFiscal.Create;
-  try
-    if Fiscal.Connect(fTerminal.FirmaID, ErrorText) then
-    begin
-      Fiscal.CashInOut(Kind * Suma, edReason.Text);
-      try
-        Fiscal.OpenDrawer;
-      except
-        // sertarul e o comoditate; miscarea e deja pe aparat
-      end;
-    end
-    else if not ConfirmWithoutFiscal(ErrorText, 'Inregistrati miscarea doar in WMS, fara aparatul fiscal?') then
-      Exit;
-  finally
-    Fiscal.Free;
-  end;
+  Fiscal := ConnectPOSFiscal(fTerminal.FirmaID, ErrorText);
+  if Assigned(Fiscal) then
+  begin
+    Fiscal.CashInOut(Kind * Suma, edReason.Text);
+    try
+      Fiscal.OpenDrawer;
+    except
+      // sertarul e o comoditate; miscarea e deja pe aparat
+    end;
+    Fiscal := nil;
+  end
+  else if not ConfirmWithoutFiscal(ErrorText, 'Inregistrati miscarea doar in WMS, fara aparatul fiscal?') then
+    Exit;
 
   POSCashMove(fShift.ShiftID, Kind, Suma, edReason.Text);
   Result := True;
@@ -294,7 +308,7 @@ end;
 
 function TfrmPOSShiftDlg.ExecClose(const Suma: Currency): Boolean;
 var
-  Fiscal: TPOSFiscal;
+  Fiscal: IFiscalDevice;
   ErrorText: string;
   ZNumber: Integer;
   Diff: Currency;
@@ -313,15 +327,14 @@ begin
     Exit;
 
   ZNumber := 0;
-  Fiscal := TPOSFiscal.Create;
-  try
-    if Fiscal.Connect(fTerminal.FirmaID, ErrorText) then
-      ZNumber := Fiscal.PrintZReport
-    else if not ConfirmWithoutFiscal(ErrorText, 'Inchideti tura in WMS FARA raportul Z?') then
-      Exit;
-  finally
-    Fiscal.Free;
-  end;
+  Fiscal := ConnectPOSFiscal(fTerminal.FirmaID, ErrorText);
+  if Assigned(Fiscal) then
+  begin
+    ZNumber := Fiscal.PrintZReport;
+    Fiscal := nil;
+  end
+  else if not ConfirmWithoutFiscal(ErrorText, 'Inchideti tura in WMS FARA raportul Z?') then
+    Exit;
 
   POSCloseShift(fShift.ShiftID, Suma, ZNumber, edReason.Text);
   Result := True;
@@ -329,43 +342,35 @@ end;
 
 procedure TfrmPOSShiftDlg.btnXReportClick(Sender: TObject);
 var
-  Fiscal: TPOSFiscal;
+  Fiscal: IFiscalDevice;
   ErrorText: string;
 begin
-  Fiscal := TPOSFiscal.Create;
   try
-    try
-      if Fiscal.Connect(fTerminal.FirmaID, ErrorText) then
-        Fiscal.PrintXReport
-      else
-        MessageDlg(ErrorText, mtError, [mbOK], 0);
-    except
-      on E: EPOSFiscalError do
-        MessageDlg(E.Message, mtError, [mbOK], 0);
-    end;
-  finally
-    Fiscal.Free;
+    Fiscal := ConnectPOSFiscal(fTerminal.FirmaID, ErrorText);
+    if Assigned(Fiscal) then
+      Fiscal.PrintXReport
+    else
+      MessageDlg(ErrorText, mtError, [mbOK], 0);
+  except
+    on E: EFiscalDeviceError do
+      MessageDlg(E.Message, mtError, [mbOK], 0);
   end;
 end;
 
 procedure TfrmPOSShiftDlg.btnDrawerClick(Sender: TObject);
 var
-  Fiscal: TPOSFiscal;
+  Fiscal: IFiscalDevice;
   ErrorText: string;
 begin
-  Fiscal := TPOSFiscal.Create;
   try
-    try
-      if Fiscal.Connect(fTerminal.FirmaID, ErrorText) then
-        Fiscal.OpenDrawer
-      else
-        MessageDlg(ErrorText, mtError, [mbOK], 0);
-    except
-      on E: EPOSFiscalError do
-        MessageDlg(E.Message, mtError, [mbOK], 0);
-    end;
-  finally
-    Fiscal.Free;
+    Fiscal := ConnectPOSFiscal(fTerminal.FirmaID, ErrorText);
+    if Assigned(Fiscal) then
+      Fiscal.OpenDrawer
+    else
+      MessageDlg(ErrorText, mtError, [mbOK], 0);
+  except
+    on E: EFiscalDeviceError do
+      MessageDlg(E.Message, mtError, [mbOK], 0);
   end;
 end;
 

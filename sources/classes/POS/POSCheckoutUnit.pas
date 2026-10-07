@@ -50,15 +50,20 @@ function POSPendingJournalFile(const PosID: Integer): string;
 implementation
 
 uses
-  DB, IBC, DBAccess, DataModuleDB, POSFiscalUnit;
+  DB, IBC, DBAccess, DataModuleDB, FiscalDeviceUnit;
 
-type
-  TFiscalLine = record
-    Title: string;
-    VatPercent: Integer;
-    Price: Currency;
-    Qty: Double;
-  end;
+// Codul stabil al platii POS (TS_SYSS.VALUE_STR) -> tipul de plata pe aparatul fiscal
+function POSFiscalPayKind(const PayCode: string): TFiscalPayKind;
+begin
+  if PayCode = 'PAY_CASH' then
+    Result := fpkCash
+  else if PayCode = 'PAY_POS' then
+    Result := fpkCard
+  else if PayCode = 'PAY_QR_MIA' then
+    Result := fpkOnline
+  else
+    raise EPOSError.Create('Tip de plata necunoscut pentru aparatul fiscal: ' + PayCode);
+end;
 
 function POSPendingJournalFile(const PosID: Integer): string;
 var
@@ -105,13 +110,14 @@ function POSCheckout(const Terminal: TPOSTerminal; const Shift: TPOSShift; const
   const AskReceiptNumber: TPOSAskReceiptNumber): TPOSCheckoutResult;
 var
   R: TPOSCheckoutResult;
-  Fiscal: TPOSFiscal;
+  Fiscal: IFiscalDevice;
   Tr: TIBCTransaction;
   Query: TIBCQuery;
-  Lines: array of TFiscalLine;
-  I: Integer;
-  PaySum, LinesSum, Suma, SumaVat: Currency;
-  ReceiptClosed: Boolean;
+  Receipt: TFiscalReceipt;
+  Printed: TFiscalReceiptResult;
+  I, VatPercent: Integer;
+  PaySum, LinesSum, Suma, SumaVat, Price: Currency;
+  Qty: Double;
   ErrorText: string;
 
   procedure Fail(const Text: string);
@@ -146,12 +152,21 @@ begin
     Exit(R);
   end;
 
-  Fiscal := TPOSFiscal.Create;
+  Fiscal := nil;
   Tr := TIBCTransaction.Create(nil);
   Query := TIBCQuery.Create(nil);
   try
     // 1. fara aparat fiscal nu se vinde
-    if not Fiscal.Connect(Terminal.FirmaID, ErrorText) then
+    try
+      Fiscal := CreateFiscalDevice(Terminal.FirmaID);
+    except
+      on E: Exception do
+      begin
+        Fail('Aparatul fiscal nu este disponibil: ' + E.Message);
+        Exit(R);
+      end;
+    end;
+    if not Fiscal.Connect(ErrorText) then
     begin
       Fail('Aparatul fiscal nu este disponibil: ' + ErrorText);
       Exit(R);
@@ -222,33 +237,34 @@ begin
       Query.ParamByName('DOCID').AsInteger := R.FacturaDocID;
       Query.Open;
       LinesSum := 0;
-      SetLength(Lines, 0);
+      Receipt.Clear;
+      Receipt.DocID := R.FacturaDocID;
+      Receipt.SourceType := 2;   // bon POS (TFP_ECC_TRANSACTION.SOURCE_TYPE)
+      Receipt.SourceRef := IntToStr(R.SaleID);
       while not Query.Eof do
       begin
-        SetLength(Lines, Length(Lines) + 1);
-        with Lines[High(Lines)] do
-        begin
-          Title := Trim(Query.FieldByName('NAMEACNT').AsString);
-          Qty := Query.FieldByName('QTY').AsFloat;
-          Price := Query.FieldByName('PRICE').AsCurrency;
-          Suma := POSRoundMoney(Price * Qty);
-          SumaVat := Query.FieldByName('SUMAVAT').AsCurrency;
-          if (SumaVat > 0) and (Suma - SumaVat > 0) then
-            VatPercent := Round(100 * SumaVat / (Suma - SumaVat))
-          else
-            VatPercent := 0;
-          LinesSum := LinesSum + Suma;
-        end;
+        Qty := Query.FieldByName('QTY').AsFloat;
+        Price := Query.FieldByName('PRICE').AsCurrency;
+        Suma := POSRoundMoney(Price * Qty);
+        SumaVat := Query.FieldByName('SUMAVAT').AsCurrency;
+        if (SumaVat > 0) and (Suma - SumaVat > 0) then
+          VatPercent := Round(100 * SumaVat / (Suma - SumaVat))
+        else
+          VatPercent := 0;
+        Receipt.AddLine(Trim(Query.FieldByName('NAMEACNT').AsString), Qty, Price, VatPercent);
+        LinesSum := LinesSum + Suma;
         Query.Next;
       end;
       Query.Close;
 
-      if Length(Lines) = 0 then
+      if Length(Receipt.Lines) = 0 then
         raise EPOSError.Create('Factura nu are linii pentru bonul fiscal.');
       // aparatul ar refuza plata daca suma liniilor difera de plati - mai bine ne oprim inainte
       if LinesSum <> PaySum then
         raise EPOSError.CreateFmt('Suma liniilor pentru bon (%s) difera de plati (%s).',
           [CurrToStr(LinesSum), CurrToStr(PaySum)]);
+      for I := 0 to High(Payments) do
+        Receipt.AddPayment(POSFiscalPayKind(Payments[I].PayCode), Payments[I].Suma);
     except
       on E: Exception do
       begin
@@ -271,30 +287,39 @@ begin
       end;
     end;
 
-    // 5. tiparirea
-    ReceiptClosed := False;
+    // 5. tiparirea. O exceptie = pe aparat nu a ramas nimic (bonul deschis e anulat de aparat)
     try
-      Fiscal.OpenReceipt;
-      for I := 0 to High(Lines) do
-        Fiscal.SellLine(Lines[I].Title, Lines[I].VatPercent, Lines[I].Price, Lines[I].Qty);
-      for I := 0 to High(Payments) do
-        Fiscal.Pay(Payments[I].PayCode, Payments[I].Suma);
-      Fiscal.CloseReceipt(R.NumarBon, R.DataBon, ReceiptClosed);
+      Printed := Fiscal.PrintReceipt(Receipt);
     except
       on E: Exception do
       begin
-        if not ReceiptClosed then
-        begin
-          Fiscal.CancelReceipt;
-          Tr.Rollback;
-          DeleteFile(R.JournalFile);
-          Fail(E.Message);
-          Exit(R);
-        end;
-        // bonul e inchis pe aparat, doar numarul nu s-a citit
-        R.ErrorText := E.Message;
-        R.NumarBon := 0;
+        Tr.Rollback;
+        DeleteFile(R.JournalFile);
+        Fail(E.Message);
+        Exit(R);
       end;
+    end;
+    R.NumarBon := Printed.Number;
+    R.DataBon := Printed.DateTime;
+    if Printed.State = frsPending then
+    begin
+      // ECC: cererea a plecat, rezultatul nu e cunoscut. Bonul NU se repeta si nu se cere numarul:
+      // documentele nu se salveaza, jurnalul local ramine, iar bonul se verifica in jurnalul ECC
+      Tr.Rollback;
+      R.Outcome := pcoPrintedNotSaved;
+      R.NumarBon := 0;
+      R.ErrorText := Printed.Warning;
+      try
+        WriteJournal(R.JournalFile, Terminal, Shift, Cart, CustomerID, Payments, R, 'ecc-pending ' + Printed.ExternalId);
+      except
+      end;
+      Exit(R);
+    end;
+    if Printed.State = frsNumberUnknown then
+    begin
+      // bonul e inchis pe aparat, doar numarul nu s-a citit
+      R.ErrorText := Printed.Warning;
+      R.NumarBon := 0;
     end;
 
     if R.NumarBon <= 0 then
@@ -328,6 +353,10 @@ begin
       Query.ParamByName('ADATA').AsDateTime := R.DataBon;
       Query.Execute;
       Tr.Commit;
+      // ECC: rindul din TDB_DOCS_RECEIPT se leaga de tranzactia din jurnal (nu e fatal daca nu reuseste)
+      Printed.Number := R.NumarBon;
+      Printed.DateTime := R.DataBon;
+      Fiscal.ConfirmRegistered(Printed, R.FacturaDocID, PaySum);
     except
       on E: Exception do
       begin
@@ -349,7 +378,7 @@ begin
   finally
     Query.Free;
     Tr.Free;
-    Fiscal.Free;
+    Fiscal := nil;
     Result := R;
   end;
 end;

@@ -221,7 +221,11 @@ begin
         begin
           Item.SitePrice := 0;
           Inc(AStats.NotFound);
-          Log('NEGASIT  %s (produs %d) - pretul ramine neschimbat', [Item.GoodsCode, Item.GoodsID]);
+          // sursa poate pune motivul in titlu (ex. Maximum: codul de pe pagina nu corespunde)
+          if Item.Title <> '' then
+            Log('NEGASIT  %s (produs %d) - pretul ramine neschimbat (%s)', [Item.GoodsCode, Item.GoodsID, Item.Title])
+          else
+            Log('NEGASIT  %s (produs %d) - pretul ramine neschimbat', [Item.GoodsCode, Item.GoodsID]);
         end;
       except
         on E: Exception do
@@ -236,7 +240,8 @@ begin
       if (I + 1) mod 50 = 0 then
         Log('... %d / %d verificate', [I + 1, AItems.Count]);
       // in SWN.exe ruleaza pe firul principal: lasam interfata sa respire
-      if Application <> nil then
+      // doar pe firul principal: in WMSParsers joburile ruleaza in fire separate
+      if (Application <> nil) and (TThread.CurrentThread.ThreadID = MainThreadID) then
         Application.ProcessMessages;
       Sleep(FRequestDelayMs);
     end;

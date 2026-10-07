@@ -98,8 +98,6 @@ inherited frame78PriceList: Tframe78PriceList
             ParentShowHint = False
             ShowHint = True
             TabOrder = 0
-            ExplicitLeft = 4
-            ExplicitWidth = 221
             object SpeedButton1: TSpeedButton
               Left = 199
               Top = 0
@@ -278,7 +276,6 @@ inherited frame78PriceList: Tframe78PriceList
                 Margins.Bottom = 2
                 Align = alClient
                 TabOrder = 1
-                ExplicitWidth = 167
                 object cxGridDataDBTableView1: TcxGridDBTableView
                   DataController.DataSource = IBCDataSourcePriceData
                   DataController.KeyFieldNames = 'PLID'
@@ -343,7 +340,6 @@ inherited frame78PriceList: Tframe78PriceList
                 Margins.Bottom = 2
                 Align = dalTop
                 BarManager = dxBarManager1
-                ExplicitWidth = 198
               end
             end
             object cxButton1: TcxButton
@@ -454,7 +450,6 @@ inherited frame78PriceList: Tframe78PriceList
                 item
                   PanelStyleClassName = 'TdxStatusBarTextPanelStyle'
                 end>
-              ExplicitWidth = 198
             end
             object cxButton2: TcxButton
               Left = 19
@@ -518,8 +513,6 @@ inherited frame78PriceList: Tframe78PriceList
           Font.Style = []
           ParentFont = False
           TabOrder = 2
-          ExplicitLeft = 210
-          ExplicitWidth = 1045
           object pcPricesAnalize: TcxPageControl
             Left = 1
             Top = 29
@@ -540,7 +533,6 @@ inherited frame78PriceList: Tframe78PriceList
             Properties.ActivePage = tsAllPriceGoods
             Properties.CustomButtons.Buttons = <>
             OnPageChanging = pcPricesAnalizePageChanging
-            ExplicitWidth = 1043
             ClientRectBottom = 588
             ClientRectLeft = 4
             ClientRectRight = 1008
@@ -552,7 +544,6 @@ inherited frame78PriceList: Tframe78PriceList
               Margins.Bottom = 2
               Caption = '(1) Toate produsele'
               ImageIndex = 5
-              ExplicitWidth = 1035
               object cxGridItems: TcxGrid
                 Left = 0
                 Top = 0
@@ -570,7 +561,6 @@ inherited frame78PriceList: Tframe78PriceList
                 Font.Style = []
                 ParentFont = False
                 TabOrder = 0
-                ExplicitWidth = 1035
                 object cxGridItemsDBTableView1: TcxGridDBTableView
                   PopupMenu = dxBarPopupMenu1
                   OnKeyDown = cxGridItemsDBTableView1KeyDown
@@ -938,7 +928,6 @@ inherited frame78PriceList: Tframe78PriceList
                 Margins.Bottom = 2
                 Panels = <>
                 SimplePanelStyle.Active = True
-                ExplicitWidth = 1035
               end
               object cxPageControl2: TcxPageControl
                 Left = 0
@@ -949,7 +938,6 @@ inherited frame78PriceList: Tframe78PriceList
                 TabOrder = 2
                 Properties.ActivePage = tsLog
                 Properties.CustomButtons.Buttons = <>
-                ExplicitWidth = 1035
                 ClientRectBottom = 189
                 ClientRectLeft = 4
                 ClientRectRight = 1000
@@ -957,7 +945,6 @@ inherited frame78PriceList: Tframe78PriceList
                 object tsLog: TcxTabSheet
                   Caption = 'tsLog'
                   ImageIndex = 0
-                  ExplicitWidth = 1027
                   object meLog: TcxMemo
                     Left = 0
                     Top = 0
@@ -975,7 +962,6 @@ inherited frame78PriceList: Tframe78PriceList
                     Style.Font.Style = []
                     Style.IsFontAssigned = True
                     TabOrder = 0
-                    ExplicitWidth = 1027
                     Height = 163
                     Width = 996
                   end
@@ -983,7 +969,10 @@ inherited frame78PriceList: Tframe78PriceList
                 object cxTabSheet2: TcxTabSheet
                   Caption = 'tsGoodsInfo'
                   ImageIndex = 1
+                  ExplicitLeft = 0
+                  ExplicitTop = 0
                   ExplicitWidth = 1008
+                  ExplicitHeight = 0
                   object cxGrid6: TcxGrid
                     Left = 0
                     Top = 0
@@ -1034,11 +1023,10 @@ inherited frame78PriceList: Tframe78PriceList
               Margins.Bottom = 2
               Caption = '(2) Produse noi'
               ImageIndex = 1
-              ExplicitWidth = 1035
               object cxGrid3: TcxGrid
                 Left = 0
                 Top = 0
-                Width = 1035
+                Width = 1004
                 Height = 562
                 Margins.Left = 2
                 Margins.Top = 2
@@ -1173,11 +1161,10 @@ inherited frame78PriceList: Tframe78PriceList
               Margins.Bottom = 2
               Caption = '(3) Produse eliminate'
               ImageIndex = 2
-              ExplicitWidth = 1035
               object cxGrid2: TcxGrid
                 Left = 0
                 Top = 0
-                Width = 1035
+                Width = 1004
                 Height = 562
                 Margins.Left = 2
                 Margins.Top = 2
@@ -1310,11 +1297,10 @@ inherited frame78PriceList: Tframe78PriceList
               Margins.Bottom = 2
               Caption = '(4) Preturi marite'
               ImageIndex = 3
-              ExplicitWidth = 1035
               object cxGrid4: TcxGrid
                 Left = 0
                 Top = 0
-                Width = 1035
+                Width = 1004
                 Height = 562
                 Margins.Left = 2
                 Margins.Top = 2
@@ -1486,11 +1472,10 @@ inherited frame78PriceList: Tframe78PriceList
               Margins.Bottom = 2
               Caption = '(5) Preturi scazute'
               ImageIndex = 4
-              ExplicitWidth = 1035
               object cxGrid5: TcxGrid
                 Left = 0
                 Top = 0
-                Width = 1035
+                Width = 1004
                 Height = 562
                 Margins.Left = 2
                 Margins.Top = 2
@@ -1686,11 +1671,10 @@ inherited frame78PriceList: Tframe78PriceList
               Margins.Bottom = 2
               Caption = '(6) Produse noi dupa price'
               ImageIndex = 5
-              ExplicitWidth = 1035
               object cxGrid1: TcxGrid
                 Left = 0
                 Top = 0
-                Width = 1035
+                Width = 1004
                 Height = 562
                 Margins.Left = 2
                 Margins.Top = 2
@@ -2059,7 +2043,6 @@ inherited frame78PriceList: Tframe78PriceList
             Margins.Bottom = 2
             Align = dalTop
             BarManager = dxBarManager1
-            ExplicitWidth = 1043
           end
         end
         object cxSplitter1: TcxSplitter
@@ -2075,7 +2058,6 @@ inherited frame78PriceList: Tframe78PriceList
           PositionAfterOpen = 15
           AutoSnap = True
           MinSize = 15
-          ExplicitLeft = 206
         end
       end
     end
@@ -2199,7 +2181,7 @@ inherited frame78PriceList: Tframe78PriceList
           UserDefine = [udPaintStyle]
           UserPaintStyle = psCaptionGlyph
           Visible = True
-          ItemName = 'dxBarButton14'
+          ItemName = 'bbAPISupplier'
         end
         item
           BeginGroup = True
@@ -2567,13 +2549,13 @@ inherited frame78PriceList: Tframe78PriceList
       Visible = ivAlways
       OnClick = dxBarButton13Click
     end
-    object dxBarButton14: TdxBarButton
+    object bbAPISupplier: TdxBarButton
       Caption = 'Api'
       Category = 0
       Hint = 'Api'
       Visible = ivAlways
       ImageIndex = 98
-      OnClick = dxBarButton14Click
+      OnClick = bbAPISupplierClick
     end
     object bbSetEPP: TdxBarButton
       Caption = 'RRP la produsele selectate'

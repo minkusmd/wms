@@ -17,8 +17,13 @@ type
     Mode: TSupplierSyncMode; // doar joburile de pret
     DelayMs: Integer;        // <= 0 = pauza implicita a jobului
     LogDir: string;
+    Images: Boolean;         // joburile de pricelist API: descarca imaginile (/images:no = nu)
+    Reevaluation: Boolean;   // joburile de pricelist API: cele 4 reevaluari (/reevaluare:no = nu)
+    ReevaluationTest: Boolean; // /reevaluare:test - reevaluarile se fac si se anuleaza (ROLLBACK)
+    Telegram: Boolean;       // rezultatul rularii in Telegram (TELEGRAM_MESSAGES); /telegram:no = nu
     class function Defaults: TParserRunOptions; static;
-    // suprascrie cu /server: /firma: /user: /mode: /delay: /log: din linia de comanda
+    // suprascrie cu /server: /firma: /user: /mode: /delay: /log: /images: /reevaluare: /telegram:
+    // din linia de comanda
     procedure ReadCommandLine;
   end;
 
@@ -40,6 +45,11 @@ type
     class function JobName: string; virtual; abstract;
     // denumirea afisata in lista
     class function DisplayName: string; virtual; abstract;
+    // denumirea scurta din mesajele Telegram (implicit DisplayName)
+    class function NotifyName: string; virtual;
+    // job de preturi: rezultatul lui merge si in canalul PRICELISTS ("Online :: Fantastic");
+    // erorile oricarui job merg in ERRORS
+    class function IsPriceJob: Boolean; virtual;
     constructor Create(AConnection: TIBCConnection; const AOptions: TParserRunOptions;
       const AOnLog: TSupplierSyncLogEvent); virtual;
     function Run: TParserJobResult; virtual; abstract;
@@ -58,6 +68,8 @@ type
   public
     class function JobName: string; override;
     class function DisplayName: string; override;
+    class function NotifyName: string; override;
+    class function IsPriceJob: Boolean; override;
     function Run: TParserJobResult; override;
     procedure Cancel; override;
   end;
@@ -94,6 +106,15 @@ begin
   Result.Mode := hsmDirectUpdate;
   Result.DelayMs := 0;
   Result.LogDir := ExtractFilePath(ParamStr(0)) + 'logs';
+  Result.Images := True;
+  Result.Reevaluation := True;
+  Result.ReevaluationTest := False;
+  Result.Telegram := True;
+end;
+
+function IsNo(const AValue: string): Boolean;
+begin
+  Result := SameText(AValue, 'no') or SameText(AValue, 'nu') or (AValue = '0') or SameText(AValue, 'false');
 end;
 
 procedure TParserRunOptions.ReadCommandLine;
@@ -107,6 +128,14 @@ begin
     Mode := hsmDirectUpdate;
   DelayMs := StrToIntDef(CommandLineValue('delay', ''), DelayMs);
   LogDir := CommandLineValue('log', LogDir);
+  if IsNo(CommandLineValue('images', '')) then
+    Images := False;
+  if IsNo(CommandLineValue('reevaluare', '')) then
+    Reevaluation := False;
+  if SameText(CommandLineValue('reevaluare', ''), 'test') then
+    ReevaluationTest := True;
+  if IsNo(CommandLineValue('telegram', '')) then
+    Telegram := False;
 end;
 
 { TParserJob }
@@ -118,6 +147,16 @@ begin
   FConnection := AConnection;
   FOptions := AOptions;
   FOnLog := AOnLog;
+end;
+
+class function TParserJob.NotifyName: string;
+begin
+  Result := DisplayName;
+end;
+
+class function TParserJob.IsPriceJob: Boolean;
+begin
+  Result := False;
 end;
 
 procedure TParserJob.Cancel;
@@ -146,6 +185,16 @@ end;
 class function TSupplierPriceJob.DisplayName: string;
 begin
   Result := Format('Preturi %s  -  furnizor %d', [SourceClass.DisplayName, SourceClass.SupplierID]);
+end;
+
+class function TSupplierPriceJob.NotifyName: string;
+begin
+  Result := Format('Preturi %s (%d)', [SourceClass.DisplayName, SourceClass.SupplierID]);
+end;
+
+class function TSupplierPriceJob.IsPriceJob: Boolean;
+begin
+  Result := True;
 end;
 
 procedure TSupplierPriceJob.Cancel;

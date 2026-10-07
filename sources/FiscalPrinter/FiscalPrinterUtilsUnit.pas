@@ -35,6 +35,15 @@ type
     IsRemote: Boolean;
   end;
 
+  // aparatul fiscal ales pentru firma si calculatorul curent (FP_DEVICES)
+  TFiscalDeviceInfo = record
+    Found: Boolean;          // exista un rind activ in FP_DEVICES
+    FPID: Integer;
+    DeviceType: Integer;     // FP_DEVICES.DEVICE_TYPE: 0 = MCC Tremol, 1 = ECC Fiscal Partner
+    EccApiCode: String;      // TS_API_CONFIG.API_CODE al casei ECC
+    Server: TFiscalPrinterServer;
+  end;
+
   TFiscalPrinterDeviceStatus = (fpdsUnknown,fpdsNotFound,fpdsNotFoundDriver,fpdsFound,fpdsFoundNew);
   TFiscalPrinterDeviceEvent = procedure (const Thread:TFiscalPrinterDetectThread) of object;
 
@@ -79,6 +88,10 @@ procedure RegisterCurrentWorkStation(const AFirmaID: Integer);
 // Se cauta in FP_DEVICES: intii MCC atasata la calculatorul curent, apoi MCC partajate
 // prin FP_DEVICE_ACCESS. Daca nu este configurat nimic - MCC locala (http://localhost:4444/).
 function GetFiscalPrinterServer(const AFirmaID: Integer): TFiscalPrinterServer;
+
+// Acelasi aparat ca GetFiscalPrinterServer, cu tipul lui (Tremol / ECC).
+// Fara rind in FP_DEVICES: Found = False si MCC Tremol locala (comportamentul de pina acum).
+function GetFiscalDeviceInfo(const AFirmaID: Integer): TFiscalDeviceInfo;
 
 // Conecteaza obiectul Tremol FP la echipamentul fiscal fara a cere portul de la utilizator.
 // Ordinea incercarilor:
@@ -173,72 +186,101 @@ begin
 end;
 
 function GetFiscalPrinterServer(const AFirmaID: Integer): TFiscalPrinterServer;
+begin
+  Result := GetFiscalDeviceInfo(AFirmaID).Server;
+end;
+
+function GetFiscalDeviceInfo(const AFirmaID: Integer): TFiscalDeviceInfo;
+const
+  // coloanele DEVICE_TYPE / ECC_API_CODE vin din DB Model/ecc_fiscalpartner.sql;
+  // intr-o baza fara ele se foloseste interogarea veche (doar Tremol)
+  cDeviceColumns: array[Boolean] of String = (
+    '0 AS DEVICE_TYPE, CAST(NULL AS VARCHAR(30)) AS ECC_API_CODE, ',
+    'D.DEVICE_TYPE, D.ECC_API_CODE, ');
 var
   Query: TIBCQuery;
   Address: String;
+  WithDeviceType: Boolean;
 begin
-  Result.ServerAddress := cTREMOL_ZFPLabServerAddress;
-  Result.Port := '';
-  Result.BaudRate := 0;
-  Result.IsRemote := False;
+  Result.Found := False;
+  Result.FPID := 0;
+  Result.DeviceType := 0;
+  Result.EccApiCode := '';
+  Result.Server.ServerAddress := cTREMOL_ZFPLabServerAddress;
+  Result.Server.Port := '';
+  Result.Server.BaudRate := 0;
+  Result.Server.IsRemote := False;
 
-  Query := TIBCQuery.Create(nil);
-  try
+  for WithDeviceType := True downto False do
+  begin
+    Query := TIBCQuery.Create(nil);
     try
-      Query.Connection := dmDB.IBCConnection;
-      // MCC se alege dupa firma curenta (FP_DEVICES.FIRMA_ID). Prioritatea:
-      //   0 - MCC legata de calculatorul curent (WS_ID);
-      //   1 - MCC partajata cu calculatorul curent prin FP_DEVICE_ACCESS;
-      //   2 - MCC a firmei fara calculator indicat (WS_ID gol) - valabila pe orice statie.
-      // MCC legata de alt calculator si nepartajata nu se foloseste: portul ei apartine acelui calculator.
-      Query.SQL.Text :=
-        'SELECT FIRST 1 D.SERVER_ADDRESS, D.COM_PORT, D.BAUD_RATE, ' +
-        '  CASE WHEN UPPER(W.COMPUTER_NAME) = :COMPUTER_NAME THEN 0 ' +
-        '       WHEN EXISTS(SELECT 1 FROM FP_DEVICE_ACCESS A ' +
-        '                   INNER JOIN WS_WORK_STATIONS W2 ON W2.WS_ID = A.WS_ID ' +
-        '                   WHERE (A.FP_ID = D.FP_ID) AND (UPPER(W2.COMPUTER_NAME) = :COMPUTER_NAME)) THEN 1 ' +
-        '       ELSE 2 END AS WS_PRIORITY ' +
-        'FROM FP_DEVICES D ' +
-        'LEFT JOIN WS_WORK_STATIONS W ON W.WS_ID = D.WS_ID ' +
-        'WHERE (D.FIRMA_ID = :FIRMA_ID) AND (D.FLG_ENABLED = 1) AND ' +
-        '      ((D.WS_ID IS NULL) OR (UPPER(W.COMPUTER_NAME) = :COMPUTER_NAME) OR ' +
-        '       EXISTS(SELECT 1 FROM FP_DEVICE_ACCESS A ' +
-        '              INNER JOIN WS_WORK_STATIONS W2 ON W2.WS_ID = A.WS_ID ' +
-        '              WHERE (A.FP_ID = D.FP_ID) AND (UPPER(W2.COMPUTER_NAME) = :COMPUTER_NAME))) ' +
-        'ORDER BY 4, D.FP_ID';
-      Query.ParamByName('FIRMA_ID').AsInteger := AFirmaID;
-      Query.ParamByName('COMPUTER_NAME').AsString := UpperCase(GetCurrentComputerName);
-      Query.Open;
+      try
+        Query.Connection := dmDB.IBCConnection;
+        // MCC se alege dupa firma curenta (FP_DEVICES.FIRMA_ID). Prioritatea:
+        //   0 - MCC legata de calculatorul curent (WS_ID);
+        //   1 - MCC partajata cu calculatorul curent prin FP_DEVICE_ACCESS;
+        //   2 - MCC a firmei fara calculator indicat (WS_ID gol) - valabila pe orice statie.
+        // MCC legata de alt calculator si nepartajata nu se foloseste: portul ei apartine acelui calculator.
+        Query.SQL.Text :=
+          'SELECT FIRST 1 D.FP_ID, D.SERVER_ADDRESS, D.COM_PORT, D.BAUD_RATE, ' +
+          cDeviceColumns[WithDeviceType] +
+          '  CASE WHEN UPPER(W.COMPUTER_NAME) = :COMPUTER_NAME THEN 0 ' +
+          '       WHEN EXISTS(SELECT 1 FROM FP_DEVICE_ACCESS A ' +
+          '                   INNER JOIN WS_WORK_STATIONS W2 ON W2.WS_ID = A.WS_ID ' +
+          '                   WHERE (A.FP_ID = D.FP_ID) AND (UPPER(W2.COMPUTER_NAME) = :COMPUTER_NAME)) THEN 1 ' +
+          '       ELSE 2 END AS WS_PRIORITY ' +
+          'FROM FP_DEVICES D ' +
+          'LEFT JOIN WS_WORK_STATIONS W ON W.WS_ID = D.WS_ID ' +
+          'WHERE (D.FIRMA_ID = :FIRMA_ID) AND (D.FLG_ENABLED = 1) AND ' +
+          '      ((D.WS_ID IS NULL) OR (UPPER(W.COMPUTER_NAME) = :COMPUTER_NAME) OR ' +
+          '       EXISTS(SELECT 1 FROM FP_DEVICE_ACCESS A ' +
+          '              INNER JOIN WS_WORK_STATIONS W2 ON W2.WS_ID = A.WS_ID ' +
+          '              WHERE (A.FP_ID = D.FP_ID) AND (UPPER(W2.COMPUTER_NAME) = :COMPUTER_NAME))) ' +
+          'ORDER BY 7, D.FP_ID';
+        Query.ParamByName('FIRMA_ID').AsInteger := AFirmaID;
+        Query.ParamByName('COMPUTER_NAME').AsString := UpperCase(GetCurrentComputerName);
+        Query.Open;
 
-      if not Query.Eof then
-      begin
-        Address := Trim(Query.FieldByName('SERVER_ADDRESS').AsString);
-        if Address <> '' then
+        if not Query.Eof then
         begin
-          // in FP_DEVICES adresa poate fi scrisa fara schema ("localhost:4444/") -
-          // clientul HTTP (Indy) are nevoie de ea
-          if Pos('://', Address) = 0 then
-            Address := 'http://' + Address;
-          // FP_Core lipeste comanda direct de adresa, deci "/" la sfirsit este obligatoriu
-          if Address[Length(Address)] <> '/' then
-            Address := Address + '/';
-          Result.ServerAddress := Address;
+          Result.Found := True;
+          Result.FPID := Query.FieldByName('FP_ID').AsInteger;
+          Result.DeviceType := Query.FieldByName('DEVICE_TYPE').AsInteger;
+          Result.EccApiCode := Trim(Query.FieldByName('ECC_API_CODE').AsString);
+          Address := Trim(Query.FieldByName('SERVER_ADDRESS').AsString);
+          if Address <> '' then
+          begin
+            // in FP_DEVICES adresa poate fi scrisa fara schema ("localhost:4444/") -
+            // clientul HTTP (Indy) are nevoie de ea
+            if Pos('://', Address) = 0 then
+              Address := 'http://' + Address;
+            // FP_Core lipeste comanda direct de adresa, deci "/" la sfirsit este obligatoriu
+            if Address[Length(Address)] <> '/' then
+              Address := Address + '/';
+            Result.Server.ServerAddress := Address;
+          end;
+          Result.Server.Port := Trim(Query.FieldByName('COM_PORT').AsString);
+          Result.Server.BaudRate := Query.FieldByName('BAUD_RATE').AsInteger;
         end;
-        Result.Port := Trim(Query.FieldByName('COM_PORT').AsString);
-        Result.BaudRate := Query.FieldByName('BAUD_RATE').AsInteger;
+        Break;
+      except
+        // MCC poate sa nu fie configurata in baza de date (sau coloanele inca lipsesc) -
+        // in acest caz ramine MCC locala cu setarile memorate pe calculator
+        Result.Found := False;
+        Result.FPID := 0;
+        Result.DeviceType := 0;
+        Result.EccApiCode := '';
+        Result.Server.ServerAddress := cTREMOL_ZFPLabServerAddress;
+        Result.Server.Port := '';
+        Result.Server.BaudRate := 0;
       end;
-    except
-      // MCC poate sa nu fie configurata in baza de date (sau coloanele inca lipsesc) -
-      // in acest caz ramine MCC locala cu setarile memorate pe calculator
-      Result.ServerAddress := cTREMOL_ZFPLabServerAddress;
-      Result.Port := '';
-      Result.BaudRate := 0;
+    finally
+      Query.Free;
     end;
-  finally
-    Query.Free;
   end;
 
-  Result.IsRemote := not IsLocalServerAddress(Result.ServerAddress);
+  Result.Server.IsRemote := not IsLocalServerAddress(Result.Server.ServerAddress);
 end;
 
 // Verifica daca pe portul indicat raspunde un echipament fiscal.

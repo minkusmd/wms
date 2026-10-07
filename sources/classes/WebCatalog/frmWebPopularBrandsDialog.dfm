@@ -4,7 +4,7 @@ object frmWebPopularBrandsDlg: TfrmWebPopularBrandsDlg
   BorderIcons = [biSystemMenu]
   BorderStyle = bsDialog
   Caption = 'Branduri populare pe site'
-  ClientHeight = 640
+  ClientHeight = 674
   ClientWidth = 900
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -15,9 +15,28 @@ object frmWebPopularBrandsDlg: TfrmWebPopularBrandsDlg
   Position = poScreenCenter
   OnCloseQuery = FormCloseQuery
   TextHeight = 17
+  object lblSite: TLabel
+    Left = 16
+    Top = 16
+    Width = 30
+    Height = 17
+    Caption = 'Site:'
+  end
+  object cmbSite: TComboBox
+    Left = 56
+    Top = 12
+    Width = 320
+    Height = 25
+    Hint = 'Lista e separata pentru fiecare site (TWEB_SITE)'
+    Style = csDropDownList
+    ParentShowHint = False
+    ShowHint = True
+    TabOrder = 9
+    OnChange = cmbSiteChange
+  end
   object lblInfo: TLabel
     Left = 16
-    Top = 10
+    Top = 44
     Width = 868
     Height = 40
     AutoSize = False
@@ -30,7 +49,7 @@ object frmWebPopularBrandsDlg: TfrmWebPopularBrandsDlg
   end
   object lvBrands: TListView
     Left = 16
-    Top = 56
+    Top = 90
     Width = 590
     Height = 420
     Columns = <
@@ -72,7 +91,7 @@ object frmWebPopularBrandsDlg: TfrmWebPopularBrandsDlg
   end
   object btnUp: TButton
     Left = 620
-    Top = 56
+    Top = 90
     Width = 125
     Height = 34
     Caption = 'Sus'
@@ -81,7 +100,7 @@ object frmWebPopularBrandsDlg: TfrmWebPopularBrandsDlg
   end
   object btnDown: TButton
     Left = 759
-    Top = 56
+    Top = 90
     Width = 125
     Height = 34
     Caption = 'Jos'
@@ -90,7 +109,7 @@ object frmWebPopularBrandsDlg: TfrmWebPopularBrandsDlg
   end
   object btnRemove: TButton
     Left = 620
-    Top = 98
+    Top = 132
     Width = 264
     Height = 34
     Caption = 'Scoate din lista'
@@ -99,7 +118,7 @@ object frmWebPopularBrandsDlg: TfrmWebPopularBrandsDlg
   end
   object pnlLogo: TPanel
     Left = 620
-    Top = 150
+    Top = 184
     Width = 264
     Height = 150
     BevelOuter = bvLowered
@@ -123,7 +142,7 @@ object frmWebPopularBrandsDlg: TfrmWebPopularBrandsDlg
   end
   object lblLogoState: TLabel
     Left = 620
-    Top = 306
+    Top = 340
     Width = 264
     Height = 72
     AutoSize = False
@@ -131,7 +150,7 @@ object frmWebPopularBrandsDlg: TfrmWebPopularBrandsDlg
   end
   object btnLoadLogo: TButton
     Left = 620
-    Top = 384
+    Top = 418
     Width = 264
     Height = 34
     Hint = 'PNG sau JPG, ideal PNG cu fundal transparent; se scrie in TS_BRANDS_IMAGE la Salveaza'
@@ -143,7 +162,7 @@ object frmWebPopularBrandsDlg: TfrmWebPopularBrandsDlg
   end
   object gbAdd: TGroupBox
     Left = 16
-    Top = 488
+    Top = 522
     Width = 868
     Height = 90
     Caption = ' Adauga un brand '
@@ -189,7 +208,7 @@ object frmWebPopularBrandsDlg: TfrmWebPopularBrandsDlg
   end
   object btnOK: TButton
     Left = 16
-    Top = 592
+    Top = 626
     Width = 200
     Height = 36
     Caption = 'Salveaza'
@@ -198,7 +217,7 @@ object frmWebPopularBrandsDlg: TfrmWebPopularBrandsDlg
   end
   object btnCancel: TButton
     Left = 684
-    Top = 592
+    Top = 626
     Width = 200
     Height = 36
     Cancel = True

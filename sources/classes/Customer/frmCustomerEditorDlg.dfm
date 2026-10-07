@@ -294,6 +294,8 @@ object frmCustomerEditorDialog: TfrmCustomerEditorDialog
             inherited cxGrid1: TcxGrid
               Width = 692
               Height = 151
+              ExplicitLeft = 0
+              ExplicitTop = 28
               ExplicitWidth = 692
               ExplicitHeight = 151
             end

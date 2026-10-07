@@ -18,8 +18,9 @@ unit MaximumContentUnit;
        principala), nu din ordinea din DOM.
      - DESCRIPTION_RU primeste textul rusesc real de pe /ru/<_id>/ (scriptul punea textul
        romanesc in ambele coloane); daca pagina RU nu da nimic, ramine textul romanesc.
-     - produsul se accepta doar daca API-ul intoarce EXACT un rezultat (raspunsul nu contine
-       codul produsului, deci cu mai multe rezultate nu stim care e al nostru).
+     - produsul se cauta cu MaximumFindProduct: primul rezultat, acceptat doar daca "Cod produs"
+       de pe pagina lui e exact codul cautat (pagina RO descarcata pentru verificare se
+       refoloseste mai jos).
      - caracteristicile se cauta si pentru produsele care au deja imagini, dar nu au descriere
        (scriptul le sarea). Valorile sint HTML-escapate in tabel.
      - cei doi pasi ai scriptului (1 = URL-uri + descrieri, 2 = conversie imagini) ruleaza
@@ -265,7 +266,8 @@ var
     begin
       Sleep(100);
       Inc(Waited, 100);
-      if Application <> nil then
+      // doar pe firul principal: in WMSParsers joburile ruleaza in fire separate
+      if (Application <> nil) and (TThread.CurrentThread.ThreadID = MainThreadID) then
         Application.ProcessMessages;
     end;
   end;
@@ -398,15 +400,17 @@ var
     Urls: TArray<string>;
     Added: Integer;
   begin
-    if not MaximumParseProduct(MaximumFetchSuggestions(Http, C.Code), ProductID, Price, Title) or (ProductID <= 0) then
+    if not MaximumFindProduct(Http, C.Code, ProductID, Price, Title, PageRo) then
     begin
       Inc(NotFound);
-      Log('NEGASIT  %s (produs %d) - fara rezultat unic pe maximum.md', [C.Code, C.GoodsID]);
+      Log('NEGASIT  %s (produs %d) - %s', [C.Code, C.GoodsID, Title]);
       Exit;
     end;
     Inc(Found);
 
-    PageRo := GetPage(Format('%s/ro/%d/', [cBaseUrl, ProductID]));
+    // pagina RO e deja descarcata de MaximumFindProduct (verificarea codului)
+    if PageRo = '' then
+      PageRo := GetPage(Format('%s/ro/%d/', [cBaseUrl, ProductID]));
 
     if C.NeedImages then
     begin

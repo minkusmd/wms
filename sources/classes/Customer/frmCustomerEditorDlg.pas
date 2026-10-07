@@ -342,6 +342,36 @@ begin
 
 end;
 
+// Adresele din cache (CachedUpdates) ramase fara client primesc clientul fisei inainte de
+// ApplyUpdates - altfel VW_TS_CUST_ADDR_BI cade cu "validation error ... CUSTOMERID ... null".
+procedure AssignCustomerToAddresses(ADataSet: TDataSet; ACustomerID: Integer);
+var
+    Bookmark: TBookmark;
+begin
+    if (ACustomerID <= 0) or not ADataSet.Active then
+        Exit;
+    ADataSet.DisableControls;
+    Bookmark := ADataSet.GetBookmark;
+    try
+        ADataSet.First;
+        while not ADataSet.Eof do
+        begin
+            if ADataSet.FieldByName('CUSTOMERID').AsInteger <= 0 then
+            begin
+                ADataSet.Edit;
+                ADataSet.FieldByName('CUSTOMERID').AsInteger := ACustomerID;
+                ADataSet.Post;
+            end;
+            ADataSet.Next;
+        end;
+        if ADataSet.BookmarkValid(Bookmark) then
+            ADataSet.GotoBookmark(Bookmark);
+    finally
+        ADataSet.FreeBookmark(Bookmark);
+        ADataSet.EnableControls;
+    end;
+end;
+
 function TfrmCustomerEditorDialog.IsFormDataPosted: Boolean;
 begin
     if CheckParams then
@@ -403,9 +433,12 @@ begin
                 frameCustomerAddr1.IBCQueryCustomerAddr.Post;
             end;
          // flush cache
+            if fMasterDataSet.FieldByName('CUSTOMERID').AsInteger > 0 then
+                AssignCustomerToAddresses(frameCustomerAddr1.IBCQueryCustomerAddr, fMasterDataSet.FieldByName('CUSTOMERID').AsInteger)
+            else
+                AssignCustomerToAddresses(frameCustomerAddr1.IBCQueryCustomerAddr, fCustomerID);
 
-            frameCustomerAddr1.IBCQueryCustomerAddr.ApplyUpdates;
-            frameCustomerAddr1.IBCQueryCustomerAddr.CommitUpdates;
+            frameCustomerAddr1.IBCQueryCustomerAddr.ApplyUpdates;            frameCustomerAddr1.IBCQueryCustomerAddr.CommitUpdates;
         except
             on E: Exception do
             begin

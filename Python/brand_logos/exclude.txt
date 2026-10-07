@@ -1,0 +1,3 @@
+# Branduri (TS_SYSS.SYSSID) pentru care brand_logos.py nu cauta logo.
+# Un ID pe rand; textul de dupa # e comentariu.
+7954  # Ecomob - brand propriu, inca fara logo (site-ul din VALUE_STR e al magazinului)

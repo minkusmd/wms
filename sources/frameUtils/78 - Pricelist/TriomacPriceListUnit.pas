@@ -41,13 +41,17 @@ type
     // Arunca Exception la date de acces lipsa, autentificare esuata sau raspuns invalid -
     // in acest caz nu se creeaza nimic.
     class function Run(AConnection: TIBCConnection; APriceCategoryID: Integer): Integer;
+
+    // acelasi import fara interfata (WMSParsers, orice fir): rezumatul merge in AOnLog
+    class function Import(AConnection: TIBCConnection; APriceCategoryID: Integer;
+      const AOnLog: TProc<string>): Integer;
   end;
 
 implementation
 
 uses
   System.JSON, System.Generics.Collections, System.Net.HttpClient, System.Net.URLClient,
-  System.UITypes, System.StrUtils, Vcl.Forms, Vcl.Controls, Vcl.Dialogs, IBCClasses;
+  System.UITypes, System.StrUtils, System.Math, Data.DB, Vcl.Forms, Vcl.Controls, Vcl.Dialogs, IBCClasses;
 
 const
   cDefaultBaseUrl = 'https://api.scop.md';
@@ -58,6 +62,8 @@ const
   cCurrencyMDL = 498;
   cCurrencyUSD = 840;
   cFLG_API = 2;
+  // randuri trimise odata (IBDAC le imparte mai departe in EXECUTE BLOCK-uri)
+  cBatchRows = 500;
 
 type
   TTriomacProduct = record
@@ -324,7 +330,7 @@ begin
 end;
 
 procedure DownloadCatalog(const ABaseUrl, AUser, APassword: string; AProducts: TList<TTriomacProduct>;
-  var AStats: TTriomacStats);
+  var AStats: TTriomacStats; const AOnIdle: TProc);
 var
   Http: THTTPClient;
   Token: string;
@@ -364,7 +370,8 @@ begin
         Root.Free;
       end;
       Inc(Page);
-      Application.ProcessMessages;
+      if Assigned(AOnIdle) then
+        AOnIdle();
     until (Page > Pages) or (Page > cMaxPages);
   finally
     Seen.Free;
@@ -380,12 +387,14 @@ function SavePriceList(AConnection: TIBCConnection; APriceCategoryID: Integer;
   AProducts: TList<TTriomacProduct>): Integer;
 var
   Tr: TIBCTransaction;
-  qMaster, qItem: TIBCQuery;
+  qMaster: TIBCQuery;
+  qItem: TIBCSQL;
   P: TTriomacProduct;
+  From, N, K: Integer;
 begin
   Tr := TIBCTransaction.Create(nil);
   qMaster := TIBCQuery.Create(nil);
-  qItem := TIBCQuery.Create(nil);
+  qItem := TIBCSQL.Create(nil);
   try
     Tr.DefaultConnection := AConnection;
     Tr.StartTransaction;
@@ -405,6 +414,7 @@ begin
       qMaster.Execute;
       Result := qMaster.ParamByName('RET_PLID').AsInteger;
 
+      // articolele in loturi (parametri-array IBDAC = EXECUTE BLOCK cu zeci de randuri pe drum)
       qItem.Connection := AConnection;
       qItem.Transaction := Tr;
       qItem.AutoCommit := False;
@@ -412,26 +422,41 @@ begin
         'insert into TS_PRICELIST_ITEMS (PLID, SUPPLIER_GOODS_CODE, SUPPLIER_GOODS_NAME, ' +
         'SUPPLIER_GOODS_BRAND, STOCK_QTY, PRICE0, CURRENCY0ID, PRICE3, CURRENCY3ID, PRICE7, ' +
         'CURRENCY7ID, SUPPLIER_CATEGORY) ' +
-        'values (:PLID, :SUPPLIER_GOODS_CODE, :SUPPLIER_GOODS_NAME, :SUPPLIER_GOODS_BRAND, ' +
-        ':STOCK_QTY, :PRICE0, :CURRENCY0ID, :PRICE3, :CURRENCY3ID, :PRICE7, :CURRENCY7ID, ' +
-        ':SUPPLIER_CATEGORY)';
+        Format('values (%d, :CODE, :NAME, :BRAND, :STOCK, :PRICE0, %d, :PRICE3, :CURRENCY3ID, :PRICE7, %d, ',
+          [Result, cCurrencyUSD, cCurrencyUSD]) + ':CATEGORY)';
+      qItem.ParamByName('CODE').DataType := ftWideString;
+      qItem.ParamByName('NAME').DataType := ftWideString;
+      qItem.ParamByName('BRAND').DataType := ftWideString;
+      qItem.ParamByName('STOCK').DataType := ftWideString;
+      qItem.ParamByName('PRICE0').DataType := ftFloat;
+      qItem.ParamByName('PRICE3').DataType := ftFloat;
+      qItem.ParamByName('CURRENCY3ID').DataType := ftInteger;
+      qItem.ParamByName('PRICE7').DataType := ftFloat;
+      qItem.ParamByName('CATEGORY').DataType := ftWideString;
 
-      for P in AProducts do
+      From := 0;
+      while From < AProducts.Count do
       begin
-        qItem.ParamByName('PLID').AsInteger := Result;
-        qItem.ParamByName('SUPPLIER_GOODS_CODE').AsString := Copy(P.Sku, 1, 128);
-        qItem.ParamByName('SUPPLIER_GOODS_NAME').AsString := Copy(P.Name, 1, 2048);
-        qItem.ParamByName('SUPPLIER_GOODS_BRAND').AsString := Copy(P.Brand, 1, 128);
-        qItem.ParamByName('STOCK_QTY').AsString := IntToStr(P.Stock);
-        // fara pret de cost in API: PRICE0 = indicativul (vezi comentariul din antet)
-        qItem.ParamByName('PRICE0').AsFloat := P.PriceUsd;
-        qItem.ParamByName('CURRENCY0ID').AsInteger := cCurrencyUSD;
-        qItem.ParamByName('PRICE3').AsFloat := P.Rrp;
-        qItem.ParamByName('CURRENCY3ID').AsInteger := P.RrpCurrencyID;
-        qItem.ParamByName('PRICE7').AsFloat := P.PriceUsd;
-        qItem.ParamByName('CURRENCY7ID').AsInteger := cCurrencyUSD;
-        qItem.ParamByName('SUPPLIER_CATEGORY').AsString := Copy(P.Category, 1, 512);
-        qItem.Execute;
+        N := Min(cBatchRows, AProducts.Count - From);
+        qItem.Params.ValueCount := N;
+        for K := 0 to N - 1 do
+        begin
+          P := AProducts[From + K];
+          qItem.ParamByName('CODE')[K].AsString := Copy(P.Sku, 1, 128);
+          qItem.ParamByName('NAME')[K].AsString := Copy(P.Name, 1, 2048);
+          qItem.ParamByName('BRAND')[K].AsString := Copy(P.Brand, 1, 128);
+          qItem.ParamByName('STOCK')[K].AsString := IntToStr(P.Stock);
+          // fara pret de cost in API: PRICE0 = indicativul (vezi comentariul din antet)
+          qItem.ParamByName('PRICE0')[K].AsFloat := P.PriceUsd;
+          qItem.ParamByName('PRICE3')[K].AsFloat := P.Rrp;
+          qItem.ParamByName('CURRENCY3ID')[K].AsInteger := P.RrpCurrencyID;
+          qItem.ParamByName('PRICE7')[K].AsFloat := P.PriceUsd;
+          // SUPPLIER_CATEGORY e declarata 512 caractere, dar are doar 512 octeti (RDB$FIELD_LENGTH) - in UTF8
+          // Firebird permite deci doar 512 / 4 = 128 caractere (2 oct 2026: 'expected length 128, actual 131')
+          qItem.ParamByName('CATEGORY')[K].AsString := Copy(P.Category, 1, 128);
+        end;
+        qItem.Execute(N);
+        Inc(From, N);
       end;
 
       Tr.Commit;
@@ -451,11 +476,11 @@ end;
 { TTriomacPriceListImport                                                        }
 { ---------------------------------------------------------------------------- }
 
-class function TTriomacPriceListImport.Run(AConnection: TIBCConnection; APriceCategoryID: Integer): Integer;
+// partea comuna a lui Run si Import: datele de acces, catalogul si pricelistul
+function DoImport(AConnection: TIBCConnection; APriceCategoryID: Integer; AProducts: TList<TTriomacProduct>;
+  var AStats: TTriomacStats; const AOnIdle: TProc): Integer;
 var
   User, Password, BaseUrl: string;
-  Products: TList<TTriomacProduct>;
-  Stats: TTriomacStats;
 begin
   ReadApiConfig(AConnection, User, Password, BaseUrl);
   if (User = '') or (Password = '') then
@@ -463,29 +488,68 @@ begin
       'Adaugati in Setari > Configurari API, API_CODE = ' + cScopApiCode + ' (furnizor ' +
       IntToStr(cTriomacSupplierID) + '), parametrii USERNAME (email-ul contului scop.md) si PASSWORD.');
 
+  DownloadCatalog(BaseUrl, User, Password, AProducts, AStats, AOnIdle);
+  if AProducts.Count = 0 then
+    raise Exception.CreateFmt('API-ul SCOP nu a intors niciun produs cu stoc si pret ' +
+      '(produse citite: %d).', [AStats.Total]);
+  Result := SavePriceList(AConnection, APriceCategoryID, AProducts);
+end;
+
+function StatsText(APLID: Integer; AProducts: TList<TTriomacProduct>; const AStats: TTriomacStats): string;
+begin
+  Result := Format('Pricelist Triomac (SCOP) #%d creat:' + sLineBreak +
+    '  produse in pricelist: %d (din %d citite)' + sLineBreak +
+    '  sarite: fara stoc %d, fara cod %d, fara pret %d, coduri repetate %d' + sLineBreak +
+    '  in promotie la furnizor: %d',
+    [APLID, AProducts.Count, AStats.Total, AStats.NoStock, AStats.NoSku, AStats.NoPrice, AStats.Duplicates,
+     AStats.Promo]) +
+    IfThen(AStats.DuplicateCodes <> '', sLineBreak + sLineBreak +
+      'Coduri (sku) folosite de mai multe produse in SCOP - s-a pastrat primul produs:' + sLineBreak +
+      Copy(AStats.DuplicateCodes, 1, 2000), '');
+end;
+
+class function TTriomacPriceListImport.Run(AConnection: TIBCConnection; APriceCategoryID: Integer): Integer;
+var
+  Products: TList<TTriomacProduct>;
+  Stats: TTriomacStats;
+begin
   Stats := Default(TTriomacStats);
   Products := TList<TTriomacProduct>.Create;
   try
     Screen.Cursor := crHourGlass;
     try
-      DownloadCatalog(BaseUrl, User, Password, Products, Stats);
-      if Products.Count = 0 then
-        raise Exception.CreateFmt('API-ul SCOP nu a intors niciun produs cu stoc si pret ' +
-          '(produse citite: %d).', [Stats.Total]);
-      Result := SavePriceList(AConnection, APriceCategoryID, Products);
+      Result := DoImport(AConnection, APriceCategoryID, Products, Stats,
+        procedure
+        begin
+          Application.ProcessMessages;
+        end);
     finally
       Screen.Cursor := crDefault;
     end;
 
-    MessageDlg(Format('Pricelist Triomac (SCOP) #%d creat:' + sLineBreak +
-      '  produse in pricelist: %d (din %d citite)' + sLineBreak +
-      '  sarite: fara stoc %d, fara cod %d, fara pret %d, coduri repetate %d' + sLineBreak +
-      '  in promotie la furnizor: %d',
-      [Result, Products.Count, Stats.Total, Stats.NoStock, Stats.NoSku, Stats.NoPrice, Stats.Duplicates,
-       Stats.Promo]) +
-      IfThen(Stats.DuplicateCodes <> '', sLineBreak + sLineBreak +
-        'Coduri (sku) folosite de mai multe produse in SCOP - s-a pastrat primul produs:' + sLineBreak +
-        Copy(Stats.DuplicateCodes, 1, 2000), ''), mtInformation, [mbOK], 0);
+    MessageDlg(StatsText(Result, Products, Stats), mtInformation, [mbOK], 0);
+  finally
+    Products.Free;
+  end;
+end;
+
+class function TTriomacPriceListImport.Import(AConnection: TIBCConnection; APriceCategoryID: Integer;
+  const AOnLog: TProc<string>): Integer;
+var
+  Products: TList<TTriomacProduct>;
+  Stats: TTriomacStats;
+  Line: string;
+begin
+  Stats := Default(TTriomacStats);
+  Products := TList<TTriomacProduct>.Create;
+  try
+    Result := DoImport(AConnection, APriceCategoryID, Products, Stats, nil);
+    if Assigned(AOnLog) then
+      // in jurnal lista codurilor repetate ramine pe un rind
+      for Line in StringReplace(StatsText(Result, Products, Stats), ';' + sLineBreak, '; ',
+        [rfReplaceAll]).Split([sLineBreak]) do
+        if Line <> '' then
+          AOnLog(Line);
   finally
     Products.Free;
   end;

@@ -166,6 +166,7 @@ type
     procedure CreateConfigurator;
     procedure SetupQtyFields;
     procedure AssignResponsibleOnOpen;
+    procedure MiaPaymentClick(Sender: TObject);
   protected
     { Protected declarations }
     function InitFrameID: integer; override;
@@ -206,7 +207,8 @@ uses
   SWNCommonDialogs,
   frmSelectPhoneNumberUnit,
   uDocumentStates,
-  frmWebEcommInfoUnit;
+  frmWebEcommInfoUnit,
+  SWNMiaPaymentsDialogUnit;
 
 {$R *.dfm}
 
@@ -652,6 +654,10 @@ begin
      // 1. Legam grid-urile de datasource-sele
   cxGridWZTable.DataController.DataSource := dmDB.IBCDataSourceDocs;
   AddDealColumns(cxGridWZTable);
+  // plata MIA (Victoriabank): coloana cu starea si fereastra cu linkul de plata / rambursarea
+  AddMiaColumn(cxGridWZTable);
+  if SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_WEB_Web_Order_Ecomm_transactii) then
+    AddMiaButton(dxBarManager, dxBarPopupMenu, MiaPaymentClick);
   cxGridComponentsTable.DataController.DataSource := dmDB.IBCDataSourceJurnal;
 
      // 2. Selection handlers
@@ -814,6 +820,17 @@ begin
     if dmDB.IBCQueryDocs.State in [dsEdit, dsInsert] then
       dmDB.IBCQueryDocs.Cancel;
   end;
+end;
+
+procedure Tframe24WebZakaz.MiaPaymentClick(Sender: TObject);
+begin
+  if not dmDB.IBCQueryDocs.Active or dmDB.IBCQueryDocs.IsEmpty then
+    Exit;
+  ShowMiaPaymentDialog(Self, dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger, fSEC_CanModify);
+  // fereastra a putut schimba starea (link nou, rambursare ceruta): coloana se reincarca
+  AddMiaColumn(cxGridWZTable);
+  cxGridWZTable.LayoutChanged;
+  dmDB.IBCQueryDocComments.Refresh;
 end;
 
 procedure Tframe24WebZakaz.ModifyRecord;

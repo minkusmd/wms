@@ -6,7 +6,16 @@ uses
   AppSettingsClass in '..\DB Service Manager\AppSettingsClass.pas',
   UtilsUnit in 'UtilsUnit.pas',
   ServiceActionClass in 'ServiceActionClass.pas',
-  TaskClass in '..\DB Service Manager\TaskClass.pas';
+  TaskClass in '..\DB Service Manager\TaskClass.pas',
+  ServiceJobsUnit in 'ServiceJobsUnit.pas',
+  ECCOnlineFiscalUnit in 'ECCOnlineFiscalUnit.pas',
+  ECCApiClient in '..\sources\FiscalPrinter\ECC\ECCApiClient.pas',
+  ECCConfigUnit in '..\sources\FiscalPrinter\ECC\ECCConfigUnit.pas',
+  ECCTransactionStore in '..\sources\FiscalPrinter\ECC\ECCTransactionStore.pas',
+  ECCReconcileUnit in '..\sources\FiscalPrinter\ECC\ECCReconcileUnit.pas',
+  ECCDeliveryUnit in '..\sources\FiscalPrinter\ECC\ECCDeliveryUnit.pas',
+  TelegramServiceUnit in 'TelegramServiceUnit.pas',
+  TelegramApiUnit in '..\sources\Utils\TelegramApiUnit.pas';
 
 {$R *.RES}
 

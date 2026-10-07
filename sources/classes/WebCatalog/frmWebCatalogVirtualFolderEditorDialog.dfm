@@ -4,7 +4,7 @@ object frmWebCatalogVirtualFolderEditorDlg: TfrmWebCatalogVirtualFolderEditorDlg
   ActiveControl = edTITLE_ROM
   BorderStyle = bsDialog
   Caption = 'Mapa virtuala'
-  ClientHeight = 724
+  ClientHeight = 764
   ClientWidth = 792
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -15,7 +15,7 @@ object frmWebCatalogVirtualFolderEditorDlg: TfrmWebCatalogVirtualFolderEditorDlg
   Position = poOwnerFormCenter
   DesignSize = (
     792
-    724)
+    764)
   TextHeight = 15
   object dtDialogTitle: TDialogTitle
     Left = 0
@@ -23,7 +23,7 @@ object frmWebCatalogVirtualFolderEditorDlg: TfrmWebCatalogVirtualFolderEditorDlg
     Width = 792
     Height = 64
     Title = 'Mapa virtuala'
-    Text = 'Subcategorie pe atribut, cu URL si imagine proprii'
+    Text = 'Subcategorie pe unul sau mai multe atribute, cu URL si imagine proprii'
     FontTitle.Charset = DEFAULT_CHARSET
     FontTitle.Color = clWindowText
     FontTitle.Height = -13
@@ -42,7 +42,7 @@ object frmWebCatalogVirtualFolderEditorDlg: TfrmWebCatalogVirtualFolderEditorDlg
     Left = 8
     Top = 72
     Width = 776
-    Height = 590
+    Height = 630
     Margins.Left = 8
     Margins.Top = 8
     Margins.Right = 8
@@ -88,41 +88,41 @@ object frmWebCatalogVirtualFolderEditorDlg: TfrmWebCatalogVirtualFolderEditorDlg
     object lbFilter: TLabel
       Left = 12
       Top = 280
-      Width = 37
+      Width = 150
       Height = 15
-      Caption = 'Atribut'
+      Caption = 'Atribute (se combina cu SI)'
     end
     object lbORDERNO: TLabel
       Left = 12
-      Top = 345
+      Top = 385
       Width = 36
       Height = 15
       Caption = 'Ordine'
     end
     object lbMETA_TITLE_ROM: TLabel
       Left = 12
-      Top = 440
+      Top = 480
       Width = 102
       Height = 15
       Caption = 'Meta title (romana)'
     end
     object lbMETA_TITLE_RUS: TLabel
       Left = 392
-      Top = 440
+      Top = 480
       Width = 83
       Height = 15
       Caption = 'Meta title (rusa)'
     end
     object lbMETA_DESCRIPTION_ROM: TLabel
       Left = 12
-      Top = 490
+      Top = 530
       Width = 122
       Height = 15
       Caption = 'Meta description (rom)'
     end
     object lbMETA_DESCRIPTION_RUS: TLabel
       Left = 392
-      Top = 490
+      Top = 530
       Width = 116
       Height = 15
       Caption = 'Meta description (rus)'
@@ -143,15 +143,6 @@ object frmWebCatalogVirtualFolderEditorDlg: TfrmWebCatalogVirtualFolderEditorDlg
       Caption = 'Imaginea se poate adauga dupa prima salvare a mapei.'
       Visible = False
       WordWrap = True
-    end
-    object lbFilterValue: TLabel
-      Left = 12
-      Top = 305
-      Width = 400
-      Height = 17
-      AutoSize = False
-      Caption = '<nu este ales nici un atribut>'
-      ShowAccelChar = False
     end
     object edTITLE_ROM: TcxDBTextEdit
       Left = 12
@@ -199,23 +190,46 @@ object frmWebCatalogVirtualFolderEditorDlg: TfrmWebCatalogVirtualFolderEditorDlg
     end
     object btnChooseFilter: TcxButton
       Left = 420
-      Top = 301
+      Top = 299
       Width = 112
       Height = 25
-      Caption = 'Alege atribut'
+      Caption = 'Adauga atribut'
       TabOrder = 6
       OnClick = btnChooseFilterClick
     end
+    object btnRemoveFilter: TcxButton
+      Left = 420
+      Top = 328
+      Width = 112
+      Height = 25
+      Caption = 'Sterge atribut'
+      TabOrder = 15
+      OnClick = btnRemoveFilterClick
+    end
+    object lstFilters: TListBox
+      Left = 12
+      Top = 299
+      Width = 400
+      Height = 72
+      Hint = 
+        'Dublu-clic = schimba valoarea. Acelasi atribut adaugat din nou =' +
+        ' inca o valoare (SAU).'
+      ItemHeight = 15
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 16
+      OnDblClick = lstFiltersDblClick
+    end
     object edORDERNO: TcxDBSpinEdit
       Left = 12
-      Top = 364
+      Top = 404
       DataBinding.DataField = 'ORDERNO'
       TabOrder = 7
       Width = 100
     end
     object cbFLG_ENABLED: TcxDBCheckBox
       Left = 140
-      Top = 364
+      Top = 404
       Caption = 'Mapa este activa'
       DataBinding.DataField = 'FLG_ENABLED'
       Properties.Alignment = taLeftJustify
@@ -227,7 +241,7 @@ object frmWebCatalogVirtualFolderEditorDlg: TfrmWebCatalogVirtualFolderEditorDlg
     end
     object cbFLG_TILE: TcxDBCheckBox
       Left = 140
-      Top = 389
+      Top = 429
       Caption = 'Apare ca tile in categorie'
       DataBinding.DataField = 'FLG_TILE'
       Properties.Alignment = taLeftJustify
@@ -239,21 +253,21 @@ object frmWebCatalogVirtualFolderEditorDlg: TfrmWebCatalogVirtualFolderEditorDlg
     end
     object edMETA_TITLE_ROM: TcxDBTextEdit
       Left = 12
-      Top = 459
+      Top = 499
       DataBinding.DataField = 'META_TITLE_ROM'
       TabOrder = 10
       Width = 360
     end
     object edMETA_TITLE_RUS: TcxDBTextEdit
       Left = 392
-      Top = 459
+      Top = 499
       DataBinding.DataField = 'META_TITLE_RUS'
       TabOrder = 11
       Width = 360
     end
     object edMETA_DESCRIPTION_ROM: TcxDBMemo
       Left = 12
-      Top = 509
+      Top = 549
       DataBinding.DataField = 'META_DESCRIPTION_ROM'
       Properties.ScrollBars = ssVertical
       TabOrder = 12
@@ -262,7 +276,7 @@ object frmWebCatalogVirtualFolderEditorDlg: TfrmWebCatalogVirtualFolderEditorDlg
     end
     object edMETA_DESCRIPTION_RUS: TcxDBMemo
       Left = 392
-      Top = 509
+      Top = 549
       DataBinding.DataField = 'META_DESCRIPTION_RUS'
       Properties.ScrollBars = ssVertical
       TabOrder = 13
@@ -283,7 +297,7 @@ object frmWebCatalogVirtualFolderEditorDlg: TfrmWebCatalogVirtualFolderEditorDlg
   end
   object btnOk: TButton
     Left = 583
-    Top = 678
+    Top = 718
     Width = 90
     Height = 29
     Anchors = [akRight, akBottom]
@@ -294,7 +308,7 @@ object frmWebCatalogVirtualFolderEditorDlg: TfrmWebCatalogVirtualFolderEditorDlg
   end
   object btnCancel: TButton
     Left = 685
-    Top = 678
+    Top = 718
     Width = 90
     Height = 29
     Anchors = [akRight, akBottom]

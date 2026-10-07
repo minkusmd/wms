@@ -1,15 +1,22 @@
 inherited frame115Megacom: Tframe115Megacom
-  Width = 1245
-  Height = 662
-  Font.Height = -15
-  ExplicitWidth = 1245
-  ExplicitHeight = 662
-  PixelsPerInch = 120
+  Width = 996
+  Height = 530
+  Margins.Left = 4
+  Margins.Top = 4
+  Margins.Right = 4
+  Margins.Bottom = 4
+  Font.Height = -12
+  ExplicitWidth = 996
+  ExplicitHeight = 530
   object cxGridVolta: TcxGrid
     Left = 0
     Top = 0
-    Width = 649
-    Height = 662
+    Width = 519
+    Height = 530
+    Margins.Left = 2
+    Margins.Top = 2
+    Margins.Right = 2
+    Margins.Bottom = 2
     Align = alLeft
     TabOrder = 0
     LookAndFeel.NativeStyle = True
@@ -24,37 +31,32 @@ inherited frame115Megacom: Tframe115Megacom
           Kind = skCount
           Column = cxGridVoltaDBTableView1GOODS_CODE
         end>
-      FilterRow.SeparatorWidth = 8
-      FixedDataRows.SeparatorWidth = 8
-      NewItemRow.SeparatorWidth = 8
       OptionsBehavior.IncSearch = True
       OptionsBehavior.ImmediateEditor = False
-      OptionsView.NavigatorOffset = 63
       OptionsView.ColumnAutoWidth = True
-      OptionsView.FixedColumnSeparatorWidth = 3
       OptionsView.Footer = True
       OptionsView.GroupByBox = False
       OptionsView.Indicator = True
-      Preview.LeftIndent = 25
-      Preview.RightIndent = 6
-      RowLayout.MinValueWidth = 100
       object cxGridVoltaDBTableView1GOODSID: TcxGridDBColumn
         Caption = 'Cod produs'
         DataBinding.FieldName = 'GOODSID'
         HeaderAlignmentHorz = taCenter
-        Width = 58
+        MinWidth = 16
+        Width = 46
       end
       object cxGridVoltaDBTableView1GOODS_CODE: TcxGridDBColumn
         Caption = 'CPF'
         DataBinding.FieldName = 'GOODS_CODE'
         HeaderAlignmentHorz = taCenter
-        Width = 91
+        MinWidth = 16
+        Width = 73
       end
       object cxGridVoltaDBTableView1_GOODS_TITLE: TcxGridDBColumn
         Caption = 'Produs'
         DataBinding.FieldName = 'GOODS_TITLE'
         HeaderAlignmentHorz = taCenter
-        Width = 458
+        MinWidth = 16
+        Width = 366
       end
       object cxGridVoltaDBTableView1_FLG_IN_PRICE: TcxGridDBColumn
         Caption = 'P'
@@ -64,7 +66,8 @@ inherited frame115Megacom: Tframe115Megacom
         Properties.ValueChecked = '1'
         Properties.ValueUnchecked = '0'
         HeaderAlignmentHorz = taCenter
-        Width = 28
+        MinWidth = 16
+        Width = 22
       end
     end
     object cxGridVoltaLevel1: TcxGridLevel
@@ -72,10 +75,14 @@ inherited frame115Megacom: Tframe115Megacom
     end
   end
   object Panel1: TPanel
-    Left = 649
+    Left = 519
     Top = 0
-    Width = 596
-    Height = 662
+    Width = 477
+    Height = 530
+    Margins.Left = 2
+    Margins.Top = 2
+    Margins.Right = 2
+    Margins.Bottom = 2
     Align = alClient
     BevelKind = bkFlat
     BevelOuter = bvNone
@@ -83,26 +90,38 @@ inherited frame115Megacom: Tframe115Megacom
     ParentBackground = False
     TabOrder = 1
     object Label1: TLabel
-      Left = 4
-      Top = 6
-      Width = 25
-      Height = 20
+      Left = 3
+      Top = 5
+      Width = 20
+      Height = 15
+      Margins.Left = 2
+      Margins.Top = 2
+      Margins.Right = 2
+      Margins.Bottom = 2
       Caption = 'Log'
     end
     object Memo1: TMemo
       AlignWithMargins = True
-      Left = 3
-      Top = 84
-      Width = 586
-      Height = 571
+      Left = 2
+      Top = 67
+      Width = 469
+      Height = 457
+      Margins.Left = 2
+      Margins.Top = 2
+      Margins.Right = 2
+      Margins.Bottom = 2
       Align = alClient
       TabOrder = 1
     end
     object Panel2: TPanel
       Left = 0
       Top = 0
-      Width = 592
-      Height = 81
+      Width = 473
+      Height = 65
+      Margins.Left = 2
+      Margins.Top = 2
+      Margins.Right = 2
+      Margins.Bottom = 2
       Align = alTop
       BevelKind = bkFlat
       BevelOuter = bvNone
@@ -110,45 +129,67 @@ inherited frame115Megacom: Tframe115Megacom
       ParentBackground = False
       TabOrder = 0
       object cxButton1: TcxButton
-        Left = 206
-        Top = 47
-        Width = 83
-        Height = 29
+        Left = 165
+        Top = 38
+        Width = 66
+        Height = 23
+        Margins.Left = 2
+        Margins.Top = 2
+        Margins.Right = 2
+        Margins.Bottom = 2
         Caption = 'Start'
         Default = True
+        OptionsImage.Spacing = 3
         TabOrder = 4
         OnClick = cxButton1Click
       end
       object cbFlgNoImage: TCheckBox
-        Left = 16
-        Top = 12
-        Width = 161
-        Height = 17
+        Left = 13
+        Top = 10
+        Width = 129
+        Height = 13
+        Margins.Left = 2
+        Margins.Top = 2
+        Margins.Right = 2
+        Margins.Bottom = 2
         Caption = 'Produsele fara imagini'
         TabOrder = 0
       end
       object cbFlgInPRICE: TCheckBox
-        Left = 216
-        Top = 12
-        Width = 97
-        Height = 17
+        Left = 173
+        Top = 10
+        Width = 77
+        Height = 13
+        Margins.Left = 2
+        Margins.Top = 2
+        Margins.Right = 2
+        Margins.Bottom = 2
         Caption = 'In pricelist'
         TabOrder = 1
       end
       object cbUpdateAllImages: TCheckBox
-        Left = 319
-        Top = 12
-        Width = 178
-        Height = 17
+        Left = 255
+        Top = 10
+        Width = 143
+        Height = 13
+        Margins.Left = 2
+        Margins.Top = 2
+        Margins.Right = 2
+        Margins.Bottom = 2
         Caption = 'Sincronizeaza toate imaginile'
         TabOrder = 2
       end
       object cxButton2: TcxButton
-        Left = 14
-        Top = 47
-        Width = 139
-        Height = 29
+        Left = 11
+        Top = 38
+        Width = 111
+        Height = 23
+        Margins.Left = 2
+        Margins.Top = 2
+        Margins.Right = 2
+        Margins.Bottom = 2
         Caption = 'Refresh'
+        OptionsImage.Spacing = 3
         TabOrder = 3
         OnClick = cxButton2Click
       end
