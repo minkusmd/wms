@@ -177,8 +177,8 @@ object frmMainForm: TfrmMainForm
       TabOrder = 0
       OnCanFocusNode = cxTreeDocTypesCanFocusNode
       OnCanSelectNode = cxTreeDocTypesCanSelectNode
-      OnCollapsing = cxTreeDocTypesCollapsing
       OnClick = cxTreeDocTypesClick
+      OnCollapsing = cxTreeDocTypesCollapsing
       OnDblClick = cxTreeDocTypesDblClick
       OnDeletion = cxTreeDocTypesDeletion
       object cxTreeDocTypescxTreeListColumn1: TcxTreeListColumn
@@ -2967,7 +2967,9 @@ object frmMainForm: TfrmMainForm
     object bbECCDiagnostic: TdxBarButton
       Caption = 'Casa ECC - diagnostic'
       Category = 0
-      Hint = 'Casa de marcat virtuala ECC Fiscal Partner: test API, bon de test, X/Z'
+      Hint = 
+        'Casa de marcat virtuala ECC Fiscal Partner: test API, bon de tes' +
+        't, X/Z'
       Visible = ivAlways
       OnClick = bbECCDiagnosticClick
     end

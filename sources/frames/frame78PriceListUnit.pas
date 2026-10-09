@@ -412,8 +412,13 @@ type
     FlgImportWithRRP: Boolean;
     LastPriceCategoryID: Integer;
     LastSupplierID: Integer;
+    FMediaMagnatToken: string;
+    FMediaMagnatTokenUser: string;
+    FMediaMagnatTokenBaseUrl: string;
+    FMediaMagnatTokenExpiresAt: UInt64;
     procedure ClosePriceAnalizeDataSet;
     procedure LoadSelectedSupplier;
+    procedure ImportMediaMagnatPriceList;
     function GetSelectionIDList(ATable: TcxGridDBTableView): string;
     function SendSelectedGoodsToPackage(const OperatorID: Integer; const GoodsList: string): Boolean;
     procedure AddRecordToReevaluareVinzare(Transaction: TIBCTransaction; DOCID, goodsid, Supplierid: Integer;
@@ -483,6 +488,7 @@ uses
   frmMuncitorulProgressUnit, frmPriceManageStringFieldsUnit, frmPriceTypesUnit, frmPricelistImportUnit,
   frmSelectGoodsTypeUnit, frmSyssDataEditor, frmSyssEditorWindow, uAnalizePriceList, uLoadProductImages, uPythonRunner, MamicoContentUnit, ImperiaContentUnit, ArvaliscomContentUnit, PriceListContentTransferUnit, NexDistributionUnit, TriomacPriceListUnit, PriceGoodsCreateUnit,
   System.Math,
+  IBCClasses, System.JSON, System.Generics.Collections, System.Net.HttpClient, System.Net.URLClient,
   System.Win.Registry,
   Vcl.Clipbrd,
   Vcl.Dialogs,
@@ -981,8 +987,499 @@ begin
   IBCQueryPriceItems.EnableControls;
 end;
 
+procedure Tframe78PriceList.ImportMediaMagnatPriceList;
+const
+  cSupplierID = 121249;
+  cApiCode = 'MEDIAMAGNAT';
+  cCurrencyMDL = 498;
+  cPageSize = 100;
+  cMaxPages = 10000;
+  cBatchSize = 500;
+type
+  TMagnatProduct = record
+    Sku, Name, Brand, Category, Stock: string;
+    PurchasePrice, SalePrice: Currency;
+  end;
+var
+  Http: THTTPClient;
+  Products: TList<TMagnatProduct>;
+  Seen: TDictionary<string, Boolean>;
+  User, Password, BaseUrl: string;
+  CategoryID, PLID, ReadCount, NoStock, NoPrice, NoCode, Duplicates: Integer;
+  MainForm: TForm;
+  WasEnabled: Boolean;
+  OldCursor: TCursor;
+
+  function JsonText(AObj: TJSONObject; const AName: string): string;
+  var
+    V: TJSONValue;
+  begin
+    V := AObj.GetValue(AName);
+    if (V = nil) or (V is TJSONNull) then
+      Exit('');
+    if not ((V is TJSONString) or (V is TJSONNumber)) then
+      raise Exception.CreateFmt('API MEDIAMAGNAT: camp invalid "%s".', [AName]);
+    Result := Trim(V.Value);
+  end;
+
+  function JsonInt(AObj: TJSONObject; const AName: string): Integer;
+  begin
+    if not TryStrToInt(JsonText(AObj, AName), Result) then
+      raise Exception.CreateFmt('API MEDIAMAGNAT: camp numeric invalid "%s".', [AName]);
+  end;
+
+  function CategoryPath(AObj: TJSONObject; const AName: string): string;
+  var
+    V, Item: TJSONValue;
+    Name: string;
+  begin
+    Result := '';
+    V := AObj.GetValue(AName);
+    if not (V is TJSONArray) then
+      Exit;
+    for Item in TJSONArray(V) do
+    begin
+      if not (Item is TJSONString) then
+        raise Exception.Create('API MEDIAMAGNAT: categorie invalida.');
+      Name := Trim(Item.Value);
+      if Name <> '' then
+      begin
+        if Result <> '' then
+          Result := Result + ' / ';
+        Result := Result + Name;
+      end;
+    end;
+  end;
+
+  procedure WaitForApi(AMilliseconds: Cardinal);
+  var
+    UntilTick, CurrentTick: UInt64;
+  begin
+    UntilTick := GetTickCount64 + AMilliseconds;
+    repeat
+      Application.ProcessMessages;
+      CurrentTick := GetTickCount64;
+      if CurrentTick >= UntilTick then
+        Break;
+      Sleep(Cardinal(Min(UInt64(50), UntilTick - CurrentTick)));
+    until False;
+  end;
+
+  procedure ReadConfig;
+  var
+    Tr: TIBCTransaction;
+    Q: TIBCQuery;
+    ParamName: string;
+  begin
+    Tr := TIBCTransaction.Create(nil);
+    Q := TIBCQuery.Create(nil);
+    try
+      Tr.DefaultConnection := dmDB.IBCConnection;
+      Tr.IsolationLevel := iblReadOnlyReadCommitted;
+      Tr.StartTransaction;
+      Q.Connection := dmDB.IBCConnection;
+      Q.Transaction := Tr;
+      Q.SQL.Text := 'select PARAM_NAME, PARAM_VALUE from TS_API_CONFIG ' +
+        'where API_CODE = :API_CODE and FLG_ACTIVE = 1';
+      Q.ParamByName('API_CODE').AsString := cApiCode;
+      Q.Open;
+      while not Q.Eof do
+      begin
+        ParamName := Trim(Q.FieldByName('PARAM_NAME').AsString);
+        if SameText(ParamName, 'USERNAME') then
+          User := Trim(Q.FieldByName('PARAM_VALUE').AsString)
+        else if SameText(ParamName, 'PASSWORD') then
+          Password := Q.FieldByName('PARAM_VALUE').AsString
+        else if SameText(ParamName, 'BASE_URL') then
+          BaseUrl := Trim(Q.FieldByName('PARAM_VALUE').AsString);
+        Q.Next;
+      end;
+      Q.Close;
+      Tr.Commit;
+    finally
+      Q.Free;
+      Tr.Free;
+    end;
+    if BaseUrl = '' then
+      BaseUrl := 'https://api.magnat.md';
+    while BaseUrl.EndsWith('/') do
+      Delete(BaseUrl, Length(BaseUrl), 1);
+    if (User = '') or (Password = '') then
+      raise Exception.Create('Lipsesc datele de acces MEDIAMAGNAT.' + sLineBreak +
+        'In Setari > Configurari API adaugati USERNAME si PASSWORD, API_CODE = ' + cApiCode +
+        ', furnizor 121249; optional BASE_URL = https://api.magnat.md.');
+  end;
+
+  procedure EnsureToken(AForce: Boolean); forward;
+
+  // Retries never turn a temporary 503 into an empty catalog. No DB writes here.
+  function RequestJson(const APath: string; ABody: TJSONObject): TJSONObject;
+  var
+    Source: TStringStream;
+    Headers: TNetHeaders;
+    Response: IHTTPResponse;
+    V: TJSONValue;
+    Attempt, WaitSeconds: Integer;
+    Renewed: Boolean;
+  begin
+    Renewed := False;
+    for Attempt := 0 to 5 do
+    begin
+      Headers := [TNetHeader.Create('Accept', 'application/json')];
+      if Assigned(ABody) then
+      begin
+        Headers := Headers + [TNetHeader.Create('Content-Type', 'application/json; charset=UTF-8')];
+        Source := TStringStream.Create(ABody.ToJSON, TEncoding.UTF8);
+        try
+          Response := Http.Post(BaseUrl + APath, Source, nil, Headers);
+        finally
+          Source.Free;
+        end;
+      end
+      else
+      begin
+        Headers := Headers + [TNetHeader.Create('Authorization', 'Bearer ' + FMediaMagnatToken)];
+        Response := Http.Get(BaseUrl + APath, nil, Headers);
+      end;
+      if (Response.StatusCode = 401) and not Assigned(ABody) and not Renewed then
+      begin
+        EnsureToken(True);
+        Renewed := True;
+        Continue;
+      end;
+      if (Response.StatusCode = 429) or (Response.StatusCode = 503) then
+      begin
+        WaitSeconds := StrToIntDef(Response.HeaderValue['Retry-After'], 5);
+        if WaitSeconds < 1 then
+          WaitSeconds := 1;
+        if (Attempt = 5) or (WaitSeconds > 300) then
+          raise Exception.CreateFmt('API MEDIAMAGNAT: HTTP %d, catalog temporar indisponibil. ' +
+            'Repetati importul peste %d secunde. Nu s-a creat niciun pricelist.',
+            [Response.StatusCode, WaitSeconds]);
+        dxStatusBar1.SimplePanelStyle.Text := Format('MEDIAMAGNAT: HTTP %d, reincercare peste %d secunde...',
+          [Response.StatusCode, WaitSeconds]);
+        WaitForApi(Cardinal(WaitSeconds) * 1000);
+        Continue;
+      end;
+      if Response.StatusCode <> 200 then
+        raise Exception.CreateFmt('API MEDIAMAGNAT: HTTP %d %s. ' +
+          'Verificati datele de acces si adresa IP permisa de furnizor.',
+          [Response.StatusCode, Response.StatusText]);
+      V := TJSONObject.ParseJSONValue(Response.ContentAsString(TEncoding.UTF8));
+      if not (V is TJSONObject) then
+      begin
+        V.Free;
+        raise Exception.Create('API MEDIAMAGNAT: raspuns JSON invalid.');
+      end;
+      Exit(TJSONObject(V));
+    end;
+    raise Exception.Create('API MEDIAMAGNAT: numarul de reincercari a fost depasit.');
+  end;
+
+  procedure EnsureToken(AForce: Boolean);
+  var
+    Body, Root: TJSONObject;
+    Token: string;
+    ExpiresIn: Integer;
+  begin
+    if not AForce and (FMediaMagnatToken <> '') and (FMediaMagnatTokenUser = User) and
+      (FMediaMagnatTokenBaseUrl = BaseUrl) and (GetTickCount64 < FMediaMagnatTokenExpiresAt) then
+      Exit;
+    FMediaMagnatToken := '';
+    FMediaMagnatTokenExpiresAt := 0;
+    Body := TJSONObject.Create;
+    try
+      Body.AddPair('username', User);
+      Body.AddPair('password', Password);
+      Root := RequestJson('/auth/token', Body);
+      try
+        Token := JsonText(Root, 'access_token');
+        ExpiresIn := JsonInt(Root, 'expires_in');
+        if (Token = '') or (ExpiresIn <= 0) then
+          raise Exception.Create('API MEDIAMAGNAT: token sau durata de valabilitate invalida.');
+        FMediaMagnatToken := Token;
+        FMediaMagnatTokenUser := User;
+        FMediaMagnatTokenBaseUrl := BaseUrl;
+        FMediaMagnatTokenExpiresAt := GetTickCount64 + UInt64(Max(1, ExpiresIn - 60)) * 1000;
+      finally
+        Root.Free;
+      end;
+    finally
+      Body.Free;
+    end;
+  end;
+
+  procedure ParseProduct(AObj: TJSONObject);
+  var
+    P: TMagnatProduct;
+    StockStatus: Integer;
+    PriceText: string;
+  begin
+    Inc(ReadCount);
+    P := Default(TMagnatProduct);
+    P.Sku := JsonText(AObj, 'sku');
+    if P.Sku = '' then
+    begin
+      Inc(NoCode);
+      Exit;
+    end;
+    // Never truncate a supplier key: two distinct SKUs could become identical.
+    if Length(P.Sku) > 128 then
+      raise Exception.Create('API MEDIAMAGNAT: sku depaseste 128 caractere.');
+    StockStatus := JsonInt(AObj, 'stock_status');
+    case StockStatus of
+      0:
+        begin
+          Inc(NoStock);
+          Exit;
+        end;
+      1: P.Stock := '<5';
+      2: P.Stock := '>=5';
+    else
+      raise Exception.CreateFmt('API MEDIAMAGNAT: stock_status invalid pentru %s.', [P.Sku]);
+    end;
+    PriceText := JsonText(AObj, 'merchant_price');
+    if PriceText = '' then
+    begin
+      Inc(NoPrice);
+      Exit;
+    end;
+    if not TryStrToCurr(PriceText, P.PurchasePrice, TFormatSettings.Invariant) then
+      raise Exception.CreateFmt('API MEDIAMAGNAT: merchant_price invalid pentru %s.', [P.Sku]);
+    if P.PurchasePrice <= 0 then
+    begin
+      Inc(NoPrice);
+      Exit;
+    end;
+    if not TryStrToCurr(JsonText(AObj, 'sale_price'), P.SalePrice, TFormatSettings.Invariant) or
+      (P.SalePrice <= 0) then
+      raise Exception.CreateFmt('API MEDIAMAGNAT: sale_price invalid pentru %s.', [P.Sku]);
+    if Seen.ContainsKey(P.Sku) then
+    begin
+      Inc(Duplicates);
+      Exit;
+    end;
+    P.Name := JsonText(AObj, 'name_ro');
+    if P.Name = '' then
+      P.Name := JsonText(AObj, 'name_ru');
+    if P.Name = '' then
+      raise Exception.CreateFmt('API MEDIAMAGNAT: denumire lipsa pentru %s.', [P.Sku]);
+    P.Brand := JsonText(AObj, 'brand');
+    P.Category := CategoryPath(AObj, 'categories_ro');
+    if P.Category = '' then
+      P.Category := CategoryPath(AObj, 'categories_ru');
+    Seen.Add(P.Sku, True);
+    Products.Add(P);
+  end;
+
+  procedure DownloadCatalog;
+  var
+    Root: TJSONObject;
+    Items, Item: TJSONValue;
+    Page, Pages, Total, PerPage, ExpectedPages, ExpectedTotal, ExpectedPerPage: Integer;
+  begin
+    EnsureToken(False);
+    Page := 1;
+    ExpectedPages := -1;
+    ExpectedTotal := -1;
+    ExpectedPerPage := -1;
+    repeat
+      dxStatusBar1.SimplePanelStyle.Text := Format('MEDIAMAGNAT: descarcare pagina %d...', [Page]);
+      Application.ProcessMessages;
+      Root := RequestJson(Format('/products?page=%d&per_page=%d', [Page, cPageSize]), nil);
+      try
+        Pages := JsonInt(Root, 'pages');
+        Total := JsonInt(Root, 'total');
+        PerPage := JsonInt(Root, 'per_page');
+        if (JsonInt(Root, 'page') <> Page) or (Pages < 0) or (Pages > cMaxPages) or
+          (Total < 0) or (PerPage < 1) or (PerPage > cPageSize) then
+          raise Exception.Create('API MEDIAMAGNAT: paginare invalida; import anulat.');
+        if (Total > 0) and ((Pages <> (Int64(Total) + PerPage - 1) div PerPage) or (Page > Pages)) then
+          raise Exception.Create('API MEDIAMAGNAT: numar de pagini inconsistent; import anulat.');
+        if ExpectedPages < 0 then
+        begin
+          ExpectedPages := Pages;
+          ExpectedTotal := Total;
+          ExpectedPerPage := PerPage;
+        end
+        else if (Pages <> ExpectedPages) or (Total <> ExpectedTotal) or (PerPage <> ExpectedPerPage) then
+          raise Exception.Create('API MEDIAMAGNAT: catalog schimbat in timpul descarcarii; repetati importul.');
+        Items := Root.GetValue('items');
+        if not (Items is TJSONArray) then
+          raise Exception.Create('API MEDIAMAGNAT: lipseste lista items.');
+        if TJSONArray(Items).Count <> Min(PerPage, Max(0, Total - (Page - 1) * PerPage)) then
+          raise Exception.Create('API MEDIAMAGNAT: pagina incompleta; import anulat.');
+        for Item in TJSONArray(Items) do
+        begin
+          if not (Item is TJSONObject) then
+            raise Exception.Create('API MEDIAMAGNAT: produs invalid in catalog.');
+          ParseProduct(TJSONObject(Item));
+        end;
+      finally
+        Root.Free;
+      end;
+      Inc(Page);
+      if Page <= Pages then
+        WaitForApi(550); // below the documented 120 requests/minute
+    until Page > Pages;
+    if ReadCount <> ExpectedTotal then
+      raise Exception.Create('API MEDIAMAGNAT: catalog incomplet; nu s-a creat pricelistul.');
+    if Products.Count = 0 then
+      raise Exception.CreateFmt('API MEDIAMAGNAT: niciun produs cu stoc si merchant_price. ' +
+        'Citite %d, fara stoc %d, fara pret %d, fara cod %d. Nu s-a creat pricelistul.',
+        [ReadCount, NoStock, NoPrice, NoCode]);
+  end;
+
+  procedure SavePriceList;
+  var
+    Tr: TIBCTransaction;
+    QMaster: TIBCQuery;
+    QItem: TIBCSQL;
+    P: TMagnatProduct;
+    From, N, K: Integer;
+  begin
+    Tr := TIBCTransaction.Create(nil);
+    QMaster := TIBCQuery.Create(nil);
+    QItem := TIBCSQL.Create(nil);
+    try
+      Tr.DefaultConnection := dmDB.IBCConnection;
+      Tr.StartTransaction;
+      try
+        QMaster.Connection := dmDB.IBCConnection;
+        QMaster.Transaction := Tr;
+        QMaster.AutoCommit := False;
+        QMaster.SQL.Text := 'insert into TS_PRICELISTS (SUPPLIERID, PRICE_CATEGORYID, FLAGS, MENTIUNI) ' +
+          'values (:SUPPLIERID, :PRICE_CATEGORYID, :FLAGS, :MENTIUNI) returning PLID';
+        QMaster.ParamByName('SUPPLIERID').AsInteger := cSupplierID;
+        QMaster.ParamByName('PRICE_CATEGORYID').AsInteger := CategoryID;
+        QMaster.ParamByName('FLAGS').AsInteger := 2; // FLG_API
+        QMaster.ParamByName('MENTIUNI').AsString := 'Import MEDIAMAGNAT API; preturi MDL; stoc estimativ';
+        QMaster.Options.ReturnParams := True;
+        QMaster.Execute;
+        PLID := QMaster.ParamByName('RET_PLID').AsInteger;
+        if PLID <= 0 then
+          raise Exception.Create('MEDIAMAGNAT: nu s-a obtinut codul pricelistului nou.');
+
+        QItem.Connection := dmDB.IBCConnection;
+        QItem.Transaction := Tr;
+        QItem.AutoCommit := False;
+        QItem.SQL.Text := 'insert into TS_PRICELIST_ITEMS (PLID, SUPPLIER_GOODS_CODE, ' +
+          'SUPPLIER_GOODS_NAME, SUPPLIER_GOODS_BRAND, SUPPLIER_CATEGORY, STOCK_QTY, ' +
+          'PRICE0, CURRENCY0ID, PRICE3, CURRENCY3ID, PRICE7, CURRENCY7ID) ' +
+          'values (:PLID, :CODE, :NAME, :BRAND, :CATEGORY, :STOCK, ' +
+          ':PRICE0, :CURRENCY0ID, :PRICE3, :CURRENCY3ID, :PRICE7, :CURRENCY7ID)';
+        QItem.ParamByName('PLID').DataType := ftInteger;
+        QItem.ParamByName('CODE').DataType := ftWideString;
+        QItem.ParamByName('NAME').DataType := ftWideString;
+        QItem.ParamByName('BRAND').DataType := ftWideString;
+        QItem.ParamByName('CATEGORY').DataType := ftWideString;
+        QItem.ParamByName('STOCK').DataType := ftWideString;
+        QItem.ParamByName('PRICE0').DataType := ftCurrency;
+        QItem.ParamByName('PRICE3').DataType := ftCurrency;
+        QItem.ParamByName('PRICE7').DataType := ftCurrency;
+        QItem.ParamByName('CURRENCY0ID').DataType := ftInteger;
+        QItem.ParamByName('CURRENCY3ID').DataType := ftInteger;
+        QItem.ParamByName('CURRENCY7ID').DataType := ftInteger;
+        From := 0;
+        while From < Products.Count do
+        begin
+          N := Min(cBatchSize, Products.Count - From);
+          QItem.Params.ValueCount := N;
+          for K := 0 to N - 1 do
+          begin
+            P := Products[From + K];
+            QItem.ParamByName('PLID')[K].AsInteger := PLID;
+            QItem.ParamByName('CODE')[K].AsString := P.Sku;
+            QItem.ParamByName('NAME')[K].AsString := Copy(P.Name, 1, 2048);
+            QItem.ParamByName('BRAND')[K].AsString := Copy(P.Brand, 1, 128);
+            // Keep compatibility with databases where DM_VARCHAR512 still allows only 128 characters.
+            QItem.ParamByName('CATEGORY')[K].AsString := Copy(P.Category, 1, 128);
+            QItem.ParamByName('STOCK')[K].AsString := P.Stock;
+            QItem.ParamByName('PRICE0')[K].AsCurrency := P.PurchasePrice;
+            QItem.ParamByName('PRICE7')[K].AsCurrency := P.PurchasePrice;
+            QItem.ParamByName('PRICE3')[K].AsCurrency := P.SalePrice;
+            QItem.ParamByName('CURRENCY0ID')[K].AsInteger := cCurrencyMDL;
+            QItem.ParamByName('CURRENCY3ID')[K].AsInteger := cCurrencyMDL;
+            QItem.ParamByName('CURRENCY7ID')[K].AsInteger := cCurrencyMDL;
+          end;
+          QItem.Execute(N);
+          Inc(From, N);
+        end;
+        Tr.Commit;
+      except
+        if Tr.Active then
+          Tr.Rollback;
+        raise;
+      end;
+    finally
+      QItem.Free;
+      QMaster.Free;
+      Tr.Free;
+    end;
+  end;
+
+begin
+  if not IBCQueryPriceCategories.Active or IBCQueryPriceCategories.IsEmpty then
+    raise Exception.Create('Selectati categoria de pret inainte de importul MEDIAMAGNAT.');
+  CategoryID := IBCQueryPriceCategories.FieldByName('PRICE_CATEGORYID').AsInteger;
+  if CategoryID <= 0 then
+    raise Exception.Create('Selectati o categorie de pret valida pentru MEDIAMAGNAT.');
+  ReadCount := 0;
+  NoStock := 0;
+  NoPrice := 0;
+  NoCode := 0;
+  Duplicates := 0;
+  ReadConfig;
+  Http := THTTPClient.Create;
+  Products := TList<TMagnatProduct>.Create;
+  Seen := TDictionary<string, Boolean>.Create;
+  MainForm := Application.MainForm;
+  WasEnabled := Assigned(MainForm) and MainForm.Enabled;
+  OldCursor := Screen.Cursor;
+  try
+    Http.ConnectionTimeout := 30000;
+    Http.ResponseTimeout := 120000;
+    if Assigned(MainForm) then
+      MainForm.Enabled := False;
+    Screen.Cursor := crHourGlass;
+    try
+      DownloadCatalog;
+      dxStatusBar1.SimplePanelStyle.Text := 'MEDIAMAGNAT: salvare pricelist...';
+      SavePriceList;
+    finally
+      Screen.Cursor := OldCursor;
+      if Assigned(MainForm) then
+        MainForm.Enabled := WasEnabled;
+      dxStatusBar1.SimplePanelStyle.Text := '';
+    end;
+    IBCQueryPriceData.Refresh;
+    IBCQueryPriceData.Locate('PLID', PLID, []);
+    MessageDlg(Format('Pricelist MEDIAMAGNAT #%d creat: %d produse (din %d citite).' + sLineBreak +
+      'Sarite: fara stoc %d, fara merchant_price %d, fara cod %d, coduri repetate %d.' + sLineBreak +
+      'Preturi MDL: PRICE0 = PRICE7 = merchant_price; PRICE3 = sale_price.' + sLineBreak +
+      'Stoc estimativ: <5 sau >=5; API-ul nu transmite cantitatea exacta.',
+      [PLID, Products.Count, ReadCount, NoStock, NoPrice, NoCode, Duplicates]), mtInformation, [mbOK], 0);
+  finally
+    Seen.Free;
+    Products.Free;
+    Http.Free;
+  end;
+end;
+
 procedure Tframe78PriceList.bbAPISupplierClick(Sender: TObject);
 begin
+  // MEDIAMAGNAT GRUP S.R.L. - catalog API magnat.md, pricelist nou
+  if IBCQuerySuppliers.FieldByName('CustomerID').AsInteger = 121249 then
+  begin
+    try
+      ImportMediaMagnatPriceList;
+    except
+      on E: Exception do
+        ShowErrorDialog('Import MEDIAMAGNAT', E.Message);
+    end;
+    Exit;
+  end;
+
   // Accent
   if IBCQuerySuppliers.FieldByName('CustomerID').AsInteger = 198 then
   begin

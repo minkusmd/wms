@@ -4255,11 +4255,6 @@ begin
   // Utilizatori
   if not SWNSecurityManager.IsSuperUser then
   begin
-    bbActiveUsers.Visible := ivNever;
-    // >> credentialele API-urilor externe
-    bbApiConfig.Visible := ivNever;
-    // >> canalele / istoricul notificarilor Telegram
-    bbTelegram.Visible := ivNever;
     // >> SQL Repository
     bbSQLRepository.Visible := ivNever;
     // >> Nomenclatoare - Service+
@@ -4415,6 +4410,16 @@ begin
     bbCrediteRetail.Visible := ivNever;
     bbTipCredite.Visible := ivNever;
   end;
+
+  if not (SWNSecurityManager.IsAdmin or SWNSecurityManager.IsSuperUser) then
+  begin
+    bbActiveUsers.Visible := ivNever;
+    // >> credentialele API-urilor externe
+    bbApiConfig.Visible := ivNever;
+    // >> canalele / istoricul notificarilor Telegram
+    bbTelegram.Visible := ivNever;
+  end;
+
 
 end;
 

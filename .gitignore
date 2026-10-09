@@ -44,3 +44,6 @@ DB Service Managersettings.dat
 /output/
 __pycache__/
 Python/tyres_fill/imgs/
+
+# Fisiere temporare ale RAD Studio
+*.$$$
