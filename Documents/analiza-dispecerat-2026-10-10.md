@@ -78,13 +78,13 @@ Ramane pentru iteratia urmatoare: repartizarea zonelor pe curieri (pagina din pl
 ## 4. Intrebari deschise pentru proprietar
 
 1. ~~Tipul documentului de retur la furnizor~~ - **confirmat 2026-10-10: 126 Retur bunuri catre furnizor.**
-2. Utilizatorul WMS tehnic pentru documentele create din aplicatie (`TS_DISPATCH_SETTINGS.WEB_USERID`) - unul nou ("CurieriWMS") cu perioada deschisa, sau 204?
+2. ~~Utilizatorul WMS tehnic~~ - **confirmat 2026-10-10: utilizator nou "CurieriWMS" cu perioada deschisa** -> `DB Model/dispatch_web_user.sql` (grup tehnic fara drepturi, perioada proprie 2026-01-01..2027-12-31, `TS_DISPATCH_SETTINGS` 316910 / depozitul 43). Nota: 204 este contul proprietarului (s.minchevici), nu un utilizator tehnic.
 3. Depozitele soferilor: se creeaza cate unul pe sofer (ca 133..143 "Angajat NN") sub ce folder?
 4. Dovada livrarii, livrarile partiale, incasarea de catre sofer (plan §2) - neschimbate.
 
 ## 5. Urmatorii pasi (ordinea din plan §10)
 
-1. DBA: crearea userului Firebird `CURIERI`, rularea `dispatch_logistics.sql` pe SW; in WMS (Curieri...): depozitul de baza, utilizatorul aplicatiei, depozitele soferilor, profilurile si codurile de activare.
+1. DBA: crearea userului Firebird `CURIERI`, rularea `dispatch_logistics.sql` si apoi `dispatch_web_user.sql` pe SW; in WMS (Curieri...): depozitele soferilor, profilurile si codurile de activare.
 2. Etapa 4, restul: repartizarea zonelor, punctele de preluare, fisa tiparita, Procesare documente (fotografiile langa pozitiile 106).
 3. Etapa 3: seriile din 106 deschis in `GET_AVAILABLE_SN` / `GET_SN_DEP_GOODS`; transferul intr-un pas pentru oprirea Depozit si sosirea la baza.
 4. Etapa 7: livrarea (autorizare cu semnatura versiunii, plata din deal, confirmare), incarcarea la depozit, "Am ajuns la depozit".
