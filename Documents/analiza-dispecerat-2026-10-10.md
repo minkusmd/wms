@@ -19,7 +19,7 @@ Verificat doar-citire pe SW si in sursele Delphi.
 | Documente | Factura de intrare din plan = **106 Intrare marfa**; stocul se misca la inserarea liniei, chiar cu documentul deschis. 107 = Rezerva/Vanzare, 108 = Rezerva separata. Cheia pozitiei `TDB_JURNAL` = `DOCID, DTDEP, CTDEP, GOODSCOMPLECT_ID, GOODSID` (fara ID de linie). | Inchiderea preluarii creeaza 106 deschis in depozitul soferului, cate unul pe furnizorul comercial, cu acelasi produs comasat pe o linie. |
 | Serii/partide | `GET_AVAILABLE_PARTS` / `GET_PARTS_DEP_GOODS` accepta deja 106 deschis (rulat pe SW 09.10). `GET_AVAILABLE_SN` / `GET_SN_DEP_GOODS` cer inca documentul inchis. `FLG_READY` se recalculeaza la COMMIT doar pentru ultima linie din sesiune. | Seriile din 106 deschis trebuie activate separat (etapa 3). |
 | Transfer | 114 are doi pasi: expediere (sursa scade imediat) si primire la inchidere (`FLG_READY` pe toate liniile, `BOX_COUNT > 0`). | Oprirea Depozit (9F) si sosirea la baza (9D) cer o varianta de transfer intr-o singura tranzactie (etapele 3, 9). |
-| Retur | Nu exista document comercial "retur la furnizor" separat; candidatul e **126 Retur bunuri catre furnizor** (misca stocul). 1945 e act fara stoc (service). | Sarcina de retur foloseste documentul 126; iesirea efectiva o face dispecerul in WMS. |
+| Retur | Nu exista document comercial "retur la furnizor" separat; documentul e **126 Retur bunuri catre furnizor** (misca stocul; confirmat de proprietar 2026-10-10). 1945 e act fara stoc (service). | Sarcina de retur foloseste documentul 126; iesirea efectiva o face dispecerul in WMS. |
 | Plata | Modalitatea e text liber `TDB_DEALS.PAYMENT_METHOD`; achitat/rest doar pe deal (`SP_DEAL_GET_BALANCE`); plata mixta nemodelata. | Detaliul platii (9E) ramane pentru iteratia urmatoare. |
 | Utilizator | Scrierea in documente cere `USER_SESSION.UserID` (CREATED_BY, perioada deschisa, `ERR_PERIOD_NO_VALID`). | `TS_DISPATCH_SETTINGS.WEB_USERID` = utilizatorul WMS tehnic sub care procedurile creeaza documente. |
 | Servicii | Atributul e `TS_GOODS.GOODS_TYPE_ID`: 4202, 4204, 4212, 4217 = servicii (nu UM, nu mapa 728). | Livrarea arata serviciile separat dupa acest atribut. |
@@ -77,7 +77,7 @@ Ramane pentru iteratia urmatoare: repartizarea zonelor pe curieri (pagina din pl
 
 ## 4. Intrebari deschise pentru proprietar
 
-1. Tipul documentului de retur la furnizor: 126 este corect?
+1. ~~Tipul documentului de retur la furnizor~~ - **confirmat 2026-10-10: 126 Retur bunuri catre furnizor.**
 2. Utilizatorul WMS tehnic pentru documentele create din aplicatie (`TS_DISPATCH_SETTINGS.WEB_USERID`) - unul nou ("CurieriWMS") cu perioada deschisa, sau 204?
 3. Depozitele soferilor: se creeaza cate unul pe sofer (ca 133..143 "Angajat NN") sub ce folder?
 4. Dovada livrarii, livrarile partiale, incasarea de catre sofer (plan §2) - neschimbate.
