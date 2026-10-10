@@ -45,6 +45,28 @@ Verificat doar-citire pe SW si in sursele Delphi.
   - Depozit: lista de incarcat.
 - Scenarii verificate pe baza de test: 12 (alt curier nu vede oprirea/fotografia), 13/20 (retransmiterea nu dubleaza), 17 (blocarea respinge WMS), 18 (browser inchis -> preluarea continua), 19 (fara fotografii nu se inchide), 20/32 (exact o intrare 106; esecul nu inchide nimic), 25, 43, 45.
 
+## 2b. Iteratia 2: forma Dispecerat in WMS (etapa 4)
+
+**Baza (adaugat in `DB Model/dispatch_logistics.sql`, re-rulabil, testat pe baza de test):**
+
+- `SP_DISPATCH_PICKUP_ASSIGN / _UNASSIGN`, `SP_DISPATCH_DELIVERY_ASSIGN / _UNASSIGN`, `SP_DISPATCH_RETURN_ASSIGN / _UNASSIGN`: sarcina intra pe traseul curierului in ziua aleasa; planul zilei si traseul (cu oprirea Depozit prima) se creeaza la prima atribuire.
+- Consolidarea opririlor (plan §7): ridicarile de la acelasi furnizor merg pe aceeasi oprire neinceputa; livrarile aceluiasi client la aceeasi adresa - la fel.
+- Oprirea furnizorului ia punctul de preluare implicit (`TS_PICKUP_POINT`) sau, fara el, adresa fizica (7662) si primul telefon din fisa furnizorului.
+- Livrarea copiaza adresa, telefonul si intervalul din `TDB_DOCS_DELIVERY` la prima planificare; livrarea esuata se replanifica intr-un rand nou (istoricul ramane). "Doar zona si ziua" = livrare "de planificat", fara curier.
+- Inainte de publicare o sarcina scoasa se sterge; dupa publicare devine "anulata", oprirea goala "Anulata", iar versiunea planului creste - soferul vede schimbarea (scenariul 14).
+- Sarcinile din preluari incepute de sofer nu se mai muta si nu se mai scot.
+- `SP_DISPATCH_STOP_MOVE` (ordinea, Depozit ramane prima), `SP_DISPATCH_PLAN_PROBLEMS` (erori: oprire fara adresa, livrare fara zona, curier inactiv sau fara depozit; avertismente: curier fara cont, furnizor fara zona, ridicari/livrari neatribuite), `SP_DISPATCH_PUBLISH` (refuzata daca exista erori).
+- Vederi pentru grile: `VW_DISPATCH_PICKUPS`, `VW_DISPATCH_DELIVERIES`, `VW_DISPATCH_RETURNS`, `VW_DISPATCH_ROUTES`, `VW_DISPATCH_STOPS`, `VW_TS_COURIER`.
+
+**WMS (`sources/classes/Dispatch/`, compilat, dfm-urile verificate la incarcare):**
+
+- Meniul "Dispecerat: achizitii si livrari" (langa "Ridicari de la furnizori") -> `TfrmDispatchDlg`: ziua (< >), starea planului, "Publica planul"; curierul si zona se aleg o data sus; paginile Achizitii, Retururi, Livrari (cu restantele neatribuite din ultimele 14 zile), Trasee (curier -> opriri, Sus/Jos), Probleme. Fiecare rand selectat = o actiune separata; refuzurile se arata la final.
+- `TfrmDispatchCouriersDlg`: profilurile curierilor (doar colaboratori), depozitul masinii, login, "Cod de activare..." si setarile firmei (depozitul de baza, utilizatorul WMS al aplicatiei).
+- `TfrmDispatchZonesDlg`: nomenclatorul zonelor.
+- "Atribuie soferul" / "Scoate soferul" din lista "Ridicari de la furnizori" trec acum prin dispecerat (nu mai scriu direct `DRIVERID`).
+
+Ramane pentru iteratia urmatoare: repartizarea zonelor pe curieri (pagina din plan §5 + aplicarea regulilor `TS_COURIER_ZONE_RULE`), punctele de preluare (dialog), fisa tiparita a curierului, pagina "Procesare documente" (fotografiile langa pozitiile intrarii).
+
 ## 3. Decizii luate in iteratia 1 (de confirmat)
 
 1. **Fotografiile se pastreaza ca BLOB in Firebird** (`TDB_PICKUP_PHOTO`), ~40 KB dupa micsorare; WMS le poate afisa direct langa pozitie. Alternativa (fisiere pe serverul aplicatiei) cere un serviciu de fisiere accesibil si din WMS.
@@ -62,7 +84,7 @@ Verificat doar-citire pe SW si in sursele Delphi.
 
 ## 5. Urmatorii pasi (ordinea din plan §10)
 
-1. DBA: crearea userului Firebird `CURIERI`, rularea `dispatch_logistics.sql` pe SW, configurarea `TS_DISPATCH_SETTINGS` si a depozitelor soferilor.
-2. Etapa 4 (WMS): forma Dispecerat - zone, profiluri curieri + cod de activare, plan/trasee/opriri, publicare, Procesare documente (fotografiile langa pozitiile 106).
+1. DBA: crearea userului Firebird `CURIERI`, rularea `dispatch_logistics.sql` pe SW; in WMS (Curieri...): depozitul de baza, utilizatorul aplicatiei, depozitele soferilor, profilurile si codurile de activare.
+2. Etapa 4, restul: repartizarea zonelor, punctele de preluare, fisa tiparita, Procesare documente (fotografiile langa pozitiile 106).
 3. Etapa 3: seriile din 106 deschis in `GET_AVAILABLE_SN` / `GET_SN_DEP_GOODS`; transferul intr-un pas pentru oprirea Depozit si sosirea la baza.
 4. Etapa 7: livrarea (autorizare cu semnatura versiunii, plata din deal, confirmare), incarcarea la depozit, "Am ajuns la depozit".

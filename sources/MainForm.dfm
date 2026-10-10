@@ -3042,6 +3042,13 @@ object frmMainForm: TfrmMainForm
       Visible = ivAlways
       OnClick = bbAutoTransportClick
     end
+    object bbDispatch: TdxBarButton
+      Caption = 'Dispecerat: achizitii si livrari'
+      Category = 0
+      Hint = 'Planul zilei: ridicari, retururi si livrari pe curieri si zone'
+      Visible = ivAlways
+      OnClick = bbDispatchClick
+    end
     object bbSupplierPickups: TdxBarButton
       Caption = 'Ridicari de la furnizori'
       Category = 0
@@ -3596,6 +3603,10 @@ object frmMainForm: TfrmMainForm
         item
           Visible = True
           ItemName = 'bbAutoTransport'
+        end
+        item
+          Visible = True
+          ItemName = 'bbDispatch'
         end
         item
           Visible = True
