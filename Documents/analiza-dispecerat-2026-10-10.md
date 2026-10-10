@@ -79,7 +79,7 @@ Ramane pentru iteratia urmatoare: repartizarea zonelor pe curieri (pagina din pl
 
 1. ~~Tipul documentului de retur la furnizor~~ - **confirmat 2026-10-10: 126 Retur bunuri catre furnizor.**
 2. ~~Utilizatorul WMS tehnic~~ - **confirmat 2026-10-10: utilizator nou "CurieriWMS" cu perioada deschisa** -> `DB Model/dispatch_web_user.sql` (grup tehnic fara drepturi, perioada proprie 2026-01-01..2027-12-31, `TS_DISPATCH_SETTINGS` 316910 / depozitul 43). Nota: 204 este contul proprietarului (s.minchevici), nu un utilizator tehnic.
-3. Depozitele soferilor: se creeaza cate unul pe sofer (ca 133..143 "Angajat NN") sub ce folder?
+3. ~~Depozitele soferilor~~ - **confirmat 2026-10-10: cate unul pe sofer, in folderul 146 "Depozite mobile"** (acolo e deja 147 "Ungureanu Ford tranzit"). `TS_DISPATCH_SETTINGS.COURIER_STOCK_FOLDERID` + `SP_COURIER_CREATE_STOCK` + butonul "Creeaza depozitul masinii..." din Dispecerat > Curieri: depozit nevizibil la vanzare, cu masca de acces copiata de la depozitul-frate.
 4. Dovada livrarii, livrarile partiale, incasarea de catre sofer (plan §2) - neschimbate.
 
 ## 5. Urmatorii pasi (ordinea din plan §10)

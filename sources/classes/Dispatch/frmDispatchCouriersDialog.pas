@@ -13,6 +13,9 @@ unit frmDispatchCouriersDialog;
 
    Setarile firmei curente: depozitul de baza (destinatia la sosirea soferului)
    si utilizatorul WMS sub care aplicatia creeaza documente (Intrare marfa).
+
+   "Creeaza depozitul masinii": depozit nou in folderul depozitelor mobile
+   (146, din TS_DISPATCH_SETTINGS), nevizibil la vanzare, legat de curier.
    ============================================================================ *)
 
 interface
@@ -52,6 +55,7 @@ type
         colNOTE: TcxGridDBColumn;
         btnAdd: TcxButton;
         btnActivation: TcxButton;
+        btnCreateStock: TcxButton;
         btnOk: TcxButton;
         btnCancel: TcxButton;
         IBCQueryCouriers: TIBCQuery;
@@ -63,11 +67,13 @@ type
         IBCTransactionUpdate: TIBCTransaction;
         procedure btnAddClick(Sender: TObject);
         procedure btnActivationClick(Sender: TObject);
+        procedure btnCreateStockClick(Sender: TObject);
         procedure IBCQueryCouriersNewRecord(DataSet: TDataSet);
         procedure IBCQueryCouriersBeforePost(DataSet: TDataSet);
     private
         procedure LoadSettings;
         function SaveAll: Boolean;
+        procedure ReopenAfterCommit(const ACourierID: Integer);
     protected
         procedure Prepare; override;
         function IsFormDataPosted: Boolean; override;
@@ -238,16 +244,67 @@ begin
         end;
     end;
 
-    IBCTransactionUpdate.StartTransaction;
-    IBCQueryCouriers.Close;
-    IBCQueryCouriers.Open;
-    IBCQueryCouriers.Locate('CUSTOMERID', id, []);
+    ReopenAfterCommit(id);
 
     if code <> '' then
         MessageDlg(Format('Codul de activare pentru %s: %s' + sLineBreak + sLineBreak +
             'Login: %s. Codul e valabil 24 de ore si se arata o singura data. ' +
             'Soferul il introduce in aplicatie la "Am primit un cod de activare".',
             [name, code, IBCQueryCouriers.FieldByName('WEB_LOGIN').AsString]), mtInformation, [mbOK], 0);
+end;
+
+{ Dupa SaveAll (COMMIT): tranzactie noua, listele recitite, curierul focalizat. }
+procedure TfrmDispatchCouriersDlg.ReopenAfterCommit(const ACourierID: Integer);
+begin
+    if not IBCTransactionUpdate.Active then
+        IBCTransactionUpdate.StartTransaction;
+    IBCQueryStocks.Close;
+    IBCQueryStocks.Open;
+    IBCQueryCouriers.Close;
+    IBCQueryCouriers.Open;
+    IBCQueryCouriers.Locate('CUSTOMERID', ACourierID, []);
+end;
+
+{ Depozitul masinii: in folderul "Depozite mobile" (TS_DISPATCH_SETTINGS.COURIER_STOCK_FOLDERID),
+  creat si legat de curier de SP_COURIER_CREATE_STOCK. }
+procedure TfrmDispatchCouriersDlg.btnCreateStockClick(Sender: TObject);
+var
+    id: Integer;
+    title: string;
+    stockID: Variant;
+begin
+    if IBCQueryCouriers.IsEmpty then
+        Exit;
+    if IBCQueryCouriers.State in dsEditModes then
+        IBCQueryCouriers.Post;
+    if not IBCQueryCouriers.FieldByName('STOCKID').IsNull then
+    begin
+        ShowMessage('Curierul are deja un depozit. Pentru alt depozit stergeti-l intai din coloana "Depozitul masinii".');
+        Exit;
+    end;
+
+    id := IBCQueryCouriers.FieldByName('CUSTOMERID').AsInteger;
+    title := Copy(IBCQueryCouriers.FieldByName('NAME').AsString, 1, 60);
+    if not InputQuery('Depozitul masinii', 'Denumirea depozitului (de exemplu soferul si masina):', title) then
+        Exit;
+
+    { procedura citeste profilul salvat: modificarile din forma se salveaza intai }
+    if not SaveAll then
+        Exit;
+    try
+        stockID := DispatchExec('SELECT O_STOCKID FROM SP_COURIER_CREATE_STOCK(:ID, :FIRMAID, :TITLE)',
+            ['ID', 'FIRMAID', 'TITLE'], [id, dmDB.CurrentFirma, Trim(title)]);
+    except
+        on E: Exception do
+        begin
+            ReopenAfterCommit(id);
+            ShowMessage(DispatchErrorText(E.Message));
+            Exit;
+        end;
+    end;
+
+    ReopenAfterCommit(id);
+    ShowMessage(Format('Depozitul "%s" (%s) a fost creat si legat de curier.', [Trim(title), VarToStr(stockID)]));
 end;
 
 procedure TfrmDispatchCouriersDlg.IBCQueryCouriersNewRecord(DataSet: TDataSet);

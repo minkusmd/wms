@@ -215,6 +215,16 @@ object frmDispatchCouriersDlg: TfrmDispatchCouriersDlg
     TabOrder = 3
     OnClick = btnActivationClick
   end
+  object btnCreateStock: TcxButton
+    Left = 290
+    Top = 516
+    Width = 190
+    Height = 31
+    Anchors = [akLeft, akBottom]
+    Caption = 'Creeaza depozitul masinii...'
+    TabOrder = 6
+    OnClick = btnCreateStockClick
+  end
   object btnOk: TcxButton
     Left = 866
     Top = 516

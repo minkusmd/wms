@@ -15,8 +15,9 @@
    - Perioada "CurieriWMS (tehnic)": 2026-01-01 .. 2027-12-31, doar bitul grupului.
      Se prelungeste ca celelalte perioade (DATA2).
    - TS_DISPATCH_SETTINGS: firma operativa 316910 (SOLUTII COMERCIALE), depozitul
-     de baza 43, WEB_USERID = utilizatorul tehnic. Se poate schimba din WMS
-     (Dispecerat > Curieri...).
+     de baza 43, WEB_USERID = utilizatorul tehnic, folderul depozitelor masinilor
+     146 "Depozite mobile" (decizia proprietarului 2026-10-10). Depozitul de baza
+     si utilizatorul se pot schimba din WMS (Dispecerat > Curieri...).
    ============================================================================ */
 
 SET TERM ^ ;
@@ -67,9 +68,10 @@ BEGIN
         INSERT INTO TDB_OPEN_PERIODS (DATA1, DATA2, ACC$MASK, DESCRIPTION)
         VALUES (DATE '2026-01-01', DATE '2027-12-31', BIN_SHL(1, :V_GROUP - 1), 'CurieriWMS (tehnic)');
 
-    /* 5. setarile dispeceratului pentru firma operativa */
-    UPDATE OR INSERT INTO TS_DISPATCH_SETTINGS (FIRMAID, BASE_STOCKID, WEB_USERID)
-    VALUES (316910, 43, :V_USERID)
+    /* 5. setarile dispeceratului pentru firma operativa: depozitul de baza 43,
+          utilizatorul tehnic, folderul depozitelor masinilor 146 "Depozite mobile" */
+    UPDATE OR INSERT INTO TS_DISPATCH_SETTINGS (FIRMAID, BASE_STOCKID, WEB_USERID, COURIER_STOCK_FOLDERID)
+    VALUES (316910, 43, :V_USERID, 146)
     MATCHING (FIRMAID);
 END^
 
