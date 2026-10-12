@@ -7,7 +7,8 @@ unit frmSupplierPickupListDialog;
    TfrmSupplierPickupConfirmDlg). Actiunile de stare lucreaza pe randurile
    selectate (selectie multipla) si se salveaza imediat, intr-o tranzactie:
 
-     Atribuie soferul / Scoate soferul  - doar sarcinile noi sau atribuite
+     Atribuie soferul / Scoate soferul  - prin dispecerat (SP_DISPATCH_PICKUP_ASSIGN / _UNASSIGN):
+                                          ridicarea intra/iese din traseul soferului
      Ridicata                           - STATEID = 2 (PICKED_AT din trigger)
      Anuleaza                           - STATEID = 3
      Redeschide                         - ridicata/anulata -> noua sau atribuita
@@ -94,6 +95,7 @@ type
         function IsFiltered: Boolean;
         function SelectedIDs: TArray<Integer>;
         function ApplyToSelected(const ASql: string; const ADriverID: Integer = 0): Integer;
+        procedure ApplyDispatchToSelected(const ASql: string; const ACourierID: Integer);
         procedure RefreshData;
     protected
         procedure Prepare; override;
@@ -113,7 +115,7 @@ implementation
 
 uses
     DataModuleDB, frmCustomersDlg, frmSupplierOrderRulesDialog, frmSupplierPickupConfirmDialog,
-    System.Math, System.UITypes;
+    SWNCustomersTypesUnit, DispatchCommonUnit, System.Math, System.UITypes;
 
 {$R *.dfm}
 
@@ -335,6 +337,9 @@ begin
         RefreshData;
 end;
 
+{ Soferul se pune prin dispecerat (SP_DISPATCH_PICKUP_ASSIGN): ridicarea intra pe
+  traseul curierului in ziua ridicarii, iar DRIVERID/PLAN_DATE sint copia traseului.
+  Doar colaboratorii cu profil de curier (TS_COURIER) pot fi alesi. }
 procedure TfrmSupplierPickupListDlg.btnAssignDriverClick(Sender: TObject);
 var
     dialog: TfrmCustomersDlg;
@@ -349,6 +354,7 @@ begin
     driverID := 0;
     dialog := TfrmCustomersDlg.Create(Self);
     try
+        dialog.CustomFilter := [cfColaboratori];
         if dialog.SelectCustomer(IBCQueryPickups.FieldByName('DRIVERID').AsInteger, False, 0,
             'Selecteaza soferul') then
             driverID := dialog.CustomerID;
@@ -359,16 +365,50 @@ begin
     if driverID <= 0 then
         Exit;
 
-    ApplyToSelected(
-        'UPDATE TDB_SUPPLIER_PICKUP SET DRIVERID = :DRIVERID, UPDATED_BY = :USERID ' +
-        'WHERE PICKUPID = :PICKUPID AND STATEID IN (0, 1)', driverID);
+    ApplyDispatchToSelected(
+        'SELECT O_STOPID FROM SP_DISPATCH_PICKUP_ASSIGN(:ID, :COURIER, ' +
+        '(SELECT COALESCE(PLAN_DATE, CURRENT_DATE) FROM TDB_SUPPLIER_PICKUP WHERE PICKUPID = :ID2))',
+        driverID);
 end;
 
 procedure TfrmSupplierPickupListDlg.btnClearDriverClick(Sender: TObject);
 begin
-    ApplyToSelected(
-        'UPDATE TDB_SUPPLIER_PICKUP SET DRIVERID = NULL, UPDATED_BY = :USERID ' +
-        'WHERE PICKUPID = :PICKUPID AND STATEID IN (0, 1)');
+    ApplyDispatchToSelected('EXECUTE PROCEDURE SP_DISPATCH_PICKUP_UNASSIGN(:ID)', 0);
+end;
+
+procedure TfrmSupplierPickupListDlg.ApplyDispatchToSelected(const ASql: string; const ACourierID: Integer);
+var
+    ids: TArray<Integer>;
+    id, ok: Integer;
+    err, errors: string;
+begin
+    ids := SelectedIDs;
+    if Length(ids) = 0 then
+    begin
+        ShowMessage('Selectati cel putin o ridicare.');
+        Exit;
+    end;
+
+    ok := 0;
+    errors := '';
+    for id in ids do
+    begin
+        if ACourierID > 0 then
+        begin
+            if DispatchTry(ASql, ['ID', 'COURIER', 'ID2'], [id, ACourierID, id], err) then
+                Inc(ok)
+            else
+                errors := errors + Format('%d: %s', [id, err]) + sLineBreak;
+        end
+        else if DispatchTry(ASql, ['ID'], [id], err) then
+            Inc(ok)
+        else
+            errors := errors + Format('%d: %s', [id, err]) + sLineBreak;
+    end;
+
+    RefreshData;
+    if ok < Length(ids) then
+        ShowMessage(Format('Modificate: %d din %d.', [ok, Length(ids)]) + sLineBreak + sLineBreak + errors);
 end;
 
 procedure TfrmSupplierPickupListDlg.btnPickedClick(Sender: TObject);

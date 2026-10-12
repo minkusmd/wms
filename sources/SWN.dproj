@@ -2002,6 +2002,16 @@
         <DCCReference Include="classes\SupplierPickup\frmSupplierPickupListDialog.pas">
             <Form>frmSupplierPickupListDlg</Form>
         </DCCReference>
+        <DCCReference Include="classes\Dispatch\DispatchCommonUnit.pas"/>
+        <DCCReference Include="classes\Dispatch\frmDispatchZonesDialog.pas">
+            <Form>frmDispatchZonesDlg</Form>
+        </DCCReference>
+        <DCCReference Include="classes\Dispatch\frmDispatchCouriersDialog.pas">
+            <Form>frmDispatchCouriersDlg</Form>
+        </DCCReference>
+        <DCCReference Include="classes\Dispatch\frmDispatchDialog.pas">
+            <Form>frmDispatchDlg</Form>
+        </DCCReference>
         <DCCReference Include="classes\EFactura\EFacturaApiClient.pas"/>
         <DCCReference Include="classes\EFactura\EFacturaXmlBuilder.pas"/>
         <DCCReference Include="classes\EFactura\EFacturaManager.pas"/>
