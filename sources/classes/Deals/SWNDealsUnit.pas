@@ -372,7 +372,8 @@ end;
 function DealAxesForDocType(const ADocTypeID: Integer): string;
 begin
   case ADocTypeID of
-    134: Result := 'PIPE,REASON';
+    // FIN: creditul e o modalitate de plata a comenzii (unificarea 1791 -> 134)
+    134: Result := 'PIPE,REASON,FIN';
     115: Result := 'PIPE,REASON,CHANNEL,FIN';
     1791: Result := 'FIN,PIPE,REASON';
     101: Result := 'PIPE,PAY';

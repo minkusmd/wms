@@ -310,6 +310,8 @@ type
     fCallID: Integer;
     fIdentifiedCustomer: string;
     fCustomerID: Integer;
+    // apel primit (MainForm arata fereastra telefonului)
+    OnIncomingCall: TNotifyEvent;
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
     procedure WMEnable(var Message: TWMEnable); message WM_ENABLE;
@@ -1153,6 +1155,8 @@ begin
     HistoryCallInfo.CustomerID := fCustomerID;
     AddToHistory(HistoryCallInfo);
     BeginLineCall(FreeLine, fCallID);
+    if Assigned(OnIncomingCall) then
+      OnIncomingCall(Self);
   end;
 end;
 

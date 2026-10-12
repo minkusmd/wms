@@ -143,6 +143,8 @@ type
     bbGoodsInfoCard_Complect: TdxBarButton;
     bbGoodsPrice_Complect: TdxBarButton;
     bbGoodsForeignCode_Complect: TdxBarButton;
+    bbAcntName_Components: TdxBarButton;
+    bbAcntName_Complect: TdxBarButton;
     dxBarButton1: TdxBarButton;
     dxBarDockControl1: TdxBarDockControl;
     dxBarManagerBar1: TdxBar;
@@ -175,6 +177,8 @@ type
     procedure bbGoodsInfoCard_ComplectClick(Sender: TObject);
     procedure bbGoodsPrice_ComplectClick(Sender: TObject);
     procedure bbGoodsForeignCode_ComplectClick(Sender: TObject);
+    procedure bbAcntName_ComplectClick(Sender: TObject);
+    procedure bbAcntName_ComponentsClick(Sender: TObject);
     procedure dxBarButton1Click(Sender: TObject);
     procedure bbChangeGoodsClick(Sender: TObject);
   private
@@ -269,6 +273,27 @@ begin
   TSWNCommonDialogs.GoodsForeignCode(dmDB.IBCQueryJurnal.FieldByName('GOODSID').AsInteger);
 end;
 
+// denumirea pe contabilitate a produsului din rind, fara a intra in editorul produsului
+procedure Tframe18SciotNaOplatu.bbAcntName_ComplectClick(Sender: TObject);
+begin
+  if IBCQueryJurnalKit.IsEmpty then
+    Exit;
+  if TSWNCommonDialogs.GoodsAcntSelect(IBCQueryJurnalKit.FieldByName('GOODSID').AsInteger,
+    SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Справочники_НДН_Изменение_наименования_для_накладной)) and
+    (IBCQueryJurnalKit.FindField('GOODS_ACNT_ID') <> nil) then
+    IBCQueryJurnalKit.Refresh;
+end;
+
+procedure Tframe18SciotNaOplatu.bbAcntName_ComponentsClick(Sender: TObject);
+begin
+  if dmDB.IBCQueryJurnal.IsEmpty then
+    Exit;
+  if TSWNCommonDialogs.GoodsAcntSelect(dmDB.IBCQueryJurnal.FieldByName('GOODSID').AsInteger,
+    SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Справочники_НДН_Изменение_наименования_для_накладной)) and
+    (dmDB.IBCQueryJurnal.FindField('GOODS_ACNT_ID') <> nil) then
+    dmDB.IBCQueryJurnal.Refresh;
+end;
+
 procedure Tframe18SciotNaOplatu.bbGoodsInfoCard_ComplectClick(Sender: TObject);
 begin
   TSWNCommonDialogs.GoodsInfoCardDialog(IBCQueryJurnalKit.FieldByName('GOODSID').AsInteger, IBCQueryJurnalKit.FieldByName
@@ -309,6 +334,7 @@ begin
   bbGoodsInfoCard_Complect.Enabled := fSelected;
   bbGoodsPrice_Complect.Enabled := fSelected;
   bbGoodsForeignCode_Complect.Enabled := fSelected;
+  bbAcntName_Complect.Enabled := fSelected;
 end;
 
 procedure Tframe18SciotNaOplatu.cxGridComplectTableCustomDrawCell(Sender: TcxCustomGridTableView; ACanvas: TcxCanvas;
@@ -741,6 +767,7 @@ begin
   bbGoodsInfoCard_Components.Enabled := fSelected;
   bbGoodsPrice_Components.Enabled := fSelected;
   bbGoodsForeignCode_Components.Enabled := fSelected;
+  bbAcntName_Components.Enabled := fSelected;
 
      // tabs
   tbsKitContent.TabVisible := fKit;
@@ -806,6 +833,13 @@ begin
   begin
     bbGoodsForeignCode_Components.Visible := ivNever;
     bbGoodsForeignCode_Complect.Visible := ivNever;
+  end;
+
+     // Denumirea pe contabilitate a produsului
+  if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Справочники_НДН_Изменение_наименования_для_накладной) then
+  begin
+    bbAcntName_Components.Visible := ivNever;
+    bbAcntName_Complect.Visible := ivNever;
   end;
 
   if SWNSecurityManager.IsPartialAccessMode then

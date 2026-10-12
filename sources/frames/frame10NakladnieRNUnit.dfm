@@ -207,6 +207,17 @@ inherited frame10NakladnieRN: Tframe10NakladnieRN
         Styles.Content = dmAdditions.cxStyle_GridColumnBOLD
         Width = 197
       end
+      object cxGridNPN_PAY_INFO: TcxGridDBColumn
+        Caption = 'Plata'
+        DataBinding.FieldName = 'PAY_INFO'
+        HeaderAlignmentHorz = taCenter
+        HeaderHint = 'Metoda de plata: credit (0% / standard), MIA, incasari legate (numerar, card, transfer) sau metoda aleasa pe site'
+        MinWidth = 60
+        Options.Editing = False
+        Options.FilteringPopupIncrementalFiltering = True
+        Styles.Content = dmAdditions.cxStyle_GridColumnBOLD
+        Width = 110
+      end
       object cxGridNPN_PHONELIST: TcxGridDBColumn
         AlternateCaption = 'Telefon'
         Caption = 'Telefon'
@@ -1365,6 +1376,14 @@ inherited frame10NakladnieRN: Tframe10NakladnieRN
       ShortCut = 16474
       OnClick = bbGoodsForeignCodeClick
     end
+    object bbAcntName: TdxBarButton
+      Caption = 'Denumirea pe contabilitate...'
+      Category = 0
+      Hint = 'Denumirea pe contabilitate a produsului'
+      Visible = ivAlways
+      ShortCut = 32834
+      OnClick = bbAcntNameClick
+    end
     object bbFLG_DOC_SALARY: TdxBarButton
       Caption = 'Acest document nu participa la calculul salariului'
       Category = 0
@@ -1824,6 +1843,10 @@ inherited frame10NakladnieRN: Tframe10NakladnieRN
       item
         Visible = True
         ItemName = 'bbGoodsForeignCode'
+      end
+      item
+        Visible = True
+        ItemName = 'bbAcntName'
       end
       item
         BeginGroup = True

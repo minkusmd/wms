@@ -486,7 +486,7 @@ uses
   SWNValueStorageUnit, dxInputDialogs, frmAddGoodsfromPrices, frmAddNewGoodsUnit, frmAnalizePriceListUnit,
   frmContentGoodsEditorDialog, frmContentPackage, frmCustomersDlg, frmGoods, frmGoodsPriceListDlgUnit, frmGoodsTypeDialog,
   frmMuncitorulProgressUnit, frmPriceManageStringFieldsUnit, frmPriceTypesUnit, frmPricelistImportUnit,
-  frmSelectGoodsTypeUnit, frmSyssDataEditor, frmSyssEditorWindow, uAnalizePriceList, uLoadProductImages, uPythonRunner, MamicoContentUnit, ImperiaContentUnit, ArvaliscomContentUnit, PriceListContentTransferUnit, NexDistributionUnit, TriomacPriceListUnit, PriceGoodsCreateUnit,
+  frmSelectGoodsTypeUnit, frmSyssDataEditor, frmSyssEditorWindow, uAnalizePriceList, uLoadProductImages, uPythonRunner, MamicoContentUnit, ImperiaContentUnit, ArvaliscomContentUnit, FiltreContentUnit, PriceListContentTransferUnit, NexDistributionUnit, TriomacPriceListUnit, PriceGoodsCreateUnit,
   System.Math,
   IBCClasses, System.JSON, System.Generics.Collections, System.Net.HttpClient, System.Net.URLClient,
   System.Win.Registry,
@@ -1112,6 +1112,29 @@ var
 
   procedure EnsureToken(AForce: Boolean); forward;
 
+  // Textul de eroare al serverului (FastAPI: {"detail": "..."})
+  function ErrorDetail(const AResponse: IHTTPResponse): string;
+  var
+    V, D: TJSONValue;
+  begin
+    Result := Trim(AResponse.ContentAsString(TEncoding.UTF8));
+    V := TJSONObject.ParseJSONValue(Result);
+    try
+      if V is TJSONObject then
+      begin
+        D := TJSONObject(V).GetValue('detail');
+        if D is TJSONString then
+          Result := D.Value
+        else if Assigned(D) then
+          Result := D.ToJSON;
+      end;
+    finally
+      V.Free;
+    end;
+    if Length(Result) > 300 then
+      Result := Copy(Result, 1, 300) + '...';
+  end;
+
   // Retries never turn a temporary 503 into an empty catalog. No DB writes here.
   function RequestJson(const APath: string; ABody: TJSONObject): TJSONObject;
   var
@@ -1161,10 +1184,17 @@ var
         WaitForApi(Cardinal(WaitSeconds) * 1000);
         Continue;
       end;
+      // 401 e identic pentru parola gresita, cont blocat si IP nepermis (documentatia API 1.0.0);
+      // 403 = IP-ul nu e in lista permisa a contului
+      if (Response.StatusCode = 401) or (Response.StatusCode = 403) then
+        raise Exception.CreateFmt('API MEDIAMAGNAT: acces refuzat (HTTP %d: %s).' + sLineBreak + sLineBreak +
+          'Serverul nu precizeaza cauza: parola gresita, cont blocat sau adresa IP nepermisa.' + sLineBreak +
+          'Verificati USERNAME si PASSWORD in Setari > Configurari API (API_CODE = %s) ' +
+          'si cereti furnizorului sa confirme contul si sa permita adresa IP externa a acestui calculator.',
+          [Response.StatusCode, ErrorDetail(Response), cApiCode]);
       if Response.StatusCode <> 200 then
-        raise Exception.CreateFmt('API MEDIAMAGNAT: HTTP %d %s. ' +
-          'Verificati datele de acces si adresa IP permisa de furnizor.',
-          [Response.StatusCode, Response.StatusText]);
+        raise Exception.CreateFmt('API MEDIAMAGNAT: HTTP %d %s: %s',
+          [Response.StatusCode, Response.StatusText, ErrorDetail(Response)]);
       V := TJSONObject.ParseJSONValue(Response.ContentAsString(TEncoding.UTF8));
       if not (V is TJSONObject) then
       begin
@@ -2359,6 +2389,16 @@ begin
   if IBCQuerySuppliers.FieldByName('CustomerID').AsInteger = cArvaliscomSupplierID then
   begin
     TArvaliscomContentLoader.RunForPriceItems(IBCQueryPriceItems, dmDB.IBCConnection, cArvaliscomSupplierID);
+    if IBCQueryPriceListImages.Active then
+      IBCQueryPriceListImages.Refresh;
+  end;
+
+  // filtre.md (LUMEA FILTRELOR)
+  if IBCQuerySuppliers.FieldByName('CustomerID').AsInteger = cFiltreSupplierID then
+  begin
+    // cauta fiecare articol dupa SUPPLIER_GOODS_CODE pe filtre.md (verificat dupa "Cod produs"):
+    // imaginile -> TS_PRICELIST_ITEMS_IMAGES, descrierea RO/RU -> TS_PRICELIST_ITEMS_DESCRIPTION
+    TFiltreContentLoader.RunForPriceItems(IBCQueryPriceItems, dmDB.IBCConnection, cFiltreSupplierID);
     if IBCQueryPriceListImages.Active then
       IBCQueryPriceListImages.Refresh;
   end;

@@ -104,6 +104,7 @@ object frmMainForm: TfrmMainForm
     Align = alLeft
     BevelOuter = bvNone
     TabOrder = 1
+    ExplicitHeight = 361
     object SpeedButton1: TSpeedButton
       Left = 441
       Top = 1111
@@ -195,6 +196,7 @@ object frmMainForm: TfrmMainForm
       Height = 28
       Align = dalBottom
       BarManager = dxBarManagerMain
+      ExplicitTop = 328
     end
     inline frameSipClient1: TframeSipClient
       Left = 0
@@ -216,13 +218,11 @@ object frmMainForm: TfrmMainForm
       ParentColor = False
       ParentFont = False
       TabOrder = 3
-      ExplicitTop = 400
       ExplicitWidth = 323
       ExplicitHeight = 361
       inherited Panel1: TPanel
         Width = 323
         Height = 232
-        StyleElements = [seFont, seClient, seBorder]
         ExplicitWidth = 323
         ExplicitHeight = 232
         inherited cxPageControl1: TcxPageControl
@@ -251,7 +251,6 @@ object frmMainForm: TfrmMainForm
         Width = 323
         Font.Charset = RUSSIAN_CHARSET
         ParentFont = False
-        StyleElements = [seFont, seClient, seBorder]
         ExplicitWidth = 323
         inherited SBtn1: TSpeedButton
           Font.Charset = RUSSIAN_CHARSET
@@ -263,7 +262,6 @@ object frmMainForm: TfrmMainForm
         end
         inherited LineMemo: TMemo
           Height = 46
-          StyleElements = [seFont, seClient, seBorder]
           ExplicitHeight = 46
         end
         inherited PhoneEdit: TcxTextEdit
@@ -2867,6 +2865,13 @@ object frmMainForm: TfrmMainForm
       Hint = 'Cursul USD (TS_CURRENCY)'
       Visible = ivAlways
     end
+    object bbSipPhone: TdxBarButton
+      Caption = 'Telefon (SIP)'
+      Category = 0
+      Hint = 'Arata / ascunde fereastra telefonului (mereu deasupra)'
+      Visible = ivAlways
+      OnClick = bbSipPhoneClick
+    end
     object bbSipLog: TdxBarButton
       Caption = 'Sip log...'
       Category = 0
@@ -2931,6 +2936,10 @@ object frmMainForm: TfrmMainForm
         item
           Visible = True
           ItemName = 'bbMainMenuRef_GoodsACNT'
+        end
+        item
+          Visible = True
+          ItemName = 'bbMainMenuRef_GoodsAcntTypes'
         end
         item
           Visible = True
@@ -3689,6 +3698,13 @@ object frmMainForm: TfrmMainForm
       ShortCut = 16450
       OnClick = bbMainMenuRef_GoodsACNTClick
     end
+    object bbMainMenuRef_GoodsAcntTypes: TdxBarButton
+      Caption = 'Denumiri contabile pe tipuri de produs'
+      Category = 2
+      Hint = 'Denumirile contabile grupate dupa tipul produsului'
+      Visible = ivAlways
+      OnClick = bbMainMenuRef_GoodsAcntTypesClick
+    end
     object bbSYSS: TdxBarButton
       Caption = 'Nomenclator general'
       Category = 2
@@ -4170,6 +4186,10 @@ object frmMainForm: TfrmMainForm
         end
         item
           BeginGroup = True
+          Visible = True
+          ItemName = 'bbSipPhone'
+        end
+        item
           Visible = True
           ItemName = 'bbSipLog'
         end

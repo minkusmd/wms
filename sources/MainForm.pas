@@ -49,6 +49,7 @@ uses
   cxPC,
   System.UITypes,
   frameSipClientUnit,
+  frmSipPhoneWindowUnit,
   SWNConst,
   System.Messaging,
   cxControls,
@@ -146,6 +147,7 @@ type
     bbShortcut_PrihodCasaOrder: TdxBarButton;
     bbShortcut_RashCasaOrder: TdxBarButton;
     bbMainMenuRef_GoodsACNT: TdxBarButton;
+    bbMainMenuRef_GoodsAcntTypes: TdxBarButton;
     bbNewDocument: TdxBarButton;
     bbModifyDocument: TdxBarButton;
     bbRemoveDocument: TdxBarButton;
@@ -283,6 +285,7 @@ type
     bbDial: TdxBarButton;
     bsUsdRate: TdxBarStatic;
     bbSipLog: TdxBarButton;
+    bbSipPhone: TdxBarButton;
     bbTipCredite: TdxBarButton;
     bbCredite: TdxBarSubItem;
     bbPromoPerDay: TdxBarButton;
@@ -366,6 +369,7 @@ type
     procedure bbMainMenuRef_GoodsTypeClick(Sender: TObject);
     procedure bbMainMenuRef_EnterprisesClick(Sender: TObject);
     procedure bbMainMenuRef_GoodsACNTClick(Sender: TObject);
+    procedure bbMainMenuRef_GoodsAcntTypesClick(Sender: TObject);
     procedure cmbMainFirmsCurChange(Sender: TObject);
     procedure bbNewDocumentClick(Sender: TObject);
     procedure bbModifyDocumentClick(Sender: TObject);
@@ -483,6 +487,7 @@ type
     procedure bbDialClick(Sender: TObject);
     procedure frameSipClient1CallBtnClick(Sender: TObject);
     procedure bbSipLogClick(Sender: TObject);
+    procedure bbSipPhoneClick(Sender: TObject);
     procedure bbTipCrediteClick(Sender: TObject);
     procedure bbPromoPerDayClick(Sender: TObject);
     procedure bbPriceRulesClick(Sender: TObject);
@@ -530,6 +535,12 @@ type
     procedure bbCloseDocumentClick(Sender: TObject);
     procedure bbOpenDocumentClick(Sender: TObject);
   private    { Private declarations }
+    // telefonul SIP: fereastra nemodala, mereu deasupra, cu frameSipClient1 + bdcSIP mutate in ea
+    fSipWindow: TfrmSipPhoneWindow;
+    procedure CreateSipPhoneWindow;
+    procedure DestroySipPhoneWindow;
+    procedure WhenSipIncomingCall(Sender: TObject);
+  private
     FPendingDocsTimer: TTimer;
     FPendingDocCounts: array[0..1] of Integer; { aliniat cu cPendingDocTypes }
     FLastPendingRefreshTick: UInt64; { GetTickCount64 al ultimei verificari la cerere }
@@ -700,6 +711,7 @@ var
 implementation
 
 uses
+  FantasticAI.SWNAccessDiagnostic,
   AppSettingsDlg,
   Clipbrd,
   DMLinkAPIClientUnit,
@@ -871,6 +883,7 @@ uses
   frmGlobalCallHistoryUnit,
   frmGoods,
   frmGoodsACNTBrowser,
+  frmGoodsAcntTypesUnit,
   frmGoodsFoldersDlg,
   frmGoodsRelatedBrowserUnit,
   frmGoodsTypeDialog,
@@ -1395,6 +1408,12 @@ begin
   ShowGoodsAcntEditor;
 end;
 
+// denumirile contabile pe tipuri de produs; schimbarea tipului cere dreptul de modificare a denumirilor
+procedure TfrmMainForm.bbMainMenuRef_GoodsAcntTypesClick(Sender: TObject);
+begin
+  ShowGoodsAcntTypesDialog(SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Справочники_НДН_Изменение_наименования_для_накладной));
+end;
+
 procedure TfrmMainForm.bbMainMenuRef_GoodsClick(Sender: TObject);
 begin
   ShowGoodsEditor;
@@ -1597,6 +1616,52 @@ begin
   finally
     dialog.Free;
   end;
+end;
+
+procedure TfrmMainForm.bbSipPhoneClick(Sender: TObject);
+begin
+  if Assigned(fSipWindow) then
+    fSipWindow.TogglePhone;
+end;
+
+procedure TfrmMainForm.CreateSipPhoneWindow;
+begin
+  fSipWindow := nil;
+  if not frameSipClient1.Visible then
+  begin
+    bbSipPhone.Visible := ivNever;
+    Exit;
+  end;
+  // bara SIP sus, frame-ul (apelare + istoria apelurilor) pe restul ferestrei; raman ale MainForm
+  fSipWindow := TfrmSipPhoneWindow.Create(nil);
+  bdcSIP.Parent := fSipWindow;
+  bdcSIP.Align := dalTop;
+  bdcSIP.Visible := True;
+  frameSipClient1.Parent := fSipWindow;
+  frameSipClient1.Align := alClient;
+  frameSipClient1.OnIncomingCall := WhenSipIncomingCall;
+  fSipWindow.LoadPosition;
+end;
+
+procedure TfrmMainForm.DestroySipPhoneWindow;
+begin
+  if not Assigned(fSipWindow) then
+    Exit;
+  fSipWindow.SavePosition;
+  // controalele se intorc in MainForm inainte ca fereastra sa fie distrusa (altfel le-ar distruge ea)
+  frameSipClient1.OnIncomingCall := nil;
+  frameSipClient1.Visible := False;
+  frameSipClient1.Parent := pnLeft;
+  bdcSIP.Visible := False;
+  bdcSIP.Parent := pnLeft;
+  FreeAndNil(fSipWindow);
+end;
+
+procedure TfrmMainForm.WhenSipIncomingCall(Sender: TObject);
+begin
+  // apel primit: fereastra telefonului apare daca operatorul o inchisese
+  if Assigned(fSipWindow) then
+    fSipWindow.ShowPhone;
 end;
 
 procedure TfrmMainForm.bbSMSClick(Sender: TObject);
@@ -2009,6 +2074,8 @@ end;
 
 procedure TfrmMainForm.BuildFirmList;
 var
+  FantasticAllowedFirms: TArray<Integer>;
+  FantasticFirmIndex: Integer;
   Props: TcxImageComboBoxProperties;
   Item: TcxImageComboBoxItem;
   S: string;
@@ -2052,6 +2119,10 @@ begin
     dxStatusBar.Panels[3].Text := 'TVA=' + dmDB.FirmaInfo.VAT.ToString + '%, ' + S;
     Props.EndUpdate;
   end;
+  SetLength(FantasticAllowedFirms, Props.Items.Count);
+  for FantasticFirmIndex := 0 to Props.Items.Count - 1 do
+    FantasticAllowedFirms[FantasticFirmIndex] := Integer(Props.Items[FantasticFirmIndex].Value);
+  WriteFantasticAccessDiagnostic(FantasticAllowedFirms);
 end;
 
 procedure TfrmMainForm.CreateDateFilter(const Filters: TFrameDocumentDateFilterSet);
@@ -3022,6 +3093,9 @@ begin
 
   winChatWindow := nil;
 
+  // dupa SetupSecurityItems: utilizatorii limitati nu au telefon (frameSipClient1 ascuns)
+  CreateSipPhoneWindow;
+
   dmDB.LoadSipColors;
 
  // Cream o singura data la pornirea aplicatiei
@@ -3219,6 +3293,8 @@ begin
   OnUltraUsdRateChecked := nil;
   if Assigned(FPendingDocsTimer) then
     FPendingDocsTimer.Enabled := False;
+
+  DestroySipPhoneWindow;
 
   if Assigned(winChatWindow) then
   begin
@@ -3791,6 +3867,8 @@ end;
 
 procedure TfrmMainForm.OnRingMessage(var Msg: TMessage);
 begin
+  if Assigned(fSipWindow) then
+    fSipWindow.ShowPhone;
   frameSipClient1.CallActionExecute(nil);
   frameSipClient1.CallActionUpdate(nil);
 end;
@@ -4182,7 +4260,10 @@ begin
   // Denumiri pentru nakladnie
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Справочники_Наименование_для_накладных) or
     SWNSecurityManager.IsPartialAccessMode then
+  begin
     bbMainMenuRef_GoodsACNT.Visible := ivNever;
+    bbMainMenuRef_GoodsAcntTypes.Visible := ivNever;
+  end;
 
   // SYSS
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Справочники_Системный_справочник) or SWNSecurityManager.IsPartialAccessMode
@@ -5648,6 +5729,9 @@ begin
   // show chat window
   if Assigned(winChatWindow) then
     winChatWindow.ShowChatWindow;
+  // telefonul SIP: deschis daca era deschis la ultima iesire
+  if Assigned(fSipWindow) then
+    fSipWindow.RestoreVisibility;
   // focus back to main window
   Self.SetFocus;
 end;
@@ -5932,9 +6016,10 @@ begin
       dbetWebCerereFinantare:
         begin
           PlayAudio_CerereDeFinantare;
-          // refresh Cerere de finantare, only if frame is visible and no other dialogs opened
-          if Assigned(SWNFrameManager.CurrentFrame) and (SWNFrameManager.CurrentFrame.FrameID = 51) and (SWNFormsMonitor.Count
-            = 0) then
+          // refresh Cerere de finantare (51) sau Web-Order (24: cu FIN_AS_WEBORDER = 1 cererea de credit
+          // vine ca 134), only if frame is visible and no other dialogs opened
+          if Assigned(SWNFrameManager.CurrentFrame) and ((SWNFrameManager.CurrentFrame.FrameID = 51) or
+            (SWNFrameManager.CurrentFrame.FrameID = 24)) and (SWNFormsMonitor.Count = 0) then
             dmDB.FullRefresh;
         end;
 

@@ -47,13 +47,42 @@ object frmAddGoodsToIncomingInvoiceDlg: TfrmAddGoodsToIncomingInvoiceDlg
       Style.TextColor = clGrayText
     end
   end
-  object cxGridDocs: TcxGrid
+  object pnlMode: TPanel
     Left = 0
     Top = 52
     Width = 1000
-    Height = 383
-    Align = alClient
+    Height = 30
+    Align = alTop
+    BevelOuter = bvNone
     TabOrder = 1
+    object rbExistingDoc: TRadioButton
+      Left = 8
+      Top = 6
+      Width = 260
+      Height = 19
+      Caption = 'In factura de intrare deschisa'
+      Checked = True
+      TabOrder = 0
+      TabStop = True
+      OnClick = rbModeClick
+    end
+    object rbNewDoc: TRadioButton
+      Left = 280
+      Top = 6
+      Width = 340
+      Height = 19
+      Caption = 'Factura de intrare noua de la furnizorul ales'
+      TabOrder = 1
+      OnClick = rbModeClick
+    end
+  end
+  object cxGridDocs: TcxGrid
+    Left = 0
+    Top = 82
+    Width = 1000
+    Height = 353
+    Align = alClient
+    TabOrder = 2
     object tvDocs: TcxGridDBTableView
       Navigator.Buttons.CustomButtons = <>
       ScrollbarAnnotations.CustomAnnotations = <>
@@ -142,6 +171,116 @@ object frmAddGoodsToIncomingInvoiceDlg: TfrmAddGoodsToIncomingInvoiceDlg
       GridView = tvDocs
     end
   end
+  object pnlSuppliers: TPanel
+    Left = 0
+    Top = 82
+    Width = 1000
+    Height = 353
+    Align = alClient
+    BevelOuter = bvNone
+    TabOrder = 3
+    Visible = False
+    object pnlSuppliersTop: TPanel
+      Left = 0
+      Top = 0
+      Width = 1000
+      Height = 34
+      Align = alTop
+      BevelOuter = bvNone
+      TabOrder = 0
+      object btnOtherSupplier: TButton
+        Left = 8
+        Top = 4
+        Width = 120
+        Height = 26
+        Caption = 'Alt furnizor...'
+        TabOrder = 0
+        OnClick = btnOtherSupplierClick
+      end
+      object lbSuppliersInfo: TcxLabel
+        Left = 138
+        Top = 8
+        Caption = 
+          'Furnizorii produsului; "Alt furnizor..." alege din catalogul de ' +
+          'clienti.'
+        Style.TextColor = clGrayText
+      end
+    end
+    object cxGridSuppliers: TcxGrid
+      Left = 0
+      Top = 34
+      Width = 1000
+      Height = 319
+      Align = alClient
+      TabOrder = 1
+      object tvSuppliers: TcxGridDBTableView
+        Navigator.Buttons.CustomButtons = <>
+        ScrollbarAnnotations.CustomAnnotations = <>
+        OnCellDblClick = tvDocsCellDblClick
+        DataController.DataSource = dsSuppliers
+        DataController.KeyFieldNames = 'CUSTOMERID'
+        DataController.Summary.DefaultGroupSummaryItems = <>
+        DataController.Summary.FooterSummaryItems = <>
+        DataController.Summary.SummaryGroups = <>
+        OptionsData.Deleting = False
+        OptionsData.DeletingConfirmation = False
+        OptionsData.Editing = False
+        OptionsData.Inserting = False
+        OptionsSelection.CellSelect = False
+        OptionsView.ColumnAutoWidth = True
+        OptionsView.GroupByBox = False
+        OptionsView.Indicator = True
+        object tvSuppliersNAME: TcxGridDBColumn
+          Caption = 'Furnizor'
+          DataBinding.FieldName = 'NAME'
+          HeaderAlignmentHorz = taCenter
+          Width = 260
+        end
+        object tvSuppliersFLG_IN_STOCK: TcxGridDBColumn
+          Caption = 'In stoc'
+          DataBinding.FieldName = 'FLG_IN_STOCK'
+          PropertiesClassName = 'TcxCheckBoxProperties'
+          Properties.ValueChecked = 1
+          Properties.ValueUnchecked = 0
+          HeaderAlignmentHorz = taCenter
+          Width = 60
+        end
+        object tvSuppliersPRICE0: TcxGridDBColumn
+          Caption = 'Pret0'
+          DataBinding.FieldName = 'PRICE0'
+          HeaderAlignmentHorz = taCenter
+          Width = 85
+        end
+        object tvSuppliersCURRENCY0_NAME: TcxGridDBColumn
+          Caption = 'Valuta pret0'
+          DataBinding.FieldName = 'CURRENCY0_NAME'
+          HeaderAlignmentHorz = taCenter
+          Width = 70
+        end
+        object tvSuppliersPRICE0_MDL: TcxGridDBColumn
+          Caption = 'Pret0, lei'
+          DataBinding.FieldName = 'PRICE0_MDL'
+          HeaderAlignmentHorz = taCenter
+          Width = 90
+        end
+        object tvSuppliersLAST_PRICE_DATE: TcxGridDBColumn
+          Caption = 'Pret actualizat'
+          DataBinding.FieldName = 'LAST_PRICE_DATE'
+          HeaderAlignmentHorz = taCenter
+          Width = 120
+        end
+        object tvSuppliersOPEN_DOCS: TcxGridDBColumn
+          Caption = 'Facturi deschise'
+          DataBinding.FieldName = 'OPEN_DOCS'
+          HeaderAlignmentHorz = taCenter
+          Width = 95
+        end
+      end
+      object lvSuppliers: TcxGridLevel
+        GridView = tvSuppliers
+      end
+    end
+  end
   object pnlBottom: TPanel
     Left = 0
     Top = 435
@@ -149,7 +288,7 @@ object frmAddGoodsToIncomingInvoiceDlg: TfrmAddGoodsToIncomingInvoiceDlg
     Height = 44
     Align = alBottom
     BevelOuter = bvNone
-    TabOrder = 2
+    TabOrder = 4
     object lbQty: TcxLabel
       Left = 8
       Top = 12
@@ -185,7 +324,7 @@ object frmAddGoodsToIncomingInvoiceDlg: TfrmAddGoodsToIncomingInvoiceDlg
     Top = 479
     Width = 1000
     Height = 41
-    TabOrder = 3
+    TabOrder = 5
   end
   object qDocs: TIBCQuery
     KeyFields = 'DOCID'
@@ -256,6 +395,71 @@ object frmAddGoodsToIncomingInvoiceDlg: TfrmAddGoodsToIncomingInvoiceDlg
     OnDataChange = dsDocsDataChange
     Left = 152
     Top = 152
+  end
+  object qSuppliers: TIBCQuery
+    KeyFields = 'CUSTOMERID'
+    SQL.Strings = (
+      'SELECT S.* FROM ('
+      '  SELECT C.CUSTOMERID, C.NAME,'
+      '         COALESCE(GF.FLG_IN_STOCK, 0) FLG_IN_STOCK, GF.PRICE0, GF.CURRENCY0_NAME,'
+      '         GF.PRICE0_MDL, GF.LAST_PRICE_DATE,'
+      '         (SELECT COUNT(*) FROM TDB_DOCS D'
+      '          WHERE D.DOCTYPEID = :DOCTYPEID AND D.DT = :FIRMA AND D.CT = C.CUSTOMERID'
+      '            AND GET_FLG_VALUE(D.FLAGS, 10) = 0 AND GET_FLG_VALUE(D.FLAGS, 2) = 0) OPEN_DOCS'
+      '  FROM TS_CUSTOMER C'
+      '  LEFT JOIN LATERAL ('
+      '    SELECT FIRST 1 GET_FLG_VALUE(F.FLAGS, 3) FLG_IN_STOCK, F.PRICE0, CU.TITLE CURRENCY0_NAME,'
+      '           ROUND(F.PRICE0 * CU.EXCHANGE_RATE, 2) PRICE0_MDL, F.LAST_PRICE_DATE'
+      '    FROM TS_GOODS_FOREIGN F'
+      '    LEFT JOIN TS_CURRENCY CU ON CU.CURRENCYID = COALESCE(F.CURRENCY0ID, 498)'
+      '    WHERE F.GOODSID = :GOODSID AND F.CUSTOMERID = C.CUSTOMERID'
+      '    ORDER BY GET_FLG_VALUE(F.FLAGS, 3) DESC, IIF(COALESCE(F.PRICE0, 0) > 0, 0, 1), F.PRICE0'
+      '  ) GF ON 1 = 1'
+      '  WHERE (C.CUSTOMERID IN (SELECT F2.CUSTOMERID FROM TS_GOODS_FOREIGN F2 WHERE F2.GOODSID = :GOODSID_F)'
+      '         OR C.CUSTOMERID = :EXTRA_CT)'
+      '    AND C.CUSTOMERID > 0'
+      ') S'
+      'ORDER BY S.FLG_IN_STOCK DESC, IIF(COALESCE(S.PRICE0, 0) > 0, 0, 1), S.PRICE0_MDL, S.NAME')
+    ReadOnly = True
+    Left = 72
+    Top = 216
+    ParamData = <
+      item
+        DataType = ftInteger
+        Name = 'DOCTYPEID'
+        ParamType = ptInput
+        Value = nil
+      end
+      item
+        DataType = ftInteger
+        Name = 'FIRMA'
+        ParamType = ptInput
+        Value = nil
+      end
+      item
+        DataType = ftInteger
+        Name = 'GOODSID'
+        ParamType = ptInput
+        Value = nil
+      end
+      item
+        DataType = ftInteger
+        Name = 'GOODSID_F'
+        ParamType = ptInput
+        Value = nil
+      end
+      item
+        DataType = ftInteger
+        Name = 'EXTRA_CT'
+        ParamType = ptInput
+        Value = nil
+      end>
+  end
+  object dsSuppliers: TIBCDataSource
+    DataSet = qSuppliers
+    OnDataChange = dsSuppliersDataChange
+    Left = 152
+    Top = 216
   end
   object trWrite: TIBCTransaction
     Left = 232

@@ -827,6 +827,7 @@ object frmGoodsEditorDialog: TfrmGoodsEditorDialog
         end>
       Properties.ListFieldIndex = 1
       Properties.ListSource = IBCDataSourceGOODS_ACNT
+      Properties.OnInitPopup = lcbGoodsAcntPropertiesInitPopup
       TabOrder = 2
       Width = 783
     end
@@ -1277,13 +1278,22 @@ object frmGoodsEditorDialog: TfrmGoodsEditorDialog
     Connection = dmDB.IBCConnection
     SQL.Strings = (
       'select * from TS_goods_acnt'
-      'where goods_TYPEID = :GOODS_TYPEID and flg_FOLDER=0')
+      'where (goods_TYPEID = :GOODS_TYPEID and flg_FOLDER=0)'
+      '   or goods_acnt_id = :GOODS_ACNT_ID'
+      'order by nameacnt')
     Left = 52
     Top = 488
     ParamData = <
       item
-        DataType = ftUnknown
+        DataType = ftInteger
         Name = 'GOODS_TYPEID'
+        ParamType = ptInput
+        Value = nil
+      end
+      item
+        DataType = ftInteger
+        Name = 'GOODS_ACNT_ID'
+        ParamType = ptInput
         Value = nil
       end>
   end

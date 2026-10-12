@@ -52,7 +52,20 @@ uses SWNDealsUnit,
   Vcl.ImgList,
   cxImageList,
   cxClasses,
-  dxUIAClasses;
+  dxUIAClasses,
+  Vcl.StdCtrls,
+  cxContainer,
+  cxPC,
+  dxBarBuiltInMenu,
+  cxVGrid,
+  cxDBVGrid,
+  cxInplaceContainer,
+  cxImage,
+  cxTextEdit,
+  cxDBEdit,
+  DBAccess,
+  IBC,
+  MemDS;
 
 type
   Tframe24WebZakaz = class(TSWNBaseFrame)
@@ -117,7 +130,38 @@ type
     bbEcommInfo: TdxBarButton;
     bbCancelCashback: TdxBarButton;
     cxGridWZ_RESPONSIBLE_USERNAME: TcxGridDBColumn;
+    cxGridWZ_PAYMENT_METHOD: TcxGridDBColumn;
     bbAssignToMe: TdxBarButton;
+    cxPageControlBottom: TcxPageControl;
+    tbsGoods: TcxTabSheet;
+    tbsCredit: TcxTabSheet;
+    pnCreditState: TPanel;
+    lbCreditState: TLabel;
+    sbCredit: TScrollBox;
+    pnCreditInfo: TPanel;
+    lbCreditInfo: TLabel;
+    cxDBVerticalGridCredit: TcxDBVerticalGrid;
+    vgrCreditOrg: TcxDBEditorRow;
+    vgrCreditType: TcxDBEditorRow;
+    vgrCreditSuma: TcxDBEditorRow;
+    vgrCreditPerioada: TcxDBEditorRow;
+    vgrCreditRata: TcxDBEditorRow;
+    vgrCreditAvans: TcxDBEditorRow;
+    pnCreditPerson: TPanel;
+    lbCreditPerson: TLabel;
+    cxDBVerticalGridPerson: TcxDBVerticalGrid;
+    vgrPersonNPP: TcxDBEditorRow;
+    vgrPersonIDNP: TcxDBEditorRow;
+    vgrPersonBirth: TcxDBEditorRow;
+    vgrPersonPhone: TcxDBEditorRow;
+    vgrPersonFax: TcxDBEditorRow;
+    imgCreditScan1: TcxDBImage;
+    imgCreditScan2: TcxDBImage;
+    edCreditScan1Name: TcxDBTextEdit;
+    edCreditScan2Name: TcxDBTextEdit;
+    IBCQueryCredit: TIBCQuery;
+    IBCDataSourceCredit: TIBCDataSource;
+    bbCreditOnly: TdxBarButton;
     procedure bbAddGoodsClick(Sender: TObject);
     procedure bbModifyGoodsClick(Sender: TObject);
     procedure bbDeleteGoodsClick(Sender: TObject);
@@ -146,9 +190,19 @@ type
     procedure cxGridComponentsTableStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
       AItem: TcxCustomGridTableItem; var AStyle: TcxStyle);
     procedure bbAssignToMeClick(Sender: TObject);
+    procedure cxGridWZ_PAYMENT_METHODGetDisplayText(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord;
+      var AText: string);
+    procedure cxPageControlBottomChange(Sender: TObject);
+    procedure IBCDataSourceCreditDataChange(Sender: TObject; Field: TField);
+    procedure bbCreditOnlyClick(Sender: TObject);
   private
     { Private declarations }
     fSEC_ViewOnly, fSEC_CanModify, fSEC_CanDelete: Boolean;
+    // dreptul 1792: dosarul de credit (IDNP, buletin) e date personale
+    fSEC_ViewCredit: Boolean;
+    procedure UpdateCreditTab;
+    procedure ShowCreditState;
+    procedure ApplyCreditFilter;
     procedure WhenGridFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord:
       TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
     procedure SelectionChanged;
@@ -167,6 +221,7 @@ type
     procedure SetupQtyFields;
     procedure AssignResponsibleOnOpen;
     procedure MiaPaymentClick(Sender: TObject);
+    function IsCreditOrder(ARecord: TcxCustomGridRecord): Boolean;
   protected
     { Protected declarations }
     function InitFrameID: integer; override;
@@ -196,7 +251,6 @@ uses
   SWNGoodsServicesUnit,
   DataModuleDB,
   DataModuleAdditions,
-  IBC,
   SWNConst,
   SWNUtils,
   frmSelectGoodsToAddDialog,
@@ -331,12 +385,11 @@ begin
         Exit;
       end;
     end;
+    // CreateConfiguratorDoc_DB inchide deja Web-Order-ul (SP_CLOSE_WEBZAKAZ in aceeasi tranzactie);
+    // aici doar se reincarca lista, fara a doua inchidere.
     docID := dmDB.CreateConfiguratorDoc_DB(dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger);
     if docID <> -1 then
-    begin
-      CloseCurrentDocument;
-//      ShowInfoDialog('Web-Order', 'Oferta creata cu succes!');
-    end;
+      dmDB.FullRefresh;
   end;
 end;
 
@@ -431,6 +484,11 @@ end;
 
 procedure Tframe24WebZakaz.cxGridWZTableCustomDrawCell(Sender: TcxCustomGridTableView; ACanvas: TcxCanvas; AViewInfo:
   TcxGridTableDataCellViewInfo; var ADone: Boolean);
+const
+  cCreditRowColor        = $E6F7E6; // RGB(230, 247, 230)
+  cCreditFocusedRowColor = $CDEBCD; // RGB(205, 235, 205)
+var
+  Credit: Boolean;
 begin
   if VarIsNumeric(AViewInfo.GridRecord.Values[cxGridWZ_FLG_CLOSED.index]) then
   begin
@@ -456,11 +514,55 @@ begin
     end;
   end;
 
+  // clientul a ales creditul: fundal verde foarte deschis, tipul platii ingrosat
+  Credit := IsCreditOrder(AViewInfo.GridRecord);
+  if Credit then
+  begin
+    if not AViewInfo.Selected then
+      ACanvas.Brush.Color := cCreditRowColor;
+    if AViewInfo.Item = cxGridWZ_PAYMENT_METHOD then
+      ACanvas.Font.Style := ACanvas.Font.Style + [fsBold];
+  end;
+
      // highlight selected row
   if AViewInfo.RecordViewInfo.Focused and not AViewInfo.Focused then
   begin
-    ACanvas.Brush.Color := $E8E8E8;
+    if Credit then
+      ACanvas.Brush.Color := cCreditFocusedRowColor
+    else
+      ACanvas.Brush.Color := $E8E8E8;
   end;
+end;
+
+// Credit = metoda de plata din deal (site: cos / "1 click") sau analitica de credit (Credit 0% / cu dobanda).
+function Tframe24WebZakaz.IsCreditOrder(ARecord: TcxCustomGridRecord): Boolean;
+begin
+  Result := False;
+  if ARecord = nil then
+    Exit;
+  Result := (Pos('CREDIT', UpperCase(VarToStr(ARecord.Values[cxGridWZ_PAYMENT_METHOD.Index]))) = 1) or
+    (Pos('CREDIT', UpperCase(VarToStr(ARecord.Values[cxGridWZ_DTSC_NAME.Index]))) = 1);
+end;
+
+procedure Tframe24WebZakaz.cxGridWZ_PAYMENT_METHODGetDisplayText(Sender: TcxCustomGridTableItem; ARecord:
+  TcxCustomGridRecord; var AText: string);
+var
+  Analytic: string;
+begin
+  if ARecord = nil then
+    Exit;
+  if IsCreditOrder(ARecord) then
+  begin
+    // analitica precizeaza tipul creditului (Credit 0% / Credit cu dobanda)
+    Analytic := VarToStr(ARecord.Values[cxGridWZ_DTSC_NAME.Index]);
+    if Pos('CREDIT', UpperCase(Analytic)) = 1 then
+      AText := Analytic
+    else
+      AText := 'Credit';
+  end
+  else if SameText(AText, 'La primire') then
+    // "1 click": plata integrala la primirea marfii
+    AText := 'Integral, la primire';
 end;
 
 procedure Tframe24WebZakaz.cxGridWZTableKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -635,6 +737,7 @@ procedure Tframe24WebZakaz.DoFrameHide;
 begin
      // inchidem sursele de date externe conform "GetExternalDataSourceTypes"
   CloseExternalData;
+  IBCQueryCredit.Close;
 
      // 1. De scos la griduri event handles for OnFocusedRecordChanged
   cxGridWZTable.OnFocusedRecordChanged := nil;
@@ -667,8 +770,91 @@ begin
      // 3. deschidem sursele de date externe conform "GetExternalDataSourceTypes"
   OpenExternalData(FrameDataFilterInfo);
 
+  // dosarul de credit se citeste doar cand fila "Credit" e deschisa (are scanarile buletinului)
+  cxPageControlBottom.ActivePage := tbsGoods;
+  UpdateCreditTab;
+
      // 4. Selection update
   SelectionChanged;
+end;
+
+procedure Tframe24WebZakaz.cxPageControlBottomChange(Sender: TObject);
+begin
+  if csLoading in ComponentState then
+    Exit;
+  UpdateCreditTab;
+end;
+
+procedure Tframe24WebZakaz.UpdateCreditTab;
+begin
+  if fSEC_ViewCredit and (cxPageControlBottom.ActivePage = tbsCredit) then
+  begin
+    if not IBCQueryCredit.Active then
+      IBCQueryCredit.Open;
+  end
+  else if IBCQueryCredit.Active then
+    IBCQueryCredit.Close;
+  ShowCreditState;
+end;
+
+procedure Tframe24WebZakaz.IBCDataSourceCreditDataChange(Sender: TObject; Field: TField);
+begin
+  // Field = nil: dosarul s-a reincarcat (alta comanda selectata)
+  if Field = nil then
+    ShowCreditState;
+end;
+
+// Comanda are dosar (rand in TWEB_CERERE_FINANTARE) -> datele lui; comanda pe credit fara dosar
+// ("1 click" cu credit) -> operatorul trebuie sa ceara actele clientului.
+procedure Tframe24WebZakaz.ShowCreditState;
+var
+  HasFile: Boolean;
+begin
+  if not IBCQueryCredit.Active then
+    Exit;
+  HasFile := not IBCQueryCredit.IsEmpty;
+  sbCredit.Visible := HasFile;
+  pnCreditState.Visible := not HasFile;
+  if HasFile then
+    Exit;
+  if IsCreditOrder(cxGridWZTable.Controller.FocusedRecord) then
+  begin
+    lbCreditState.Font.Color := clRed;
+    lbCreditState.Caption := 'Dosar de credit lipsa - cereti actele clientului (buletinul).';
+  end
+  else
+  begin
+    lbCreditState.Font.Color := clGrayText;
+    lbCreditState.Caption := 'Comanda nu este pe credit - nu are dosar de credit.';
+  end;
+end;
+
+procedure Tframe24WebZakaz.bbCreditOnlyClick(Sender: TObject);
+begin
+  ApplyCreditFilter;
+end;
+
+// Filtrul rapid "Doar comenzi pe credit": aceeasi regula ca IsCreditOrder - metoda de plata din
+// deal sau analitica de plata incep cu "Credit" (Credit / Credit 0% / Credit cu dobanda).
+procedure Tframe24WebZakaz.ApplyCreditFilter;
+var
+  Filter: TcxDataFilterCriteria;
+begin
+  Filter := cxGridWZTable.DataController.Filter;
+  Filter.BeginUpdate;
+  try
+    Filter.Root.Clear;
+    if bbCreditOnly.Down then
+    begin
+      Filter.Options := Filter.Options + [fcoCaseInsensitive];
+      Filter.Root.BoolOperatorKind := fboOr;
+      Filter.Root.AddItem(cxGridWZ_PAYMENT_METHOD, foLike, 'Credit%', 'Credit%');
+      Filter.Root.AddItem(cxGridWZ_DTSC_NAME, foLike, 'Credit%', 'Credit%');
+    end;
+    Filter.Active := bbCreditOnly.Down;
+  finally
+    Filter.EndUpdate;
+  end;
 end;
 
 procedure Tframe24WebZakaz.dxBarButton1Click(Sender: TObject);
@@ -769,7 +955,8 @@ begin
 end;
 
 procedure Tframe24WebZakaz.AssignResponsibleOnOpen;
-// Comanda web deschisa, neinchisa si fara responsabil primeste utilizatorul curent.
+// Comanda web deschisa, neinchisa si fara responsabil (NULL, 0 sau -1) primeste utilizatorul
+// curent - aceeasi regula ca la Cererea de finantare si la crearea ofertei.
 // UPDATE-ul e conditionat pe RESPONSIBLE_USERID gol, deci daca doi operatori o
 // deschid in acelasi timp ramane primul. Reincarcarea completa pastreaza in
 // grila atat RESPONSIBLE_USERID, cat si RESPONSIBLE_USERNAME.
@@ -780,13 +967,13 @@ begin
   if not dmDB.IBCQueryDocs.Active or dmDB.IBCQueryDocs.IsEmpty then
     Exit;
   if (dmDB.IBCQueryDocs.FieldByName('FLG_CLOSED').AsInteger = 1) or
-    (dmDB.IBCQueryDocs.FieldByName('RESPONSIBLE_USERID').AsInteger <> 0) then
+    (dmDB.IBCQueryDocs.FieldByName('RESPONSIBLE_USERID').AsInteger > 0) then
     Exit;
 
   DocID := dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger;
   try
     dmDB.ExecuteQuery('UPDATE TDB_DOCS SET RESPONSIBLE_USERID = :USERID' +
-      ' WHERE DOCID = :DOCID AND DOCTYPEID = 134 AND COALESCE(RESPONSIBLE_USERID, 0) = 0',
+      ' WHERE DOCID = :DOCID AND DOCTYPEID = 134 AND COALESCE(RESPONSIBLE_USERID, -1) <= 0',
       [dmDB.CurrentUserID, DocID]);
 
     // Cine a castigat: noi sau un coleg care a deschis-o cu o clipa inainte
@@ -805,7 +992,7 @@ begin
       Query.Free;
     end;
 
-    if Winner <> 0 then
+    if Winner > 0 then
     begin
       dmDB.IBCQueryDocs.DisableControls;
       try
@@ -894,6 +1081,8 @@ begin
   bbAction_Sceot.Enabled := fSceot;
 
   GoodsSelectionChanged;
+  // mesajul "dosar lipsa" depinde si de plata comenzii selectate, nu doar de dosar
+  ShowCreditState;
 end;
 
 procedure Tframe24WebZakaz.SetupDefaultFocus;
@@ -922,6 +1111,10 @@ begin
     bbAction_Rashod.Visible := ivNever;
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_WEB_WЗ_Создать_Счет_на_Оплату) then
     bbAction_Sceot.Visible := ivNever;
+
+  // fila "Credit" (dosarul: IDNP, buletin) - doar cu dreptul "Cerere de finantare - vizualizare"
+  fSEC_ViewCredit := SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_WEB_ЗНФ_Просмотр);
+  tbsCredit.TabVisible := fSEC_ViewCredit;
 
   if dxBarPopupMenu.ItemLinks.VisibleItemCount <= 0 then
     cxGridWZTable.PopupMenu := nil

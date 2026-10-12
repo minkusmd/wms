@@ -55,7 +55,8 @@ uses
   Vcl.Menus,
   dxUIAClasses,
   FiscalDeviceUnit,
-  ECCReceiptSendUnit;
+  ECCReceiptSendUnit,
+  cxImage;
 
 type
   TDocumentInfo = class
@@ -121,6 +122,8 @@ type
     tbsPrintProgress: TTabSheet;
     Label1: TLabel;
     Label5: TLabel;
+    sbReceiptImage: TScrollBox;
+    imgReceipt: TcxImage;
     cxGridTable_GOODSID: TcxGridColumn;
     lbCustomerVAT: TLabel;
     lbInvalidTVAGroup: TLabel;
@@ -208,6 +211,7 @@ type
     function DoPrintReceipt: Boolean;
     function ReceiptDocID: Integer;
     procedure SendReceiptToClient;
+    procedure ShowReceiptImage;
     procedure DoOpenTill;
     procedure AbortReceipt;
     procedure SetIsPersoanaJuridica(const Value: Boolean);
@@ -266,7 +270,9 @@ uses
   SWNConst,
   SWNDBErrors,
   SWNUtils,
-  SWNValueStorageUnit;
+  SWNValueStorageUnit,
+  ECCTransactionStore,
+  Vcl.Imaging.pngimage;
 
 {$R *.dfm}
 { TfrmReceiptPrintDlg }
@@ -481,6 +487,7 @@ begin
             fReceiptSuma) then
             // ECC: rindul din TDB_DOCS_RECEIPT se leaga de tranzactia din jurnal
             fDevice.ConfirmRegistered(fLastPrinted, fTargetFacturaDocInfo.DocID, fReceiptSuma);
+          ShowReceiptImage;
           SendReceiptToClient;
         end
         else if not fReceiptPrinted then
@@ -1388,6 +1395,47 @@ begin
   Result := fFactura_DOCID;
   if Result <= 0 then
     Result := fTargetFacturaDocInfo.DocID;
+end;
+
+// ECC: imaginea bonului emis (PNG-ul din TFP_ECC_TRANSACTION) pe tab-ul de tipar, la orice
+// varianta de trimitere. Lipsa imaginii nu schimba nimic: bonul e emis si inregistrat.
+procedure TfrmReceiptPrintV2Dlg.ShowReceiptImage;
+var
+  Store: TECCTransactionStore;
+  Data: TMemoryStream;
+  Png: TPngImage;
+begin
+  if (fDevice = nil) or (fDevice.Kind <> fdkECC) or (fLastPrinted.ExternalId = '') then
+    Exit;
+  Data := TMemoryStream.Create;
+  Png := TPngImage.Create;
+  Store := TECCTransactionStore.Create(dmDB.IBCConnection);
+  try
+    try
+      if not Store.LoadPng(fLastPrinted.ExternalId, Data) then
+        Exit;
+      Data.Position := 0;
+      Png.LoadFromStream(Data);
+    except
+      Exit;
+    end;
+    if Png.Width = 0 then
+      Exit;
+    tbsPrintProgress.Caption := 'Bonul fiscal';
+    Label1.Visible := False;
+    Label5.Visible := False;
+    sbReceiptImage.Visible := True;
+    imgReceipt.Picture.Assign(Png);
+    // bonul la marimea lui, micsorat doar daca e mai lat decit tab-ul; cel lung se citeste derulind.
+    // Intii inaltimea intreaga: apare bara de derulare si latimea ramasa e cea finala.
+    imgReceipt.Height := Png.Height;
+    if Png.Width > imgReceipt.Width then
+      imgReceipt.Height := Round(imgReceipt.Width * Png.Height / Png.Width);
+  finally
+    Store.Free;
+    Png.Free;
+    Data.Free;
+  end;
 end;
 
 // Bonul ECC ajunge la client pe calea aleasa la emitere. Esecul nu schimba nimic:

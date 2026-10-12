@@ -1,4 +1,4 @@
-unit frmGoodsEditorDlg;
+п»їunit frmGoodsEditorDlg;
 
 interface
 
@@ -144,6 +144,7 @@ type
     procedure btnUpdateDictClick(Sender: TObject);
     procedure bbGoodsTitleModifyClick(Sender: TObject);
     procedure frameGoodsEditDescription1edCODEExit(Sender: TObject);
+    procedure lcbGoodsAcntPropertiesInitPopup(Sender: TObject);
   private
     { Private declarations }
     FCreateNewRecord: Boolean;
@@ -162,6 +163,7 @@ type
 //    procedure DoCreateDefaultSupplierGoodsCode(GoodsID: Integer);
     procedure SetParentWEBGoodsTypeID(const Value: Integer);
     procedure ShowLastModifyDateTime;
+    procedure OpenGoodsAcntList;
   protected
     { Protected declarations }
     procedure BindingDataSource; override;
@@ -576,6 +578,7 @@ begin
     IBCQueryGST.Active := True;
     IBCQueryTypeGoodsDelivery.Active := True;
     IBCQueryGoodsType.Active := True;
+    OpenGoodsAcntList;
 
     IBCQueryGoodsDictionary.ParamByName('GOODSID').AsInteger := fMasterDataSet.FieldByName('GOODSID').AsInteger;
     IBCQueryGoodsDictionary.Open;
@@ -616,13 +619,36 @@ begin
   end;
 end;
 
+// Denumirile contabile pentru tipul produsului (TS_GOODS_ACNT.GOODS_TYPEID = WEBGOODSTYPE_ID), plus cea
+// legata deja de produs: lcbGoodsAcnt o afiseaza si cind are alt tip sau nu are tip. Se redeschide doar daca
+// s-a schimbat tipul sau denumirea (la deschiderea dialogului si a listei).
+procedure TfrmGoodsEditorDialog.OpenGoodsAcntList;
+var
+  TypeID, AcntID: Integer;
+begin
+  TypeID := fMasterDataSet.FieldByName('WEBGOODSTYPE_ID').AsInteger;
+  AcntID := fMasterDataSet.FieldByName('GOODS_ACNT_ID').AsInteger;
+  if IBCQueryGOODS_ACNT.Active and (IBCQueryGOODS_ACNT.ParamByName('GOODS_TYPEID').AsInteger = TypeID) and
+    (IBCQueryGOODS_ACNT.ParamByName('GOODS_ACNT_ID').AsInteger = AcntID) then
+    Exit;
+  IBCQueryGOODS_ACNT.Close;
+  IBCQueryGOODS_ACNT.ParamByName('GOODS_TYPEID').AsInteger := TypeID;
+  IBCQueryGOODS_ACNT.ParamByName('GOODS_ACNT_ID').AsInteger := AcntID;
+  IBCQueryGOODS_ACNT.Open;
+end;
+
+procedure TfrmGoodsEditorDialog.lcbGoodsAcntPropertiesInitPopup(Sender: TObject);
+begin
+  OpenGoodsAcntList;
+end;
+
 procedure TfrmGoodsEditorDialog.SelectGoodsAcnt;
 var
   goodsACNT: TfrmGoodsACNTDlg;
 begin
   goodsACNT := TfrmGoodsACNTDlg.Create(Self);
   try
-    if SecurityFlagEnabled(cSecurityFlag_Справочники_НДН_Изменение_наименования_для_накладной) then
+    if SecurityFlagEnabled(cSecurityFlag_РЎРїСЂР°РІРѕС‡РЅРёРєРё_РќР”Рќ_РР·РјРµРЅРµРЅРёРµ_РЅР°РёРјРµРЅРѕРІР°РЅРёСЏ_РґР»СЏ_РЅР°РєР»Р°РґРЅРѕР№) then
     begin
       AppUserConfigStorage.OpenSection(Self.Name + 'GOODS_ACNT_ID');
       try
@@ -681,7 +707,7 @@ end;
 procedure TfrmGoodsEditorDialog.SetupSecurityItems;
 begin
   // goods property
-  if not SecurityFlagEnabled(cSecurityFlag_Справочники_Товары_Изменение_характеристик_товара) then
+  if not SecurityFlagEnabled(cSecurityFlag_РЎРїСЂР°РІРѕС‡РЅРёРєРё_РўРѕРІР°СЂС‹_РР·РјРµРЅРµРЅРёРµ_С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРє_С‚РѕРІР°СЂР°) then
   begin
     mmTITLE.Enabled := False;
 
@@ -693,59 +719,59 @@ begin
     cbFLG_REQUIRE_CERTIFICAT.Enabled := False;
   end;
 
-  if not SecurityFlagEnabled(cSecurityFlag_Справочники_Наименование_для_накладных) then
+  if not SecurityFlagEnabled(cSecurityFlag_РЎРїСЂР°РІРѕС‡РЅРёРєРё_РќР°РёРјРµРЅРѕРІР°РЅРёРµ_РґР»СЏ_РЅР°РєР»Р°РґРЅС‹С…) then
   begin
     beGoodsACNT.Properties.Buttons[0].Visible := False;
     beGoodsACNT.Properties.ClickKey := 0;
   end;
 
-  if not SecurityFlagEnabled(cSecurityFlag_Справочники_Товары_Тип_учета_товара) then
+  if not SecurityFlagEnabled(cSecurityFlag_РЎРїСЂР°РІРѕС‡РЅРёРєРё_РўРѕРІР°СЂС‹_РўРёРї_СѓС‡РµС‚Р°_С‚РѕРІР°СЂР°) then
   begin
     lcbSerialNumber.Enabled := False;
   end;
 
   // currency
-  if not SecurityFlagEnabled(cSecurityFlag_Справочники_Товары_Изменение_валюты_и_цены_товара) then
+  if not SecurityFlagEnabled(cSecurityFlag_РЎРїСЂР°РІРѕС‡РЅРёРєРё_РўРѕРІР°СЂС‹_РР·РјРµРЅРµРЅРёРµ_РІР°Р»СЋС‚С‹_Рё_С†РµРЅС‹_С‚РѕРІР°СЂР°) then
   begin
 //    lcbCurrency.Enabled := False;
     tbsPriceHistory.TabVisible := False;
   end;
 
   // Price columns
-  if not SecurityFlagEnabled(cSecurityFlag_Справочники_Товары_Колонка_цен_0) then
+  if not SecurityFlagEnabled(cSecurityFlag_РЎРїСЂР°РІРѕС‡РЅРёРєРё_РўРѕРІР°СЂС‹_РљРѕР»РѕРЅРєР°_С†РµРЅ_0) then
   begin
     cxGridPriceHistory_PRICE7.Visible := False;
     cxGridChartDBSeries_Price7.Visible := False;
   end;
-  if not SecurityFlagEnabled(cSecurityFlag_Справочники_Товары_Колонка_цен_1) then
+  if not SecurityFlagEnabled(cSecurityFlag_РЎРїСЂР°РІРѕС‡РЅРёРєРё_РўРѕРІР°СЂС‹_РљРѕР»РѕРЅРєР°_С†РµРЅ_1) then
   begin
     cxGridPriceHistory_PRICE1.Visible := False;
   end;
-  if not SecurityFlagEnabled(cSecurityFlag_Справочники_Товары_Колонка_цен_2) then
+  if not SecurityFlagEnabled(cSecurityFlag_РЎРїСЂР°РІРѕС‡РЅРёРєРё_РўРѕРІР°СЂС‹_РљРѕР»РѕРЅРєР°_С†РµРЅ_2) then
   begin
     cxGridPriceHistory_PRICE2.Visible := False;
   end;
-  if not SecurityFlagEnabled(cSecurityFlag_Справочники_Товары_Колонка_цен_3) then
+  if not SecurityFlagEnabled(cSecurityFlag_РЎРїСЂР°РІРѕС‡РЅРёРєРё_РўРѕРІР°СЂС‹_РљРѕР»РѕРЅРєР°_С†РµРЅ_3) then
   begin
     cxGridPriceHistory_PRICE3.Visible := False;
   end;
-  if not SecurityFlagEnabled(cSecurityFlag_Справочники_Товары_Колонка_цен_4) then
+  if not SecurityFlagEnabled(cSecurityFlag_РЎРїСЂР°РІРѕС‡РЅРёРєРё_РўРѕРІР°СЂС‹_РљРѕР»РѕРЅРєР°_С†РµРЅ_4) then
   begin
     cxGridPriceHistory_PRICE4.Visible := False;
     cxGridChartDBSeries_Price4.Visible := False;
   end;
-  if not SecurityFlagEnabled(cSecurityFlag_Справочники_Товары_Колонка_цен_5) then
+  if not SecurityFlagEnabled(cSecurityFlag_РЎРїСЂР°РІРѕС‡РЅРёРєРё_РўРѕРІР°СЂС‹_РљРѕР»РѕРЅРєР°_С†РµРЅ_5) then
   begin
     cxGridPriceHistory_PRICE7.Visible := False;
     cxGridChartDBSeries_Price7.Visible := False;
   end;
-  if not SecurityFlagEnabled(cSecurityFlag_Справочники_Товары_Колонка_цен_6) then
+  if not SecurityFlagEnabled(cSecurityFlag_РЎРїСЂР°РІРѕС‡РЅРёРєРё_РўРѕРІР°СЂС‹_РљРѕР»РѕРЅРєР°_С†РµРЅ_6) then
   begin
   end;
-  if not SecurityFlagEnabled(cSecurityFlag_Справочники_Товары_Колонка_цен_7) then
+  if not SecurityFlagEnabled(cSecurityFlag_РЎРїСЂР°РІРѕС‡РЅРёРєРё_РўРѕРІР°СЂС‹_РљРѕР»РѕРЅРєР°_С†РµРЅ_7) then
   begin
   end;
-  btnOk.Visible := SecurityFlagEnabled(cSecurityFlag_Справочники_Товары_Изменение_характеристик_товара);
+  btnOk.Visible := SecurityFlagEnabled(cSecurityFlag_РЎРїСЂР°РІРѕС‡РЅРёРєРё_РўРѕРІР°СЂС‹_РР·РјРµРЅРµРЅРёРµ_С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРє_С‚РѕРІР°СЂР°);
 end;
 
 procedure TfrmGoodsEditorDialog.ShowLastModifyDateTime;

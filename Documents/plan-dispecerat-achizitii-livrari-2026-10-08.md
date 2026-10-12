@@ -1,6 +1,7 @@
 # Plan: Dispecerat pentru achizitii si livrari
 
 Data: 2026-10-08
+Actualizat: 2026-10-10
 Stare: propunere functionala si tehnica; deciziile deschise sunt marcate explicit.
 Scop: un singur ecran WMS in care dispecerul planifica ridicarile de la
 furnizori si livrarile catre clienti, repartizand zonele si sarcinile pe curieri.
@@ -47,6 +48,16 @@ sarcini si trasee operationale.
   de marfa, cu preturi si total propriu. Se afiseaza si totalul comenzii.
 - Se afiseaza modalitatea de plata: numerar, card, credit, transfer, precum
   si plata partiala, suma achitata si restul de achitat/incasat.
+- Stack confirmat pentru aplicatia soferilor: PHP/Laravel, Livewire 4 si
+  Alpine.js, intr-un proiect separat de `fantastic.web`.
+- Decizii 2026-10-10, dupa analiza aplicatiei existente uno.md/app/curier
+  (`CurieriWMS/docs/analiza-uno-curier-2026-10-10.md`), detaliate in 9F:
+  - Returul la furnizor intra in prima versiune, ca sarcina distincta in
+    lista de achizitii a soferului.
+  - Depozitul propriu apare ca oprire de incarcare in lista de achizitii.
+  - Soferul vede pretul de achizitie, cantitatea si suma la achizitii.
+  - Interfata aplicatiei soferilor este in limba romana.
+  - Aplicatia uno.md/app/curier ramane in paralel; nu se integreaza cu ea.
 
 ## 2. Decizii de confirmat
 
@@ -414,10 +425,81 @@ WMS si telefonul se actualizeaza periodic si la revenirea in ecran; se
 afiseaza ultima actualizare. Mecanismul concret si intervalul se stabilesc
 la implementare. Planurile ciorna nu sunt prezentate ca trasee de executat.
 
-Se poate reutiliza infrastructura Yii2 a `fantastic.web` pentru un modul
-autentificat dedicat soferilor sau se poate utiliza un serviciu separat.
-Alegerea se face dupa inspectarea instructiunilor si autentificarii acelui
-proiect; aceasta propunere nu presupune ca integrarea este deja verificata.
+### Arhitectura web confirmata
+
+Aplicatia soferilor este un proiect separat de `fantastic.web`, cu backend
+PHP/Laravel, componente Livewire 4 si Alpine.js pentru interactiunile locale
+pe telefon. WMS Delphi ramane interfata dispecerului si gestioneaza
+completarea documentelor, vanzarea si fiscalizarea.
+
+Directorul aplicatiei, confirmat de utilizator:
+`D:\Projects\MyProjects\WMS\CurieriWMS`.
+Sursele Laravel, configuratia Docker Compose si resursele de build vor fi
+organizate aici. Fisierele `.pas`/`.dfm` ale WMS raman in structura Delphi
+existenta; aplicatia PHP are propria structura si codificare UTF-8.
+
+Livewire gestioneaza traseele, formularele, starile si incarcarile de
+fotografii. Alpine gestioneaza previzualizarile, ferestrele si interactiunile
+locale; se foloseste instanta inclusa de Livewire, fara incarcare dubla.
+Regulile de business sunt in servicii backend si proceduri/validari comune
+in Firebird, independente de componentele interfetei.
+
+Accesul la Firebird foloseste un strat dedicat cu interogari parametrizate,
+proceduri si tranzactii. Nu se presupune suport nativ Eloquent pentru schema
+WMS. Inainte de implementarea fluxurilor se verifica driverul compatibil cu
+versiunile PHP/Laravel alese, codificarile, BLOB-urile, tranzactiile si
+concurenta; versiunile concrete se fixeaza dupa aceasta verificare.
+
+Fotografiile se stocheaza privat pe server sau intr-un serviciu de fisiere,
+cu referinte in baza si acces autorizat. Contul web este legat explicit de
+colaboratorul-curier. Datele operationale raman in Firebird, fara duplicarea
+comenzilor sau a soldurilor intr-o baza web independenta.
+
+Primul pas tehnic este o verificare restransa a integrarii Laravel-Firebird:
+citirea unei sarcini, o tranzactie cu rollback si verificarea conflictelor
+de alocare. Dupa validarea conexiunii se implementeaza fluxurile complete.
+
+### Docker Compose pentru dezvoltare si rulare
+
+Mediul propus foloseste containere Linux si Docker Compose pentru proiectul
+Laravel al soferilor. Se pregateste o imagine proprie PHP 8.5-FPM, cu
+`pdo_firebird` si biblioteca client Firebird compatibila. Instalarea extensiei
+se verifica in imagine; un pachet Composer nu inlocuieste driverul PHP.
+
+Servicii de baza: `web` (Nginx) si `app` (PHP-FPM/Laravel). Composer si
+Node/Vite sunt folosite la instalare si build; Vite poate rula separat in
+dezvoltare. Worker-ul de coada, scheduler-ul si Redis se adauga numai pentru
+functionalitatile care le necesita, folosind aceeasi versiune a aplicatiei.
+
+Firebird WMS existent este instalat pe Windows Server si ramane sursa
+operationala acolo. Containerele Linux ale aplicatiei se conecteaza prin
+reteaua privata la IP-ul/numele Windows Server, portul Firebird configurat
+(uzual 3050) si aliasul bazei. Biblioteca client Firebird din container
+este versiunea Linux; fisierul bazei si serviciul Firebird raman pe Windows.
+Se prefera aliasul definit pe server, fara a expune calea Windows in
+configuratia aplicatiei. Nu se monteaza fisierul bazei live in container.
+Se verifica accesul de la hostul Docker, regula Windows Firewall pentru
+sursa autorizata si autentificarea contului dedicat aplicatiei. Locatia
+hostului Docker ramane de stabilit; nu se presupune instalarea lui pe
+acelasi Windows Server. Conectarea nu foloseste `localhost` pentru serverul
+Firebird extern.
+Pentru testele cu modificari se foloseste o baza de test separata; optional
+un serviciu Firebird dedicat profilului de test, fara afectarea bazei live.
+
+Fotografiile si datele persistente ale aplicatiei au volume/stocare privata
+cu backup; recrearea containerelor nu sterge dovezile. Configuratia si
+secretele se furnizeaza la rulare, fara parole in imagine sau in Git.
+
+Dezvoltarea si productia au configuratii Compose distincte: in dezvoltare
+codul poate fi montat pentru editare, iar in productie codul si resursele
+compilate sunt incluse intr-o imagine versionata, fara server Vite.
+Accesul telefonului este prin HTTPS; PHP-FPM si datele Firebird nu sunt
+expuse direct telefonului. Se verifica limitele de upload pe intregul traseu
+Nginx/PHP/Livewire, jurnalizarea si accesul autorizat la fotografii.
+
+Verificarea initiala include build-ul imaginii, prezenta `pdo_firebird`,
+conectarea la baza de test, citirea unei sarcini si rollback-ul unei operatii.
+In acest pas de planificare nu au fost create sau pornite containere.
 
 ### Conexiune slaba si confirmari
 
@@ -678,6 +760,60 @@ reconfirmarea dispecerului si actualizarea ecranului. Serverul respinge
 confirmarea dintr-o versiune veche pentru a evita predarea/incasarea dupa
 date comerciale depasite.
 
+## 9F. Retur la furnizor, oprirea Depozit si pretul de achizitie
+
+Decizii ale utilizatorului din 2026-10-10, luate dupa analiza aplicatiei
+existente uno.md/app/curier. Aplicatia aceea ruleaza pe alt sistem si
+ramane in paralel; CurieriWMS nu ii preia datele si nu se integreaza cu ea.
+
+### Oprirea Depozit
+
+Lista de achizitii a soferului incepe cu oprirea Depozit (depozitul de baza):
+marfa din stoc propriu pentru livrarile zilei si marfa de returnat la
+furnizori. Nu este o ridicare de la furnizor (sectiunea 4 ramane valabila);
+este o oprire de incarcare. Soferul confirma cantitatile incarcate, iar
+serverul creeaza transferul depozit de baza -> depozitul soferului, cu
+seriile/partidele deja cunoscute din stoc. Confirmarea are identificator
+unic, ca orice alta confirmare. Marfa neincarcata ramane in lista dispecerului
+ca problema de rezolvat. Marfa incarcata si nelivrata revine la baza prin
+transferul soldului (9D).
+
+### Retur la furnizor
+
+Returul este o sarcina distincta, planificata de dispecer pe baza documentului
+de retur catre furnizor din WMS (tipul exact de document se identifica la
+analiza finala). Pe telefon apare la oprirea furnizorului respectiv, separat
+de ridicari: rand evidentiat, directia catre furnizor, produs, cod, cantitate,
+pret si motivul/nota (de exemplu retur pe e-Factura).
+
+- Marfa de returnat se incarca la oprirea Depozit, deci se afla in depozitul
+  soferului cand ajunge la furnizor.
+- La predare soferul confirma cantitatea primita efectiv de furnizor; serverul
+  inregistreaza iesirea din depozitul soferului prin documentul de retur.
+  Nu se creeaza Factura de intrare. Dovada predarii (act semnat, fotografie)
+  se stabileste odata cu dovada livrarii (sectiunea 2).
+- Returul refuzat sau nepredat ramane in masina, se raporteaza cu motiv si
+  intra in transferul soldului la sosirea la baza.
+- Totalurile ridicarilor si ale retururilor se afiseaza separat; returul nu
+  se aduna la suma de achizitie a opririi. Cantitatea apare intotdeauna.
+- Returul face parte din aceeasi oprire, dar are document propriu: inceperea
+  preluarii (9B) fixeaza si lista de retur a opririi.
+
+### Pretul de achizitie pe telefon
+
+In lista de achizitii si in ecranul Preluare, fiecare pozitie arata pretul
+de achizitie, cantitatea si suma, iar oprirea arata totalul, ca soferul sa
+poata verifica factura furnizorului. Sursa pretului (comanda la furnizor,
+pricelist sau pretul de cost din pozitie) se stabileste la analiza finala.
+Pretul de achizitie apare numai pe ecranele de achizitie si retur; ecranele de
+livrare arata pretul de vanzare (9E).
+
+### Limba
+
+Interfata aplicatiei soferilor este in limba romana, cu diacritice. In prima
+versiune nu exista comutator de limba; denumirile produselor si notele apar
+asa cum sunt in WMS.
+
 ## 10. Etape de implementare
 
 1. **Analiza finala**: raspunsuri la intrebarile deschise; buffere IDE;
@@ -689,17 +825,21 @@ date comerciale depasite.
    adresa si data livrarii, depozit sofer, generarea Facturii de intrare la
    inchidere, completarea seriilor/partidelor si legatura cu vanzarea;
    activarea seriilor si partidelor salvate din intrari deschise si ajustarea selectiei,
-   alocarii si validarilor de stoc afectate.
+   alocarii si validarilor de stoc afectate; documentul de retur la furnizor
+   si transferul de incarcare la oprirea Depozit (9F).
 4. **Forma dispecerului**: paginile achizitii/livrari, filtre, restante,
    atribuiri in masa si modificari manuale.
 5. **Trasee si executare**: opriri consolidate, ordine, dependente, predari,
    confirmari, jurnal si fisa tiparita pentru curier.
 6. **Backend si acces soferi**: autentificare legata de colaborator, citirea
    traseului publicat, blocare persistenta la sosire, fotografii pe produs,
-   inchidere atomica cu generare intrare, prevenirea duplicatelor si WMS.
+   inchidere atomica cu generare intrare, prevenirea duplicatelor si WMS;
+   proiect Laravel separat si strat Firebird verificat inaintea fluxurilor.
 7. **Aplicatie web pe telefon**: traseu, oprire, apel/harta, preluare, livrare,
    produse cu serii/partide si preturi, servicii separate, totaluri si plata,
-   raportare probleme si predari. Confirmarile necesita internet; dovada
+   raportare probleme si predari, oprirea Depozit, retur la furnizor si
+   pretul de achizitie (9F), cu Livewire 4 si Alpine.js; interfata in romana.
+   Confirmarile necesita internet; dovada
    livrarii se implementeaza potrivit raspunsului la intrebarea deschisa.
 8. **Procesarea din birou**: fotografii langa pozitiile intrarii, transcriere
    serii/partide, pregatire vanzare din masina, cec electronic si transmitere.
@@ -800,6 +940,17 @@ Se pastreaza codificarile si CRLF ale surselor conform AGENTS.md.
     cu suma achitata, restul si suma de incasat la livrarea curenta.
 41. Predarea nu confirma automat plata; schimbarea pretului, serviciilor
     sau instructiunilor de plata invalideaza autorizarea versiunii vechi.
+
+42. Oprirea Depozit apare prima in lista de achizitii; confirmarea incarcarii
+    creeaza o singura data transferul in depozitul soferului.
+43. Un retur la furnizor apare la oprirea furnizorului, separat de ridicari,
+    cu cantitate, pret si motiv; totalul lui nu se aduna la ridicari.
+44. Confirmarea returului scoate marfa din depozitul soferului prin documentul
+    de retur, fara Factura de intrare; un retur refuzat revine la baza prin
+    transferul soldului.
+45. La achizitii soferul vede pretul de achizitie, cantitatea, suma si totalul
+    opririi; la livrari vede numai pretul de vanzare.
+46. Toate ecranele aplicatiei soferilor sunt in limba romana.
 
 ## 12. Rezultatul asteptat
 

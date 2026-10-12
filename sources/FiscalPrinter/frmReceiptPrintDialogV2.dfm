@@ -857,6 +857,31 @@
           '.'#13#10#13#10
         WordWrap = True
       end
+      object sbReceiptImage: TScrollBox
+        Left = 0
+        Top = 0
+        Width = 626
+        Height = 294
+        HorzScrollBar.Visible = False
+        VertScrollBar.Tracking = True
+        Align = alClient
+        BorderStyle = bsNone
+        Color = clWhite
+        ParentColor = False
+        TabOrder = 0
+        Visible = False
+        object imgReceipt: TcxImage
+          Left = 0
+          Top = 0
+          Align = alTop
+          Properties.ReadOnly = True
+          Properties.ShowFocusRect = False
+          Style.BorderStyle = ebsNone
+          TabOrder = 0
+          Height = 294
+          Width = 626
+        end
+      end
     end
   end
   object btnClose: TcxButton

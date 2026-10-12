@@ -26,14 +26,87 @@ type
     /// <summary>Show dialog "Contracte"</summary>
     class function ContractsDialog(ANewContractID: Integer; ACurrencyID: integer; AFLG_ACNT: integer;
                                    const ACT: Integer; const AContractID: Integer): string;
+
+    /// <summary>Alegerea "Denumirii pe contabilitate" a produsului direct din document.</summary>
+    class function GoodsAcntSelect(const GoodsID: Integer; const ACanModify: Boolean): Boolean;
   end;
 
 
 implementation
 uses frmGoodsInfoCardDialog, frmGoodsPricesDialog, frmGoodsForeignCodeDialog, frmCustomerCurrentDebtsDialog,
-     frmCustomerNotifyDebtsDialog, frmCustomerContractsDialog, System.SysUtils;
+     frmCustomerNotifyDebtsDialog, frmCustomerContractsDialog, System.SysUtils,
+     frmGoodsACNTBrowser, DataModuleDB, SWNValueStorageUnit, IBC, Data.DB;
 
 { TSWNCommonDialogs }
+
+// Denumirea pe contabilitate a produsului (TS_GOODS.GOODS_ACNT_ID), aleasa direct din document, fara
+// editorul produsului. ACanModify = dreptul de a schimba denumirea; fara el catalogul doar se vizualizeaza.
+// Scrierea merge pe o tranzactie proprie, comisa pe loc. True = denumirea s-a schimbat.
+class function TSWNCommonDialogs.GoodsAcntSelect(const GoodsID: Integer; const ACanModify: Boolean): Boolean;
+const
+  cLastGoodsAcntKey = 'DocGoods_GOODS_ACNT_ID';
+var
+  dialog: TfrmGoodsACNTDlg;
+  q: TIBCQuery;
+  tr: TIBCTransaction;
+  CurrentID, StartID, NewID: Integer;
+begin
+  Result := False;
+  q := TIBCQuery.Create(nil);
+  try
+    q.Connection := dmDB.IBCConnection;
+    q.SQL.Text := 'SELECT GOODS_ACNT_ID FROM TS_GOODS WHERE GOODSID = :GOODSID';
+    q.ParamByName('GOODSID').AsInteger := GoodsID;
+    q.Open;
+    if q.IsEmpty then
+      Exit;
+    CurrentID := q.Fields[0].AsInteger;
+  finally
+    q.Free;
+  end;
+
+  dialog := TfrmGoodsACNTDlg.Create(nil);
+  try
+    if not ACanModify then
+    begin
+      dialog.BrowseGoodsACNT(CurrentID);
+      Exit;
+    end;
+    // produsul fara denumire (-1): catalogul se deschide pe ultima denumire aleasa
+    StartID := CurrentID;
+    if StartID <= 0 then
+      StartID := AppUserConfigStorage.IntValues.GetValue(cLastGoodsAcntKey, -1);
+    if not dialog.SelectGoodsACNT(StartID) or (dialog.GoodsAcntID = CurrentID) then
+      Exit;
+    NewID := dialog.GoodsAcntID;
+  finally
+    dialog.Free;
+  end;
+
+  tr := TIBCTransaction.Create(nil);
+  q := TIBCQuery.Create(nil);
+  try
+    tr.DefaultConnection := dmDB.IBCConnection;
+    q.Connection := dmDB.IBCConnection;
+    q.Transaction := tr;
+    q.SQL.Text := 'UPDATE TS_GOODS SET GOODS_ACNT_ID = :GOODS_ACNT_ID WHERE GOODSID = :GOODSID';
+    q.ParamByName('GOODS_ACNT_ID').AsInteger := NewID;
+    q.ParamByName('GOODSID').AsInteger := GoodsID;
+    tr.StartTransaction;
+    try
+      q.ExecSQL;
+      tr.Commit;
+    except
+      tr.Rollback;
+      raise;
+    end;
+  finally
+    q.Free;
+    tr.Free;
+  end;
+  AppUserConfigStorage.IntValues.SetValue(cLastGoodsAcntKey, NewID);
+  Result := True;
+end;
 
 class procedure TSWNCommonDialogs.CustomerDebts(const CustomerID: Integer);
 var dialog: TfrmCustomerCurrentDebtsDlg;

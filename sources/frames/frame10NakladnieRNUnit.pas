@@ -132,6 +132,7 @@ type
     bbPriceCol7: TdxBarButton;
     bbPriceCol0: TdxBarButton;
     bbGoodsForeignCode: TdxBarButton;
+    bbAcntName: TdxBarButton;
     bbGoodsPrice: TdxBarButton;
     bbGoodsInfoCard: TdxBarButton;
     cxGridNPN_DTSC_NAME: TcxGridDBColumn;
@@ -169,6 +170,7 @@ type
     bbChangeDocUser: TdxBarButton;
     dxBarButton1: TdxBarButton;
     cxGridComponents_FLG_SUPPLIER_PROMO: TcxGridDBColumn;
+    cxGridNPN_PAY_INFO: TcxGridDBColumn;
     cxGridNPN_PHONELIST: TcxGridDBColumn;
     cxGridNPN_DELIVERY_DATE: TcxGridDBColumn;
     cxGridComponents_FLG_FORCED: TcxGridDBColumn;
@@ -257,6 +259,7 @@ type
     procedure cxGridDBCol_STOCK_QTYGetDisplayText(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord; var
       AText: string);
     procedure bbGoodsForeignCodeClick(Sender: TObject);
+    procedure bbAcntNameClick(Sender: TObject);
     procedure cxGridComponents_DISCOUNT_PGetDisplayText(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord;
       var AText: string);
     procedure cxGridComponents_DISCOUNT_SUMAGetDisplayText(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord;
@@ -1610,6 +1613,17 @@ begin
     ('STOCK_QTY').AsFloat);
 end;
 
+// denumirea pe contabilitate a produsului din rind, fara a intra in editorul produsului
+procedure Tframe10NakladnieRN.bbAcntNameClick(Sender: TObject);
+begin
+  if dmDB.IBCQueryJurnal.IsEmpty then
+    Exit;
+  if TSWNCommonDialogs.GoodsAcntSelect(dmDB.IBCQueryJurnal.FieldByName('GOODSID').AsInteger,
+    SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Справочники_НДН_Изменение_наименования_для_накладной)) and
+    (dmDB.IBCQueryJurnal.FindField('GOODS_ACNT_ID') <> nil) then
+    dmDB.IBCQueryJurnal.Refresh;
+end;
+
 procedure Tframe10NakladnieRN.bbGoodsInfoCardClick(Sender: TObject);
 begin
   TSWNCommonDialogs.GoodsInfoCardDialog(dmDB.IBCQueryJurnal.FieldByName('GOODSID').AsInteger, dmDB.IBCQueryJurnal.FieldByName
@@ -2486,6 +2500,7 @@ begin
   bbGoodsInfoCard.Enabled := fGoodsSelected;
   bbGoodsPrice.Enabled := fGoodsSelected;
   bbGoodsForeignCode.Enabled := fGoodsSelected;
+  bbAcntName.Enabled := fGoodsSelected;
      // popup menu
   bbGoodsChangeUser.Enabled := fChangeUser;
 end;
@@ -2600,6 +2615,10 @@ begin
      // Corespondenta produsului in alte firme
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Справочники_Товары_Товары_из_других_фирм) then
     bbGoodsForeignCode.Visible := ivNever;
+
+     // Denumirea pe contabilitate a produsului
+  if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Справочники_НДН_Изменение_наименования_для_накладной) then
+    bbAcntName.Visible := ivNever;
 
    	 // Documentul nu participa la calculul salariului
   if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_VINZARE_Rezervare_Documentul_nu_participa_la_calculul_salariului)

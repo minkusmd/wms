@@ -937,6 +937,22 @@ inherited frame18SciotNaOplatu: Tframe18SciotNaOplatu
       ShortCut = 16474
       OnClick = bbGoodsForeignCode_ComplectClick
     end
+    object bbAcntName_Components: TdxBarButton
+      Caption = 'Denumirea pe contabilitate...'
+      Category = 1
+      Hint = 'Denumirea pe contabilitate a produsului'
+      Visible = ivAlways
+      ShortCut = 32834
+      OnClick = bbAcntName_ComponentsClick
+    end
+    object bbAcntName_Complect: TdxBarButton
+      Caption = 'Denumirea pe contabilitate...'
+      Category = 2
+      Hint = 'Denumirea pe contabilitate a produsului'
+      Visible = ivAlways
+      ShortCut = 32834
+      OnClick = bbAcntName_ComplectClick
+    end
     object bbChangeGoods: TdxBarButton
       Caption = 'Modifica produs'
       Category = 2
@@ -1148,6 +1164,10 @@ inherited frame18SciotNaOplatu: Tframe18SciotNaOplatu
       item
         Visible = True
         ItemName = 'bbGoodsForeignCode_Components'
+      end
+      item
+        Visible = True
+        ItemName = 'bbAcntName_Components'
       end>
     UseOwnFont = False
     Left = 64
@@ -1168,6 +1188,10 @@ inherited frame18SciotNaOplatu: Tframe18SciotNaOplatu
       item
         Visible = True
         ItemName = 'bbGoodsForeignCode_Complect'
+      end
+      item
+        Visible = True
+        ItemName = 'bbAcntName_Complect'
       end>
     UseOwnFont = False
     Left = 216

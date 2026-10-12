@@ -2,17 +2,29 @@ unit frmAddGoodsToIncomingInvoiceDlgUnit;
 
 {
   Adaugarea produsului din factura de iesire (frame 10) intr-o factura de
-  intrare deschisa (DOCTYPEID = 106, "Primirea de bunuri", frame 9).
+  intrare (DOCTYPEID = 106, "Primirea de bunuri", frame 9): una deschisa sau
+  una noua, creata aici pentru furnizorul ales.
 
+  Factura deschisa:
   - lista: facturile de intrare ale firmei curente, neinchise si nesterse;
     primele sint cele al caror furnizor (CT) are produsul in TS_GOODS_FOREIGN;
   - pretul propus = TS_GOODS_FOREIGN.PRICE0 al furnizorului facturii, convertit
     in valuta facturii (EXCHANGE_RATE al valutei pretului0 / RATE al facturii);
-  - cantitatea propusa = cantitatea din factura de iesire;
   - daca produsul e deja in factura (acelasi depozit), cantitatea se adauga la
     cea existenta, pretul ramine cel din factura.
+  Factura noua:
+  - lista: furnizorii produsului din TS_GOODS_FOREIGN (+ "Alt furnizor..." din
+    catalogul de clienti); primii sint cei cu produsul in stoc (FLG_IN_PRICE,
+    bitul 3 din FLAGS), apoi dupa pretul0 in lei;
+  - antetul ca in frame 9: SP_GET_DOCTYPE_DEFAULTS(106, firma) + valuta si
+    FLG_ACNT din contractul implicit al furnizorului; pretul propus e pretul0
+    in lei, convertit la scriere daca factura e in alta valuta.
+  Implicit e ales furnizorul cu produsul in stoc si cel mai mic pret0: factura
+  lui deschisa, daca are, altfel factura noua.
+
   Scrierea: VW_TDB_JURNAL (triggerii calculeaza SUMA, SUMAVAT, COST, STOCK_QTY)
-  + SP_EXPENSES2JURNAL, ca in frame 9 (TdmDB.IBCQueryJurnalAfterPost).
+  + SP_EXPENSES2JURNAL, ca in frame 9 (TdmDB.IBCQueryJurnalAfterPost); factura
+  noua si produsul se scriu in aceeasi tranzactie.
 }
 
 interface
@@ -58,6 +70,7 @@ uses
   cxDropDownEdit,
   cxCalc,
   cxLabel,
+  cxCheckBox,
   Data.DB,
   DBAccess,
   IBC,
@@ -69,6 +82,9 @@ type
     pnlTop: TPanel;
     lbGoods: TcxLabel;
     lbInfo: TcxLabel;
+    pnlMode: TPanel;
+    rbExistingDoc: TRadioButton;
+    rbNewDoc: TRadioButton;
     cxGridDocs: TcxGrid;
     tvDocs: TcxGridDBTableView;
     tvDocsDOCID: TcxGridDBColumn;
@@ -83,6 +99,20 @@ type
     tvDocsQTY_IN_DOC: TcxGridDBColumn;
     tvDocsCREATED_BY_NAME: TcxGridDBColumn;
     lvDocs: TcxGridLevel;
+    pnlSuppliers: TPanel;
+    pnlSuppliersTop: TPanel;
+    btnOtherSupplier: TButton;
+    lbSuppliersInfo: TcxLabel;
+    cxGridSuppliers: TcxGrid;
+    tvSuppliers: TcxGridDBTableView;
+    tvSuppliersNAME: TcxGridDBColumn;
+    tvSuppliersFLG_IN_STOCK: TcxGridDBColumn;
+    tvSuppliersPRICE0: TcxGridDBColumn;
+    tvSuppliersCURRENCY0_NAME: TcxGridDBColumn;
+    tvSuppliersPRICE0_MDL: TcxGridDBColumn;
+    tvSuppliersLAST_PRICE_DATE: TcxGridDBColumn;
+    tvSuppliersOPEN_DOCS: TcxGridDBColumn;
+    lvSuppliers: TcxGridLevel;
     pnlBottom: TPanel;
     lbQty: TcxLabel;
     ceQty: TcxCalcEdit;
@@ -92,18 +122,31 @@ type
     RzDialogButtons1: TRzDialogButtons;
     qDocs: TIBCQuery;
     dsDocs: TIBCDataSource;
+    qSuppliers: TIBCQuery;
+    dsSuppliers: TIBCDataSource;
     trWrite: TIBCTransaction;
     procedure dsDocsDataChange(Sender: TObject; Field: TField);
+    procedure dsSuppliersDataChange(Sender: TObject; Field: TField);
     procedure tvDocsCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo;
       AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
+    procedure rbModeClick(Sender: TObject);
+    procedure btnOtherSupplierClick(Sender: TObject);
   private
     FGoodsID: Integer;
     FGoodsName: string;
     FQty: Double;
     FDocID: Integer;
+    FIsNewDocument: Boolean;
+    function IsNewDocumentMode: Boolean;
+    procedure OpenSuppliers(const ExtraSupplierID: Integer);
+    procedure UpdateMode;
+    procedure UpdatePrice;
     function GetExistingQty(const DocID, DTDEP, CTDEP: Integer): Variant;
+    procedure ExecGoodsRow(const q: TIBCQuery; const DocID, DTDEP, CTDEP, FlgAcnt: Integer; const Qty, Price: Double;
+      const AddToExisting: Boolean);
     procedure WriteGoodsToDocument(const DocID, DTDEP, CTDEP, FlgAcnt: Integer; const Qty, Price: Double;
       const AddToExisting: Boolean);
+    function CreateDocumentWithGoods(const SupplierID: Integer; const Qty, PriceMDL: Double): Integer;
   protected
     procedure Prepare; override;
     function IsFormDataPosted: Boolean; override;
@@ -113,6 +156,8 @@ type
     property Qty: Double read FQty write FQty;
     // factura de intrare in care s-a adaugat produsul (dupa mrOk)
     property DocID: Integer read FDocID;
+    // True = factura a fost creata in acest dialog
+    property IsNewDocument: Boolean read FIsNewDocument;
   end;
 
 // Deschide dialogul; intoarce DOCID-ul facturii de intrare sau 0 la renuntare.
@@ -124,12 +169,16 @@ implementation
 uses
   DataModuleDB,
   SWNDBErrors,
-  SWNUtils;
+  SWNUtils,
+  frmCustomersDlg,
+  frmCustomerContractsDialog;
 
 {$R *.dfm}
 
 const
   cDocTypeID_FacturaIntrare = 106; // "Primirea de bunuri", frame 9
+  cCurrencyMDL = 498;
+  cCurrencyUSD = 840;
 
 function ShowAddGoodsToIncomingInvoiceDialog(const AOwner: TComponent; const GoodsID: Integer;
   const GoodsName: string; const Qty: Double): Integer;
@@ -152,9 +201,12 @@ end;
 { TfrmAddGoodsToIncomingInvoiceDlg }
 
 procedure TfrmAddGoodsToIncomingInvoiceDlg.Prepare;
+var
+  UseNew: Boolean;
 begin
   inherited;
   FDocID := 0;
+  FIsNewDocument := False;
   lbGoods.Caption := Format('%s  (cod %d)', [FGoodsName, FGoodsID]);
   ceQty.Value := FQty;
 
@@ -168,20 +220,109 @@ begin
   qDocs.ParamByName('FIRMA').AsInteger := dmDB.CurrentFirma;
   qDocs.Open;
 
-  if qDocs.IsEmpty then
+  OpenSuppliers(0);
+
+  // implicit: furnizorul cu produsul in stoc si cel mai mic pret0 (primul rind din lista);
+  // factura lui deschisa, daca are, altfel factura noua
+  UseNew := qDocs.IsEmpty;
+  if not qSuppliers.IsEmpty and (qSuppliers.FieldByName('FLG_IN_STOCK').AsInteger = 1) then
+    UseNew := not qDocs.Locate('CT', qSuppliers.FieldByName('CUSTOMERID').AsInteger, []);
+
+  rbExistingDoc.Enabled := not qDocs.IsEmpty;
+  if UseNew then
+    rbNewDoc.Checked := True
+  else
+    rbExistingDoc.Checked := True;
+  UpdateMode;
+end;
+
+procedure TfrmAddGoodsToIncomingInvoiceDlg.OpenSuppliers(const ExtraSupplierID: Integer);
+begin
+  qSuppliers.Close;
+  qSuppliers.Connection := dmDB.IBCConnection;
+  qSuppliers.ParamByName('GOODSID').AsInteger := FGoodsID;
+  qSuppliers.ParamByName('GOODSID_F').AsInteger := FGoodsID;
+  qSuppliers.ParamByName('DOCTYPEID').AsInteger := cDocTypeID_FacturaIntrare;
+  qSuppliers.ParamByName('FIRMA').AsInteger := dmDB.CurrentFirma;
+  qSuppliers.ParamByName('EXTRA_CT').AsInteger := ExtraSupplierID;
+  qSuppliers.Open;
+end;
+
+function TfrmAddGoodsToIncomingInvoiceDlg.IsNewDocumentMode: Boolean;
+begin
+  Result := rbNewDoc.Checked;
+end;
+
+procedure TfrmAddGoodsToIncomingInvoiceDlg.rbModeClick(Sender: TObject);
+begin
+  UpdateMode;
+end;
+
+procedure TfrmAddGoodsToIncomingInvoiceDlg.UpdateMode;
+begin
+  cxGridDocs.Visible := not IsNewDocumentMode;
+  pnlSuppliers.Visible := IsNewDocumentMode;
+  if IsNewDocumentMode then
+    lbInfo.Caption := 'Se creeaza o factura de intrare noua pentru furnizorul ales. Pretul propus ' +
+      '= pretul0 al furnizorului, in lei. Primii sint furnizorii cu produsul in stoc, dupa pret.'
+  else
+    lbInfo.Caption := 'Facturile de intrare deschise ale firmei curente. Pretul propus ' +
+      '= pretul0 al produsului de la furnizorul facturii, in valuta facturii.';
+  UpdatePrice;
+end;
+
+procedure TfrmAddGoodsToIncomingInvoiceDlg.UpdatePrice;
+begin
+  if IsNewDocumentMode then
   begin
-    ShowInfoDialog('Factura de intrare', 'Nu exista facturi de intrare deschise pentru firma curenta.');
-    ModalResult := mrCancel;
+    if qSuppliers.Active and not qSuppliers.IsEmpty then
+      cePrice.Value := qSuppliers.FieldByName('PRICE0_MDL').AsFloat
+    else
+      cePrice.Value := 0;
+    lbPriceCurrency.Caption := 'MDL';
+  end
+  else if qDocs.Active and not qDocs.IsEmpty then
+  begin
+    cePrice.Value := qDocs.FieldByName('DOC_PRICE').AsFloat;
+    lbPriceCurrency.Caption := qDocs.FieldByName('CURRENCY_NAME').AsString;
   end;
 end;
 
 procedure TfrmAddGoodsToIncomingInvoiceDlg.dsDocsDataChange(Sender: TObject; Field: TField);
 begin
   // la schimbarea facturii propunem pretul0 al furnizorului ei
-  if (Field <> nil) or not qDocs.Active or qDocs.IsEmpty then
+  if (Field <> nil) or IsNewDocumentMode then
     Exit;
-  cePrice.Value := qDocs.FieldByName('DOC_PRICE').AsFloat;
-  lbPriceCurrency.Caption := qDocs.FieldByName('CURRENCY_NAME').AsString;
+  UpdatePrice;
+end;
+
+procedure TfrmAddGoodsToIncomingInvoiceDlg.dsSuppliersDataChange(Sender: TObject; Field: TField);
+begin
+  // la schimbarea furnizorului propunem pretul0 lui
+  if (Field <> nil) or not IsNewDocumentMode then
+    Exit;
+  UpdatePrice;
+end;
+
+procedure TfrmAddGoodsToIncomingInvoiceDlg.btnOtherSupplierClick(Sender: TObject);
+var
+  dialog: TfrmCustomersDlg;
+  SupplierID: Integer;
+begin
+  dialog := TfrmCustomersDlg.Create(Self);
+  try
+    if not dialog.SelectCustomer(-1, False, 0, 'Selecteaza furnizorul') then
+      Exit;
+    SupplierID := dialog.CustomerID;
+  finally
+    dialog.Free;
+  end;
+  if SupplierID <= 0 then
+    Exit;
+  OpenSuppliers(SupplierID);
+  qSuppliers.Locate('CUSTOMERID', SupplierID, []);
+  UpdatePrice;
+  cxGridSuppliers.SetFocus;
 end;
 
 procedure TfrmAddGoodsToIncomingInvoiceDlg.tvDocsCellDblClick(Sender: TcxCustomGridTableView;
@@ -197,13 +338,27 @@ var
   DocID, DTDEP, CTDEP: Integer;
   NewQty, NewPrice: Double;
   AddToExisting: Boolean;
+  SupplierName: string;
 begin
   Result := False;
 
-  if qDocs.IsEmpty then
+  if IsNewDocumentMode then
   begin
-    ShowErrorDialog('Factura de intrare', 'Alegeti factura de intrare.');
-    Exit;
+    if qSuppliers.IsEmpty then
+    begin
+      ShowErrorDialog('Factura de intrare', 'Alegeti furnizorul (sau "Alt furnizor...").');
+      Exit;
+    end;
+    SupplierName := qSuppliers.FieldByName('NAME').AsString;
+  end
+  else
+  begin
+    if qDocs.IsEmpty then
+    begin
+      ShowErrorDialog('Factura de intrare', 'Alegeti factura de intrare.');
+      Exit;
+    end;
+    SupplierName := qDocs.FieldByName('CT_NAME').AsString;
   end;
 
   NewQty := ceQty.Value;
@@ -219,14 +374,36 @@ begin
     Exit;
   end;
 
+  if (NewPrice = 0) and (ShowAskDialog('Factura de intrare',
+    Format('Furnizorul "%s" nu are pretul0 pentru acest produs.', [SupplierName]),
+    'Adaugati produsul cu pretul 0?') <> mrYes) then
+    Exit;
+
+  if IsNewDocumentMode then
+  begin
+    if (qSuppliers.FieldByName('OPEN_DOCS').AsInteger > 0) and (ShowAskDialog('Factura de intrare',
+      Format('Furnizorul "%s" are deja %d factur(i) de intrare deschise.',
+        [SupplierName, qSuppliers.FieldByName('OPEN_DOCS').AsInteger]),
+      'Creati totusi o factura noua?') <> mrYes) then
+      Exit;
+
+    try
+      FDocID := CreateDocumentWithGoods(qSuppliers.FieldByName('CUSTOMERID').AsInteger, NewQty, NewPrice);
+      FIsNewDocument := True;
+      Result := True;
+    except
+      on E: Exception do
+      begin
+        if not ProcessSWNError(E) then
+          raise;
+      end;
+    end;
+    Exit;
+  end;
+
   DocID := qDocs.FieldByName('DOCID').AsInteger;
   DTDEP := qDocs.FieldByName('DTDEP').AsInteger;
   CTDEP := qDocs.FieldByName('CTDEP').AsInteger;
-
-  if (NewPrice = 0) and (ShowAskDialog('Factura de intrare',
-    Format('Furnizorul "%s" nu are pretul0 pentru acest produs.', [qDocs.FieldByName('CT_NAME').AsString]),
-    'Adaugati produsul cu pretul 0?') <> mrYes) then
-    Exit;
 
   // produsul exista deja pe acelasi depozit al facturii -> cheie primara ocupata
   ExistingQty := GetExistingQty(DocID, DTDEP, CTDEP);
@@ -271,6 +448,40 @@ begin
   end;
 end;
 
+// Rindul produsului in factura + repartizarea cheltuielilor; ruleaza in tranzactia lui q (trWrite).
+procedure TfrmAddGoodsToIncomingInvoiceDlg.ExecGoodsRow(const q: TIBCQuery; const DocID, DTDEP, CTDEP,
+  FlgAcnt: Integer; const Qty, Price: Double; const AddToExisting: Boolean);
+begin
+  if AddToExisting then
+  begin
+    q.SQL.Text := 'UPDATE TDB_JURNAL SET QTY = QTY + :QTY ' +
+      'WHERE DOCID = :DOCID AND DTDEP = :DTDEP AND CTDEP = :CTDEP AND GOODSCOMPLECT_ID = -1 AND GOODSID = :GOODSID';
+  end
+  else
+  begin
+    q.SQL.Text := 'INSERT INTO VW_TDB_JURNAL (DOCID, DTDEP, CTDEP, GOODSCOMPLECT_ID, GOODSID, UMID, QTY, PRICE, SUMA, ' +
+      'SUMAVAT, WARRANTY, STOCK_QTY, COST, FLG_ACTIVE, FLG_ACNT, FLG_READY, FLG_DELETE) ' +
+      'SELECT :DOCID, :DTDEP, :CTDEP, -1, G.GOODSID, COALESCE(G.UMID, 1), :QTY, :PRICE, 0, ' +
+      '0, COALESCE(G.WARRANTY, 0), 0, 0, 1, :FLG_ACNT, 0, 0 ' +
+      'FROM TS_GOODS G WHERE G.GOODSID = :GOODSID';
+    q.ParamByName('PRICE').AsFloat := Price;
+    q.ParamByName('FLG_ACNT').AsInteger := FlgAcnt;
+  end;
+  q.ParamByName('DOCID').AsInteger := DocID;
+  q.ParamByName('DTDEP').AsInteger := DTDEP;
+  q.ParamByName('CTDEP').AsInteger := CTDEP;
+  q.ParamByName('GOODSID').AsInteger := FGoodsID;
+  q.ParamByName('QTY').AsFloat := Qty;
+  q.ExecSQL;
+  if q.RowsAffected = 0 then
+    raise Exception.CreateFmt('Produsul %d nu a fost gasit in nomenclator.', [FGoodsID]);
+
+  // repartizarea cheltuielilor aditionale pe produse (ca in frame 9)
+  q.SQL.Text := 'EXECUTE PROCEDURE SP_EXPENSES2JURNAL(:DOCID)';
+  q.ParamByName('DOCID').AsInteger := DocID;
+  q.ExecSQL;
+end;
+
 procedure TfrmAddGoodsToIncomingInvoiceDlg.WriteGoodsToDocument(const DocID, DTDEP, CTDEP, FlgAcnt: Integer;
   const Qty, Price: Double; const AddToExisting: Boolean);
 var
@@ -284,35 +495,118 @@ begin
 
     trWrite.StartTransaction;
     try
-      if AddToExisting then
-      begin
-        q.SQL.Text := 'UPDATE TDB_JURNAL SET QTY = QTY + :QTY ' +
-          'WHERE DOCID = :DOCID AND DTDEP = :DTDEP AND CTDEP = :CTDEP AND GOODSCOMPLECT_ID = -1 AND GOODSID = :GOODSID';
-      end
-      else
-      begin
-        q.SQL.Text := 'INSERT INTO VW_TDB_JURNAL (DOCID, DTDEP, CTDEP, GOODSCOMPLECT_ID, GOODSID, UMID, QTY, PRICE, SUMA, ' +
-          'SUMAVAT, WARRANTY, STOCK_QTY, COST, FLG_ACTIVE, FLG_ACNT, FLG_READY, FLG_DELETE) ' +
-          'SELECT :DOCID, :DTDEP, :CTDEP, -1, G.GOODSID, COALESCE(G.UMID, 1), :QTY, :PRICE, 0, ' +
-          '0, COALESCE(G.WARRANTY, 0), 0, 0, 1, :FLG_ACNT, 0, 0 ' +
-          'FROM TS_GOODS G WHERE G.GOODSID = :GOODSID';
-        q.ParamByName('PRICE').AsFloat := Price;
-        q.ParamByName('FLG_ACNT').AsInteger := FlgAcnt;
-      end;
-      q.ParamByName('DOCID').AsInteger := DocID;
+      ExecGoodsRow(q, DocID, DTDEP, CTDEP, FlgAcnt, Qty, Price, AddToExisting);
+      trWrite.Commit;
+    except
+      trWrite.Rollback;
+      raise;
+    end;
+  finally
+    q.Free;
+  end;
+end;
+
+// Factura de intrare noua (antetul ca in frame 9, frmNakladnaiaPNDocDlg) + produsul, intr-o tranzactie.
+// PriceMDL se converteste in valuta facturii, daca contractul furnizorului o cere alta decit lei.
+function TfrmAddGoodsToIncomingInvoiceDlg.CreateDocumentWithGoods(const SupplierID: Integer;
+  const Qty, PriceMDL: Double): Integer;
+var
+  q: TIBCQuery;
+  Contract: TCustomerDefultContractInfo;
+  DT, DTDEP, DTSC, SC2, CurrencyID, FlgAcnt, ContractID: Integer;
+  Rate, RateUSD, Price: Double;
+begin
+  // valorile implicite ale tipului de document pe firma (Setari > tipuri de documente)
+  DT := dmDB.CurrentFirma;
+  DTDEP := -1;
+  DTSC := -1;
+  SC2 := -1;
+  CurrencyID := cCurrencyMDL;
+  FlgAcnt := 0;
+  q := TIBCQuery.Create(nil);
+  try
+    q.Connection := dmDB.IBCConnection;
+    q.SQL.Text := 'SELECT * FROM SP_GET_DOCTYPE_DEFAULTS(:DOCTYPEID, :FIRMA)';
+    q.ParamByName('DOCTYPEID').AsInteger := cDocTypeID_FacturaIntrare;
+    q.ParamByName('FIRMA').AsInteger := dmDB.CurrentFirma;
+    q.Open;
+    if not q.Eof then
+    begin
+      if not q.FieldByName('DT').IsNull then
+        DT := q.FieldByName('DT').AsInteger;
+      if not q.FieldByName('DTDEP').IsNull then
+        DTDEP := q.FieldByName('DTDEP').AsInteger;
+      if not q.FieldByName('DTSC').IsNull then
+        DTSC := q.FieldByName('DTSC').AsInteger;
+      if not q.FieldByName('SC').IsNull then
+        SC2 := q.FieldByName('SC').AsInteger;
+      if not q.FieldByName('CURRENCYID').IsNull then
+        CurrencyID := q.FieldByName('CURRENCYID').AsInteger;
+      FlgAcnt := q.FieldByName('FLG_ACNT').AsInteger;
+    end;
+  finally
+    q.Free;
+  end;
+  if DTDEP <= 0 then
+    raise Exception.Create('Pentru "Factura de intrare" nu e setat depozitul implicit al firmei curente ' +
+      '(valorile implicite ale tipului de document). Creati factura din "Primirea de bunuri".');
+
+  // contractul implicit al furnizorului da valuta si contabilitatea (ca SelectCT in frame 9)
+  ContractID := -1;
+  Contract := TCustomerDefultContractInfo.Create(nil, SupplierID, Now);
+  try
+    if Contract.ContractID > 0 then
+    begin
+      ContractID := Contract.ContractID;
+      CurrencyID := Contract.CurrencyID;
+      FlgAcnt := Ord(Contract.FLG_ACNT);
+    end;
+  finally
+    Contract.Free;
+  end;
+
+  Rate := dmDB.GetCurrencyExchangeValue(CurrencyID, FlgAcnt = 1);
+  RateUSD := dmDB.GetCurrencyExchangeValue(cCurrencyUSD, FlgAcnt = 1, True);
+  if (Rate <= 0) or (RateUSD < 1) then
+    raise Exception.Create('Cursul valutar al facturii nu a putut fi determinat.');
+  if CurrencyID = cCurrencyMDL then
+    Price := PriceMDL
+  else
+    Price := Round(PriceMDL / Rate * 100) / 100;
+
+  q := TIBCQuery.Create(nil);
+  try
+    q.Connection := dmDB.IBCConnection;
+    q.Transaction := trWrite;
+    q.AutoCommit := False;
+
+    trWrite.StartTransaction;
+    try
+      q.SQL.Text := 'SELECT NEXT VALUE FOR SQ_TDB_DOCS_DOCID FROM RDB$DATABASE';
+      q.Open;
+      Result := q.Fields[0].AsInteger;
+      q.Close;
+
+      // DATA, CREATED_DATE, CREATED_BY, CTDEP / CTSC = -1 le pun triggerii (TRG_TDB_DOCS_BI)
+      q.SQL.Text := 'INSERT INTO VW_TDB_DOCS (DOCID, DT, CT, DTDEP, DTSC, SC2, SUMA, VAT, CURRENCYID, DISCOUNT, ' +
+        'RATE, RATEUSD, FLG_ACNT, ACC$MASK, DOCTYPEID, CONTRACTID) ' +
+        'VALUES (:DOCID, :DT, :CT, :DTDEP, :DTSC, :SC2, 0, 0, :CURRENCYID, 0, ' +
+        ':RATE, :RATEUSD, :FLG_ACNT, 0, :DOCTYPEID, :CONTRACTID)';
+      q.ParamByName('DOCID').AsInteger := Result;
+      q.ParamByName('DT').AsInteger := DT;
+      q.ParamByName('CT').AsInteger := SupplierID;
       q.ParamByName('DTDEP').AsInteger := DTDEP;
-      q.ParamByName('CTDEP').AsInteger := CTDEP;
-      q.ParamByName('GOODSID').AsInteger := FGoodsID;
-      q.ParamByName('QTY').AsFloat := Qty;
-      q.ExecSQL;
-      if q.RowsAffected = 0 then
-        raise Exception.CreateFmt('Produsul %d nu a fost gasit in nomenclator.', [FGoodsID]);
-
-      // repartizarea cheltuielilor aditionale pe produse (ca in frame 9)
-      q.SQL.Text := 'EXECUTE PROCEDURE SP_EXPENSES2JURNAL(:DOCID)';
-      q.ParamByName('DOCID').AsInteger := DocID;
+      q.ParamByName('DTSC').AsInteger := DTSC;
+      q.ParamByName('SC2').AsInteger := SC2;
+      q.ParamByName('CURRENCYID').AsInteger := CurrencyID;
+      q.ParamByName('RATE').AsFloat := Rate;
+      q.ParamByName('RATEUSD').AsFloat := RateUSD;
+      q.ParamByName('FLG_ACNT').AsInteger := FlgAcnt;
+      q.ParamByName('DOCTYPEID').AsInteger := cDocTypeID_FacturaIntrare;
+      q.ParamByName('CONTRACTID').AsInteger := ContractID;
       q.ExecSQL;
 
+      ExecGoodsRow(q, Result, DTDEP, -1, FlgAcnt, Qty, Price, False);
       trWrite.Commit;
     except
       trWrite.Rollback;

@@ -105,6 +105,7 @@ type
   private
     { Private declarations }
     fSEC_ViewOnly, fSEC_CanModify, fSEC_CanDelete: Boolean;
+    function IsArchiveMode: Boolean;
     procedure WhenGridFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
     procedure SelectionChanged;
     procedure WhenPopupMenuPopup;
@@ -418,8 +419,34 @@ begin
     Result := Result + [fbtMODIFY];
   if SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_WEB_ЗНФ_Редактировать) then
     Result := Result + [fbtMODIFY];
-  if SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_WEB_ЗНФ_Удалить) then
+  if SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_WEB_ЗНФ_Удалить) and not IsArchiveMode then
     Result := Result + [fbtDELETE];
+end;
+
+// Comutatorul FIN_AS_WEBORDER (TS_API_CONFIG, API_CODE = WEB_ORDERS) = 1: cererile de credit de pe site
+// vin ca Web-Order 134 (frame24, fila "Credit"), iar cererile 1791 raman doar arhiva pentru citire.
+// Se pot inchide in continuare cererile ramase deschise. Fara rand / eroare -> modul vechi.
+function Tframe51ZaiavkaCredit.IsArchiveMode: Boolean;
+var
+  Query: TIBCQuery;
+begin
+  Result := False;
+  Query := TIBCQuery.Create(nil);
+  try
+    Query.Connection := dmDB.IBCConnection;
+    Query.Transaction := dmDB.IBCTrDefaultSelect;
+    Query.SQL.Text := 'SELECT FIRST 1 TRIM(PARAM_VALUE) FROM TS_API_CONFIG' +
+      ' WHERE API_CODE = ''WEB_ORDERS'' AND PARAM_NAME = ''FIN_AS_WEBORDER'' AND FLG_ACTIVE = 1';
+    try
+      Query.Open;
+      Result := (not Query.Eof) and (Query.Fields[0].AsString = '1');
+      Query.Close;
+    except
+      // tabela/coloana lipsa sau fara drept de citire -> modul vechi
+    end;
+  finally
+    Query.Free;
+  end;
 end;
 
 function Tframe51ZaiavkaCredit.InitFrameID: integer;
@@ -501,7 +528,9 @@ begin
   dialog := TfrmWebZaiavkaCreditDlg.Create(Self);
   try
     dialog.CreateNewDocument := False;
-    dialog.readonly := (not canEdit) and fSEC_ViewOnly;
+    // cererea inchisa sau fara drept de modificare se deschide doar pentru citire
+    // (inainte: "(not canEdit) and fSEC_ViewOnly" lasa o cerere inchisa editabila fara dreptul de vizualizare)
+    dialog.readonly := not canEdit;
     dialog.ShowModal;
   finally
     dialog.Free;
@@ -550,6 +579,17 @@ begin
 
   if not fSEC_CanModify then
     bbDocClose.Visible := ivNever;
+
+  // Arhiva (comutatorul FIN_AS_WEBORDER = 1): doar citire si inchiderea cererilor ramase deschise
+  if IsArchiveMode then
+  begin
+    fSEC_ViewOnly := fSEC_ViewOnly or fSEC_CanModify;
+    fSEC_CanModify := False;
+    fSEC_CanDelete := False;
+    bbCreateConfigurator.Visible := ivNever;
+    cxButton1.Enabled := False;
+    cxButton2.Enabled := False;
+  end;
 
   if dxBarPopupMenu.ItemLinks.VisibleItemCount <= 0 then
     cxGridPopupMenu1.PopupMenus[0].PopupMenu := nil;

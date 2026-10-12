@@ -276,8 +276,6 @@ type
     { Public declarations }
     procedure SetupDefaultFocus; override;
     function GetCurrentSearchContext: TSearchContextValue; override;
-    procedure UpdateGoodsAcntID(GoodsID, GoodsAcntID: Integer; GoodsAcntTitle:
-        string);
   end;
 
 implementation
@@ -296,41 +294,13 @@ var
 {$R *.dfm}
 
 procedure Tframe09NakladniePN.bbAcntNameClick(Sender: TObject);
-var
-  goodsACNT: TfrmGoodsACNTDlg;
 begin
-  goodsACNT := TfrmGoodsACNTDlg.Create(Self);
-  try
-    if SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Справочники_НДН_Изменение_наименования_для_накладной) then
-    begin
-      AppUserConfigStorage.OpenSection(Self.Name + 'GOODS_ACNT_ID');
-      try
-        AppUserConfigStorage.IntValues.GetValue(Self.Name + 'GOODS_ACNT_ID', goodsACNT.GoodsAcntID)//          store column visibility and width
-      finally
-        AppUserConfigStorage.CloseSection;
-      end;
-
-      if goodsACNT.SelectGoodsAcnt(dmdb.ibcqueryjurnal.FieldByName('GOODS_ACNT_ID').AsInteger) then
-      begin
-        UpdateGoodsAcntID(dmdb.ibcqueryjurnal.FieldByName('GOODSID').AsInteger, goodsACNT.GoodsAcntID, goodsACNT.GoodsAcntTitle);
-
-        AppUserConfigStorage.OpenSection(Self.Name + 'GOODS_ACNT_ID');
-        try
-          AppUserConfigStorage.IntValues.SetValue(Self.Name + 'GOODS_ACNT_ID', goodsACNT.GoodsAcntID)//          store column visibility and width
-        finally
-          AppUserConfigStorage.CloseSection;
-        end;
-
-      end;
-    end
-    else
-    begin
-      // deschidem doar cu codul de contabilitate, fara a face update in tdb_jurnal si in ts_goods
-      goodsACNT.BrowseGoodsACNT(dmdb.IBCQueryJurnal.FieldByName('GOODS_ACNT_ID').AsInteger);
-    end;
-  finally
-    goodsACNT.Free;
-  end;
+  // denumirea pe contabilitate a produsului din rind, fara a intra in editorul produsului
+  if dmDB.IBCQueryJurnal.IsEmpty then
+    Exit;
+  if TSWNCommonDialogs.GoodsAcntSelect(dmDB.IBCQueryJurnal.FieldByName('GOODSID').AsInteger,
+    SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Справочники_НДН_Изменение_наименования_для_накладной)) then
+    dmDB.IBCQueryJurnal.Refresh;
 end;
 
 { Tframe09NakladniePN }
@@ -1776,24 +1746,6 @@ begin
   finally
     dialog.Free;
   end;
-end;
-
-procedure Tframe09NakladniePN.UpdateGoodsAcntID(GoodsID, GoodsAcntID: Integer;
-    GoodsAcntTitle: string);
-begin
-  var q:=TIBCQuery.Create(nil);
-    try
-      q.sql.text := 'update ts_goods set goods_acnt_id = :goods_acnt_id where goodsid = :goodsid';
-      q.transaction := dmdb.IBCTrDefaultUpdate;
-      q.parambyname('goods_acnt_id').AsInteger := GoodsAcntID;
-      q.parambyname('goodsid').AsInteger := GoodsID;
-      q.ExecSQL;
-
-      dmdb.IBCQueryJurnal.Refresh;
-    finally
-      q.Free;
-    end;
-
 end;
 
 function Tframe09NakladniePN.WhenCheckIfGoodsExists(const GoodsID: Integer): Boolean;

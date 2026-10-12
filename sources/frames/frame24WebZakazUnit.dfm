@@ -121,6 +121,15 @@ inherited frame24WebZakaz: Tframe24WebZakaz
         Styles.Content = dmAdditions.cxStyle_GridColumnBOLD
         Width = 178
       end
+      object cxGridWZ_PAYMENT_METHOD: TcxGridDBColumn
+        Caption = 'Plata'
+        DataBinding.FieldName = 'PAYMENT_METHOD'
+        OnGetDisplayText = cxGridWZ_PAYMENT_METHODGetDisplayText
+        HeaderAlignmentHorz = taCenter
+        MinWidth = 64
+        Options.Editing = False
+        Width = 130
+      end
       object cxGridWZ_SUMA: TcxGridDBColumn
         Caption = 'Suma'
         DataBinding.FieldName = 'SUMA'
@@ -230,320 +239,618 @@ inherited frame24WebZakaz: Tframe24WebZakaz
     Align = alBottom
     BevelOuter = bvNone
     TabOrder = 2
-    object cxGridComponents: TcxGrid
-      Left = 0
-      Top = 30
-      Width = 974
-      Height = 208
-      Margins.Left = 2
-      Margins.Top = 2
-      Margins.Right = 2
-      Margins.Bottom = 2
-      Align = alClient
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWindowText
-      Font.Height = -12
-      Font.Name = 'Segoe UI'
-      Font.Style = []
-      ParentFont = False
-      TabOrder = 1
-      LookAndFeel.NativeStyle = True
-      LookAndFeel.SkinName = ''
-      object cxGridComponentsTable: TcxGridDBTableView
-        PopupMenu = dxBarPopupMenuJurnal
-        OnKeyDown = cxGridComponentsTableKeyDown
-        Navigator.Buttons.First.Visible = True
-        Navigator.Buttons.PriorPage.Visible = True
-        Navigator.Buttons.Prior.Visible = True
-        Navigator.Buttons.Next.Visible = True
-        Navigator.Buttons.NextPage.Visible = True
-        Navigator.Buttons.Last.Visible = True
-        Navigator.Buttons.Insert.Visible = True
-        Navigator.Buttons.Append.Visible = False
-        Navigator.Buttons.Delete.Visible = True
-        Navigator.Buttons.Edit.Visible = True
-        Navigator.Buttons.Post.Visible = True
-        Navigator.Buttons.Cancel.Visible = True
-        Navigator.Buttons.Refresh.Visible = True
-        Navigator.Buttons.SaveBookmark.Visible = True
-        Navigator.Buttons.GotoBookmark.Visible = True
-        Navigator.Buttons.Filter.Visible = True
-        OnCellDblClick = cxGridComponentsTableCellDblClick
-        OnCustomDrawCell = cxGridComponentsTableCustomDrawCell
-        DataController.KeyFieldNames = 'DOCID;DTDEP;CTDEP;GOODSCOMPLECT_ID;GOODSID'
-        DataController.Summary.FooterSummaryItems = <
-          item
-            Kind = skSum
-            FieldName = 'QTY'
-            Column = cxGridDBCol_QTY
-          end
-          item
-            Kind = skSum
-            FieldName = 'SUMA'
-            Column = cxGridDBCol_SUMA
-          end
-          item
-            Kind = skSum
-            FieldName = 'SUMAVAT'
-            Column = cxGridDBCol_SUMAVAT
-          end
-          item
-            Kind = skCount
-            Column = cxGridDBCol_GOODSID
-          end>
-        OptionsBehavior.IncSearch = True
-        OptionsBehavior.ImmediateEditor = False
-        OptionsData.Deleting = False
-        OptionsData.Editing = False
-        OptionsData.Inserting = False
-        OptionsSelection.InvertSelect = False
-        OptionsView.NoDataToDisplayInfoText = '<'#1053#1077#1090' '#1079#1072#1087#1080#1089#1077#1081'>'
-        OptionsView.ScrollBars = ssVertical
-        OptionsView.ColumnAutoWidth = True
-        OptionsView.Footer = True
-        OptionsView.GridLineColor = 13750737
-        OptionsView.GroupByBox = False
-        OptionsView.Indicator = True
-        Styles.OnGetContentStyle = cxGridComponentsTableStylesGetContentStyle
-        Styles.Footer = dmAdditions.cxStyle_GridHeader
-        Styles.Header = dmAdditions.cxStyle_GridHeader
-        Styles.Inactive = dmAdditions.cxStyle_GirdContentInactive
-        object cxGridDBCol_GOODSID: TcxGridDBColumn
-          Caption = 'Cod'
-          DataBinding.FieldName = 'GOODSID'
-          FooterAlignmentHorz = taRightJustify
-          HeaderAlignmentHorz = taCenter
-          MinWidth = 80
-          Options.HorzSizing = False
-          Width = 80
-        end
-        object cxGridDBCol_DTDEP_NAME: TcxGridDBColumn
-          Caption = 'Depozit'
-          DataBinding.FieldName = 'DTDEP_NAME'
-          MinWidth = 90
-          Options.HorzSizing = False
-          Width = 90
-        end
-        object cxGridDBCol_IMG: TcxGridDBColumn
-          DataBinding.FieldName = 'GOODS_TYPE_ID'
-          PropertiesClassName = 'TcxImageComboBoxProperties'
-          Properties.DefaultImageIndex = 12
-          Properties.Images = dmAdditions.cxImageList_SWN
-          Properties.Items = <
-            item
-              ImageIndex = 12
-            end
-            item
-              ImageIndex = 44
-              Value = 4203
-            end>
-          MinWidth = 24
-          Options.Editing = False
-          Options.Focusing = False
-          Options.IncSearch = False
-          Options.HorzSizing = False
-          Options.Moving = False
-          Options.ShowCaption = False
-          Options.Sorting = False
-          VisibleForCustomization = False
-          Width = 24
-          IsCaptionAssigned = True
-        end
-        object cxGridComponentsTable_FLD_FORCED_ADDON: TcxGridDBColumn
-          Caption = '...'
-          DataBinding.FieldName = 'flg_forced_addon'
-          PropertiesClassName = 'TcxImageComboBoxProperties'
-          Properties.Images = dmAdditions.ilFlags
-          Properties.Items = <
-            item
-              ImageIndex = 0
-              Value = 2
-            end
-            item
-              ImageIndex = 1
-              Value = 1
-            end
-            item
-              ImageIndex = 2
-              Value = 4
-            end>
-          HeaderAlignmentHorz = taCenter
-          MinWidth = 24
-          Options.Editing = False
-          Options.Focusing = False
-          Options.IncSearch = False
-          Options.HorzSizing = False
-          Options.Moving = False
-          Width = 24
-        end
-        object cxGridComponents_FLG_SUPPLIER_PROMO: TcxGridDBColumn
-          Caption = 'P'
-          DataBinding.FieldName = 'FLG_SUPPLIER_PROMO'
-          PropertiesClassName = 'TcxImageComboBoxProperties'
-          Properties.Images = dmAdditions.ilFlags
-          Properties.Items = <
-            item
-              Description = 'Promotie furnizor'
-              ImageIndex = 3
-              Value = '1'
-            end>
-          HeaderAlignmentHorz = taCenter
-          MinWidth = 24
-          Options.Focusing = False
-          Options.HorzSizing = False
-          Width = 24
-        end
-        object cxGridComponents_FLG_PROMO: TcxGridDBColumn
-          Caption = 'FP'
-          DataBinding.FieldName = 'FLG_PROMO'
-          PropertiesClassName = 'TcxImageComboBoxProperties'
-          Properties.Images = dmAdditions.ilGoodsProperties
-          Properties.Items = <
-            item
-              ImageIndex = 6
-              Value = 1
-            end>
-          MinWidth = 24
-          Options.HorzSizing = False
-          Width = 24
-        end
-        object cxGridDBCol_GOODS_NAME: TcxGridDBColumn
-          Caption = 'Produs'
-          DataBinding.FieldName = 'GOODS_NAME'
-          MinWidth = 13
-          Width = 264
-        end
-        object cxGridDBCol_QTY: TcxGridDBColumn
-          Caption = 'Cant'
-          DataBinding.FieldName = 'QTY'
-          PropertiesClassName = 'TcxCalcEditProperties'
-          OnGetDisplayText = cxGridDBCol_QTYGetDisplayText
-          FooterAlignmentHorz = taRightJustify
-          HeaderAlignmentHorz = taCenter
-          MinWidth = 64
-          Options.Focusing = False
-          Options.HorzSizing = False
-          Width = 64
-        end
-        object cxGridDBCol_UM_NAME: TcxGridDBColumn
-          Caption = 'UM'
-          DataBinding.FieldName = 'UM_NAME'
-          PropertiesClassName = 'TcxLabelProperties'
-          Properties.Alignment.Horz = taCenter
-          HeaderAlignmentHorz = taCenter
-          MinWidth = 64
-          Options.HorzSizing = False
-          Options.Sorting = False
-          Width = 64
-        end
-        object cxGridComponentsFLG_FORCED: TcxGridDBColumn
-          Caption = 'FF'
-          DataBinding.FieldName = 'FLG_FORCED'
-          PropertiesClassName = 'TcxCheckBoxProperties'
-          Properties.ValueChecked = '1'
-          Properties.ValueUnchecked = '0'
-          HeaderAlignmentHorz = taCenter
-          MinWidth = 24
-          Options.HorzSizing = False
-          Width = 24
-        end
-        object cxGridDBCol_PRICE: TcxGridDBColumn
-          Caption = 'Pret'
-          DataBinding.FieldName = 'PRICE'
-          PropertiesClassName = 'TcxCurrencyEditProperties'
-          Properties.DisplayFormat = '0.00'
-          HeaderAlignmentHorz = taCenter
-          MinWidth = 64
-          Options.HorzSizing = False
-          Width = 64
-        end
-        object cxGridDBCol_SUMA: TcxGridDBColumn
-          Caption = 'Suma'
-          DataBinding.FieldName = 'SUMA'
-          PropertiesClassName = 'TcxCurrencyEditProperties'
-          Properties.DisplayFormat = '0.00'
-          FooterAlignmentHorz = taRightJustify
-          HeaderAlignmentHorz = taCenter
-          MinWidth = 64
-          Options.HorzSizing = False
-          Styles.Footer = dmAdditions.cxStyle_MoneyCounter_Total
-          Width = 64
-        end
-        object cxGridDBCol_STOCK_QTY: TcxGridDBColumn
-          Caption = 'Sold'
-          DataBinding.FieldName = 'STOCK_QTY'
-          HeaderAlignmentHorz = taCenter
-          MinWidth = 30
-          Options.HorzSizing = False
-          Width = 30
-        end
-        object cxGridDBCol_SUMAVAT: TcxGridDBColumn
-          Caption = 'TVA'
-          DataBinding.FieldName = 'SUMAVAT'
-          PropertiesClassName = 'TcxCurrencyEditProperties'
-          Properties.DisplayFormat = '0.00'
-          FooterAlignmentHorz = taRightJustify
-          HeaderAlignmentHorz = taCenter
-          MinWidth = 45
-          Options.HorzSizing = False
-          Width = 45
-        end
-        object cxGridDBCol_GOODS_TYPE_ID: TcxGridDBColumn
-          DataBinding.FieldName = 'GOODS_TYPE_ID'
-          Visible = False
-          MinWidth = 13
-          VisibleForCustomization = False
-        end
-        object cxGridDBCol_FLG_READY: TcxGridDBColumn
-          Caption = #1043#1086#1090#1086#1074
-          DataBinding.FieldName = 'FLG_READY'
-          PropertiesClassName = 'TcxCheckBoxProperties'
-          Properties.ValueChecked = 1
-          Properties.ValueUnchecked = 0
-          Visible = False
-          HeaderAlignmentHorz = taCenter
-          MinWidth = 26
-          Options.HorzSizing = False
-          Width = 26
-        end
-        object cxGridComponents_UMID: TcxGridDBColumn
-          DataBinding.FieldName = 'UMID'
-          Visible = False
-          MinWidth = 13
-          VisibleForCustomization = False
-        end
-        object cxGridComponentsTableColumn1: TcxGridDBColumn
-          Caption = 'FA'
-          DataBinding.FieldName = 'FLG_FORCED_ADDON'
-          PropertiesClassName = 'TcxImageComboBoxProperties'
-          Properties.Images = dmAdditions.ilFlags
-          Properties.Items = <
-            item
-              ImageIndex = 1
-              Value = 1
-            end>
-          MinWidth = 24
-          Options.HorzSizing = False
-          Width = 24
-        end
-      end
-      object cxGridLevel: TcxGridLevel
-        GridView = cxGridComponentsTable
-      end
-    end
-    object dxBarDockControl1: TdxBarDockControl
+    object cxPageControlBottom: TcxPageControl
       Left = 0
       Top = 0
       Width = 974
-      Height = 30
-      Margins.Left = 2
-      Margins.Top = 2
-      Margins.Right = 2
-      Margins.Bottom = 2
-      Align = dalTop
-      BarManager = dxBarManager
-      SunkenBorder = True
-      UseOwnSunkenBorder = True
+      Height = 238
+      Align = alClient
+      TabOrder = 0
+      Properties.ActivePage = tbsGoods
+      Properties.CustomButtons.Buttons = <>
+      Properties.TabPosition = tpBottom
+      OnChange = cxPageControlBottomChange
+      ClientRectBottom = 212
+      ClientRectLeft = 4
+      ClientRectRight = 970
+      ClientRectTop = 4
+      object tbsGoods: TcxTabSheet
+        Caption = 'Produse (&1)'
+        ImageIndex = 0
+        object cxGridComponents: TcxGrid
+          Left = 0
+          Top = 30
+          Width = 966
+          Height = 178
+          Margins.Left = 2
+          Margins.Top = 2
+          Margins.Right = 2
+          Margins.Bottom = 2
+          Align = alClient
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -12
+          Font.Name = 'Segoe UI'
+          Font.Style = []
+          ParentFont = False
+          TabOrder = 1
+          LookAndFeel.NativeStyle = True
+          LookAndFeel.SkinName = ''
+          object cxGridComponentsTable: TcxGridDBTableView
+            PopupMenu = dxBarPopupMenuJurnal
+            OnKeyDown = cxGridComponentsTableKeyDown
+            Navigator.Buttons.First.Visible = True
+            Navigator.Buttons.PriorPage.Visible = True
+            Navigator.Buttons.Prior.Visible = True
+            Navigator.Buttons.Next.Visible = True
+            Navigator.Buttons.NextPage.Visible = True
+            Navigator.Buttons.Last.Visible = True
+            Navigator.Buttons.Insert.Visible = True
+            Navigator.Buttons.Append.Visible = False
+            Navigator.Buttons.Delete.Visible = True
+            Navigator.Buttons.Edit.Visible = True
+            Navigator.Buttons.Post.Visible = True
+            Navigator.Buttons.Cancel.Visible = True
+            Navigator.Buttons.Refresh.Visible = True
+            Navigator.Buttons.SaveBookmark.Visible = True
+            Navigator.Buttons.GotoBookmark.Visible = True
+            Navigator.Buttons.Filter.Visible = True
+            OnCellDblClick = cxGridComponentsTableCellDblClick
+            OnCustomDrawCell = cxGridComponentsTableCustomDrawCell
+            DataController.KeyFieldNames = 'DOCID;DTDEP;CTDEP;GOODSCOMPLECT_ID;GOODSID'
+            DataController.Summary.FooterSummaryItems = <
+              item
+                Kind = skSum
+                FieldName = 'QTY'
+                Column = cxGridDBCol_QTY
+              end
+              item
+                Kind = skSum
+                FieldName = 'SUMA'
+                Column = cxGridDBCol_SUMA
+              end
+              item
+                Kind = skSum
+                FieldName = 'SUMAVAT'
+                Column = cxGridDBCol_SUMAVAT
+              end
+              item
+                Kind = skCount
+                Column = cxGridDBCol_GOODSID
+              end>
+            OptionsBehavior.IncSearch = True
+            OptionsBehavior.ImmediateEditor = False
+            OptionsData.Deleting = False
+            OptionsData.Editing = False
+            OptionsData.Inserting = False
+            OptionsSelection.InvertSelect = False
+            OptionsView.NoDataToDisplayInfoText = '<'#1053#1077#1090' '#1079#1072#1087#1080#1089#1077#1081'>'
+            OptionsView.ScrollBars = ssVertical
+            OptionsView.ColumnAutoWidth = True
+            OptionsView.Footer = True
+            OptionsView.GridLineColor = 13750737
+            OptionsView.GroupByBox = False
+            OptionsView.Indicator = True
+            Styles.OnGetContentStyle = cxGridComponentsTableStylesGetContentStyle
+            Styles.Footer = dmAdditions.cxStyle_GridHeader
+            Styles.Header = dmAdditions.cxStyle_GridHeader
+            Styles.Inactive = dmAdditions.cxStyle_GirdContentInactive
+            object cxGridDBCol_GOODSID: TcxGridDBColumn
+              Caption = 'Cod'
+              DataBinding.FieldName = 'GOODSID'
+              FooterAlignmentHorz = taRightJustify
+              HeaderAlignmentHorz = taCenter
+              MinWidth = 80
+              Options.HorzSizing = False
+              Width = 80
+            end
+            object cxGridDBCol_DTDEP_NAME: TcxGridDBColumn
+              Caption = 'Depozit'
+              DataBinding.FieldName = 'DTDEP_NAME'
+              MinWidth = 90
+              Options.HorzSizing = False
+              Width = 90
+            end
+            object cxGridDBCol_IMG: TcxGridDBColumn
+              DataBinding.FieldName = 'GOODS_TYPE_ID'
+              PropertiesClassName = 'TcxImageComboBoxProperties'
+              Properties.DefaultImageIndex = 12
+              Properties.Images = dmAdditions.cxImageList_SWN
+              Properties.Items = <
+                item
+                  ImageIndex = 12
+                end
+                item
+                  ImageIndex = 44
+                  Value = 4203
+                end>
+              MinWidth = 24
+              Options.Editing = False
+              Options.Focusing = False
+              Options.IncSearch = False
+              Options.HorzSizing = False
+              Options.Moving = False
+              Options.ShowCaption = False
+              Options.Sorting = False
+              VisibleForCustomization = False
+              Width = 24
+              IsCaptionAssigned = True
+            end
+            object cxGridComponentsTable_FLD_FORCED_ADDON: TcxGridDBColumn
+              Caption = '...'
+              DataBinding.FieldName = 'flg_forced_addon'
+              PropertiesClassName = 'TcxImageComboBoxProperties'
+              Properties.Images = dmAdditions.ilFlags
+              Properties.Items = <
+                item
+                  ImageIndex = 0
+                  Value = 2
+                end
+                item
+                  ImageIndex = 1
+                  Value = 1
+                end
+                item
+                  ImageIndex = 2
+                  Value = 4
+                end>
+              HeaderAlignmentHorz = taCenter
+              MinWidth = 24
+              Options.Editing = False
+              Options.Focusing = False
+              Options.IncSearch = False
+              Options.HorzSizing = False
+              Options.Moving = False
+              Width = 24
+            end
+            object cxGridComponents_FLG_SUPPLIER_PROMO: TcxGridDBColumn
+              Caption = 'P'
+              DataBinding.FieldName = 'FLG_SUPPLIER_PROMO'
+              PropertiesClassName = 'TcxImageComboBoxProperties'
+              Properties.Images = dmAdditions.ilFlags
+              Properties.Items = <
+                item
+                  Description = 'Promotie furnizor'
+                  ImageIndex = 3
+                  Value = '1'
+                end>
+              HeaderAlignmentHorz = taCenter
+              MinWidth = 24
+              Options.Focusing = False
+              Options.HorzSizing = False
+              Width = 24
+            end
+            object cxGridComponents_FLG_PROMO: TcxGridDBColumn
+              Caption = 'FP'
+              DataBinding.FieldName = 'FLG_PROMO'
+              PropertiesClassName = 'TcxImageComboBoxProperties'
+              Properties.Images = dmAdditions.ilGoodsProperties
+              Properties.Items = <
+                item
+                  ImageIndex = 6
+                  Value = 1
+                end>
+              MinWidth = 24
+              Options.HorzSizing = False
+              Width = 24
+            end
+            object cxGridDBCol_GOODS_NAME: TcxGridDBColumn
+              Caption = 'Produs'
+              DataBinding.FieldName = 'GOODS_NAME'
+              MinWidth = 13
+              Width = 264
+            end
+            object cxGridDBCol_QTY: TcxGridDBColumn
+              Caption = 'Cant'
+              DataBinding.FieldName = 'QTY'
+              PropertiesClassName = 'TcxCalcEditProperties'
+              OnGetDisplayText = cxGridDBCol_QTYGetDisplayText
+              FooterAlignmentHorz = taRightJustify
+              HeaderAlignmentHorz = taCenter
+              MinWidth = 64
+              Options.Focusing = False
+              Options.HorzSizing = False
+              Width = 64
+            end
+            object cxGridDBCol_UM_NAME: TcxGridDBColumn
+              Caption = 'UM'
+              DataBinding.FieldName = 'UM_NAME'
+              PropertiesClassName = 'TcxLabelProperties'
+              Properties.Alignment.Horz = taCenter
+              HeaderAlignmentHorz = taCenter
+              MinWidth = 64
+              Options.HorzSizing = False
+              Options.Sorting = False
+              Width = 64
+            end
+            object cxGridComponentsFLG_FORCED: TcxGridDBColumn
+              Caption = 'FF'
+              DataBinding.FieldName = 'FLG_FORCED'
+              PropertiesClassName = 'TcxCheckBoxProperties'
+              Properties.ValueChecked = '1'
+              Properties.ValueUnchecked = '0'
+              HeaderAlignmentHorz = taCenter
+              MinWidth = 24
+              Options.HorzSizing = False
+              Width = 24
+            end
+            object cxGridDBCol_PRICE: TcxGridDBColumn
+              Caption = 'Pret'
+              DataBinding.FieldName = 'PRICE'
+              PropertiesClassName = 'TcxCurrencyEditProperties'
+              Properties.DisplayFormat = '0.00'
+              HeaderAlignmentHorz = taCenter
+              MinWidth = 64
+              Options.HorzSizing = False
+              Width = 64
+            end
+            object cxGridDBCol_SUMA: TcxGridDBColumn
+              Caption = 'Suma'
+              DataBinding.FieldName = 'SUMA'
+              PropertiesClassName = 'TcxCurrencyEditProperties'
+              Properties.DisplayFormat = '0.00'
+              FooterAlignmentHorz = taRightJustify
+              HeaderAlignmentHorz = taCenter
+              MinWidth = 64
+              Options.HorzSizing = False
+              Styles.Footer = dmAdditions.cxStyle_MoneyCounter_Total
+              Width = 64
+            end
+            object cxGridDBCol_STOCK_QTY: TcxGridDBColumn
+              Caption = 'Sold'
+              DataBinding.FieldName = 'STOCK_QTY'
+              HeaderAlignmentHorz = taCenter
+              MinWidth = 30
+              Options.HorzSizing = False
+              Width = 30
+            end
+            object cxGridDBCol_SUMAVAT: TcxGridDBColumn
+              Caption = 'TVA'
+              DataBinding.FieldName = 'SUMAVAT'
+              PropertiesClassName = 'TcxCurrencyEditProperties'
+              Properties.DisplayFormat = '0.00'
+              FooterAlignmentHorz = taRightJustify
+              HeaderAlignmentHorz = taCenter
+              MinWidth = 45
+              Options.HorzSizing = False
+              Width = 45
+            end
+            object cxGridDBCol_GOODS_TYPE_ID: TcxGridDBColumn
+              DataBinding.FieldName = 'GOODS_TYPE_ID'
+              Visible = False
+              MinWidth = 13
+              VisibleForCustomization = False
+            end
+            object cxGridDBCol_FLG_READY: TcxGridDBColumn
+              Caption = #1043#1086#1090#1086#1074
+              DataBinding.FieldName = 'FLG_READY'
+              PropertiesClassName = 'TcxCheckBoxProperties'
+              Properties.ValueChecked = 1
+              Properties.ValueUnchecked = 0
+              Visible = False
+              HeaderAlignmentHorz = taCenter
+              MinWidth = 26
+              Options.HorzSizing = False
+              Width = 26
+            end
+            object cxGridComponents_UMID: TcxGridDBColumn
+              DataBinding.FieldName = 'UMID'
+              Visible = False
+              MinWidth = 13
+              VisibleForCustomization = False
+            end
+            object cxGridComponentsTableColumn1: TcxGridDBColumn
+              Caption = 'FA'
+              DataBinding.FieldName = 'FLG_FORCED_ADDON'
+              PropertiesClassName = 'TcxImageComboBoxProperties'
+              Properties.Images = dmAdditions.ilFlags
+              Properties.Items = <
+                item
+                  ImageIndex = 1
+                  Value = 1
+                end>
+              MinWidth = 24
+              Options.HorzSizing = False
+              Width = 24
+            end
+          end
+          object cxGridLevel: TcxGridLevel
+            GridView = cxGridComponentsTable
+          end
+        end
+        object dxBarDockControl1: TdxBarDockControl
+          Left = 0
+          Top = 0
+          Width = 966
+          Height = 30
+          Margins.Left = 2
+          Margins.Top = 2
+          Margins.Right = 2
+          Margins.Bottom = 2
+          Align = dalTop
+          BarManager = dxBarManager
+          SunkenBorder = True
+          UseOwnSunkenBorder = True
+        end
+      end
+      object tbsCredit: TcxTabSheet
+        Caption = 'Credit (&2)'
+        ImageIndex = 1
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
+        object pnCreditState: TPanel
+          Left = 0
+          Top = 0
+          Width = 966
+          Height = 28
+          Align = alTop
+          BevelOuter = bvNone
+          TabOrder = 0
+          Visible = False
+          object lbCreditState: TLabel
+            AlignWithMargins = True
+            Left = 8
+            Top = 3
+            Width = 955
+            Height = 22
+            Margins.Left = 8
+            Align = alClient
+            AutoSize = False
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = clRed
+            Font.Height = -13
+            Font.Name = 'Segoe UI'
+            Font.Style = [fsBold]
+            ParentFont = False
+            Layout = tlCenter
+          end
+        end
+        object sbCredit: TScrollBox
+          Left = 0
+          Top = 28
+          Width = 966
+          Height = 178
+          HorzScrollBar.Smooth = True
+          Align = alClient
+          BevelInner = bvNone
+          BevelOuter = bvNone
+          BorderStyle = bsNone
+          TabOrder = 1
+          object pnCreditInfo: TPanel
+            Left = 0
+            Top = 0
+            Width = 320
+            Height = 178
+            Align = alLeft
+            BevelOuter = bvNone
+            TabOrder = 0
+            object lbCreditInfo: TLabel
+              Left = 0
+              Top = 0
+              Width = 320
+              Height = 20
+              Align = alTop
+              AutoSize = False
+              Caption = 'Creditul'
+              Font.Charset = DEFAULT_CHARSET
+              Font.Color = clWindowText
+              Font.Height = -12
+              Font.Name = 'Segoe UI'
+              Font.Style = [fsBold]
+              ParentFont = False
+              Layout = tlCenter
+            end
+            object cxDBVerticalGridCredit: TcxDBVerticalGrid
+              Left = 0
+              Top = 20
+              Width = 320
+              Height = 158
+              Align = alClient
+              OptionsView.RowHeaderWidth = 140
+              OptionsBehavior.ImmediateEditor = False
+              OptionsBehavior.AllowChangeRecord = False
+              OptionsData.Editing = False
+              OptionsData.Appending = False
+              OptionsData.Deleting = False
+              OptionsData.Inserting = False
+              ScrollbarAnnotations.CustomAnnotations = <>
+              Styles.Header = dmAdditions.cxStyle_Goods_GeneralHeader
+              TabOrder = 0
+              DataController.DataSource = IBCDataSourceCredit
+              Version = 1
+              object vgrCreditOrg: TcxDBEditorRow
+                Properties.Caption = 'Organizatia'
+                Properties.DataBinding.FieldName = 'ORG_TITLE'
+                ID = 0
+                ParentID = -1
+                Index = 0
+                Version = 1
+              end
+              object vgrCreditType: TcxDBEditorRow
+                Properties.Caption = 'Tipul creditului'
+                Properties.DataBinding.FieldName = 'CREDIT_TYPE_NAME'
+                ID = 1
+                ParentID = -1
+                Index = 1
+                Version = 1
+              end
+              object vgrCreditSuma: TcxDBEditorRow
+                Properties.Caption = 'Suma creditului'
+                Properties.EditPropertiesClassName = 'TcxCurrencyEditProperties'
+                Properties.EditProperties.DisplayFormat = ',0.00'
+                Properties.DataBinding.FieldName = 'CREDIT_SUMA'
+                ID = 2
+                ParentID = -1
+                Index = 2
+                Version = 1
+              end
+              object vgrCreditPerioada: TcxDBEditorRow
+                Properties.Caption = 'Termen (luni)'
+                Properties.DataBinding.FieldName = 'CREDIT_PERIOADA'
+                ID = 3
+                ParentID = -1
+                Index = 3
+                Version = 1
+              end
+              object vgrCreditRata: TcxDBEditorRow
+                Properties.Caption = 'Rata lunara'
+                Properties.EditPropertiesClassName = 'TcxCurrencyEditProperties'
+                Properties.EditProperties.DisplayFormat = ',0.00'
+                Properties.DataBinding.FieldName = 'PLATA_LUNARA'
+                ID = 4
+                ParentID = -1
+                Index = 4
+                Version = 1
+              end
+              object vgrCreditAvans: TcxDBEditorRow
+                Properties.Caption = 'Avans'
+                Properties.EditPropertiesClassName = 'TcxCurrencyEditProperties'
+                Properties.EditProperties.DisplayFormat = ',0.00'
+                Properties.DataBinding.FieldName = 'AVANS'
+                ID = 5
+                ParentID = -1
+                Index = 5
+                Version = 1
+              end
+            end
+          end
+          object pnCreditPerson: TPanel
+            Left = 322
+            Top = 0
+            Width = 340
+            Height = 178
+            Align = alLeft
+            BevelOuter = bvNone
+            TabOrder = 1
+            object lbCreditPerson: TLabel
+              Left = 0
+              Top = 0
+              Width = 340
+              Height = 20
+              Align = alTop
+              AutoSize = False
+              Caption = 'Persoana care solicita creditul'
+              Font.Charset = DEFAULT_CHARSET
+              Font.Color = clWindowText
+              Font.Height = -12
+              Font.Name = 'Segoe UI'
+              Font.Style = [fsBold]
+              ParentFont = False
+              Layout = tlCenter
+            end
+            object cxDBVerticalGridPerson: TcxDBVerticalGrid
+              Left = 0
+              Top = 20
+              Width = 340
+              Height = 158
+              Align = alClient
+              OptionsView.RowHeaderWidth = 170
+              OptionsBehavior.ImmediateEditor = False
+              OptionsBehavior.AllowChangeRecord = False
+              OptionsData.Editing = False
+              OptionsData.Appending = False
+              OptionsData.Deleting = False
+              OptionsData.Inserting = False
+              ScrollbarAnnotations.CustomAnnotations = <>
+              Styles.Header = dmAdditions.cxStyle_Goods_GeneralHeader
+              TabOrder = 0
+              DataController.DataSource = IBCDataSourceCredit
+              Version = 1
+              object vgrPersonNPP: TcxDBEditorRow
+                Properties.Caption = 'Numele, prenumele'
+                Properties.DataBinding.FieldName = 'NPP'
+                ID = 0
+                ParentID = -1
+                Index = 0
+                Version = 1
+              end
+              object vgrPersonIDNP: TcxDBEditorRow
+                Properties.Caption = 'IDNP'
+                Properties.DataBinding.FieldName = 'IDEN'
+                ID = 1
+                ParentID = -1
+                Index = 1
+                Version = 1
+              end
+              object vgrPersonBirth: TcxDBEditorRow
+                Properties.Caption = 'Data nasterii'
+                Properties.DataBinding.FieldName = 'DATA_NASTERII'
+                ID = 2
+                ParentID = -1
+                Index = 2
+                Version = 1
+              end
+              object vgrPersonPhone: TcxDBEditorRow
+                Properties.Caption = 'Telefon de contact'
+                Properties.DataBinding.FieldName = 'CONTACT_TELEFON'
+                ID = 3
+                ParentID = -1
+                Index = 3
+                Version = 1
+              end
+              object vgrPersonFax: TcxDBEditorRow
+                Properties.Caption = 'Copia buletinului prin fax'
+                Properties.EditPropertiesClassName = 'TcxCheckBoxProperties'
+                Properties.EditProperties.ValueChecked = 1
+                Properties.EditProperties.ValueUnchecked = 0
+                Properties.DataBinding.FieldName = 'FLG_COPY_BY_FAX'
+                ID = 4
+                ParentID = -1
+                Index = 4
+                Version = 1
+              end
+            end
+          end
+          object imgCreditScan1: TcxDBImage
+            Left = 672
+            Top = 20
+            DataBinding.DataField = 'SCAN1'
+            DataBinding.DataSource = IBCDataSourceCredit
+            Properties.GraphicClassName = 'TdxSmartImage'
+            Properties.ReadOnly = True
+            TabOrder = 2
+            Height = 130
+            Width = 180
+          end
+          object imgCreditScan2: TcxDBImage
+            Left = 860
+            Top = 20
+            DataBinding.DataField = 'SCAN2'
+            DataBinding.DataSource = IBCDataSourceCredit
+            Properties.GraphicClassName = 'TdxSmartImage'
+            Properties.ReadOnly = True
+            TabOrder = 3
+            Height = 130
+            Width = 180
+          end
+          object edCreditScan1Name: TcxDBTextEdit
+            Left = 672
+            Top = 152
+            Hint = 'Numele fisierului incarcat de client (buletin, fata)'
+            DataBinding.DataField = 'SCAN1_NAME'
+            DataBinding.DataSource = IBCDataSourceCredit
+            ParentShowHint = False
+            Properties.ReadOnly = True
+            ShowHint = True
+            TabOrder = 4
+            Width = 180
+          end
+          object edCreditScan2Name: TcxDBTextEdit
+            Left = 860
+            Top = 152
+            Hint = 'Numele fisierului incarcat de client (buletin, verso)'
+            DataBinding.DataField = 'SCAN2_NAME'
+            DataBinding.DataSource = IBCDataSourceCredit
+            ParentShowHint = False
+            Properties.ReadOnly = True
+            ShowHint = True
+            TabOrder = 5
+            Width = 180
+          end
+        end
+      end
     end
   end
   object cxSplitter1: TcxSplitter
@@ -726,6 +1033,14 @@ inherited frame24WebZakaz: Tframe24WebZakaz
       ShortCut = 32833
       OnClick = bbAssignToMeClick
     end
+    object bbCreditOnly: TdxBarButton
+      Caption = 'Doar comenzi pe credit'
+      Category = 1
+      Hint = 'Arata doar comenzile cu plata pe credit'
+      Visible = ivAlways
+      ButtonStyle = bsChecked
+      OnClick = bbCreditOnlyClick
+    end
     object bbGoodsBalance: TdxBarButton
       Caption = 'Miscarea produsului'
       Category = 2
@@ -753,6 +1068,11 @@ inherited frame24WebZakaz: Tframe24WebZakaz
       item
         Visible = True
         ItemName = 'bbAssignToMe'
+      end
+      item
+        BeginGroup = True
+        Visible = True
+        ItemName = 'bbCreditOnly'
       end
       item
         BeginGroup = True
@@ -800,6 +1120,44 @@ inherited frame24WebZakaz: Tframe24WebZakaz
     Left = 136
     Top = 140
     PixelsPerInch = 96
+  end
+  object IBCQueryCredit: TIBCQuery
+    Connection = dmDB.IBCConnection
+    Transaction = dmDB.IBCTrDefaultSelect
+    SQL.Strings = (
+      
+        'SELECT F.DOCID, F.CREDIT_SUMA, F.CREDIT_PERIOADA, F.PLATA_LUNARA' +
+        ', F.AVANS,'
+      '  F.ORG_ID, O.TITLE AS ORG_TITLE,'
+      '  IIF(TRIM(COALESCE(F.CREDIT_TYPE, '#39#39')) = '#39#39', NULL,'
+      '    IIF(TRIM(F.CREDIT_TYPE) = '#39'0'#39', '#39'Credit 0%'#39','
+      
+        '      '#39'Credit cu dobanda '#39' || TRIM(F.CREDIT_TYPE) || '#39'%'#39')) AS CR' +
+        'EDIT_TYPE_NAME,'
+      
+        '  F.NPP, F.IDEN, F.DATA_NASTERII, F.CONTACT_TELEFON, F.FLG_COPY_' +
+        'BY_FAX,'
+      '  F.SCAN1, F.SCAN2, F.SCAN1_NAME, F.SCAN2_NAME'
+      'FROM TWEB_CERERE_FINANTARE F'
+      'LEFT JOIN TS_FINANCE_CUSTOMER O ON O.UID = F.ORG_ID'
+      'WHERE F.DOCID = :DOCID')
+    MasterSource = dmDB.IBCDataSourceDocs
+    ReadOnly = True
+    Options.DetailDelay = 100
+    Left = 216
+    Top = 140
+    ParamData = <
+      item
+        DataType = ftInteger
+        Name = 'DOCID'
+        Value = nil
+      end>
+  end
+  object IBCDataSourceCredit: TIBCDataSource
+    DataSet = IBCQueryCredit
+    OnDataChange = IBCDataSourceCreditDataChange
+    Left = 296
+    Top = 140
   end
   object cxImageList1: TcxImageList
     SourceDPI = 96

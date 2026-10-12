@@ -15,7 +15,9 @@ interface
 
 uses
   Winapi.Windows, System.SysUtils, System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms,
-  Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls, SWNBaseUnit, ECCApiClient, ECCConfigUnit, ECCTransactionStore;
+  Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls, SWNBaseUnit, ECCApiClient, ECCConfigUnit, ECCTransactionStore,
+  cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters,
+  cxContainer, cxEdit, cxImage;
 
 type
   TfrmECCDiagnosticDlg = class(TSWNCustomForm)
@@ -51,7 +53,7 @@ type
     memLog: TMemo;
     Splitter1: TSplitter;
     sbDoc: TScrollBox;
-    imgDoc: TImage;
+    imgDoc: TcxImage;
     procedure cmbApiCodeChange(Sender: TObject);
     procedure btnReloadClick(Sender: TObject);
     procedure btnStatusClick(Sender: TObject);

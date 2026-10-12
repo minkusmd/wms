@@ -29,10 +29,13 @@ object frmECCDiagnosticDlg: TfrmECCDiagnosticDlg
     Align = alTop
     BevelOuter = bvNone
     TabOrder = 0
+    DesignSize = (
+      920
+      224)
     object lblApiCode: TLabel
       Left = 12
       Top = 15
-      Width = 58
+      Width = 60
       Height = 16
       Caption = 'Casa ECC:'
     end
@@ -48,14 +51,14 @@ object frmECCDiagnosticDlg: TfrmECCDiagnosticDlg
     object lblSum: TLabel
       Left = 12
       Top = 149
-      Width = 37
+      Width = 38
       Height = 16
       Caption = 'Suma:'
     end
     object lblDocId: TLabel
       Left = 12
       Top = 187
-      Width = 64
+      Width = 57
       Height = 16
       Caption = 'Id / fisier:'
     end
@@ -314,12 +317,15 @@ object frmECCDiagnosticDlg: TfrmECCDiagnosticDlg
     Color = clWhite
     ParentColor = False
     TabOrder = 2
-    object imgDoc: TImage
+    object imgDoc: TcxImage
       Left = 0
       Top = 0
-      Width = 105
-      Height = 105
-      AutoSize = True
+      Align = alClient
+      TabOrder = 0
+      ExplicitWidth = 140
+      ExplicitHeight = 100
+      Height = 408
+      Width = 376
     end
   end
 end

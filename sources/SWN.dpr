@@ -3,6 +3,7 @@ program SWN;
 
 
 uses
+  FantasticAI.SWNAccessDiagnostic in 'FantasticAI\FantasticAI.SWNAccessDiagnostic.pas',
   madExcept,
   madLinkDisAsm,
   madListHardware,
@@ -63,6 +64,7 @@ uses
   frmGoodsAcntFolderDialog in 'classes\GoodsACNT\frmGoodsAcntFolderDialog.pas' {frmGoodsAcntFolderDlg},
   frmGoodsAcntEditorDialog in 'classes\GoodsACNT\frmGoodsAcntEditorDialog.pas' {frmGoodsAcntEditorDlg},
   frmMergeGoodsAcntUnit in 'classes\GoodsACNT\frmMergeGoodsAcntUnit.pas' {frmMergeGoodsAcntDlg},
+  frmGoodsAcntTypesUnit in 'classes\GoodsACNT\frmGoodsAcntTypesUnit.pas' {frmGoodsAcntTypesDlg},
   frame01CasaPKOUnit in 'frames\frame01CasaPKOUnit.pas' {frame01CasaPKO: TFrame},
   frame02CasaRKOUnit in 'frames\frame02CasaRKOUnit.pas' {frame02CasaRKO: TFrame},
   frame03CasaNSUnit in 'frames\frame03CasaNSUnit.pas' {frame03CasaNS: TFrame},
@@ -176,6 +178,7 @@ uses
   ECCReconcileUnit in 'FiscalPrinter\ECC\ECCReconcileUnit.pas',
   ECCDeliveryUnit in 'FiscalPrinter\ECC\ECCDeliveryUnit.pas',
   ECCReceiptSendUnit in 'FiscalPrinter\ECC\ECCReceiptSendUnit.pas',
+  frmECCReceiptSendDialog in 'FiscalPrinter\ECC\frmECCReceiptSendDialog.pas' {frmECCReceiptSendDlg},
   frmECCCouriersDialog in 'FiscalPrinter\ECC\frmECCCouriersDialog.pas' {frmECCCouriersDlg},
   frmECCReconcileDialog in 'FiscalPrinter\ECC\frmECCReconcileDialog.pas' {frmECCReconcileDlg},
   frmECCDiagnosticDialog in 'FiscalPrinter\ECC\frmECCDiagnosticDialog.pas' {frmECCDiagnosticDlg},
@@ -591,6 +594,7 @@ uses
   frameSipAccountSettingsUnit in 'classes\SipClient\frameSipAccountSettingsUnit.pas' {frameSipAccountSettings: TFrame},
   frmSelectPhoneNumberUnit in 'classes\Customer\frmSelectPhoneNumberUnit.pas' {frmSelectPhoneNumber},
   frameSipClientUnit in 'classes\SipClient\frameSipClientUnit.pas' {frameSipClient: TFrame},
+  frmSipPhoneWindowUnit in 'classes\SipClient\frmSipPhoneWindowUnit.pas' {frmSipPhoneWindow},
   uSipLog in 'Tools\Sip\uSipLog.pas' {frmSipLog},
   uSelectUserDialog in 'Security\uSelectUserDialog.pas' {frmSelectUserDialog},
   frmWebPromoSortingActiuniDialog in 'classes\WebPromoActiuni2012\frmWebPromoSortingActiuniDialog.pas' {frmWebPromoSortingActiuniDlg},
@@ -769,6 +773,7 @@ uses
   TriomacPriceListUnit in 'frameUtils\78 - Pricelist\TriomacPriceListUnit.pas',
   PriceGoodsCreateUnit in 'frameUtils\78 - Pricelist\PriceGoodsCreateUnit.pas',
   ArvaliscomContentUnit in 'frameUtils\78 - Pricelist\ArvaliscomContentUnit.pas',
+  FiltreContentUnit in 'frameUtils\78 - Pricelist\FiltreContentUnit.pas',
   PriceListContentTransferUnit in 'frameUtils\78 - Pricelist\PriceListContentTransferUnit.pas',
   frmModifyFilterParamsUnit in 'classes\Goods\frmModifyFilterParamsUnit.pas' {frmModifyFilterParamsDlg},
   frmGoodsRelatedBrowserUnit in 'classes\GoodsRelated\frmGoodsRelatedBrowserUnit.pas' {frmGoodsRelatedDlg},

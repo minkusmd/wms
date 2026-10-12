@@ -1230,9 +1230,9 @@ inherited frame09NakladniePN: Tframe09NakladniePN
       OnClick = dxBarButton5Click
     end
     object bbAcntName: TdxBarButton
-      Caption = 'Denumire factura'
+      Caption = 'Denumirea pe contabilitate...'
       Category = 0
-      Hint = 'Denumire factura'
+      Hint = 'Denumirea pe contabilitate a produsului'
       Visible = ivAlways
       ShortCut = 32834
       OnClick = bbAcntNameClick
@@ -1400,6 +1400,10 @@ inherited frame09NakladniePN: Tframe09NakladniePN
       item
         Visible = True
         ItemName = 'bbGoodsForeignCode'
+      end
+      item
+        Visible = True
+        ItemName = 'bbAcntName'
       end>
     UseOwnFont = False
     Left = 69

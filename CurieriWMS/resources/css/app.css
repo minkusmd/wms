@@ -1,0 +1,73 @@
+@import 'tailwindcss';
+
+@source '../../storage/framework/views/*.php';
+
+/* Interfata e pentru telefon (mobile-first): o coloana, text mare, zone de atingere >= 48px. */
+@theme {
+    --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans', sans-serif, 'Apple Color Emoji',
+        'Segoe UI Emoji';
+
+    --color-brand-50: #eff6ff;
+    --color-brand-100: #dbeafe;
+    --color-brand-600: #1d4ed8;
+    --color-brand-700: #1e40af;
+
+    /* starile: mereu punct colorat + text */
+    --color-state-new: #64748b;
+    --color-state-work: #d97706;
+    --color-state-done: #16a34a;
+    --color-state-fail: #dc2626;
+    --color-state-wait: #7c3aed;
+}
+
+@layer base {
+    html {
+        -webkit-text-size-adjust: 100%;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+        @apply min-h-dvh bg-slate-100 font-sans text-[17px] leading-snug text-slate-900 antialiased;
+    }
+}
+
+/* clase proprii (declarate cu @utility ca sa poata fi folosite si in @apply) */
+@utility btn {
+    @apply inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-xl px-4 text-lg font-semibold select-none active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100;
+}
+
+@utility btn-primary {
+    @apply btn bg-brand-600 text-white active:bg-brand-700;
+}
+
+@utility btn-success {
+    @apply btn bg-green-600 text-white active:bg-green-700;
+}
+
+@utility btn-danger {
+    @apply btn bg-red-600 text-white active:bg-red-700;
+}
+
+@utility btn-light {
+    @apply btn border border-slate-300 bg-white text-slate-900 active:bg-slate-100;
+}
+
+@utility card {
+    @apply rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200;
+}
+
+@utility field {
+    @apply block min-h-14 w-full rounded-xl border border-slate-300 bg-white px-4 text-lg focus:border-brand-600 focus:ring-2 focus:ring-brand-100 focus:outline-none;
+}
+
+@utility label {
+    @apply mb-1 block text-base font-medium text-slate-700;
+}
+
+@utility dot {
+    @apply inline-block size-3 shrink-0 rounded-full;
+}
+
+[x-cloak] {
+    display: none !important;
+}

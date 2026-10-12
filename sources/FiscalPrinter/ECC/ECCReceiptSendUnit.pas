@@ -2,15 +2,16 @@ unit ECCReceiptSendUnit;
 
 (* Cum primeste clientul bonul emis pe casa ECC: tiparit, pe e-mail, pe Viber sau prin SMS.
 
-   Operatorul alege inainte de emitere (ECCChooseReceiptSend), ca adresa / numarul sa fie
-   verificate pina sa existe bonul; dupa emitere ECCSendReceipt il preda clientului.
+   Operatorul alege inainte de emitere (ECCChooseReceiptSend, fereastra frmECCReceiptSendDialog), ca
+   adresa / numarul sa fie verificate pina sa existe bonul; dupa emitere ECCSendReceipt il preda clientului.
    API-ul ECC nu trimite bonul (SMS / e-mail are doar aplicatia ECC), de aceea WMS trimite singur:
      Tiparire - PNG-ul bonului pe imprimanta bonurilor (ECCFiscalDevice), ca pina acum;
      E-mail   - coada EMAIL_MESSAGES (SP_CREATE_MAIL_TO_SEND), corp HTML cu produsele si linkul MEV.
-                Coada nu are atasamente; linkul MEV e verificarea oficiala a bonului la SFS;
+                Coada nu are atasamevnte; linkul MEV e verificarea oficiala a bonului la SFS;
      Viber    - PNG-ul in clipboard ca fisier + conversatia deschisa pe numar (ca "Trimite pe..."
                 din rapoarte, ReportMessengerSendUnit); operatorul apasa Ctrl+V si Enter;
-     SMS      - coada SMS_MESSAGES: numar, suma si linkul MEV.
+     SMS      - coada SMS_MESSAGES: numar, suma si linkul MEV;
+     Fara actiune - bonul doar se emite si se inregistreaza in MEV (PNG-ul ramine in jurnal).
    Cozile le trimite serviciul de mesaje din afara WMS. Inserarea merge pe o tranzactie proprie:
    dmDB.SendSMS / SendSWNMail lucreaza pe IBCTrDefaultUpdate, care poate fi activa in dialogul bonului.
    Contactul propus: din deal-ul documentului (sau al parintilor lui), apoi din clientul CT. *)
@@ -21,7 +22,8 @@ uses
   System.SysUtils, System.Classes, FiscalDeviceUnit;
 
 type
-  TECCReceiptSendKind = (rskPrint, rskEmail, rskViber, rskSms);
+  // ordinea = valoarea salvata in ECC_RECEIPT_SEND_KIND: variantele noi se adauga la sfirsit
+  TECCReceiptSendKind = (rskPrint, rskEmail, rskViber, rskSms, rskNone);
 
   TECCReceiptSendChoice = record
     Kind: TECCReceiptSendKind;
@@ -29,7 +31,7 @@ type
   end;
 
 const
-  cECCReceiptSendNames: array[TECCReceiptSendKind] of string = ('Tiparire', 'E-mail', 'Viber', 'SMS');
+  cECCReceiptSendNames: array[TECCReceiptSendKind] of string = ('Tiparire', 'E-mail', 'Viber', 'SMS', 'Fara actiune');
 
 // Fereastra de dinaintea emiterii: ASummary = ce bon se emite; ADocID = documentul din care
 // se propune contactul. False = operatorul a renuntat (bonul nu se emite).
@@ -43,9 +45,8 @@ function ECCSendReceipt(const AChoice: TECCReceiptSendChoice; const ADocID: Inte
 implementation
 
 uses
-  Winapi.Windows, System.UITypes, System.IOUtils, System.StrUtils, Vcl.Forms, Vcl.StdCtrls, Vcl.ExtCtrls,
-  Vcl.Dialogs, Vcl.Graphics, IBC, DataModuleDB, SWNValueStorageUnit, ReportMessengerSendUnit,
-  ECCTransactionStore;
+  System.UITypes, System.IOUtils, IBC, DataModuleDB, SWNValueStorageUnit, ReportMessengerSendUnit,
+  ECCTransactionStore, frmECCReceiptSendDialog;
 
 const
   cSendKindKey = 'ECC_RECEIPT_SEND_KIND';
@@ -107,198 +108,19 @@ begin
       ADocID);
 end;
 
-function IsValidEmail(const S: string): Boolean;
-var
-  At: Integer;
-begin
-  At := Pos('@', S);
-  Result := (At > 1) and (Pos('@', S, At + 1) = 0) and (Pos('.', S, At + 2) > 0) and
-    (S[Length(S)] <> '.') and (Pos(' ', S) = 0);
-end;
-
-// Mobil din Moldova in formatul cozii SMS (0XXXXXXXX, 06... / 07...); '' = nu e mobil valid.
-function NormalizeSmsPhone(const APhone: string): string;
-var
-  Digits: string;
-begin
-  Result := '';
-  Digits := NormalizePhoneForMessenger(APhone);  // 373XXXXXXXX
-  if (Length(Digits) = 11) and StartsStr('373', Digits) and CharInSet(Digits[4], ['6', '7']) then
-    Result := '0' + Copy(Digits, 4, MaxInt);
-end;
-
-{ fereastra de alegere }
-
-type
-  TECCReceiptSendForm = class(TForm)
-  private
-    FKinds: TRadioGroup;
-    FContactLabel: TLabel;
-    FContact: TEdit;
-    FEmail, FPhone: string;
-    FLastKind: Integer;
-    procedure KindClick(Sender: TObject);
-    procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
-    procedure StoreContact;
-  public
-    constructor CreateDialog(const ASummary, AEmail, APhone: string; const AKind: TECCReceiptSendKind);
-    function Choice: TECCReceiptSendChoice;
-  end;
-
-constructor TECCReceiptSendForm.CreateDialog(const ASummary, AEmail, APhone: string;
-  const AKind: TECCReceiptSendKind);
-var
-  Info: TLabel;
-  Btn: TButton;
-  K: TECCReceiptSendKind;
-begin
-  inherited CreateNew(nil);
-  FEmail := AEmail;
-  FPhone := APhone;
-  Caption := 'Bon fiscal - casa ECC';
-  BorderStyle := bsDialog;
-  Position := poScreenCenter;
-  ClientWidth := 420;
-  OnCloseQuery := FormCloseQuery;
-
-  Info := TLabel.Create(Self);
-  Info.Parent := Self;
-  Info.SetBounds(16, 12, 388, 0);
-  Info.AutoSize := True;
-  Info.WordWrap := True;
-  Info.Caption := ASummary;
-
-  FKinds := TRadioGroup.Create(Self);
-  FKinds.Parent := Self;
-  FKinds.SetBounds(16, Info.Top + Info.Height + 12, 388, 112);
-  FKinds.Caption := ' Cum primeste clientul bonul ';
-  FKinds.Items.Add('Tiparit pe imprimanta');
-  FKinds.Items.Add('Pe e-mail (produsele + linkul de verificare SFS)');
-  FKinds.Items.Add('Pe Viber (imaginea bonului)');
-  FKinds.Items.Add('Prin SMS (suma + linkul de verificare SFS)');
-
-  FContactLabel := TLabel.Create(Self);
-  FContactLabel.Parent := Self;
-  FContactLabel.SetBounds(16, FKinds.Top + FKinds.Height + 12, 388, 15);
-
-  FContact := TEdit.Create(Self);
-  FContact.Parent := Self;
-  FContact.SetBounds(16, FContactLabel.Top + 18, 388, 23);
-
-  Btn := TButton.Create(Self);
-  Btn.Parent := Self;
-  Btn.SetBounds(212, FContact.Top + FContact.Height + 16, 104, 27);
-  Btn.Caption := 'Emite bonul';
-  Btn.Default := True;
-  Btn.ModalResult := mrOk;
-
-  Btn := TButton.Create(Self);
-  Btn.Parent := Self;
-  Btn.SetBounds(324, FContact.Top + FContact.Height + 16, 80, 27);
-  Btn.Caption := 'Renunta';
-  Btn.Cancel := True;
-  Btn.ModalResult := mrCancel;
-
-  ClientHeight := Btn.Top + Btn.Height + 12;
-
-  K := AKind;
-  FLastKind := Ord(K);
-  FKinds.ItemIndex := Ord(K);
-  FKinds.OnClick := KindClick;
-  KindClick(nil);
-end;
-
-// adresa si numarul se tin separat: trecerea intre variante nu pierde ce a scris operatorul
-procedure TECCReceiptSendForm.StoreContact;
-begin
-  case TECCReceiptSendKind(FLastKind) of
-    rskEmail: FEmail := Trim(FContact.Text);
-    rskViber, rskSms: FPhone := Trim(FContact.Text);
-  end;
-end;
-
-procedure TECCReceiptSendForm.KindClick(Sender: TObject);
-begin
-  if Sender <> nil then
-    StoreContact;
-  FLastKind := FKinds.ItemIndex;
-  case TECCReceiptSendKind(FKinds.ItemIndex) of
-    rskEmail:
-      begin
-        FContactLabel.Caption := 'Adresa de e-mail a clientului:';
-        FContact.Text := FEmail;
-      end;
-    rskViber:
-      begin
-        FContactLabel.Caption := 'Telefonul clientului in Viber:';
-        FContact.Text := FPhone;
-      end;
-    rskSms:
-      begin
-        FContactLabel.Caption := 'Telefonul mobil al clientului (06... / 07...):';
-        FContact.Text := FPhone;
-      end;
-  else
-    FContactLabel.Caption := 'Bonul se tipareste pe imprimanta bonurilor a acestui calculator.';
-    FContact.Text := '';
-  end;
-  FContact.Enabled := FKinds.ItemIndex <> Ord(rskPrint);
-  if FContact.Enabled and Visible then
-    FContact.SetFocus;
-end;
-
-procedure TECCReceiptSendForm.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
-var
-  S, Err: string;
-begin
-  if ModalResult <> mrOk then
-    Exit;
-  S := Trim(FContact.Text);
-  Err := '';
-  case TECCReceiptSendKind(FKinds.ItemIndex) of
-    rskEmail:
-      if not IsValidEmail(S) then
-        Err := 'Introduceti o adresa de e-mail corecta.';
-    rskViber:
-      if NormalizePhoneForMessenger(S) = '' then
-        Err := 'Introduceti numarul de telefon al clientului (de ex. 069123456).';
-    rskSms:
-      if NormalizeSmsPhone(S) = '' then
-        Err := 'SMS-ul se trimite doar pe un mobil din Moldova (06... / 07..., 9 cifre).';
-  end;
-  CanClose := Err = '';
-  if not CanClose then
-  begin
-    MessageDlg(Err, mtWarning, [mbOK], 0);
-    FContact.SetFocus;
-  end;
-end;
-
-function TECCReceiptSendForm.Choice: TECCReceiptSendChoice;
-begin
-  Result.Kind := TECCReceiptSendKind(FKinds.ItemIndex);
-  case Result.Kind of
-    rskEmail: Result.Contact := Trim(FContact.Text);
-    rskViber: Result.Contact := NormalizePhoneForMessenger(FContact.Text);
-    rskSms: Result.Contact := NormalizeSmsPhone(FContact.Text);
-  else
-    Result.Contact := '';
-  end;
-end;
-
 function ECCChooseReceiptSend(const ASummary: string; const ADocID: Integer;
   out AChoice: TECCReceiptSendChoice): Boolean;
 var
-  F: TECCReceiptSendForm;
+  F: TfrmECCReceiptSendDlg;
   Kind: Integer;
 begin
   AChoice := Default(TECCReceiptSendChoice);
   Kind := AppConfigStorage.IntValues.GetValue(cSendKindKey, Ord(rskPrint));
   if (Kind < Ord(Low(TECCReceiptSendKind))) or (Kind > Ord(High(TECCReceiptSendKind))) then
     Kind := Ord(rskPrint);
-  F := TECCReceiptSendForm.CreateDialog(ASummary, FindDocEmail(ADocID), FindDocPhone(ADocID),
-    TECCReceiptSendKind(Kind));
+  F := TfrmECCReceiptSendDlg.Create(nil);
   try
+    F.SetData(ASummary, FindDocEmail(ADocID), FindDocPhone(ADocID), TECCReceiptSendKind(Kind));
     Result := F.ShowModal = mrOk;
     if Result then
     begin
