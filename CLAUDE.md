@@ -94,7 +94,7 @@ msbuild SWN.dproj /p:Config=Release /p:Platform=Win32
 ## Other Directories
 
 - `fantastic.web/` — **отдельный проект** (свой `.git`, свой `CLAUDE.md`): сайт **fantastic.md** — интернет-магазин на Yii2/PHP. Работает с **той же базой Firebird** (`SW`), что и WMS; со стороны WMS его питают `sources/classes/WebShops/`, `WebCatalog/` и views `VW_TWEB_*`. Внутри этой папки следуй её собственному CLAUDE.md, а не Delphi-инструкциям (в т.ч. правило кодировки cp1251 к PHP не относится).
-- `CurieriWMS/` — **отдельный проект** (свой `CLAUDE.md`; PHP/composer/artisan только в Docker — локальный PHP 7.4 принадлежит fantastic.web): веб-приложение водителей/курьеров для телефона (PHP/Laravel + Livewire 4 + Alpine.js, Docker Compose) — маршрут, забор у поставщиков, доставка клиенту. Работает с той же базой Firebird `SW`; диспетчер остаётся в WMS (Delphi). Исходники PHP — UTF-8, правило cp1251 к ним не относится. План: `Documents/plan-dispecerat-achizitii-livrari-2026-10-08.md` (§9A).
+- `CurieriWMS/` — **отдельный проект** (свой `.git`, свой `CLAUDE.md`; PHP/composer/artisan только в Docker — локальный PHP 7.4 принадлежит fantastic.web): веб-приложение водителей/курьеров для телефона (PHP/Laravel + Livewire 4 + Alpine.js, Docker Compose) — маршрут, забор у поставщиков, доставка клиенту. Работает с той же базой Firebird `SW`; диспетчер остаётся в WMS (Delphi). Исходники PHP — UTF-8, правило cp1251 к ним не относится. План: `Documents/plan-dispecerat-achizitii-livrari-2026-10-08.md` (§9A).
 
 ## Парный файл AGENTS.md
 
