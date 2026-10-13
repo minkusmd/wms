@@ -522,7 +522,7 @@ begin
         Exit;
     RunForSelected(gvPickups, gvPickupsPICKUPID,
         'SELECT O_STOPID FROM SP_DISPATCH_PICKUP_ASSIGN(:ID, :COURIER, :DATA)',
-        ['COURIER', 'DATA'], [courier, WorkDate]);
+        ['COURIER', 'DATA'], [courier, VarFromDateTime(WorkDate)]);
 end;
 
 procedure TfrmDispatchDlg.btnPickupUnassignClick(Sender: TObject);
@@ -539,7 +539,7 @@ begin
         Exit;
     RunForSelected(gvReturns, gvReturnsDOCID,
         'SELECT O_STOPID FROM SP_DISPATCH_RETURN_ASSIGN(:ID, :COURIER, :DATA)',
-        ['COURIER', 'DATA'], [courier, WorkDate]);
+        ['COURIER', 'DATA'], [courier, VarFromDateTime(WorkDate)]);
 end;
 
 procedure TfrmDispatchDlg.btnReturnUnassignClick(Sender: TObject);
@@ -556,7 +556,7 @@ begin
         Exit;
     RunForSelected(gvDeliveries, gvDeliveriesDOCID,
         'SELECT O_DELIVERYID FROM SP_DISPATCH_DELIVERY_ASSIGN(:ID, :COURIER, :DATA, :ZONE)',
-        ['COURIER', 'DATA', 'ZONE'], [courier, WorkDate, SelectedZone]);
+        ['COURIER', 'DATA', 'ZONE'], [courier, VarFromDateTime(WorkDate), SelectedZone]);
 end;
 
 procedure TfrmDispatchDlg.btnDeliveryZoneOnlyClick(Sender: TObject);
@@ -569,7 +569,7 @@ begin
     end;
     RunForSelected(gvDeliveries, gvDeliveriesDOCID,
         'SELECT O_DELIVERYID FROM SP_DISPATCH_DELIVERY_ASSIGN(:ID, :COURIER, :DATA, :ZONE)',
-        ['COURIER', 'DATA', 'ZONE'], [Null, WorkDate, SelectedZone]);
+        ['COURIER', 'DATA', 'ZONE'], [Null, VarFromDateTime(WorkDate), SelectedZone]);
 end;
 
 procedure TfrmDispatchDlg.btnDeliveryUnassignClick(Sender: TObject);

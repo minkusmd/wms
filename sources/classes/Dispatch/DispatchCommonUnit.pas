@@ -96,6 +96,10 @@ begin
                 q.ParamByName(ANames[i]).DataType := ftInteger;
                 q.ParamByName(ANames[i]).Clear;
             end
+            else if VarType(AValues[i]) in [varDate, varDouble] then
+                { ziua planului: prin .Value IBDAC o trimitea ca numar (46307.0) si
+                  parametrul DATE al procedurii dadea "conversion error from string" }
+                q.ParamByName(ANames[i]).AsDate := VarToDateTime(AValues[i])
             else
                 q.ParamByName(ANames[i]).Value := AValues[i];
 
