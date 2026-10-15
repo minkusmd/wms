@@ -1,83 +1,60 @@
 object frmCustomersDlg: TfrmCustomersDlg
   Left = 0
   Top = 0
-  Margins.Left = 5
-  Margins.Top = 5
-  Margins.Right = 5
-  Margins.Bottom = 5
   ActiveControl = cxGridCustomers
   BorderIcons = [biSystemMenu]
   Caption = 'Nomenclator clienti'
-  ClientHeight = 1050
-  ClientWidth = 1808
+  ClientHeight = 600
+  ClientWidth = 1033
   Color = clBtnFace
-  Constraints.MinHeight = 639
-  Constraints.MinWidth = 1049
+  Constraints.MinHeight = 365
+  Constraints.MinWidth = 599
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
-  Font.Height = -21
+  Font.Height = -12
   Font.Name = 'Segoe UI'
   Font.Style = []
   Position = poMainFormCenter
   OnCreate = FormCreate
-  PixelsPerInch = 168
-  TextHeight = 30
+  TextHeight = 15
   object pnBottom: TPanel
     Left = 0
-    Top = 973
-    Width = 1808
-    Height = 77
-    Margins.Left = 5
-    Margins.Top = 5
-    Margins.Right = 5
-    Margins.Bottom = 5
+    Top = 556
+    Width = 1033
+    Height = 44
     Align = alBottom
     BevelOuter = bvNone
     TabOrder = 5
     DesignSize = (
-      1808
-      77)
+      1033
+      44)
     object btnOk: TcxButton
-      Left = 1447
-      Top = 11
-      Width = 158
-      Height = 50
-      Margins.Left = 5
-      Margins.Top = 5
-      Margins.Right = 5
-      Margins.Bottom = 5
+      Left = 827
+      Top = 6
+      Width = 90
+      Height = 29
       Anchors = [akTop, akRight]
       Caption = 'OK'
-      OptionsImage.Spacing = 7
       TabOrder = 0
       OnClick = btnOkClick
     end
     object btnCancel: TcxButton
-      Left = 1615
-      Top = 11
-      Width = 158
-      Height = 50
-      Margins.Left = 5
-      Margins.Top = 5
-      Margins.Right = 5
-      Margins.Bottom = 5
+      Left = 923
+      Top = 6
+      Width = 90
+      Height = 29
       Anchors = [akTop, akRight]
       Cancel = True
       Caption = 'Renunta'
       ModalResult = 2
-      OptionsImage.Spacing = 7
       TabOrder = 1
     end
   end
   object cxGridCustomers: TcxGrid
     Left = 0
-    Top = 43
-    Width = 1808
-    Height = 930
-    Margins.Left = 5
-    Margins.Top = 5
-    Margins.Right = 5
-    Margins.Bottom = 5
+    Top = 26
+    Width = 1033
+    Height = 530
     Align = alClient
     BevelInner = bvNone
     BevelOuter = bvNone
@@ -85,8 +62,6 @@ object frmCustomersDlg: TfrmCustomersDlg
     TabOrder = 0
     LookAndFeel.NativeStyle = True
     LookAndFeel.SkinName = ''
-    ExplicitTop = 46
-    ExplicitHeight = 927
     object cxGridCustomersTable: TcxGridDBTableView
       PopupMenu = dxBarPopupMenu
       OnDblClick = cxGridCustomersTableDblClick
@@ -113,9 +88,6 @@ object frmCustomersDlg: TfrmCustomersDlg
       DataController.DataModeController.GridModeBufferCount = 100
       DataController.DataSource = IBCDataSourceCustomer
       DataController.KeyFieldNames = 'CUSTOMERID'
-      FilterRow.SeparatorWidth = 11
-      FixedDataRows.SeparatorWidth = 11
-      NewItemRow.SeparatorWidth = 11
       OptionsBehavior.IncSearch = True
       OptionsCustomize.ColumnFiltering = False
       OptionsCustomize.ColumnGrouping = False
@@ -130,16 +102,11 @@ object frmCustomersDlg: TfrmCustomersDlg
       OptionsData.Inserting = False
       OptionsSelection.MultiSelect = True
       OptionsView.CellEndEllipsis = True
-      OptionsView.NavigatorOffset = 88
       OptionsView.NoDataToDisplayInfoText = '<Nu sunt inregistrari>'
       OptionsView.ScrollBars = ssVertical
       OptionsView.ColumnAutoWidth = True
-      OptionsView.FixedColumnSeparatorWidth = 4
       OptionsView.GridLineColor = 13750737
       OptionsView.GroupByBox = False
-      Preview.LeftIndent = 35
-      Preview.RightIndent = 9
-      RowLayout.MinValueWidth = 140
       Styles.Header = dmAdditions.cxStyle_GridHeader
       Styles.Inactive = dmAdditions.cxStyle_GirdContentInactive
       object cxGridCustomers_CUSTOMERID: TcxGridDBColumn
@@ -149,13 +116,12 @@ object frmCustomersDlg: TfrmCustomersDlg
         FooterAlignmentHorz = taRightJustify
         GroupSummaryAlignment = taRightJustify
         HeaderAlignmentHorz = taCenter
-        MinWidth = 35
         Options.Editing = False
         Options.Filtering = False
         Options.FilteringFilteredItemsList = False
         Options.ShowEditButtons = isebNever
         Options.SortByDisplayText = isbtOff
-        Width = 182
+        Width = 104
       end
       object cxGridCustomers_IMG: TcxGridDBColumn
         DataBinding.FieldName = 'IMAGE_INDEX'
@@ -197,7 +163,7 @@ object frmCustomersDlg: TfrmCustomersDlg
             ImageIndex = 77
             Value = 6
           end>
-        MinWidth = 42
+        MinWidth = 24
         Options.Editing = False
         Options.Filtering = False
         Options.Focusing = False
@@ -209,64 +175,60 @@ object frmCustomersDlg: TfrmCustomersDlg
         Options.Moving = False
         Options.Sorting = False
         VisibleForCustomization = False
-        Width = 42
+        Width = 24
         IsCaptionAssigned = True
       end
       object cxGridCustomers_DISPLAYNAME: TcxGridDBColumn
         Caption = 'Client'
         DataBinding.FieldName = 'DISPLAYNAME'
-        MinWidth = 35
         Styles.OnGetContentStyle = cxGridCustomers_DISPLAYNAMEStylesGetContentStyle
         VisibleForCustomization = False
-        Width = 819
+        Width = 468
       end
       object cxGridCustomers_TELEFON1: TcxGridDBColumn
         Caption = 'Telefon'
         DataBinding.FieldName = 'TELEFON1'
-        MinWidth = 158
+        MinWidth = 90
         Options.HorzSizing = False
-        Width = 158
+        Width = 90
       end
       object cxGridCustomers_FAX: TcxGridDBColumn
         Caption = #1060#1072#1082#1089
         DataBinding.FieldName = 'FAX'
         Visible = False
-        MinWidth = 158
+        MinWidth = 90
         Options.HorzSizing = False
-        Width = 158
+        Width = 90
       end
       object cxGridCustomers_MOBILE: TcxGridDBColumn
         Caption = 'Tel. Mobil'
         DataBinding.FieldName = 'MOBILE'
-        MinWidth = 35
-        Width = 219
+        Width = 125
       end
       object cxGridCustomers_ACCOUNTNUMBER: TcxGridDBColumn
         Caption = 'Cont bancar'
         DataBinding.FieldName = 'ACCOUNTNUMBER'
         Visible = False
-        MinWidth = 175
+        MinWidth = 100
         Options.HorzSizing = False
-        Width = 175
+        Width = 100
       end
       object cxGridCustomers_IDEN_NUMBER: TcxGridDBColumn
         Caption = 'Cod fiscal'
         DataBinding.FieldName = 'IDEN_NUMBER'
-        MinWidth = 175
+        MinWidth = 100
         Options.HorzSizing = False
-        Width = 175
+        Width = 100
       end
       object cxGridCustomers_FLG_FOLDER: TcxGridDBColumn
         DataBinding.FieldName = 'FLG_FOLDER'
         Visible = False
-        MinWidth = 35
         VisibleForCustomization = False
       end
       object cxGridCustomers_CUSTOMER_STATUS_ID: TcxGridDBColumn
         Caption = 'Status'
         DataBinding.FieldName = 'CUSTOMER_STATUS_ID'
         Visible = False
-        MinWidth = 35
         VisibleForCustomization = False
       end
     end
@@ -279,7 +241,7 @@ object frmCustomersDlg: TfrmCustomersDlg
     AutoDockColor = False
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
-    Font.Height = -21
+    Font.Height = -12
     Font.Name = 'Segoe UI'
     Font.Style = []
     CanCustomize = False
@@ -315,11 +277,11 @@ object frmCustomersDlg: TfrmCustomersDlg
     UseSystemFont = False
     Left = 31
     Top = 66
-    PixelsPerInch = 168
+    PixelsPerInch = 96
     DockControlHeights = (
       0
       0
-      43
+      26
       0)
     object dxBarManager1Bar1: TdxBar
       AllowClose = False
@@ -813,7 +775,7 @@ object frmCustomersDlg: TfrmCustomersDlg
     UseOwnFont = False
     Left = 28
     Top = 120
-    PixelsPerInch = 168
+    PixelsPerInch = 96
   end
   object cxPropertiesStore1: TcxPropertiesStore
     Components = <>

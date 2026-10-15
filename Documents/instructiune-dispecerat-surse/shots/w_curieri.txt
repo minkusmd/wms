@@ -1,0 +1,12 @@
+dtDialogTitle=0,0,1100,64
+pnSettings=0,64,1100,40
+lbBaseStock=8,76,200,15
+lbWebUser=520,76,252,15
+lcbBaseStock=212,72,280,23
+lcbWebUser=778,72,310,23
+cxGridCouriers=8,108,1084,396
+btnAdd=8,516,120,31
+btnActivation=134,516,150,31
+btnCreateStock=290,516,190,31
+btnOk=866,516,110,31
+btnCancel=982,516,110,31

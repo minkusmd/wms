@@ -95,7 +95,7 @@ uses
   DataModuleDB, SWNUtils, SWNConst, DataModuleAdditions, SWNDBErrors, SWNValueStorageUnit, SWNSecurity, SWNSecurityFlags,
   frmCustomerCurrentDebtsDialog, frmCerereDePlataDialog, frmCerereDePlataDBDialog, Vcl.Imaging.jpeg,
   Vcl.Imaging.pngimage, System.IOUtils, System.Variants, Winapi.ActiveX, frmVoltaParserUnit, Vcl.WebpImage,
-  Winapi.GDIPOBJ, WebpHelpers, libwebp, uLoadProductImages, WebProductImagesUnit, SWNParseUtils,
+  Winapi.GDIPOBJ, WebpHelpers, libwebp, {uLoadProductImages,} WebProductImagesUnit, SWNParseUtils,
   System.RegularExpressions, System.NetEncoding, System.Math, MamicoContentUnit;
 
 {$R *.dfm}

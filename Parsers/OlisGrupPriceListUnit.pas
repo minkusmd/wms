@@ -6,7 +6,10 @@ unit OlisGrupPriceListUnit;
   Aceleasi reguli ca formularul din WMS (b2b.api\Muncitorul\frmMuncitorulProgressUnit):
     - doar produsele cu stoc > 0;
     - PRICE0 = PRICE7 = pret_online, PRICE3 = pret_vinz, toate in MDL (498);
-    - titluRO -> denumirea, brand, categorieRO, guar_period -> garantia.
+    - titluRO -> denumirea, brand, categorieRO, guar_period -> garantia;
+    - textRO/textRU + features + imagini -> TS_PRICELIST_ITEMS_DESCRIPTION / _IMAGES prin
+      OlisGrupContentUnit (dupa COMMIT-ul pricelistului; descarcarea imaginilor si copierea
+      la produse le face jobul, in AfterReevaluation).
   Diferente: IBDAC in loc de FireDAC (conexiunea jobului, fara parola in .dfm), JSON citit
   direct (fara TFDMemTable) si articolele scrise in loturi IBDAC (EXECUTE BLOCK) intr-o
   singura tranzactie - totul sau nimic, fara fire de scriere separate.
@@ -33,7 +36,7 @@ implementation
 
 uses
   System.Classes, System.JSON, System.Math, System.Generics.Collections, System.Net.HttpClient,
-  System.Net.URLClient, System.NetConsts, Data.DB, IBCClasses;
+  System.Net.URLClient, System.NetConsts, Data.DB, IBCClasses, OlisGrupContentUnit;
 
 const
   cFeedUrl = 'https://price.muncitorul.md/api/products.json';
@@ -94,6 +97,8 @@ var
   Root, V: TJSONValue;
   Obj: TJSONObject;
   Items: TList<TOlisItem>;
+  Content: TList<TOlisContentItem>;
+  ContentStats: TOlisContentStats;
   Seen: TDictionary<string, Boolean>;
   Item: TOlisItem;
   Total, NoStock, Duplicates, I, N, K: Integer;
@@ -112,6 +117,7 @@ begin
   NoStock := 0;
   Duplicates := 0;
   Items := TList<TOlisItem>.Create;
+  Content := TList<TOlisContentItem>.Create;
   Seen := TDictionary<string, Boolean>.Create;
   try
     Root := TJSONObject.ParseJSONValue(DownloadFeed);
@@ -146,6 +152,7 @@ begin
         Item.PriceVinz := JFloat(Obj, 'pret_vinz');
         Item.Warranty := Trunc(JFloat(Obj, 'guar_period'));
         Items.Add(Item);
+        Content.Add(TOlisGrupContent.FromJson(Obj));
       end;
     finally
       Root.Free;
@@ -231,8 +238,20 @@ begin
 
     Log(Format('Pricelist Olis Grup #%d creat: %d produse cu stoc (din %d citite; fara stoc %d, coduri repetate %d)',
       [Result, Items.Count, Total, NoStock, Duplicates]));
+
+    // descrierile si URL-urile imaginilor; pricelist-ul ramine si daca pasul asta pica
+    try
+      ContentStats := TOlisGrupContent.Save(AConnection, Content.ToArray);
+      Log(Format('Olis Grup: %d descrieri RO/RU, %d produse cu imagini (%d liste noi/schimbate, %d URL-uri)',
+        [ContentStats.Descriptions, ContentStats.ProductsWithImages, ContentStats.ImagesChanged,
+         ContentStats.ImageRows]));
+    except
+      on E: Exception do
+        Log('Olis Grup: descrierile si imaginile nu s-au salvat - ' + E.Message);
+    end;
   finally
     Seen.Free;
+    Content.Free;
     Items.Free;
   end;
 end;

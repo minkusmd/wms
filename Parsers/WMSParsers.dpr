@@ -69,6 +69,7 @@ uses
   B2B.DMLinkPriceListImport in '..\sources\b2b.api\dmlink\B2B.DMLinkPriceListImport.pas',
   NexDistributionUnit in '..\sources\frameUtils\78 - Pricelist\NexDistributionUnit.pas',
   TriomacPriceListUnit in '..\sources\frameUtils\78 - Pricelist\TriomacPriceListUnit.pas',
+  OlisGrupContentUnit in '..\sources\b2b.api\Muncitorul\OlisGrupContentUnit.pas',
   OlisGrupPriceListUnit in 'OlisGrupPriceListUnit.pas',
   PriceListReevaluationUnit in 'PriceListReevaluationUnit.pas',
   PriceListApiJobsUnit in 'PriceListApiJobsUnit.pas',

@@ -93,7 +93,7 @@ uses
   frmCustomerCurrentDebtsDialog, frmCerereDePlataDialog,
   frmCerereDePlataDBDialog, Vcl.Imaging.jpeg, Vcl.Imaging.pngimage,
   System.IOUtils, System.Variants, Winapi.ActiveX, frmVoltaParserUnit,
-  Vcl.WebpImage, Winapi.GDIPOBJ, WebpHelpers, libwebp, uLoadProductImages;
+  Vcl.WebpImage, Winapi.GDIPOBJ, WebpHelpers, libwebp{, uLoadProductImages - TLoadBombaProductImages nu mai e folosit};
 
 {$R *.dfm}
 
@@ -116,19 +116,20 @@ begin
   Memo1.Lines.Add(AMessage);
 end;
 
+// TLoadBombaProductImages (uLoadProductImages) nu mai e folosit - metoda ramine goala, e legata din .dfm
 procedure Tframe110BombaAPI.cxButton1Click(Sender: TObject);
-var
-  ProductImages: TLoadBombaProductImages;
+//var
+//  ProductImages: TLoadBombaProductImages;
 begin
-  while not IBCQuery1.Eof do begin
-    ProductImages := TLoadBombaProductImages.Create(dmdb.IBCConnection);
-    productimages.OnParseStep := DoParseStep;
-    ProductImages.LoadImages(IBCQuery1.FieldByName('GOODSID').AsInteger, IBCQuery1.FieldByName('GOODS_CODE').AsString);
-    Memo1.Lines.Add('------------------------------------------');
-    IBCQuery1.Next;
-    ibcquery1.last;
-    Application.ProcessMessages;
-  end;
+//  while not IBCQuery1.Eof do begin
+//    ProductImages := TLoadBombaProductImages.Create(dmdb.IBCConnection);
+//    productimages.OnParseStep := DoParseStep;
+//    ProductImages.LoadImages(IBCQuery1.FieldByName('GOODSID').AsInteger, IBCQuery1.FieldByName('GOODS_CODE').AsString);
+//    Memo1.Lines.Add('------------------------------------------');
+//    IBCQuery1.Next;
+//    ibcquery1.last;
+//    Application.ProcessMessages;
+//  end;
 end;
 
 procedure Tframe110BombaAPI.cxButton2Click(Sender: TObject);

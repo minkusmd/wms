@@ -124,6 +124,8 @@ type
     bbMainMenuRef_Banks: TdxBarButton;
     bbMainMenuRef_Stocks: TdxBarButton;
     bbMainMenuRef_Enterprises: TdxBarButton;
+    bbCompanyNew: TdxBarButton;
+    bbCompanyCard: TdxBarButton;
     bbMainMenuSys_Settings: TdxBarButton;
     bbCreateNewVersion: TdxBarSubItem;
     bbMainMenuHelp_About: TdxBarButton;
@@ -369,6 +371,8 @@ type
     procedure bbMainMenuRef_BanksClick(Sender: TObject);
     procedure bbMainMenuRef_GoodsTypeClick(Sender: TObject);
     procedure bbMainMenuRef_EnterprisesClick(Sender: TObject);
+    procedure bbCompanyNewClick(Sender: TObject);
+    procedure bbCompanyCardClick(Sender: TObject);
     procedure bbMainMenuRef_GoodsACNTClick(Sender: TObject);
     procedure bbMainMenuRef_GoodsAcntTypesClick(Sender: TObject);
     procedure cmbMainFirmsCurChange(Sender: TObject);
@@ -702,6 +706,7 @@ type
     procedure RefreshPendingDocsIndicatorNow;
     function PendingDocCount(const ADocTypeID: Integer): Integer;
     procedure RefreshUsdRateCaption;
+    procedure WndProc(var Message: Winapi.Messages.TMessage); override;
   public    { Public declarations }
     procedure GotoDocument(const SearchDocumentID: Integer; const Target: TSearchDocumentSearchTarget);
     procedure ShowCreditRetailDlg;
@@ -735,6 +740,8 @@ uses
   UltraCurrencyRateThread,
   SWNValueStorageUnit,
   SwnThreadsUnit,
+  TaskbarBadgeUnit,
+  frmCompanyCardDialog,
   dxNavBarCollns,
   frame01CasaPKOUnit,
   frame02CasaRKOUnit,
@@ -1418,6 +1425,55 @@ begin
   ShowFirmsEditor;
 end;
 
+procedure TfrmMainForm.bbCompanyNewClick(Sender: TObject);
+// Fisa noua de companie / subdiviziune (frmCompanyCardDialog). Firma noua intra in lista din bara
+// doar daca utilizatorul are acces la ea (GET_FIRMS_BY_USER); firma curenta ramane aceeasi -
+// BuildFirmList ar comuta inapoi pe firma implicita a utilizatorului.
+var
+  NewID: Integer;
+  Tr: TIBCTransaction;
+  Q: TIBCQuery;
+  Item: TcxImageComboBoxItem;
+begin
+  NewID := TfrmCompanyCardDlg.Execute(Self, 0);
+  if NewID <= 0 then
+    Exit;
+  Tr := TIBCTransaction.Create(nil);
+  Q := TIBCQuery.Create(nil);
+  try
+    Tr.DefaultConnection := dmDB.IBCConnection;
+    Q.Connection := dmDB.IBCConnection;
+    Q.Transaction := Tr;
+    Q.SQL.Text := 'SELECT DISPLAYNAME FROM GET_FIRMS_BY_USER(:U) WHERE CUSTOMERID = :ID';
+    Q.ParamByName('U').AsInteger := dmDB.CurrentUserID;
+    Q.ParamByName('ID').AsInteger := NewID;
+    Q.Open;
+    if not Q.IsEmpty then
+    begin
+      Item := TcxImageComboBoxProperties(cmbMainFirms.Properties).Items.Add;
+      Item.Value := NewID;
+      if SWNSecurityManager.LoggedUser.IsSuperAdminUser then
+        Item.Description := Format('%s (%d)', [Q.Fields[0].AsString, NewID])
+      else
+        Item.Description := Q.Fields[0].AsString;
+      Item.ImageIndex := 11;
+    end;
+    Q.Close;
+    if Tr.Active then
+      Tr.Commit;
+  finally
+    Q.Free;
+    Tr.Free;
+  end;
+end;
+
+procedure TfrmMainForm.bbCompanyCardClick(Sender: TObject);
+// Fisa firmei alese in bara principala.
+begin
+  if dmDB.CurrentFirma > 0 then
+    TfrmCompanyCardDlg.Execute(Self, dmDB.CurrentFirma);
+end;
+
 procedure TfrmMainForm.bbMainMenuRef_GoodsACNTClick(Sender: TObject);
 begin
   ShowGoodsAcntEditor;
@@ -1648,7 +1704,11 @@ begin
     Exit;
   end;
   // bara SIP sus, frame-ul (apelare + istoria apelurilor) pe restul ferestrei; raman ale MainForm
-  fSipWindow := TfrmSipPhoneWindow.Create(nil);
+  // proprietar MainForm, nu Application.Handle (aici Application.MainForm e inca nil)
+  fSipWindow := TfrmSipPhoneWindow.CreateFor(Self);
+  // la recrearea handle-ului MainForm VCL recreeaza si ferestrele din PopupChildren
+  PopupChildren.Add(fSipWindow);
+  fSipWindow.FreeNotification(Self);
   bdcSIP.Parent := fSipWindow;
   bdcSIP.Align := dalTop;
   bdcSIP.Visible := True;
@@ -3264,6 +3324,8 @@ begin
   end;
   if Increased and not Application.Active then
     FlashTaskbarUntilActive(Handle);
+  // numarul comenzilor web noi (134) si pe butonul din taskbar, ca la mesagerii
+  SetTaskbarBadge(Handle, PendingDocCount(cPendingDocTypes[0]));
 
   for I := 0 to cxTreeDocTypes.AbsoluteCount - 1 do
   begin
@@ -3337,6 +3399,14 @@ begin
     fUpdater.Free;
   end;
   frmSchedulerDaemon.Free;
+end;
+
+procedure TfrmMainForm.WndProc(var Message: Winapi.Messages.TMessage);
+begin
+  inherited;
+  // butonul din taskbar abia creat sau Explorer repornit: insigna cu numarul se pune din nou
+  if (TaskbarButtonCreatedMessage <> 0) and (Message.Msg = TaskbarButtonCreatedMessage) then
+    ReapplyTaskbarBadge(Handle);
 end;
 
 procedure TfrmMainForm.FormShow(Sender: TObject);
@@ -4265,11 +4335,15 @@ begin
   begin
     bbMainMenuRef_Customers.Visible := ivNever;
     bbMainMenuRef_Enterprises.Visible := ivNever;
+    bbCompanyNew.Visible := ivNever;
+    bbCompanyCard.Visible := ivNever;
   end;
 
   if SWNSecurityManager.IsPartialAccessMode then
   begin
     bbMainMenuRef_Enterprises.Visible := ivNever;
+    bbCompanyNew.Visible := ivNever;
+    bbCompanyCard.Visible := ivNever;
   end;
 
   // Denumiri pentru nakladnie
@@ -4453,6 +4527,8 @@ begin
     bbBugete.Visible := ivNever;
     bbMainMenuRef_Customers.Visible := ivNever;
     bbMainMenuRef_Enterprises.Visible := ivNever;
+    bbCompanyNew.Visible := ivNever;
+    bbCompanyCard.Visible := ivNever;
     bbMCC.Visible := ivNever;
     bbECCDiagnostic.Visible := ivNever;
     bbWorkStations.Visible := ivNever;

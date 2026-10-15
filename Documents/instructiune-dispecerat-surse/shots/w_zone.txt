@@ -1,0 +1,6 @@
+dtDialogTitle=0,0,720,64
+cxGridZones=8,72,704,352
+btnAdd=8,436,100,31
+btnDelete=114,436,100,31
+btnOk=486,436,110,31
+btnCancel=602,436,110,31

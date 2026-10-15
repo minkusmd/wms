@@ -703,6 +703,18 @@ begin
   cxDateEdit1.Date := Now;
 end;
 
+{ Denumirea din celula Excel poate contine rinduri noi (Alt+Enter) -
+  in baza le inlocuim cu spatiu, ca denumirea sa ramina pe un singur rind. }
+function SingleLine(const AValue: string): string;
+begin
+  Result := StringReplace(AValue, #13#10, ' ', [rfReplaceAll]);
+  Result := StringReplace(Result, #13, ' ', [rfReplaceAll]);
+  Result := StringReplace(Result, #10, ' ', [rfReplaceAll]);
+  while Pos('  ', Result) > 0 do
+    Result := StringReplace(Result, '  ', ' ', [rfReplaceAll]);
+  Result := Trim(Result);
+end;
+
 function TfrmPriceListImportDlg.ColumnTitle(const AColumnIndex: Integer): string;
 var
   ATable: TdxSpreadSheetTableView;
@@ -857,20 +869,8 @@ begin
           ParamByName('SUPPLIER_GOODS_CODE').AsString := supplier_goods_code;
         end;
 
-        s := '';
         if Assigned(ATable.Cells[I, 1]) then
-        begin
-
-          if ATable.Cells[I, 1].AsString <> '' then
-            s := Split(ATable.Cells[I, 1].AsString, char($A))[0]
-          else
-            s := '';
-
-          if Trim(s) <> '' then
-            s := ATable.Cells[I, 1].AsString;
-
-          ParamByName('SUPPLIER_GOODS_NAME').AsString := copy(s, 1, 255);
-        end;
+          ParamByName('SUPPLIER_GOODS_NAME').AsString := copy(SingleLine(ATable.Cells[I, 1].AsString), 1, 255);
 
         if Assigned(ATable.Cells[I, 2]) then
           ParamByName('PRICE0').AsString := iif(stringreplace(ATable.Cells[I, 2].DisplayText, ' ', '', [rfReplaceAll]) =
@@ -906,17 +906,7 @@ begin
           ParamByName('SUPPLIER_GOODS_BRAND').AsString := stringreplace(ATable.Cells[I, 9].DisplayText, #$D#$A, ' ', [rfReplaceAll]);
 
         if Assigned(ATable.Cells[I, 10]) then
-        begin
-
-          if pos(#$A, ATable.Cells[I, 10].AsString, 1) > 0 then
-            s := Split(ATable.Cells[I, 10].AsString, #$A)[0]
-          else
-            s := ATable.Cells[I, 10].AsString;
-
-          if s <> '' then
-            s := ATable.Cells[I, 10].AsString;
-          ParamByName('sUPPLIER_GOODS_MODEL').AsString := s;
-        end;
+          ParamByName('SUPPLIER_GOODS_MODEL').AsString := SingleLine(ATable.Cells[I, 10].AsString);
 
         if Assigned(ATable.Cells[I, 11]) then
           ParamByName('SUPPLIER_CATEGORY').AsString := ATable.Cells[I, 11].DisplayText;

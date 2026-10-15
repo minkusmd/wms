@@ -28,10 +28,12 @@ unit MamicoContentUnit;
 interface
 
 uses
-  System.SysUtils, System.Classes, Data.DB, IBC;
+  System.SysUtils, System.Classes, Data.DB, IBC, Vcl.Graphics;
 
 const
   cMamicoSupplierID = 315715;
+  // latura maxima a imaginilor salvate in TS_PRICELIST_ITEMS_IMAGES (si copiate apoi in TS_GOODS_IMAGE)
+  cMaxPriceListImageSide = 1200;
   cMamicoThreadCount = 8;
 
 type
@@ -91,6 +93,11 @@ function CreateContentHttp: TObject;
 function ContentGetPage(AHttp: TObject; const AUrl: string): string;
 function ContentGetBytes(AHttp: TObject; const AUrl: string): TBytes;
 
+// Micsoreaza proportional imaginea daca o latura depaseste cMaxPriceListImageSide (inlocuieste AImage).
+// NexDistribution trimite JPG-uri de 3213x5712 -> PNG-uri de 13-55 MB, care blocau frame78 la deschidere.
+// True = imaginea a fost micsorata.
+function ShrinkPriceListImage(var AImage: TWICImage): Boolean;
+
 // functii pure de parsare (pot fi testate pe HTML salvat)
 function MamicoIsProductPage(const AHtml: string): Boolean;
 function MamicoAlternateUrl(const AHtml, AHrefLang: string): string;
@@ -103,7 +110,7 @@ implementation
 uses
   System.RegularExpressions, System.NetEncoding, System.Net.HttpClient, System.Net.URLClient,
   System.SyncObjs, System.Generics.Collections, System.UITypes, System.StrUtils, System.Math,
-  Winapi.ActiveX, Vcl.Graphics, Vcl.Forms, Vcl.Controls, Vcl.StdCtrls, Vcl.Dialogs;
+  Winapi.ActiveX, Winapi.GDIPOBJ, WebpHelpers, libwebp, Vcl.Forms, Vcl.Controls, Vcl.StdCtrls, Vcl.Dialogs;
 
 const
   cBaseUrl = 'https://mamico.md';
@@ -112,6 +119,24 @@ const
   cRx = [roIgnoreCase, roSingleLine];
   // pauza fiecarui fir intre doua articole, ca sa nu incarcam site-ul furnizorului
   cDelayBetweenItemsMs = 300;
+
+function ShrinkPriceListImage(var AImage: TWICImage): Boolean;
+var
+  W, H: Integer;
+  Scale: Double;
+  Scaled: TWICImage;
+begin
+  Result := False;
+  W := AImage.Width;
+  H := AImage.Height;
+  if (W <= cMaxPriceListImageSide) and (H <= cMaxPriceListImageSide) then
+    Exit;
+  Scale := cMaxPriceListImageSide / Max(W, H);
+  Scaled := AImage.CreateScaledCopy(Max(1, Round(W * Scale)), Max(1, Round(H * Scale)), wipmHighQualityCubic);
+  AImage.Free;
+  AImage := Scaled;
+  Result := True;
+end;
 
 { ---------------------------------------------------------------------------- }
 { parsare                                                                        }
@@ -412,12 +437,66 @@ begin
     R.Log.Add(Format('%s: pagina fara imagini si fara descriere', [ACode]));
 end;
 
+// RIFF....WEBP
+function IsWebpBytes(const ABytes: TBytes): Boolean;
+begin
+  Result := (Length(ABytes) >= 12) and (ABytes[0] = Ord('R')) and (ABytes[1] = Ord('I')) and
+    (ABytes[2] = Ord('F')) and (ABytes[3] = Ord('F')) and (ABytes[8] = Ord('W')) and
+    (ABytes[9] = Ord('E')) and (ABytes[10] = Ord('B')) and (ABytes[11] = Ord('P'));
+end;
+
+// Incarca octetii unei imagini (JPG / PNG / WebP) in AWic. WIC citeste WebP doar cind codecul
+// "WebP Image Extensions" e instalat in Windows; fara el (ex. imaginile .webp de pe ronixtools.com,
+// furnizorul CILITRANS) LoadFromStream ridica EInvalidGraphic si imaginea ramine nesalvata.
+// Atunci WebP-ul se decodeaza prin libwebp.dll -> GDI+ -> PNG (ca in frame115Megacom).
+procedure LoadPriceListImage(const ABytes: TBytes; AWic: TWICImage);
+var
+  Raw, Png: TMemoryStream;
+  WebpData: PByte;
+  GpBmp: TGPBitmap;
+begin
+  Raw := TMemoryStream.Create;
+  try
+    Raw.WriteBuffer(ABytes[0], Length(ABytes));
+    Raw.Position := 0;
+    try
+      AWic.LoadFromStream(Raw);
+    except
+      on E: Exception do
+      begin
+        if not IsWebpBytes(ABytes) then
+          raise;
+        WebpData := nil;
+        GpBmp := nil;
+        Png := TMemoryStream.Create;
+        try
+          WebpDecode(Raw, WebpData, GpBmp);
+          if (WebpData = nil) or (GpBmp = nil) or (GpBmp.GetWidth = 0) then
+            raise Exception.Create('WebP nedecodabil (libwebp): ' + E.Message);
+          GpBmp.Save(TStreamAdapter.Create(Png, soReference), gPNG);
+          if Png.Size = 0 then
+            raise Exception.Create('WebP -> PNG (GDI+) a esuat: ' + E.Message);
+          Png.Position := 0;
+          AWic.LoadFromStream(Png);
+        finally
+          GpBmp.Free;
+          if WebpData <> nil then
+            WebPFree(WebpData);
+          Png.Free;
+        end;
+      end;
+    end;
+  finally
+    Raw.Free;
+  end;
+end;
+
 class function TMamicoContentLoader.SaveItem(AConnection: TIBCConnection; ASupplierID: Integer;
   AResult: TMamicoItemResult): Integer;
 var
   Tr: TIBCTransaction;
   Query: TIBCQuery;
-  Raw, Png: TMemoryStream;
+  Png: TMemoryStream;
   Wic: TWICImage;
   I: Integer;
 begin
@@ -477,14 +556,12 @@ begin
           // CDN-ul intoarce WebP; in baza pastram PNG (ca la ceilalti furnizori)
           if Length(AResult.ImageData[I]) > 0 then
           begin
-            Raw := TMemoryStream.Create;
             Png := TMemoryStream.Create;
             Wic := TWICImage.Create;
             try
               try
-                Raw.WriteBuffer(AResult.ImageData[I][0], Length(AResult.ImageData[I]));
-                Raw.Position := 0;
-                Wic.LoadFromStream(Raw);
+                LoadPriceListImage(AResult.ImageData[I], Wic);
+                ShrinkPriceListImage(Wic);
                 Wic.ImageFormat := wifPng;
                 Wic.SaveToStream(Png);
                 Png.Position := 0;
@@ -498,7 +575,6 @@ begin
             finally
               Wic.Free;
               Png.Free;
-              Raw.Free;
             end;
           end;
 

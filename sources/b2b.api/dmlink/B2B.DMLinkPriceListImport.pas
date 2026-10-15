@@ -104,7 +104,7 @@ type
     // descarca in fire imaginile articolelor din APLID care au in TS_PRICELIST_ITEMS_IMAGES
     // randuri fara IMAGE (fereastra de progres comuna cu mamico.md / NexDistribution)
     class procedure DownloadImages(AConnection: TIBCConnection; APLID: Integer;
-      ASupplierID: Integer = cDMLinkSupplierID);
+      ASupplierID: Integer = cDMLinkSupplierID; const ASiteName: string = 'DMLink API');
 
     // acelasi lucru fara interfata (WMSParsers, orice fir): AThreadCount fire, fiecare
     // descarca, converteste in PNG si scrie pe conexiunea lui; intoarce imaginile salvate
@@ -1315,7 +1315,8 @@ begin
   end;
 end;
 
-class procedure TDMLinkPriceListImport.DownloadImages(AConnection: TIBCConnection; APLID, ASupplierID: Integer);
+class procedure TDMLinkPriceListImport.DownloadImages(AConnection: TIBCConnection; APLID, ASupplierID: Integer;
+  const ASiteName: string);
 var
   Filter: TDMLinkImageFilter;
   Query: TIBCQuery;
@@ -1338,7 +1339,7 @@ begin
 
     // Query are deja doar codurile cu imagini nedescarcate (inclusiv cele cu o parte din imagini,
     // pe care modul "doar fara continut" le-ar sari); fisiere statice - fara pauza intre cereri
-    TMamicoContentLoader.RunForPriceItemsEx(Query, AConnection, ASupplierID, DMLinkFetch, 'DMLink API',
+    TMamicoContentLoader.RunForPriceItemsEx(Query, AConnection, ASupplierID, DMLinkFetch, ASiteName,
       False, 0);
   finally
     Query.Free;

@@ -123,7 +123,7 @@ object frmContentGoodsEditorDlg: TfrmContentGoodsEditorDlg
     Margins.Bottom = 5
     Align = alClient
     TabOrder = 1
-    Properties.ActivePage = tbsAttributes
+    Properties.ActivePage = tbsDescriptions
     Properties.CustomButtons.Buttons = <>
     OnPageChanging = pcPageControlPageChanging
     ClientRectBottom = 458
@@ -133,10 +133,6 @@ object frmContentGoodsEditorDlg: TfrmContentGoodsEditorDlg
     object tbWebName: TcxTabSheet
       Caption = '&0 Denumire web'
       ImageIndex = 0
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object dxBarDockControl4: TdxBarDockControl
         Left = 0
         Top = 0
@@ -161,10 +157,6 @@ object frmContentGoodsEditorDlg: TfrmContentGoodsEditorDlg
         object tbsSearchKeys: TcxTabSheet
           Caption = 'Search Keys'
           ImageIndex = 1
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object cxDBMemo2: TcxDBMemo
             AlignWithMargins = True
             Left = 3
@@ -270,10 +262,6 @@ object frmContentGoodsEditorDlg: TfrmContentGoodsEditorDlg
     object tbsDescriptions: TcxTabSheet
       Caption = '&1 - Descriere'
       ImageIndex = 1
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object pcDescriptions: TPageControl
         Left = 0
         Top = 0
@@ -303,7 +291,7 @@ object frmContentGoodsEditorDlg: TfrmContentGoodsEditorDlg
             Left = 16
             Top = 34
             Width = 913
-            Height = 248
+            Height = 183
             Cursor = crIBeam
             DataField = 'DESCRIPTION_RO'
             DataSource = IBCDataSourceDSC
@@ -343,9 +331,9 @@ object frmContentGoodsEditorDlg: TfrmContentGoodsEditorDlg
           end
           object mmGOODS_Description: TDBSynEdit
             Left = 16
-            Top = 288
+            Top = 220
             Width = 913
-            Height = 218
+            Height = 286
             Cursor = crIBeam
             DataField = 'DESCRIPTION'
             DataSource = IBCDataSourceDSC
@@ -1013,6 +1001,7 @@ object frmContentGoodsEditorDlg: TfrmContentGoodsEditorDlg
         inherited pnTop: TPanel
           Width = 957
           StyleElements = [seFont, seClient, seBorder]
+          ExplicitWidth = 957
           inherited lbInfo: TLabel
             StyleElements = [seFont, seClient, seBorder]
           end
@@ -1020,6 +1009,8 @@ object frmContentGoodsEditorDlg: TfrmContentGoodsEditorDlg
         inherited cxGridSvc: TcxGrid
           Width = 957
           Height = 372
+          ExplicitWidth = 957
+          ExplicitHeight = 372
         end
       end
     end
@@ -1333,6 +1324,15 @@ object frmContentGoodsEditorDlg: TfrmContentGoodsEditorDlg
           BeginGroup = True
           Visible = True
           ItemName = 'bbYouTube'
+        end
+        item
+          BeginGroup = True
+          Visible = True
+          ItemName = 'bbTranslateRom2Rus'
+        end
+        item
+          Visible = True
+          ItemName = 'bbRus2Rom'
         end>
       NotDocking = [dsNone, dsLeft, dsTop, dsRight, dsBottom]
       OneOnRow = True
@@ -1907,6 +1907,19 @@ object frmContentGoodsEditorDlg: TfrmContentGoodsEditorDlg
       Visible = ivAlways
       ImageIndex = 35
       OnClick = bbDeleteAllClick
+    end
+    object bbTranslateRom2Rus: TdxBarButton
+      Caption = 'Rom -> Rus'
+      Category = 1
+      Hint = 'Rom -> Rus'
+      Visible = ivAlways
+      OnClick = bbTranslateRom2RusClick
+    end
+    object bbRus2Rom: TdxBarButton
+      Caption = 'Rus -> Rom'
+      Category = 1
+      Hint = 'Rus -> Rom'
+      Visible = ivAlways
     end
     object dxBarButton5: TdxBarButton
       Caption = 'Competeaza denumirea'

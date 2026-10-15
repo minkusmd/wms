@@ -5,7 +5,9 @@ unit ReportMessengerSendUnit;
 
   Niciuna dintre aplicatii nu are un API gratuit care sa trimita un fisier catre un numar de
   telefon oarecare, iar prin linkurile lor nu se poate atasa un fisier. De aceea:
-    1. PDF-ul se pune in clipboard ca FISIER (CF_HDROP), exact ca la Copy din Explorer;
+    1. PDF-ul se pune in clipboard ca FISIER (CF_HDROP), exact ca la Copy din Explorer, si ca
+       TEXT = calea Windows (C:\...\Document_....pdf). Fara text, aplicatiile (Viber/Qt) si
+       campurile de text generau singure varianta "file:///C:/..." din CF_HDROP;
     2. se deschide conversatia cu numarul respectiv in aplicatia de pe calculator;
     3. operatorul apasa Ctrl+V si Enter in conversatie.
 
@@ -34,7 +36,8 @@ function NormalizePhoneForMessenger(const APhone: string): string;
 // Primul telefon al clientului documentului (TDB_DOCS.CT -> TS_CUST_PHONES), '' daca nu exista.
 function GetDocumentCustomerPhone(const ADocID: Integer): string;
 
-// Pune fisierul in clipboard ca fisier (CF_HDROP), ca la Copy din Explorer.
+// Pune fisierul in clipboard ca fisier (CF_HDROP), ca la Copy din Explorer, plus calea Windows
+// ca text (CF_UNICODETEXT si FileNameW) - lipita intr-un cimp de text da C:\..., nu file:///.
 procedure CopyFileToClipboard(const AFileName: string);
 
 // Deschide conversatia cu APhoneDigits (deja normalizat). False = nicio aplicatie nu a raspuns.
@@ -102,8 +105,26 @@ begin
   end;
 end;
 
+// Bloc global cu un sir Unicode terminat cu #0 (proprietatea trece la clipboard dupa SetAsHandle).
+function AllocUnicodeText(const AText: string): THandle;
+var
+  P: PWideChar;
+begin
+  Result := GlobalAlloc(GMEM_MOVEABLE or GMEM_ZEROINIT, (Length(AText) + 1) * SizeOf(WideChar));
+  if Result = 0 then
+    Exit;
+  P := GlobalLock(Result);
+  try
+    Move(PWideChar(AText)^, P^, Length(AText) * SizeOf(WideChar));
+  finally
+    GlobalUnlock(Result);
+  end;
+end;
+
 procedure CopyFileToClipboard(const AFileName: string);
 var
+  FullName: string;
+  HText, HFileName: THandle;
   DropFiles: PDropFiles;
   HGlobal, HEffect: THandle;
   Size: NativeUInt;
@@ -112,9 +133,11 @@ var
 begin
   if not FileExists(AFileName) then
     raise Exception.CreateFmt('Fisierul %s nu exista.', [AFileName]);
+  // calea absoluta, cu separatori Windows (C:\...\Document_....pdf)
+  FullName := ExpandFileName(StringReplace(AFileName, '/', '\', [rfReplaceAll]));
 
   // DROPFILES + calea (Unicode) + dublu terminator
-  Size := SizeOf(TDropFiles) + (Length(AFileName) + 2) * SizeOf(WideChar);
+  Size := SizeOf(TDropFiles) + (Length(FullName) + 2) * SizeOf(WideChar);
   HGlobal := GlobalAlloc(GMEM_MOVEABLE or GMEM_ZEROINIT, Size);
   if HGlobal = 0 then
     RaiseLastOSError;
@@ -122,7 +145,7 @@ begin
   try
     DropFiles^.pFiles := SizeOf(TDropFiles);
     DropFiles^.fWide := True;
-    Move(PWideChar(AFileName)^, (PByte(DropFiles) + SizeOf(TDropFiles))^, Length(AFileName) * SizeOf(WideChar));
+    Move(PWideChar(FullName)^, (PByte(DropFiles) + SizeOf(TDropFiles))^, Length(FullName) * SizeOf(WideChar));
   finally
     GlobalUnlock(HGlobal);
   end;
@@ -137,6 +160,10 @@ begin
     GlobalUnlock(HEffect);
   end;
 
+  // calea ca text: altfel varianta text a clipboard-ului o genereaza aplicatia, ca "file:///C:/..."
+  HText := AllocUnicodeText(FullName);
+  HFileName := AllocUnicodeText(FullName);
+
   Clipboard.Open;
   try
     Clipboard.Clear;
@@ -144,6 +171,10 @@ begin
     Clipboard.SetAsHandle(CF_HDROP, HGlobal);
     if HEffect <> 0 then
       Clipboard.SetAsHandle(EffectFormat, HEffect);
+    if HText <> 0 then
+      Clipboard.SetAsHandle(CF_UNICODETEXT, HText);
+    if HFileName <> 0 then
+      Clipboard.SetAsHandle(RegisterClipboardFormat(CFSTR_FILENAMEW), HFileName);
   finally
     Clipboard.Close;
   end;

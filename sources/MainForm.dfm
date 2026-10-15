@@ -3243,6 +3243,15 @@ object frmMainForm: TfrmMainForm
         end
         item
           Visible = True
+          ItemName = 'bbCompanyNew'
+        end
+        item
+          Visible = True
+          ItemName = 'bbCompanyCard'
+        end
+        item
+          BeginGroup = True
+          Visible = True
           ItemName = 'bbFantasticOnline'
         end
         item
@@ -3692,6 +3701,20 @@ object frmMainForm: TfrmMainForm
       Hint = 'Organizatii'
       Visible = ivAlways
       OnClick = bbMainMenuRef_EnterprisesClick
+    end
+    object bbCompanyNew: TdxBarButton
+      Caption = 'Companie / subdiviziune noua...'
+      Category = 2
+      Hint = 'Fisa unei companii proprii sau subdiviziuni noi: date ASP / SFS / BNS, conturi, logo, semnaturi, casa ECC'
+      Visible = ivAlways
+      OnClick = bbCompanyNewClick
+    end
+    object bbCompanyCard: TdxBarButton
+      Caption = 'Fisa companiei curente...'
+      Category = 2
+      Hint = 'Datele firmei alese in bara: rechizite, conturi, logo, semnaturi, casa ECC'
+      Visible = ivAlways
+      OnClick = bbCompanyCardClick
     end
     object bbMainMenuRef_GoodsType: TdxBarButton
       Caption = 'Categorii de produse'

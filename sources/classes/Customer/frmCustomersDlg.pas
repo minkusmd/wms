@@ -1,4 +1,4 @@
-﻿unit frmCustomersDlg;
+﻿  unit frmCustomersDlg;
 
 interface
 
@@ -124,6 +124,8 @@ type
     FCustomerFolderID: Integer;
     fCustomFilter: TCustomerFiltersSet;
     fCustomFilterSQL: string;
+    // titlul ferestrei fara mesajul "primii N din M" al cautarii
+    fBaseCaption: string;
     fExcludeFilterSQL: string;
     fCustomerSearchMask: string;
     fCustomerVAT: integer;
@@ -136,6 +138,7 @@ type
     procedure NavigateBack;
     procedure NavigateToCustomer(const CustomerID: integer);
     procedure NavigateSearch(const WhereConditions: string; SearchField: TSearchField = sfID);
+    procedure ShowSearchLimitInfo;
     procedure NavigateToHome(const RootID: integer);
     procedure EnableCondition(const ConditionIndex: integer);
     function ItemSelected: Boolean;
@@ -213,6 +216,10 @@ uses
   frmGoodsFromSupplierUnit;
 
 {$R *.dfm}
+
+const
+  // = valoarea implicita a parametrului ALIMIT din SELECT_CUSTOMERS (DB Model/select_customers_search_fast.sql)
+  cSearchResultLimit = 1000;
 { TfrmSelectCustomerDlg }
 
 procedure TfrmCustomersDlg.bbAccountsClick(Sender: TObject);
@@ -618,6 +625,10 @@ end;
 procedure TfrmCustomersDlg.EnableCondition(const ConditionIndex: integer);
 begin
   fInSearch := False;
+  if fBaseCaption = '' then
+    fBaseCaption := Caption
+  else
+    Caption := fBaseCaption;
   IBCQueryCustomer.Close;
   case ConditionIndex of
     0:
@@ -625,7 +636,9 @@ begin
     1:
       IBCQueryCustomer.SQL.Text := 'SELECT A.* FROM SELECT_CUSTOMERS(:ParentID,:SelectType) A order by FLG_FOLDER DESC, name';
     2:
-      IBCQueryCustomer.SQL.Text := 'SELECT A.* FROM SELECT_CUSTOMERS(:ParentID,:SelectType,:WhereCondition) A order by FLG_FOLDER DESC, name';
+      // fara ORDER BY: procedura sorteaza dupa nume si se opreste la primii 1000 (TOTAL_FOUND = toti);
+      // un ORDER BY aici obliga serverul sa calculeze toti clientii inainte de primul rind
+      IBCQueryCustomer.SQL.Text := 'SELECT A.* FROM SELECT_CUSTOMERS(:ParentID,:SelectType,:WhereCondition) A';
   end;
 end;
 
@@ -686,6 +699,7 @@ begin
   IBCQueryCustomer.FilterSQL := GetCustomFilterSQL;
   ibcquerycustomer.Prepare;
   IBCQueryCustomer.Open;
+  ShowSearchLimitInfo;
 
 //  if FilterSQL <> '' then
 //  begin
@@ -697,6 +711,20 @@ begin
   fInSearch := True;
   if (cxGridCustomersTable.DataController.RecNo = 0) then
     SelectedRecordChanged;
+end;
+
+// Cautarea intoarce cel mult primii 1000 de clienti (dupa nume); TOTAL_FOUND = citi s-au gasit.
+procedure TfrmCustomersDlg.ShowSearchLimitInfo;
+var
+  F: TField;
+begin
+  F := IBCQueryCustomer.FindField('TOTAL_FOUND');
+  if (F = nil) or IBCQueryCustomer.IsEmpty or F.IsNull then
+    Exit;
+  // mesajul apare doar cind lista e taiata (s-au gasit mai multi decit se arata)
+  if F.AsInteger > cSearchResultLimit then
+    Caption := Format('%s  -  afisati primii %d din %d clienti gasiti, precizati cautarea',
+      [fBaseCaption, cSearchResultLimit, F.AsInteger]);
 end;
 
 procedure TfrmCustomersDlg.NavigateBack;

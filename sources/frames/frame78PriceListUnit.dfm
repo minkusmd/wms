@@ -38,6 +38,10 @@ inherited frame78PriceList: Tframe78PriceList
       Margins.Bottom = 2
       Caption = 'Price list'
       ImageIndex = 0
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object pnClient: TPanel
         Left = 0
         Top = 0
@@ -544,6 +548,10 @@ inherited frame78PriceList: Tframe78PriceList
               Margins.Bottom = 2
               Caption = '(1) Toate produsele'
               ImageIndex = 5
+              ExplicitLeft = 0
+              ExplicitTop = 0
+              ExplicitWidth = 0
+              ExplicitHeight = 0
               object cxGridItems: TcxGrid
                 Left = 0
                 Top = 0
@@ -938,6 +946,7 @@ inherited frame78PriceList: Tframe78PriceList
                 TabOrder = 2
                 Properties.ActivePage = tsLog
                 Properties.CustomButtons.Buttons = <>
+                OnChange = cxPageControl2Change
                 ClientRectBottom = 189
                 ClientRectLeft = 4
                 ClientRectRight = 1000
@@ -945,6 +954,10 @@ inherited frame78PriceList: Tframe78PriceList
                 object tsLog: TcxTabSheet
                   Caption = 'tsLog'
                   ImageIndex = 0
+                  ExplicitLeft = 0
+                  ExplicitTop = 0
+                  ExplicitWidth = 0
+                  ExplicitHeight = 0
                   object meLog: TcxMemo
                     Left = 0
                     Top = 0
@@ -2398,7 +2411,7 @@ inherited frame78PriceList: Tframe78PriceList
       Caption = 'Download images'
       Category = 0
       Hint = 'Download images'
-      Visible = ivAlways
+      Visible = ivNever
       OnClick = dxBarButton6Click
     end
     object bbShowSettings: TdxBarButton
@@ -4008,6 +4021,7 @@ inherited frame78PriceList: Tframe78PriceList
     MasterFields = 'SUPPLIERID;SUPPLIER_GOODS_CODE'
     DetailFields = 'SUPPLIERID;SUPPLIER_GOODS_CODE'
     MasterSource = IBCDataSourcePriceItems
+    Options.DeferredBlobRead = True
     Options.DetailDelay = 500
     Left = 1008
     Top = 224

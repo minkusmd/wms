@@ -31,6 +31,12 @@ procedure AddMiaButton(AManager: TdxBarManager; APopup: TdxBarPopupMenu; const A
 { ACanChange = utilizatorul poate crea linkuri, trimite SMS si cere rambursarea. }
 procedure ShowMiaPaymentDialog(AOwner: TComponent; const ADocID: Integer; const ACanChange: Boolean);
 
+{ Garda la stergerea unei comenzi web: daca are o plata MIA neachitata (New),
+  ceruta in ultimele 24 de ore, cere confirmare explicita si o nota cu rezultatul
+  apelului catre client. False = nu se sterge. ANote = textul de pastrat in deal
+  (gol cind comanda nu are o astfel de plata). }
+function ConfirmDeleteUnpaidMiaOrder(AOwner: TComponent; const ADocID: Integer; out ANote: string): Boolean;
+
 implementation
 
 uses
@@ -468,6 +474,115 @@ begin
     Dialog.ShowModal;
   finally
     Dialog.Free;
+  end;
+end;
+
+{ --- garda la stergerea comenzii --------------------------------------------- }
+
+type
+  TMiaDeleteGuardForm = class(TForm)
+  private
+    FMemo: TMemo;
+    FOkButton: TButton;
+    procedure MemoChange(Sender: TObject);
+  public
+    constructor CreateGuard(AOwner: TComponent; const ADocID: Integer; const APayment: TMiaOrderPayment);
+    function Note: string;
+  end;
+
+const
+  cMiaDeleteNoteMinLen = 10;
+
+function Px(const AValue: Integer): Integer;
+begin
+  Result := MulDiv(AValue, Screen.PixelsPerInch, 96);
+end;
+
+constructor TMiaDeleteGuardForm.CreateGuard(AOwner: TComponent; const ADocID: Integer;
+  const APayment: TMiaOrderPayment);
+var
+  lbl: TLabel;
+  btn: TButton;
+begin
+  inherited CreateNew(AOwner);
+  Caption := 'Stergere comanda cu plata MIA neachitata';
+  BorderStyle := bsDialog;
+  Position := poScreenCenter;
+  ClientWidth := Px(560);
+  ClientHeight := Px(330);
+
+  lbl := TLabel.Create(Self);
+  lbl.Parent := Self;
+  lbl.AutoSize := False;
+  lbl.WordWrap := True;
+  lbl.SetBounds(Px(16), Px(12), ClientWidth - Px(32), Px(70));
+  lbl.Caption := Format('Comanda #%d are o plata MIA neachitata: %s lei, ceruta la %s.' + sLineBreak +
+    'Clientul trebuie sunat inainte de stergere (telefonul e in comanda): ' +
+    'oferiti plata la primire sau in rate. Comanda nu se sterge fara rezultatul apelului.',
+    [ADocID, FormatFloat('#,##0.00', APayment.Amount), FormatDateTime('dd.mm.yyyy hh:nn', APayment.CreatedAt)]);
+
+  lbl := TLabel.Create(Self);
+  lbl.Parent := Self;
+  lbl.SetBounds(Px(16), Px(90), ClientWidth - Px(32), Px(17));
+  lbl.Caption := Format('Nota (obligatorie, minim %d caractere): cu cine ati vorbit si ce a raspuns clientul',
+    [cMiaDeleteNoteMinLen]);
+  lbl.Font.Style := [fsBold];
+
+  FMemo := TMemo.Create(Self);
+  FMemo.Parent := Self;
+  FMemo.SetBounds(Px(16), Px(112), ClientWidth - Px(32), Px(160));
+  FMemo.ScrollBars := ssVertical;
+  FMemo.MaxLength := 500;
+  FMemo.OnChange := MemoChange;
+
+  FOkButton := TButton.Create(Self);
+  FOkButton.Parent := Self;
+  FOkButton.SetBounds(ClientWidth - Px(16) - Px(260), ClientHeight - Px(16) - Px(27), Px(150), Px(27));
+  FOkButton.Caption := 'Sterge comanda';
+  FOkButton.ModalResult := mrOk;
+  FOkButton.Enabled := False;
+
+  btn := TButton.Create(Self);
+  btn.Parent := Self;
+  btn.SetBounds(ClientWidth - Px(16) - Px(100), ClientHeight - Px(16) - Px(27), Px(100), Px(27));
+  btn.Caption := 'Renunta';
+  btn.ModalResult := mrCancel;
+  btn.Cancel := True;
+  btn.Default := True;
+
+  ActiveControl := FMemo;
+end;
+
+procedure TMiaDeleteGuardForm.MemoChange(Sender: TObject);
+begin
+  FOkButton.Enabled := Length(Note) >= cMiaDeleteNoteMinLen;
+end;
+
+function TMiaDeleteGuardForm.Note: string;
+begin
+  Result := Trim(StringReplace(FMemo.Text, sLineBreak, ' ', [rfReplaceAll]));
+end;
+
+function ConfirmDeleteUnpaidMiaOrder(AOwner: TComponent; const ADocID: Integer; out ANote: string): Boolean;
+var
+  payment: TMiaOrderPayment;
+  frm: TMiaDeleteGuardForm;
+begin
+  ANote := '';
+  Result := True;
+  if (ADocID <= 0) or not MiaPaymentsAvailable(dmDB.IBCConnection) then
+    Exit;
+  payment := LoadMiaOrderPayment(dmDB.IBCConnection, ADocID);
+  if not payment.Found or (payment.Status <> cMiaNew) or (payment.CreatedAt < Now - 1) then
+    Exit;
+  frm := TMiaDeleteGuardForm.CreateGuard(AOwner, ADocID, payment);
+  try
+    Result := frm.ShowModal = mrOk;
+    if Result then
+      ANote := Format('Stearsa cu plata MIA neachitata (%s lei din %s): %s',
+        [FormatFloat('#,##0.00', payment.Amount), FormatDateTime('dd.mm.yyyy hh:nn', payment.CreatedAt), frm.Note]);
+  finally
+    frm.Free;
   end;
 end;
 

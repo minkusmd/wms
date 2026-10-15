@@ -1,0 +1,12 @@
+services:
+  app:
+    environment:
+      FB_HOST: firebird-test
+      FB_PORT: "3050"
+      FB_DATABASE: /var/lib/firebird/data/curieri_test.fdb
+      FB_USERNAME: CURIERI
+      FB_PASSWORD: ${FB_TEST_PASSWORD}
+      FB_ALLOW_WRITE_PROBES: "false"
+  firebird-test:
+    volumes:
+      - C:/Users/s.minchevici/.claude/jobs/eab24862/tmp/doc/30-seed.sql:/docker-entrypoint-initdb.d/30-seed.sql:ro

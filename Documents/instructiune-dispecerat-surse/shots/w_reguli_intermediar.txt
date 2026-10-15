@@ -1,0 +1,10 @@
+dtDialogTitle=0,0,960,64
+pnTop=0,64,960,36
+lbHint=8,74,580,15
+cxGridRules=8,108,944,316
+btnAdd=8,436,100,31
+btnChangeStock=114,436,170,31
+btnChangeOrder=290,436,150,31
+btnDelete=446,436,90,31
+btnOk=726,436,110,31
+btnCancel=842,436,110,31

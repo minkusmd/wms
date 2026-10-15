@@ -211,7 +211,9 @@ inherited frame10NakladnieRN: Tframe10NakladnieRN
         Caption = 'Plata'
         DataBinding.FieldName = 'PAY_INFO'
         HeaderAlignmentHorz = taCenter
-        HeaderHint = 'Metoda de plata: credit (0% / standard), MIA, incasari legate (numerar, card, transfer) sau metoda aleasa pe site'
+        HeaderHint = 
+          'Metoda de plata: credit (0% / standard), MIA, incasari legate (n' +
+          'umerar, card, transfer) sau metoda aleasa pe site'
         MinWidth = 60
         Options.Editing = False
         Options.FilteringPopupIncrementalFiltering = True
@@ -418,7 +420,7 @@ inherited frame10NakladnieRN: Tframe10NakladnieRN
       Font.Style = []
       ParentFont = False
       TabOrder = 0
-      Properties.ActivePage = tbCashback
+      Properties.ActivePage = cxTabSheet1
       Properties.CustomButtons.Buttons = <>
       Properties.Images = dmAdditions.cxImageDocs
       Properties.TabPosition = tpBottom
@@ -1623,6 +1625,7 @@ inherited frame10NakladnieRN: Tframe10NakladnieRN
       Hint = 'Alege furnizorul'
       Visible = ivAlways
       DropDownMenu = frmSelectGoodsToAddDlg.dxBarPopupMenu1
+      ShortCut = 32837
       OnClick = bbSelectSupplierClick
     end
     object bbAddToIncomingInvoice: TdxBarButton

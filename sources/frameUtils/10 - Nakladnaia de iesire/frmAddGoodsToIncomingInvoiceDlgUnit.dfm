@@ -167,8 +167,82 @@ object frmAddGoodsToIncomingInvoiceDlg: TfrmAddGoodsToIncomingInvoiceDlg
         Width = 120
       end
     end
+    object tvLines: TcxGridDBTableView
+      Navigator.Buttons.CustomButtons = <>
+      ScrollbarAnnotations.CustomAnnotations = <>
+      OnCustomDrawCell = tvLinesCustomDrawCell
+      DataController.DataSource = dsLines
+      DataController.DetailKeyFieldNames = 'DOCID'
+      DataController.KeyFieldNames = 'DOCID;DTDEP;CTDEP;GOODSCOMPLECT_ID;GOODSID'
+      DataController.MasterKeyFieldNames = 'DOCID'
+      DataController.Summary.DefaultGroupSummaryItems = <>
+      DataController.Summary.FooterSummaryItems = <
+        item
+          Format = '0 pozitii'
+          Kind = skCount
+          Column = tvLinesGOODS_NAME
+        end
+        item
+          Format = ',0.00'
+          Kind = skSum
+          Column = tvLinesSUMA
+        end>
+      DataController.Summary.SummaryGroups = <>
+      OptionsData.Deleting = False
+      OptionsData.DeletingConfirmation = False
+      OptionsData.Editing = False
+      OptionsData.Inserting = False
+      OptionsSelection.CellSelect = False
+      OptionsView.ColumnAutoWidth = True
+      OptionsView.Footer = True
+      OptionsView.GroupByBox = False
+      object tvLinesGOODSID: TcxGridDBColumn
+        Caption = 'Cod'
+        DataBinding.FieldName = 'GOODSID'
+        Width = 70
+      end
+      object tvLinesGOODS_NAME: TcxGridDBColumn
+        Caption = 'Produs'
+        DataBinding.FieldName = 'GOODS_NAME'
+        Width = 330
+      end
+      object tvLinesDTDEP_NAME: TcxGridDBColumn
+        Caption = 'Depozit'
+        DataBinding.FieldName = 'DTDEP_NAME'
+        Width = 110
+      end
+      object tvLinesUM_NAME: TcxGridDBColumn
+        Caption = 'UM'
+        DataBinding.FieldName = 'UM_NAME'
+        Width = 45
+      end
+      object tvLinesQTY: TcxGridDBColumn
+        Caption = 'Cantitate'
+        DataBinding.FieldName = 'QTY'
+        PropertiesClassName = 'TcxCalcEditProperties'
+        Properties.DisplayFormat = '0.###'
+        Width = 75
+      end
+      object tvLinesPRICE: TcxGridDBColumn
+        Caption = 'Pret'
+        DataBinding.FieldName = 'PRICE'
+        PropertiesClassName = 'TcxCurrencyEditProperties'
+        Properties.DisplayFormat = ',0.00'
+        Width = 85
+      end
+      object tvLinesSUMA: TcxGridDBColumn
+        Caption = 'Suma'
+        DataBinding.FieldName = 'SUMA'
+        PropertiesClassName = 'TcxCurrencyEditProperties'
+        Properties.DisplayFormat = ',0.00'
+        Width = 95
+      end
+    end
     object lvDocs: TcxGridLevel
       GridView = tvDocs
+      object lvLines: TcxGridLevel
+        GridView = tvLines
+      end
     end
   end
   object pnlSuppliers: TPanel
@@ -394,6 +468,17 @@ object frmAddGoodsToIncomingInvoiceDlg: TfrmAddGoodsToIncomingInvoiceDlg
     DataSet = qDocs
     OnDataChange = dsDocsDataChange
     Left = 152
+    Top = 152
+  end
+  object qLines: TIBCQuery
+    KeyFields = 'DOCID;DTDEP;CTDEP;GOODSCOMPLECT_ID;GOODSID'
+    ReadOnly = True
+    Left = 312
+    Top = 152
+  end
+  object dsLines: TIBCDataSource
+    DataSet = qLines
+    Left = 384
     Top = 152
   end
   object qSuppliers: TIBCQuery

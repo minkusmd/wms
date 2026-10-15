@@ -93,7 +93,7 @@ uses
   DataModuleDB, SWNUtils, SWNConst, DataModuleAdditions, SWNDBErrors, SWNValueStorageUnit, SWNSecurity, SWNSecurityFlags,
   frmCustomerCurrentDebtsDialog, frmCerereDePlataDialog, frmCerereDePlataDBDialog, Vcl.Imaging.jpeg, Vcl.Imaging.pngimage,
   System.IOUtils, System.Variants, Winapi.ActiveX, frmVoltaParserUnit, Vcl.WebpImage, Winapi.GDIPOBJ, WebpHelpers, libwebp,
-  uLoadProductImages, WebProductImagesUnit, EuroTermParserUnit;
+  {uLoadProductImages,} WebProductImagesUnit, EuroTermParserUnit;
 
 {$R *.dfm}
 

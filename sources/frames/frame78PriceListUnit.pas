@@ -335,6 +335,7 @@ type
     cxGridItemsDBTableView1EXCHANGE_RATE3: TcxGridDBColumn;
     dxBarButton21: TdxBarButton;
     cxGridDataDBTableView1_FLG_DONE: TcxGridDBColumn;
+    procedure cxPageControl2Change(Sender: TObject);
     procedure actAnalizaPriceLIstExecute(Sender: TObject);
     procedure ActReevaluareExecute(Sender: TObject);
     procedure bbAnalizeClick(Sender: TObject);
@@ -444,6 +445,7 @@ type
     procedure DeleteAllGoodsFromCatalog(PLID, SupplierID: Integer);
     procedure DeleteRecord; override;
     procedure DoAnalizePrice(OldPlid: integer; NewPlid: Integer);
+    procedure UpdatePriceListImagesQuery;
     procedure DoSearchBrandByName;
     function GetActiveTableView(ActivePageIndex: Integer): TcxGridDBTableView;
     function GetGoodsCurrency3Index(ATableView: TcxGridDBTableView): Integer;
@@ -485,8 +487,8 @@ uses
   ApiAccentUnit, B2B.DMLinkPriceListImport, DataModuleAdditions, DataModuleDB, SWNConst, SWNDBErrors, SWNSecurity, SWNTypes, SWNUtils,
   SWNValueStorageUnit, dxInputDialogs, frmAddGoodsfromPrices, frmAddNewGoodsUnit, frmAnalizePriceListUnit,
   frmContentGoodsEditorDialog, frmContentPackage, frmCustomersDlg, frmGoods, frmGoodsPriceListDlgUnit, frmGoodsTypeDialog,
-  frmMuncitorulProgressUnit, frmPriceManageStringFieldsUnit, frmPriceTypesUnit, frmPricelistImportUnit,
-  frmSelectGoodsTypeUnit, frmSyssDataEditor, frmSyssEditorWindow, uAnalizePriceList, uLoadProductImages, uPythonRunner, MamicoContentUnit, ImperiaContentUnit, ArvaliscomContentUnit, FiltreContentUnit, PriceListContentTransferUnit, NexDistributionUnit, TriomacPriceListUnit, PriceGoodsCreateUnit,
+  frmMuncitorulProgressUnit, OlisGrupContentUnit, frmPriceManageStringFieldsUnit, frmPriceTypesUnit, frmPricelistImportUnit,
+  frmSelectGoodsTypeUnit, frmSyssDataEditor, frmSyssEditorWindow, uAnalizePriceList, {uLoadProductImages,} uPythonRunner, MamicoContentUnit, ImperiaContentUnit, ArvaliscomContentUnit, FiltreContentUnit, PriceListContentTransferUnit, NexDistributionUnit, TriomacPriceListUnit, PriceGoodsCreateUnit,
   System.Math,
   IBCClasses, System.JSON, System.Generics.Collections, System.Net.HttpClient, System.Net.URLClient,
   System.Win.Registry,
@@ -1599,6 +1601,30 @@ begin
       d.PriceCategoryID := IBCQueryPriceCategories.FieldByName('price_categoryid').AsInteger;
       d.ShowModal;
       IBCQueryPriceData.Refresh;
+
+      // descrierile RO/RU + URL-urile imaginilor din feed -> TS_PRICELIST_ITEMS_DESCRIPTION / _IMAGES,
+      // apoi descarcarea imaginilor si copierea la produsele legate - ca la DMLink
+      if d.Imported and (Length(d.Content) > 0) then
+      begin
+        var ContentStats: TOlisContentStats;
+        Screen.Cursor := crHourGlass;
+        try
+          ContentStats := TOlisGrupContent.Save(dmDB.IBCConnection, d.Content);
+        finally
+          Screen.Cursor := crDefault;
+        end;
+        MessageDlg(Format('Pricelist Olis Grup #%d creat.' + sLineBreak +
+          '  descrieri RO/RU: %d' + sLineBreak +
+          '  produse cu imagini: %d (liste de imagini noi/schimbate: %d, %d URL-uri)',
+          [d.PLID, ContentStats.Descriptions, ContentStats.ProductsWithImages,
+           ContentStats.ImagesChanged, ContentStats.ImageRows]) + sLineBreak + sLineBreak +
+          'Urmeaza descarcarea imaginilor nedescarcate si copierea lor la produsele legate.',
+          mtInformation, [mbOK], 0);
+
+        TDMLinkPriceListImport.DownloadImages(dmDB.IBCConnection, d.PLID, cOlisContentSupplierID,
+          'muncitorul.md');
+        TPriceListContentTransfer.Run(dmDB.IBCConnection, cOlisContentSupplierID, d.PLID);
+      end;
     finally
       d.Free;
     end;
@@ -1913,16 +1939,19 @@ begin
   end;
 end;
 
+// "Download images": TLoadBombaProductImages (uLoadProductImages) descarca un URL fix de pe bomba.md -
+// nu mai e folosit; butonul e ascuns (ivNever), metoda ramine goala - e legata din .dfm.
+// Imaginile furnizorilor se aduc prin "Caracteristici si imagini" (bbGoodsPropertiesDownloadClick).
 procedure Tframe78PriceList.dxBarButton6Click(Sender: TObject);
-var
-  bmbImages: TLoadBombaProductImages;
+//var
+//  bmbImages: TLoadBombaProductImages;
 begin
-  bmbImages := TLoadBombaProductImages.Create(dmDB.IBCConnection);
-  try
-    bmbImages.LoadImages(IBCQueryPriceItems.FieldByName('GOODSID').AsInteger, IBCQueryPriceItems.FieldByName('SUPPLIER_GOODS_CODE').AsString);
-  finally
-    bmbImages.Free;
-  end;
+//  bmbImages := TLoadBombaProductImages.Create(dmDB.IBCConnection);
+//  try
+//    bmbImages.LoadImages(IBCQueryPriceItems.FieldByName('GOODSID').AsInteger, IBCQueryPriceItems.FieldByName('SUPPLIER_GOODS_CODE').AsString);
+//  finally
+//    bmbImages.Free;
+//  end;
 end;
 
 procedure Tframe78PriceList.dxBarButton7Click(Sender: TObject);
@@ -2385,6 +2414,25 @@ begin
       IBCQueryPriceData.FieldByName('PLID').AsInteger);
   end;
 
+  // Olis Grup (feed muncitorul.md): descrierile si URL-urile imaginilor recitite din feed (ca la
+  // import), apoi imaginile nedescarcate si copierea la produsele legate - fara pricelist nou
+  if (IBCQuerySuppliers.FieldByName('CustomerID').AsInteger = cOlisContentSupplierID) and
+    IBCQueryPriceData.Active and not IBCQueryPriceData.IsEmpty then
+  begin
+    Screen.Cursor := crHourGlass;
+    try
+      TOlisGrupContent.Save(dmDB.IBCConnection, TOlisGrupContent.LoadFromFeed);
+    finally
+      Screen.Cursor := crDefault;
+    end;
+    TDMLinkPriceListImport.DownloadImages(dmDB.IBCConnection, IBCQueryPriceData.FieldByName('PLID').AsInteger,
+      cOlisContentSupplierID, 'muncitorul.md');
+    if IBCQueryPriceListImages.Active then
+      IBCQueryPriceListImages.Refresh;
+    TPriceListContentTransfer.Run(dmDB.IBCConnection, cOlisContentSupplierID,
+      IBCQueryPriceData.FieldByName('PLID').AsInteger);
+  end;
+
   // arvaliscom.md (ARVALISCOM)
   if IBCQuerySuppliers.FieldByName('CustomerID').AsInteger = cArvaliscomSupplierID then
   begin
@@ -2417,14 +2465,67 @@ end;
 
 // imaginile si descrierile furnizorului (TS_PRICELIST_ITEMS_IMAGES / _DESCRIPTION) ->
 // TS_GOODS_IMAGE / TS_GOODS_DSC pentru produsele legate de pricelistul curent; universal,
-// pentru orice furnizor - nu suprascrie imaginile si descrierile existente
+// pentru orice furnizor - nu suprascrie imaginile si descrierile existente.
+// Copierea ia doar rindurile cu blob-ul IMAGE completat. Unele loadere (scripturile Python, ex.
+// ronix_tools.py pentru CILITRANS 317185 / PLID 6074) scriu doar IMAGE_URL - fara pasul de mai jos
+// butonul raporta "nu este nimic de copiat". Rindurile cu URL si fara IMAGE se descarca intii
+// (DownloadImages e universal: URL-urile din tabela, conversie in PNG, inclusiv WebP), apoi se copiaza.
 procedure Tframe78PriceList.bbGoodsContentToProductionClick(Sender: TObject);
+var
+  SupplierID, PLID, Pending: Integer;
+  SiteName: string;
+  Query: TIBCQuery;
 begin
   if not IBCQueryPriceData.Active or IBCQueryPriceData.IsEmpty then
     Exit;
-  TPriceListContentTransfer.Run(dmDB.IBCConnection,
-    IBCQueryPriceData.FieldByName('SUPPLIERID').AsInteger,
-    IBCQueryPriceData.FieldByName('PLID').AsInteger);
+  SupplierID := IBCQueryPriceData.FieldByName('SUPPLIERID').AsInteger;
+  PLID := IBCQueryPriceData.FieldByName('PLID').AsInteger;
+
+  // imaginile articolelor din pricelist care au doar adresa, fara continut descarcat
+  Pending := 0;
+  SiteName := '';
+  Query := TIBCQuery.Create(nil);
+  try
+    Query.Connection := dmDB.IBCConnection;
+    Query.SQL.Text :=
+      'select count(*), min(x.IMAGE_URL) from TS_PRICELIST_ITEMS_IMAGES x ' +
+      'where x.SUPPLIERID = :SUPPLIERID and x.IMAGE is null and coalesce(x.IMAGE_URL, '''') <> '''' ' +
+      '  and exists(select 1 from TS_PRICELIST_ITEMS i ' +
+      '    where i.PLID = :PLID and i.SUPPLIER_GOODS_CODE = x.SUPPLIER_GOODS_CODE)';
+    Query.ParamByName('SUPPLIERID').AsInteger := SupplierID;
+    Query.ParamByName('PLID').AsInteger := PLID;
+    Query.Open;
+    Pending := Query.Fields[0].AsInteger;
+    if Pending > 0 then
+      try
+        SiteName := TURI.Create(Trim(Query.Fields[1].AsString)).Host;
+      except
+        SiteName := '';
+      end;
+    Query.Close;
+  finally
+    Query.Free;
+  end;
+  if SiteName = '' then
+    SiteName := 'site-ul furnizorului';
+
+  if Pending > 0 then
+    case MessageDlg(Format('%d imagini ale articolelor din acest pricelist au doar adresa (URL), ' +
+      'fara continut descarcat - acestea nu se pot copia la produse.'#13#10#13#10 +
+      'Da - descarca imaginile de pe %s (se convertesc in PNG), apoi copiaza la produse'#13#10 +
+      'Nu - copiaza doar ce este deja descarcat'#13#10 +
+      'Renunta - nu face nimic', [Pending, SiteName]), mtConfirmation, [mbYes, mbNo, mbCancel], 0) of
+      mrYes:
+        begin
+          TDMLinkPriceListImport.DownloadImages(dmDB.IBCConnection, PLID, SupplierID, SiteName);
+          if IBCQueryPriceListImages.Active then
+            IBCQueryPriceListImages.Refresh;
+        end;
+      mrCancel:
+        Exit;
+    end;
+
+  TPriceListContentTransfer.Run(dmDB.IBCConnection, SupplierID, PLID);
 end;
 
 procedure Tframe78PriceList.bbIdentifyBrandClick(Sender: TObject);
@@ -3361,8 +3462,29 @@ begin
     IBCQueryPriceData.Open;
 
   IBCQueryPriceItems.Open;
-  IBCQueryPriceListImages.Open;
+  UpdatePriceListImagesQuery;
+end;
 
+// Imaginile pozitiei (TS_PRICELIST_ITEMS_IMAGES) se citesc doar cind fila lor e deschisa: interogarea
+// e legata de fiecare pozitie selectata, iar la NexDistribution o pozitie are zeci de MB de imagini
+// (PNG-uri de 3213x5712) - deschiderea pricelistului dura peste 10 s. DeferredBlobRead (in .dfm):
+// din imaginile pozitiei se aduce doar cea afisata.
+procedure Tframe78PriceList.UpdatePriceListImagesQuery;
+begin
+  if cxPageControl2.ActivePage = cxTabSheet2 then
+  begin
+    if IBCQueryPriceItems.Active and not IBCQueryPriceListImages.Active then
+      IBCQueryPriceListImages.Open;
+  end
+  else if IBCQueryPriceListImages.Active then
+    IBCQueryPriceListImages.Close;
+end;
+
+procedure Tframe78PriceList.cxPageControl2Change(Sender: TObject);
+begin
+  if csLoading in ComponentState then
+    Exit;
+  UpdatePriceListImagesQuery;
 end;
 
 procedure Tframe78PriceList.pcPricesAnalizePageChanging(Sender: TObject; NewPage: TcxTabSheet; var AllowChange: Boolean);

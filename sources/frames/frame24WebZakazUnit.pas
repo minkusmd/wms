@@ -212,6 +212,7 @@ type
     procedure ShowAddGoodsDialog;
     procedure ShowModifyGoodsDialog;
     procedure DeleteSelectedGoods;
+    procedure SaveMiaDeleteNote(const ADocID: Integer; const ANote: string);
     procedure CreateRashodnaiaNakladnaia;
     procedure CreateSciotNaOplatu;
     procedure CloseCurrentDocument;
@@ -577,11 +578,36 @@ begin
     AText := FormatDateTime('dd.mm.yyyy hh:nn', ARecord.Values[cxGridWZ_DATA.Index]);
 end;
 
-procedure Tframe24WebZakaz.DeleteRecord;
+procedure Tframe24WebZakaz.SaveMiaDeleteNote(const ADocID: Integer; const ANote: string);
+var
+  dealID: Int64;
 begin
-  if ShowAskDialog(cMSG_DELETERECORD_DeleteDocument, Format(cMSG_DELETERECORD_WebZakaz, [dmDB.IBCQueryDocs.FieldByName('DOCID').asInteger]))
-    = mrYes then
+  // nota ramine in deal (deal-ul supravietuieste stergerii documentului);
+  // fara deal, in comentariile documentului
+  dealID := FindDealByDoc(ADocID);
+  if dealID > 0 then
+    ExecDealSQL('UPDATE TDB_DEALS SET NOTE = SUBSTRING(COALESCE(NOTE || '' | '', '''') || :note FROM 1 FOR 1000) ' +
+      'WHERE DEAL_ID = :dealid', ['note', ANote, 'dealid', dealID])
+  else
+    ExecDealSQL('EXECUTE PROCEDURE SP_ADD_DOC_COMMENTS(:docid, :prefix, :note)',
+      ['docid', ADocID, 'prefix', 'MIA: ', 'note', ANote]);
+end;
+
+procedure Tframe24WebZakaz.DeleteRecord;
+var
+  docID: Integer;
+  miaNote: string;
+begin
+  docID := dmDB.IBCQueryDocs.FieldByName('DOCID').asInteger;
+  // Comanda cu plata MIA neachitata: dialogul cere nota cu rezultatul apelului
+  // catre client si tine loc de confirmare
+  if not ConfirmDeleteUnpaidMiaOrder(Self, docID, miaNote) then
+    Exit;
+  if (miaNote <> '') or
+    (ShowAskDialog(cMSG_DELETERECORD_DeleteDocument, Format(cMSG_DELETERECORD_WebZakaz, [docID])) = mrYes) then
   begin
+    if miaNote <> '' then
+      SaveMiaDeleteNote(docID, miaNote);
     dmDB.IBCQueryDocs.UpdateTransaction.StartTransaction;
     try
       dmDB.IBCQueryDocs.Delete;

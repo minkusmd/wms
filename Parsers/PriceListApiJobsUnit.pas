@@ -12,7 +12,7 @@ unit PriceListApiJobsUnit;
   Fiecare job, in firul lui (ParserRunnerUnit.RunParserJobsParallel), cu conexiunea lui:
     1. pricelistul nou, in categoria ultimului pricelist al furnizorului;
     2. cele 4 reevaluari (PriceListReevaluationUnit), daca nu e /reevaluare:no;
-    3. DMLink / Nex: imaginile nedescarcate, in fire (daca nu e /images:no) - la final, fiindca
+    3. DMLink / Nex / Olis Grup: imaginile nedescarcate, in fire (daca nu e /images:no) - la final, fiindca
        dureaza cel mai mult si reevaluarile nu depind de ele. }
 
 interface
@@ -68,6 +68,7 @@ type
     class function SupplierName: string; override;
     class function DefaultCategoryID: Integer; override;
     function ImportPriceList(ACategoryID: Integer): Integer; override;
+    procedure AfterReevaluation(APLID: Integer); override;
   public
     class function JobName: string; override;
   end;
@@ -384,6 +385,25 @@ begin
     begin
       Log(S);
     end);
+end;
+
+procedure TOlisGrupPriceListJob.AfterReevaluation(APLID: Integer);
+var
+  Stats: TContentTransferStats;
+begin
+  // URL-urile si descrierile le-a salvat importul (OlisGrupContentUnit); aici, ca la DMLink,
+  // descarcarea imaginilor si copierea la produsele legate
+  TDMLinkPriceListImport.DownloadImagesSilent(FConnection, APLID,
+    procedure(S: string)
+    begin
+      Log(S);
+    end,
+    IsCancelled, cOlisGrupSupplierID, cImageThreads);
+  if IsCancelled then
+    Exit;
+  Stats := TPriceListContentTransfer.Execute(FConnection, cOlisGrupSupplierID, APLID);
+  Log('Olis Grup: copiat la produse - %d produse cu imagini noi (%d imagini), %d descrieri (%d perechi produs-cod)',
+    [Stats.GoodsImages, Stats.Images, Stats.Descriptions, Stats.Pairs]);
 end;
 
 { NexDistribution }

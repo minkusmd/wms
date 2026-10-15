@@ -92,7 +92,7 @@ uses
   SWNSecurity, SWNSecurityFlags, frmCustomerCurrentDebtsDialog, frmCerereDePlataDialog,
   frmCerereDePlataDBDialog, Vcl.Imaging.jpeg, Vcl.Imaging.pngimage, System.IOUtils, System.Variants,
   Winapi.ActiveX, frmVoltaParserUnit, Vcl.WebpImage, Winapi.GDIPOBJ, WebpHelpers, libwebp,
-  uLoadProductImages, WebProductImagesUnit, SWNParseUtils;
+  {uLoadProductImages,} WebProductImagesUnit, SWNParseUtils;
 
 {$R *.dfm}
 

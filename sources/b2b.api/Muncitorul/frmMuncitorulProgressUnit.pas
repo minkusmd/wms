@@ -38,7 +38,8 @@ uses
   Data.DB,
   FireDAC.Comp.Client,
   FireDAC.Comp.DataSet,
-  Muncitorul.Data;
+  Muncitorul.Data,
+  OlisGrupContentUnit;
 
 const
   cOlisSupplierID = 251465;
@@ -119,6 +120,9 @@ type
     FPriceCategoryID: Integer;
     FRunner: TThread;
     FRunning: Boolean;
+    FImported: Boolean;
+    FContent: TArray<TOlisContentItem>;
+    FContentError: string;
     procedure RunImport;
     procedure FinishImport(const AError: string);
     procedure ShowStep(ALabel: TLabel; const AText: string);
@@ -137,6 +141,11 @@ type
     property PLID: Integer read FPLID write FPLID;
     property PriceCategoryID: Integer read FPriceCategoryID write
         SetPriceCategoryID;
+    // pricelist-ul nou a fost creat (PLID = cel nou)
+    property Imported: Boolean read FImported;
+    // descrierile RO/RU si URL-urile imaginilor produselor din pricelist - le salveaza
+    // apelantul prin TOlisGrupContent.Save (conexiunea IBDAC a WMS)
+    property Content: TArray<TOlisContentItem> read FContent;
     { Public declarations }
   end;
 
@@ -379,8 +388,19 @@ begin
     LWatch := TStopwatch.StartNew;
     LInserted := AddToPriceListItems(LItems);
     FImportTime := LWatch.ElapsedMilliseconds;
-    ShowStep(Label3, Format('3. Import to PriceList - %d ms, %d rinduri (%d fire)',
+    FImported := True;
+
+    { --- STEP 4: descrierile si imaginile (din acelasi JSON) - pricelist-ul ramine si daca pica --- }
+    ShowStep(Label3, Format('3. Import to PriceList - %d ms, %d rinduri (%d fire); continut...',
       [FImportTime, LInserted, cOlisThreadCount]));
+    try
+      FContent := TOlisGrupContent.ParseFeed(FJson.Text);
+    except
+      on E: Exception do
+        FContentError := E.Message;
+    end;
+    ShowStep(Label3, Format('3. Import to PriceList - %d ms, %d rinduri (%d fire); continut: %d produse',
+      [FImportTime, LInserted, cOlisThreadCount, Length(FContent)]));
   except
     on E: Exception do
       LError := E.Message;
@@ -403,7 +423,10 @@ begin
     'Import: %d ms (%d fire)', [FDownloadTime, FLoadTime, FImportTime, cOlisThreadCount]);
 
   if AError <> '' then
-    ShowMessage('Importul Olis Grup nu s-a facut:' + sLineBreak + AError);
+    ShowMessage('Importul Olis Grup nu s-a facut:' + sLineBreak + AError)
+  else if FContentError <> '' then
+    ShowMessage('Pricelist-ul Olis Grup a fost creat, dar descrierile si imaginile nu s-au citit:' +
+      sLineBreak + FContentError);
 
   Close;
 end;

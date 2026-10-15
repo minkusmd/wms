@@ -437,7 +437,7 @@ procedure TfrmGoodsQuickInfoDlg.Prepare;
 var
   N: integer;
 begin
-  dtDialogTitle.Text := Format('���������� � ������ �%d', [FGoodsID]);
+  dtDialogTitle.Text := Format('Informatia despre produsul nr. %d', [FGoodsID]);
   lbImages.ItemHeight := 120; //lbImages.ClientWidth;
   LoadGoodsInfo;
 

@@ -38,6 +38,9 @@ const
 
   // InvoiceStatus - ciclul de viata al facturii in e-Factura
   cEFInvPending = -1; // stare WMS: trimisa prin API, inca negasita in e-Factura
+  // stare WMS: respinsa de e-Factura la procesare (motivul in TDB_EFACTURA.LAST_ERROR) sau
+  // negasita acolo si marcata ca netrimisa - factura WMS poate fi stearsa sau retrimisa
+  cEFInvRejected = -3;
   cEFInvDraft = 0;
   cEFInvSignedBySupplier = 1;
   cEFInvRejectedByBuyer = 2;
@@ -189,6 +192,7 @@ function EFacturaStatusName(AInvoiceStatus: Integer): string;
 begin
   case AInvoiceStatus of
     cEFInvPending: Result := 'Trimisa, in procesare';
+    cEFInvRejected: Result := 'Respinsa / negasita in e-Factura';
     cEFInvDraft: Result := 'Nesemnata (Facturi noi)';
     cEFInvSignedBySupplier: Result := 'Semnata de furnizor';
     cEFInvRejectedByBuyer: Result := 'Refuzata de cumparator';

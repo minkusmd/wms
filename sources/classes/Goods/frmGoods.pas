@@ -214,6 +214,7 @@ type
         dxBarButton12: TdxBarButton;
         dxBarButton13: TdxBarButton;
     bbAcntGoods: TdxBarButton;
+        bbSupplierFilter: TdxBarButton;
         procedure bbAcntGoodsClick(Sender: TObject);
         procedure cxGridGoods_TableKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure bbHomeClick(Sender: TObject);
@@ -305,6 +306,7 @@ type
         procedure bbShowGoodsTypeFoldersClick(Sender: TObject);
         procedure dxBarButton12Click(Sender: TObject);
         procedure dxBarButton13Click(Sender: TObject);
+        procedure bbSupplierFilterClick(Sender: TObject);
     private
   { Private declarations }
         FCurrentParentID: Integer;
@@ -337,6 +339,14 @@ type
         fGoodsSerialType: Integer;
         FGoodsVendorID: Integer;
         FWebGoodsTypeID: Integer;
+    // filtru dupa furnizor peste datele din grid; se reseteaza la schimbarea mapei (EnableCondition)
+        fSupplierFilterID: Integer;
+        fSupplierFilterName: string;
+        fSupplierBaseFilterSQL: string;
+        procedure ShowSupplierFilterDialog;
+        procedure ApplySupplierFilter(const SupplierID: Integer; const SupplierName: string);
+        procedure ClearSupplierFilter(const Reload: Boolean);
+        procedure UpdateSupplierFilterInfo;
     /// <summary>TfrmGoodsBrowser.SelectedRecordChanged
     /// </summary>
         procedure SelectedRecordChanged;
@@ -486,7 +496,8 @@ uses
     frmChangeGoodsSuppliersUnit, SWNGoodsUtils, frmModifyFilterParamsUnit,
     frmGoodsRelatedBrowserUnit, frmSelectGoodsUnit, frmWebCatalogDialog,
     frmGoodsForeignCodeEditorDialog, frmGoodsChangeFiltersUnit,
-    frmShowGoodsTypeFoldersUnit, frmGoodsByCategoryFolderDlgUnit;
+    frmShowGoodsTypeFoldersUnit, frmGoodsByCategoryFolderDlgUnit,
+    frmGoodsSupplierFilterDialog;
 
 type
     TcxGridTableControllerAccess = class(TcxGridTableController);
@@ -757,6 +768,103 @@ end;
 procedure TfrmGoodsBrowser.bbRefreshClick(Sender: TObject);
 begin
     IBCQueryGoods.Refresh;
+end;
+
+procedure TfrmGoodsBrowser.bbSupplierFilterClick(Sender: TObject);
+begin
+    ShowSupplierFilterDialog;
+end;
+
+procedure TfrmGoodsBrowser.ShowSupplierFilterDialog;
+var
+    d: TfrmGoodsSupplierFilterDlg;
+    BaseFilter: string;
+begin
+    try
+        if not IBCQueryGoods.Active then
+            Exit;
+
+        // lista furnizorilor se calculeaza pe datele grid-ului fara filtrul pe furnizor
+        if fSupplierFilterID > 0 then
+            BaseFilter := fSupplierBaseFilterSQL
+        else
+            BaseFilter := IBCQueryGoods.FilterSQL;
+
+        d := TfrmGoodsSupplierFilterDlg.Create(Self, IBCQueryGoods, BaseFilter, fSupplierFilterID);
+        try
+            case d.ShowModal of
+                mrOk:
+                    ApplySupplierFilter(d.SupplierID, d.SupplierName);
+                mrNo:
+                    ClearSupplierFilter(True);
+            end;
+        finally
+            d.Free;
+        end;
+    finally
+        UpdateSupplierFilterInfo; // butonul bsChecked isi schimba singur starea la click
+    end;
+end;
+
+procedure TfrmGoodsBrowser.ApplySupplierFilter(const SupplierID: Integer; const SupplierName: string);
+var
+    Condition: string;
+begin
+    if SupplierID <= 0 then
+        Exit;
+
+    if fSupplierFilterID = 0 then
+        fSupplierBaseFilterSQL := IBCQueryGoods.FilterSQL;
+
+    Condition := Format('(A.FLG_FOLDER = 0 and exists(select 1 from TS_GOODS_FOREIGN F where F.GOODSID = A.GOODSID and F.CUSTOMERID = %d))', [SupplierID]);
+    if fSupplierBaseFilterSQL <> '' then
+        Condition := '(' + fSupplierBaseFilterSQL + ') and ' + Condition;
+
+    fSupplierFilterID := SupplierID;
+    fSupplierFilterName := SupplierName;
+
+    Screen.Cursor := crHourGlass;
+    try
+        IBCQueryGoods.Close;
+        IBCQueryGoods.FilterSQL := Condition;
+        IBCQueryGoods.Open;
+    finally
+        Screen.Cursor := crDefault;
+    end;
+    UpdateSupplierFilterInfo;
+end;
+
+procedure TfrmGoodsBrowser.ClearSupplierFilter(const Reload: Boolean);
+var
+    WasActive: Boolean;
+begin
+    WasActive := fSupplierFilterID > 0;
+    fSupplierFilterID := 0;
+    fSupplierFilterName := '';
+
+    if Reload and WasActive then
+    begin
+        IBCQueryGoods.Close;
+        IBCQueryGoods.FilterSQL := fSupplierBaseFilterSQL;
+        IBCQueryGoods.Open;
+    end;
+    fSupplierBaseFilterSQL := '';
+    UpdateSupplierFilterInfo;
+end;
+
+procedure TfrmGoodsBrowser.UpdateSupplierFilterInfo;
+begin
+    bbSupplierFilter.Down := fSupplierFilterID > 0;
+    if fSupplierFilterID > 0 then
+    begin
+        bbSupplierFilter.Hint := 'Filtru furnizor: ' + fSupplierFilterName;
+        dxStatusBar1.Panels[1].Text := 'Filtru furnizor: ' + fSupplierFilterName;
+    end
+    else
+    begin
+        bbSupplierFilter.Hint := 'Filtru dupa furnizor';
+        dxStatusBar1.Panels[1].Text := '';
+    end;
 end;
 
 procedure TfrmGoodsBrowser.bbRemoveClick(Sender: TObject);
@@ -2316,6 +2424,7 @@ procedure TfrmGoodsBrowser.EnableCondition(const ConditionIndex: Integer; const 
 begin
     fInSearch := False;
     IBCQueryGoods.Close;
+    ClearSupplierFilter(False); // alta mapa / alta cautare - filtrul pe furnizor se anuleaza
     case ConditionIndex of
         0:
             begin

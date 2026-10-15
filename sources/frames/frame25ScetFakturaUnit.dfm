@@ -209,6 +209,27 @@ inherited frame25ScetFaktura: Tframe25ScetFaktura
         MinWidth = 16
         Width = 80
       end
+      object cxGridSF_PAY_INFO: TcxGridDBColumn
+        Caption = 'Plata'
+        DataBinding.FieldName = 'PAY_INFO'
+        HeaderAlignmentHorz = taCenter
+        HeaderHint = 'Metoda de plata: credit (0% / standard), MIA, incasari legate (numerar, card, transfer) sau metoda aleasa pe site'
+        MinWidth = 60
+        Options.Editing = False
+        Options.FilteringPopupIncrementalFiltering = True
+        Styles.Content = dmAdditions.cxStyle_GridColumnBOLD
+        Width = 110
+      end
+      object cxGridSF_DTSC_NAME: TcxGridDBColumn
+        AlternateCaption = 'analitica DTSC (modalitatea de plata)'
+        Caption = 'plata'
+        DataBinding.FieldName = 'DTSC_NAME'
+        HeaderAlignmentHorz = taCenter
+        MinWidth = 16
+        Options.Editing = False
+        Options.FilteringPopupIncrementalFiltering = True
+        Width = 80
+      end
       object cxGridSF_FLG_EXPORTED: TcxGridDBColumn
         AlternateCaption = 'exportat'
         Caption = 'exp'
@@ -728,6 +749,12 @@ inherited frame25ScetFaktura: Tframe25ScetFaktura
             DataBinding.FieldName = 'EF_STATUS_DATE'
             MinWidth = 80
             Width = 110
+          end
+          object cxGridInvoiceTable_EF_LAST_ERROR: TcxGridDBColumn
+            Caption = 'eroare e-Factura'
+            DataBinding.FieldName = 'EF_LAST_ERROR'
+            MinWidth = 80
+            Width = 200
           end
           object cxGridInvoiceTable_DATA_ELIBERARII: TcxGridDBColumn
             Caption = 'data eliberarii'
@@ -1721,6 +1748,10 @@ inherited frame25ScetFaktura: Tframe25ScetFaktura
         item
           Visible = True
           ItemName = 'bbEFacturaCancel'
+        end
+        item
+          Visible = True
+          ItemName = 'bbEFacturaMarkNotSent'
         end>
       NotDocking = [dsNone, dsLeft, dsTop, dsRight, dsBottom]
       OneOnRow = True
@@ -2285,6 +2316,13 @@ inherited frame25ScetFaktura: Tframe25ScetFaktura
       Visible = ivAlways
       OnClick = bbEFacturaCancelClick
     end
+    object bbEFacturaMarkNotSent: TdxBarButton
+      Caption = 'Marcheaza ca netrimisa'
+      Category = 0
+      Hint = 'Factura trimisa care nu exista in e-Factura (respinsa la procesare): dupa verificare in e-Factura poate fi stearsa sau retrimisa'
+      Visible = ivAlways
+      OnClick = bbEFacturaMarkNotSentClick
+    end
     object bbExport2eFactura: TdxBarButton
       Caption = 'Export XML e-Factura'
       Category = 0
@@ -2485,7 +2523,8 @@ inherited frame25ScetFaktura: Tframe25ScetFaktura
       'SELECT VW_TDB_INVOICES.*,'
       ' (SELECT E.EF_STATUS FROM TDB_EFACTURA E WHERE E.INVOICEID = VW_TDB_INVOICES.INVOICEID) EF_STATUS,'
       ' (SELECT E.EF_STATUS_DATE FROM TDB_EFACTURA E WHERE E.INVOICEID = VW_TDB_INVOICES.INVOICEID) EF_STATUS_DATE,'
-      ' (SELECT E.SERIA || '#39' '#39' || E.EF_NUMBER FROM TDB_EFACTURA E WHERE E.INVOICEID = VW_TDB_INVOICES.INVOICEID) EF_SERIA_NUMBER'
+      ' (SELECT E.SERIA || '#39' '#39' || E.EF_NUMBER FROM TDB_EFACTURA E WHERE E.INVOICEID = VW_TDB_INVOICES.INVOICEID) EF_SERIA_NUMBER,'
+      ' (SELECT E.LAST_ERROR FROM TDB_EFACTURA E WHERE E.INVOICEID = VW_TDB_INVOICES.INVOICEID) EF_LAST_ERROR'
       'FROM VW_TDB_INVOICES'
       'WHERE'
       '  INVOICEID = :INVOICEID AND DOCID = :DOCID')
@@ -2506,7 +2545,8 @@ inherited frame25ScetFaktura: Tframe25ScetFaktura
       ' VW_TDB_INVOICES.*,'
       ' (SELECT E.EF_STATUS FROM TDB_EFACTURA E WHERE E.INVOICEID = VW_TDB_INVOICES.INVOICEID) EF_STATUS,'
       ' (SELECT E.EF_STATUS_DATE FROM TDB_EFACTURA E WHERE E.INVOICEID = VW_TDB_INVOICES.INVOICEID) EF_STATUS_DATE,'
-      ' (SELECT E.SERIA || '#39' '#39' || E.EF_NUMBER FROM TDB_EFACTURA E WHERE E.INVOICEID = VW_TDB_INVOICES.INVOICEID) EF_SERIA_NUMBER'
+      ' (SELECT E.SERIA || '#39' '#39' || E.EF_NUMBER FROM TDB_EFACTURA E WHERE E.INVOICEID = VW_TDB_INVOICES.INVOICEID) EF_SERIA_NUMBER,'
+      ' (SELECT E.LAST_ERROR FROM TDB_EFACTURA E WHERE E.INVOICEID = VW_TDB_INVOICES.INVOICEID) EF_LAST_ERROR'
       'FROM'
       ' VW_TDB_INVOICES')
     MasterFields = 'DOCID'

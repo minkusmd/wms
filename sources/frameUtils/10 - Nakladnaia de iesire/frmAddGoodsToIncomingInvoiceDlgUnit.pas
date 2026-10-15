@@ -22,6 +22,10 @@ unit frmAddGoodsToIncomingInvoiceDlgUnit;
   Implicit e ales furnizorul cu produsul in stoc si cel mai mic pret0: factura
   lui deschisa, daca are, altfel factura noua.
 
+  Pozitiile facturilor deschise: nivelul detail al grilei (lvLines, legat prin DOCID); qLines
+  citeste VW_TDB_JURNAL doar pentru DOCID-urile din qDocs (IN cu lista - un join cu view-urile
+  dureaza zeci de secunde). Factura selectata se deschide singura; produsul ales e ingrosat.
+
   Scrierea: VW_TDB_JURNAL (triggerii calculeaza SUMA, SUMAVAT, COST, STOCK_QTY)
   + SP_EXPENSES2JURNAL, ca in frame 9 (TdmDB.IBCQueryJurnalAfterPost); factura
   noua si produsul se scriu in aceeasi tranzactie.
@@ -35,6 +39,7 @@ uses
   System.SysUtils,
   System.Variants,
   System.Classes,
+  System.UITypes,
   Vcl.Graphics,
   Vcl.Controls,
   Vcl.Forms,
@@ -71,6 +76,7 @@ uses
   cxCalc,
   cxLabel,
   cxCheckBox,
+  cxCurrencyEdit,
   Data.DB,
   DBAccess,
   IBC,
@@ -125,12 +131,25 @@ type
     qSuppliers: TIBCQuery;
     dsSuppliers: TIBCDataSource;
     trWrite: TIBCTransaction;
+    tvLines: TcxGridDBTableView;
+    tvLinesGOODSID: TcxGridDBColumn;
+    tvLinesGOODS_NAME: TcxGridDBColumn;
+    tvLinesDTDEP_NAME: TcxGridDBColumn;
+    tvLinesUM_NAME: TcxGridDBColumn;
+    tvLinesQTY: TcxGridDBColumn;
+    tvLinesPRICE: TcxGridDBColumn;
+    tvLinesSUMA: TcxGridDBColumn;
+    lvLines: TcxGridLevel;
+    qLines: TIBCQuery;
+    dsLines: TIBCDataSource;
     procedure dsDocsDataChange(Sender: TObject; Field: TField);
     procedure dsSuppliersDataChange(Sender: TObject; Field: TField);
     procedure tvDocsCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo;
       AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
     procedure rbModeClick(Sender: TObject);
     procedure btnOtherSupplierClick(Sender: TObject);
+    procedure tvLinesCustomDrawCell(Sender: TcxCustomGridTableView; ACanvas: TcxCanvas;
+      AViewInfo: TcxGridTableDataCellViewInfo; var ADone: Boolean);
   private
     FGoodsID: Integer;
     FGoodsName: string;
@@ -138,6 +157,9 @@ type
     FDocID: Integer;
     FIsNewDocument: Boolean;
     function IsNewDocumentMode: Boolean;
+    procedure OpenLines;
+    procedure DocsFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord,
+      AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
     procedure OpenSuppliers(const ExtraSupplierID: Integer);
     procedure UpdateMode;
     procedure UpdatePrice;
@@ -219,6 +241,8 @@ begin
   qDocs.ParamByName('DOCTYPEID').AsInteger := cDocTypeID_FacturaIntrare;
   qDocs.ParamByName('FIRMA').AsInteger := dmDB.CurrentFirma;
   qDocs.Open;
+  OpenLines;
+  tvDocs.OnFocusedRecordChanged := DocsFocusedRecordChanged;
 
   OpenSuppliers(0);
 
@@ -246,6 +270,60 @@ begin
   qSuppliers.ParamByName('FIRMA').AsInteger := dmDB.CurrentFirma;
   qSuppliers.ParamByName('EXTRA_CT').AsInteger := ExtraSupplierID;
   qSuppliers.Open;
+end;
+
+// Pozitiile (VW_TDB_JURNAL) tuturor facturilor din lista; grila le leaga de factura prin DOCID.
+procedure TfrmAddGoodsToIncomingInvoiceDlg.OpenLines;
+var
+  Ids: TStringList;
+begin
+  qLines.Close;
+  qLines.Connection := dmDB.IBCConnection;
+  Ids := TStringList.Create;
+  try
+    qDocs.DisableControls;
+    try
+      qDocs.First;
+      while not qDocs.Eof do
+      begin
+        Ids.Add(IntToStr(qDocs.FieldByName('DOCID').AsInteger));
+        qDocs.Next;
+      end;
+      qDocs.First;
+    finally
+      qDocs.EnableControls;
+    end;
+    if Ids.Count = 0 then
+      Ids.Add('-1');
+    Ids.Delimiter := ',';
+    Ids.StrictDelimiter := True;
+    qLines.SQL.Text := 'SELECT J.DOCID, J.DTDEP, J.CTDEP, J.GOODSCOMPLECT_ID, J.GOODSID, J.GOODS_NAME, ' +
+      'J.DTDEP_NAME, J.UM_NAME, J.QTY, J.PRICE, J.SUMA ' +
+      'FROM VW_TDB_JURNAL J WHERE J.DOCID IN (' + Ids.DelimitedText + ') ' +
+      'ORDER BY J.DOCID, J.GOODS_NAME';
+  finally
+    Ids.Free;
+  end;
+  qLines.Open;
+end;
+
+// factura selectata isi arata pozitiile fara clic pe "+"
+procedure TfrmAddGoodsToIncomingInvoiceDlg.DocsFocusedRecordChanged(Sender: TcxCustomGridTableView;
+  APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
+begin
+  if AFocusedRecord is TcxGridMasterDataRow then
+    TcxGridMasterDataRow(AFocusedRecord).Expanded := True;
+end;
+
+// produsul ales e deja in factura: rindul lui in pozitii e ingrosat
+procedure TfrmAddGoodsToIncomingInvoiceDlg.tvLinesCustomDrawCell(Sender: TcxCustomGridTableView; ACanvas: TcxCanvas;
+  AViewInfo: TcxGridTableDataCellViewInfo; var ADone: Boolean);
+var
+  V: Variant;
+begin
+  V := AViewInfo.GridRecord.Values[tvLinesGOODSID.Index];
+  if VarIsNumeric(V) and (V = FGoodsID) then
+    ACanvas.Font.Style := ACanvas.Font.Style + [fsBold];
 end;
 
 function TfrmAddGoodsToIncomingInvoiceDlg.IsNewDocumentMode: Boolean;

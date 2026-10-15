@@ -881,6 +881,10 @@ object frmGoodsBrowser: TfrmGoodsBrowser
       item
         PanelStyleClassName = 'TdxStatusBarTextPanelStyle'
         Width = 64
+      end
+      item
+        PanelStyleClassName = 'TdxStatusBarTextPanelStyle'
+        Width = 400
       end>
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
@@ -1016,6 +1020,12 @@ object frmGoodsBrowser: TfrmGoodsBrowser
           UserPaintStyle = psCaptionGlyph
           Visible = True
           ItemName = 'bbSearch'
+        end
+        item
+          UserDefine = [udPaintStyle]
+          UserPaintStyle = psCaptionGlyph
+          Visible = True
+          ItemName = 'bbSupplierFilter'
         end
         item
           BeginGroup = True
@@ -1688,6 +1698,15 @@ object frmGoodsBrowser: TfrmGoodsBrowser
       Hint = 'Produse in contabilitate'
       Visible = ivAlways
       OnClick = bbAcntGoodsClick
+    end
+    object bbSupplierFilter: TdxBarButton
+      Caption = 'Furnizor'
+      Category = 3
+      Hint = 'Filtru dupa furnizor'
+      Visible = ivAlways
+      ButtonStyle = bsChecked
+      ShortCut = 24646
+      OnClick = bbSupplierFilterClick
     end
     object bbHome: TdxBarButton
       Caption = 'Inceput'

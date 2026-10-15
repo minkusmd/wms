@@ -305,6 +305,8 @@ type
     tbsServices: TcxTabSheet;
     frameGoodsServices1: TframeGoodsServices;
     bbDeleteAll: TdxBarButton;
+    bbTranslateRom2Rus: TdxBarButton;
+    bbRus2Rom: TdxBarButton;
     procedure actSaveImagesExecute(Sender: TObject);
     procedure actSaveImagesUpdate(Sender: TObject);
     procedure actSaveSearchKeysExecute(Sender: TObject);
@@ -372,6 +374,7 @@ type
     procedure edYouTubeURLPropertiesChange(Sender: TObject);
     procedure btnOpenYouTubeClick(Sender: TObject);
     procedure bbDeleteAllClick(Sender: TObject);
+    procedure bbTranslateRom2RusClick(Sender: TObject);
   private
     FActiveTabsheetIndex: Integer;
     { Private declarations }
@@ -1539,6 +1542,11 @@ end;
 procedure TfrmContentGoodsEditorDlg.bbRefreshClick(Sender: TObject);
 begin
   RefreshImageList;
+end;
+
+procedure TfrmContentGoodsEditorDlg.bbTranslateRom2RusClick(Sender: TObject);
+begin
+//
 end;
 
 procedure TfrmContentGoodsEditorDlg.DoImportFilters(IntoGoodsID, FromGoodsID: Integer);

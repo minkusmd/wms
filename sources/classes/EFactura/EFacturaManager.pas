@@ -37,11 +37,13 @@ type
   end;
 
   TEFacturaSyncResult = record
-    Found: Boolean;          // False = inca in procesare la e-Factura
+    Found: Boolean;          // False = inca in procesare la e-Factura (sau respinsa - vezi Rejected)
     Seria: string;
     Number: string;
     InvoiceStatus: Integer;
     NumberAssigned: Boolean; // FACTURANO a fost completat la aceasta sincronizare
+    Rejected: Boolean;       // e-Factura a respins factura la procesare (stare cEFInvRejected)
+    Message: string;         // motivul respingerii, cum l-a intors e-Factura
   end;
 
   TEFacturaManager = class
@@ -55,8 +57,12 @@ type
     procedure ExecInTransaction(AQuery: TIBCQuery);
     function DocFirmaID(ADocID: Integer): Integer;
     procedure ReadSentInvoice(AInvoiceID: Integer; out AApiId, ASeria, ANumber, AFacturaNo: string;
-      out AFirmaID: Integer);
+      out AFirmaID: Integer); overload;
+    procedure ReadSentInvoice(AInvoiceID: Integer; out AApiId, ASeria, ANumber, AFacturaNo: string;
+      out AFirmaID, AStatus: Integer); overload;
     procedure SetNumber(AInvoiceID: Integer; const ASeria, ANumber: string; AInvoiceStatus: Integer);
+    // doar starea WMS (fara serie/numar) + motivul, pentru starile -1 / -3
+    procedure SetState(AInvoiceID, AStatus: Integer; const AError: string);
     // pentru interogari in Registrul fiscal: firma preferata sau prima firma configurata
     function LookupClient(APreferFirmaID: Integer): TEFacturaApiClient;
   public
@@ -70,6 +76,16 @@ type
     // AForceResend - retrimite o factura care n-a aparut niciodata in e-Factura
     function SendInvoice(ADocID, AUserID: Integer; AForceResend: Boolean = False): TEFacturaSendResult;
     function SyncInvoice(AInvoiceID: Integer): TEFacturaSyncResult;
+    // Factura trimisa, fara serie/numar, care nu apare in e-Factura (respinsa la procesare):
+    // CheckNotSent cauta in e-Factura dupa ApiId (toate statusurile) - daca o gaseste cu numar,
+    // actualizeaza statusul si ridica eroare; altfel intoarce facturile catre acelasi cumparator,
+    // inregistrate dupa trimitere si necunoscute in WMS ('' = nimic), ca utilizatorul sa verifice.
+    // MarkNotSent o trece in cEFInvRejected - WMS permite apoi stergerea sau retrimiterea.
+    function CheckNotSent(AInvoiceID: Integer): string;
+    procedure MarkNotSent(AInvoiceID: Integer; const AUserName: string);
+    // Codul TVA al furnizorului trebuie sa se potriveasca cu TVA-ul randurilor - altfel e-Factura
+    // respinge factura la procesare, fara mesaj in raspunsul la PostInvoices
+    class procedure CheckVatConsistency(const AInvoicesXml: string);
     procedure CancelInvoice(AInvoiceID: Integer; const AComment: string);
     function GetInvoicePdf(AInvoiceID: Integer): TBytes;
     // Datele firmei din Registrul fiscal: denumire, adresa juridica, cod TVA, IBAN-uri.
@@ -86,7 +102,7 @@ type
 implementation
 
 uses
-  Data.DB, EFacturaXmlBuilder;
+  Data.DB, System.DateUtils, System.RegularExpressions, EFacturaXmlBuilder;
 
 { TEFacturaManager }
 
@@ -213,11 +229,19 @@ end;
 procedure TEFacturaManager.ReadSentInvoice(AInvoiceID: Integer; out AApiId, ASeria, ANumber, AFacturaNo: string;
   out AFirmaID: Integer);
 var
+  Status: Integer;
+begin
+  ReadSentInvoice(AInvoiceID, AApiId, ASeria, ANumber, AFacturaNo, AFirmaID, Status);
+end;
+
+procedure TEFacturaManager.ReadSentInvoice(AInvoiceID: Integer; out AApiId, ASeria, ANumber, AFacturaNo: string;
+  out AFirmaID, AStatus: Integer);
+var
   Q: TIBCQuery;
 begin
   Q := NewQuery;
   try
-    Q.SQL.Text := 'SELECT E.API_ID, E.SERIA, E.EF_NUMBER, I.FACTURANO, D.DT FROM TDB_EFACTURA E' +
+    Q.SQL.Text := 'SELECT E.API_ID, E.SERIA, E.EF_NUMBER, E.EF_STATUS, I.FACTURANO, D.DT FROM TDB_EFACTURA E' +
       ' JOIN TDB_INVOICES I ON I.DOCID = E.DOCID AND I.INVOICEID = E.INVOICEID' +
       ' JOIN TDB_DOCS D ON D.DOCID = E.DOCID' +
       ' WHERE E.INVOICEID = :INVOICEID';
@@ -230,6 +254,28 @@ begin
     ANumber := Trim(Q.FieldByName('EF_NUMBER').AsString);
     AFacturaNo := Trim(Q.FieldByName('FACTURANO').AsString);
     AFirmaID := Q.FieldByName('DT').AsInteger;
+    AStatus := Q.FieldByName('EF_STATUS').AsInteger;
+  finally
+    Q.Free;
+  end;
+end;
+
+procedure TEFacturaManager.SetState(AInvoiceID, AStatus: Integer; const AError: string);
+var
+  Q: TIBCQuery;
+begin
+  Q := NewQuery;
+  try
+    Q.SQL.Text := 'UPDATE TDB_EFACTURA SET EF_STATUS = :EF_STATUS, EF_STATUS_DATE = CURRENT_TIMESTAMP,' +
+      ' LAST_ERROR = :LAST_ERROR WHERE INVOICEID = :INVOICEID';
+    Q.ParamByName('EF_STATUS').AsInteger := AStatus;
+    Q.ParamByName('LAST_ERROR').DataType := ftString;
+    if AError = '' then
+      Q.ParamByName('LAST_ERROR').Clear
+    else
+      Q.ParamByName('LAST_ERROR').AsString := Copy(AError, 1, 1024);
+    Q.ParamByName('INVOICEID').AsInteger := AInvoiceID;
+    ExecInTransaction(Q);
   finally
     Q.Free;
   end;
@@ -273,8 +319,8 @@ begin
     Builder.Free;
   end;
 
-  // o factura se trimite o singura data; retrimiterea e permisa dupa anulare
-  // sau, explicit, cand trimiterea anterioara nu a aparut niciodata in e-Factura
+  // o factura se trimite o singura data; retrimiterea e permisa dupa anulare, dupa respingerea la
+  // procesare sau, explicit, cand trimiterea anterioara nu a aparut niciodata in e-Factura
   Q := NewQuery;
   try
     Q.SQL.Text := 'SELECT EF_STATUS, API_ID, SERIA, EF_NUMBER FROM TDB_EFACTURA WHERE INVOICEID = :INVOICEID';
@@ -283,7 +329,8 @@ begin
     if not Q.IsEmpty then
     begin
       PrevStatus := Q.FieldByName('EF_STATUS').AsInteger;
-      if not ((PrevStatus = cEFInvCanceledBySupplier) or ((PrevStatus = cEFInvPending) and AForceResend)) then
+      if not ((PrevStatus = cEFInvCanceledBySupplier) or (PrevStatus = cEFInvRejected) or
+        ((PrevStatus = cEFInvPending) and AForceResend)) then
       begin
         Ident := Trim(Trim(Q.FieldByName('SERIA').AsString) + ' ' + Trim(Q.FieldByName('EF_NUMBER').AsString));
         if Ident = '' then
@@ -295,6 +342,8 @@ begin
   finally
     Q.Free;
   end;
+
+  CheckVatConsistency(Xml);
 
   Result.Post := Api.PostInvoices(Xml);
   Err := Result.Post.ErrorMessage;
@@ -333,19 +382,47 @@ end;
 function TEFacturaManager.SyncInvoice(AInvoiceID: Integer): TEFacturaSyncResult;
 var
   ApiId, Seria, Number, FacturaNo: string;
-  FirmaID: Integer;
+  FirmaID, PrevStatus: Integer;
   Api: TEFacturaApiClient;
   Inv: TEFacturaInvoice;
 begin
   Result := Default(TEFacturaSyncResult);
   Result.InvoiceStatus := cEFInvPending;
-  ReadSentInvoice(AInvoiceID, ApiId, Seria, Number, FacturaNo, FirmaID);
+  ReadSentInvoice(AInvoiceID, ApiId, Seria, Number, FacturaNo, FirmaID, PrevStatus);
   Api := ClientForFirma(FirmaID);
 
   if (Seria = '') or (Number = '') then
   begin
     if not Api.FindByApiId(ApiId, Inv) then
+    begin
+      // vazuta anterior (fara numar) si disparuta intre timp: inapoi "in procesare", nu ramine blocata
+      // intr-un status care nu permite nicio actiune; respinsa ramane respinsa
+      if PrevStatus = cEFInvRejected then
+        Result.InvoiceStatus := cEFInvRejected
+      else if PrevStatus <> cEFInvPending then
+        SetState(AInvoiceID, cEFInvPending, '');
       Exit;
+    end;
+
+    // rezultat de eroare = respingerea asincrona a facturii (motivul in Message)
+    if Inv.Status = cEFacturaReqError then
+    begin
+      Result.Rejected := True;
+      Result.InvoiceStatus := cEFInvRejected;
+      Result.Message := Trim(Inv.Message);
+      if Result.Message = '' then
+        Result.Message := 'e-Factura a respins factura fara a indica motivul.';
+      SetState(AInvoiceID, cEFInvRejected, Result.Message);
+      Exit;
+    end;
+
+    // gasita, dar inca fara serie/numar: o tratam ca "in procesare" (nu ca Draft fara numar)
+    if (Inv.Seria = '') or (Inv.Number = '') then
+    begin
+      if PrevStatus <> cEFInvPending then
+        SetState(AInvoiceID, cEFInvPending, Trim(Inv.Message));
+      Exit;
+    end;
   end
   else
     Inv := Api.CheckStatus(Seria, Number);
@@ -356,6 +433,135 @@ begin
   Result.InvoiceStatus := Inv.InvoiceStatus;
   Result.NumberAssigned := (FacturaNo = '') and (Inv.Seria <> '') and (Inv.Number <> '');
   SetNumber(AInvoiceID, Inv.Seria, Inv.Number, Inv.InvoiceStatus);
+end;
+
+function TEFacturaManager.CheckNotSent(AInvoiceID: Integer): string;
+const
+  // toate statusurile in afara de anulata - o factura anulata nu e o copie activa
+  cStatuses: array[0..7] of Integer = (cEFInvDraft, cEFInvSignedBySupplier, cEFInvSentToBuyer,
+    cEFInvSignedByBuyer, cEFInvAcceptedByBuyer, cEFInvTransported, cEFInvRejectedByBuyer, cEFInvArchived);
+var
+  ApiId, Seria, Number, FacturaNo, BuyerIDNO, Ident: string;
+  FirmaID, PrevStatus, St: Integer;
+  SentAt: TDateTime;
+  Api: TEFacturaApiClient;
+  Inv: TEFacturaInvoice;
+  Search: TEFacturaSearch;
+  Found: TEFacturaInvoices;
+  Q: TIBCQuery;
+  Unknown: TStringList;
+  M: TMatch;
+begin
+  ReadSentInvoice(AInvoiceID, ApiId, Seria, Number, FacturaNo, FirmaID, PrevStatus);
+  if (Seria <> '') and (Number <> '') then
+    raise EEFacturaApiError.CreateFmt('Factura are serie si numar in e-Factura (%s %s) - folositi anularea.',
+      [Seria, Number]);
+  Api := ClientForFirma(FirmaID);
+
+  // 1. dupa identificatorul nostru, in toate statusurile
+  if Api.FindByApiId(ApiId, Inv) and (Inv.Status <> cEFacturaReqError) and (Inv.Seria <> '') and
+    (Inv.Number <> '') then
+  begin
+    SetNumber(AInvoiceID, Inv.Seria, Inv.Number, Inv.InvoiceStatus);
+    raise EEFacturaApiError.CreateFmt('Factura exista in e-Factura: %s %s (%s). Statusul a fost actualizat.',
+      [Inv.Seria, Inv.Number, EFacturaStatusName(Inv.InvoiceStatus)]);
+  end;
+
+  // 2. facturile catre acelasi cumparator, inregistrate de la trimitere, pe care WMS nu le cunoaste
+  // (o factura preluata de e-Factura, dar fara identificatorul nostru)
+  Q := NewQuery;
+  Unknown := TStringList.Create;
+  try
+    Q.SQL.Text := 'SELECT SENT_AT, XML_SENT FROM TDB_EFACTURA WHERE INVOICEID = :INVOICEID';
+    Q.ParamByName('INVOICEID').AsInteger := AInvoiceID;
+    Q.Open;
+    SentAt := Q.FieldByName('SENT_AT').AsDateTime;
+    M := TRegEx.Match(Q.FieldByName('XML_SENT').AsString, '<Buyer\b[^>]*\bIDNO="([^"]*)"');
+    BuyerIDNO := '';
+    if M.Success then
+      BuyerIDNO := Trim(M.Groups[1].Value);
+    Q.Close;
+
+    if BuyerIDNO <> '' then
+    begin
+      Q.SQL.Text := 'SELECT 1 FROM TDB_EFACTURA WHERE SERIA = :SERIA AND EF_NUMBER = :EF_NUMBER';
+      for St in cStatuses do
+      begin
+        Search := TEFacturaSearch.Create(St);
+        Search.BuyerIDNO := BuyerIDNO;
+        Search.RegisteredFrom := DateOf(SentAt);
+        Search.RegisteredTo := IncDay(Date, 1);
+        Found := Api.SearchInvoices(Search);
+        for Inv in Found do
+        begin
+          if (Inv.Status = cEFacturaReqError) or (Inv.Seria = '') or (Inv.Number = '') then
+            Continue;
+          Q.Close;
+          Q.ParamByName('SERIA').AsString := Inv.Seria;
+          Q.ParamByName('EF_NUMBER').AsString := Inv.Number;
+          Q.Open;
+          if Q.IsEmpty then
+          begin
+            Ident := Format('%s %s (%s)', [Inv.Seria, Inv.Number, EFacturaStatusName(St)]);
+            if Unknown.IndexOf(Ident) < 0 then
+              Unknown.Add(Ident);
+          end;
+        end;
+      end;
+    end;
+    Result := Trim(Unknown.Text);
+  finally
+    Unknown.Free;
+    Q.Free;
+  end;
+end;
+
+procedure TEFacturaManager.MarkNotSent(AInvoiceID: Integer; const AUserName: string);
+var
+  ApiId, Seria, Number, FacturaNo: string;
+  FirmaID, PrevStatus: Integer;
+begin
+  ReadSentInvoice(AInvoiceID, ApiId, Seria, Number, FacturaNo, FirmaID, PrevStatus);
+  if (Seria <> '') and (Number <> '') then
+    raise EEFacturaApiError.CreateFmt('Factura are serie si numar in e-Factura (%s %s) - folositi anularea.',
+      [Seria, Number]);
+  SetState(AInvoiceID, cEFInvRejected, Format('Negasita in e-Factura; marcata ca netrimisa de %s la %s.',
+    [AUserName, FormatDateTime('dd.mm.yyyy hh:nn', Now)]));
+end;
+
+class procedure TEFacturaManager.CheckVatConsistency(const AInvoicesXml: string);
+var
+  M: TMatch;
+  CodTVA, Rate: string;
+  WithVat, WithoutVat: Integer;
+begin
+  CodTVA := '';
+  M := TRegEx.Match(AInvoicesXml, '<Supplier\b[^>]*\bCodTVA="([^"]*)"');
+  if M.Success then
+    CodTVA := Trim(M.Groups[1].Value);
+
+  WithVat := 0;
+  WithoutVat := 0;
+  // atributul TVA al randului ("-" = fara TVA); \b exclude TotalTVA / UnitPriceWithoutTVA
+  for M in TRegEx.Matches(AInvoicesXml, '<Row\b[^>]*\bTVA="([^"]*)"') do
+  begin
+    Rate := Trim(M.Groups[1].Value);
+    if (Rate = '') or (Rate = '-') then
+      Inc(WithoutVat)
+    else
+      Inc(WithVat);
+  end;
+
+  if (CodTVA <> '') and (WithVat = 0) and (WithoutVat > 0) then
+    raise EEFacturaApiError.CreateFmt('Factura nu poate fi trimisa: furnizorul este platitor de TVA ' +
+      '(cod TVA %s), dar niciun rand al facturii nu are TVA.' + sLineBreak + sLineBreak +
+      'Documentul a fost probabil creat cand firma nu platea TVA. Recalculati TVA-ul documentului ' +
+      '(sau verificati cu contabilul daca marfa e scutita de TVA).', [CodTVA]);
+  if (CodTVA = '') and (WithVat > 0) then
+    raise EEFacturaApiError.CreateFmt('Factura nu poate fi trimisa: furnizorul nu are cod TVA in fisa ' +
+      'firmei, dar %d randuri ale facturii au TVA.' + sLineBreak + sLineBreak +
+      'Completati codul TVA al firmei (daca e platitoare de TVA) sau recalculati documentul fara TVA.',
+      [WithVat]);
 end;
 
 procedure TEFacturaManager.CancelInvoice(AInvoiceID: Integer; const AComment: string);
@@ -543,7 +749,10 @@ begin
     begin
       if (Supplier.CodTVA = '') and (Abs(Vat) >= 0.01) then
         W.Add(Format('Furnizorul nu este platitor de TVA (fara cod TVA in Registrul fiscal), dar factura are ' +
-          'TVA de %.2f lei.', [Vat]));
+          'TVA de %.2f lei.', [Vat]))
+      else if (Supplier.CodTVA <> '') and (Abs(Vat) < 0.01) then
+        W.Add(Format('Furnizorul este platitor de TVA (cod TVA %s in Registrul fiscal), dar factura nu are TVA - ' +
+          'trimiterea va fi blocata daca si fisa firmei are cod TVA.', [Supplier.CodTVA]));
       Accounts := Api.GetBankAccounts(SupplierIDNO);
       Registered := False;
       for Acc in Accounts do

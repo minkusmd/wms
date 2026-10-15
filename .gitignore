@@ -47,3 +47,7 @@ Python/tyres_fill/imgs/
 
 # Fisiere temporare ale RAD Studio
 *.$$$
+
+# --- Fisiere temporare / arhive duplicate ---
+/tmp/
+Images/*.zip

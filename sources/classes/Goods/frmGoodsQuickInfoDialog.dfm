@@ -2,9 +2,9 @@ object frmGoodsQuickInfoDlg: TfrmGoodsQuickInfoDlg
   Left = 0
   Top = 0
   BorderStyle = bsDialog
-  Caption = #1041#1099#1089#1090#1088#1072#1103' '#1080#1085#1092#1086#1088#1084#1072#1094#1080#1103' '#1086' '#1090#1086#1074#1072#1088#1077
+  Caption = 'Informatia despre produs'
   ClientHeight = 681
-  ClientWidth = 875
+  ClientWidth = 872
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -18,9 +18,9 @@ object frmGoodsQuickInfoDlg: TfrmGoodsQuickInfoDlg
   object dtDialogTitle: TDialogTitle
     Left = 0
     Top = 0
-    Width = 875
+    Width = 872
     Height = 64
-    Title = #1041#1099#1089#1090#1088#1072#1103' '#1080#1085#1092#1086#1088#1084#1072#1094#1080#1103' '#1086' '#1090#1086#1074#1072#1088#1077
+    Title = 'Informatia despre produs'
     Text = ''
     FontTitle.Charset = DEFAULT_CHARSET
     FontTitle.Color = clWindowText
@@ -34,12 +34,13 @@ object frmGoodsQuickInfoDlg: TfrmGoodsQuickInfoDlg
     FontText.Style = []
     ImageList = dmAdditions.cxImageList_DialogIcons
     ImageIndex = 1
+    ExplicitWidth = 875
   end
   object pnClient: TPanel
     AlignWithMargins = True
     Left = 8
     Top = 72
-    Width = 859
+    Width = 856
     Height = 549
     Margins.Left = 8
     Margins.Top = 8
@@ -51,72 +52,75 @@ object frmGoodsQuickInfoDlg: TfrmGoodsQuickInfoDlg
     Color = clWindow
     ParentBackground = False
     TabOrder = 1
+    ExplicitWidth = 859
     object Bevel1: TBevel
       Left = 0
       Top = 0
-      Width = 855
+      Width = 852
       Height = 121
       Align = alTop
       Shape = bsSpacer
       ExplicitLeft = -2
       ExplicitTop = -3
+      ExplicitWidth = 855
     end
     object Label1: TLabel
       Left = 12
       Top = 15
-      Width = 83
+      Width = 52
       Height = 15
-      Caption = #1053#1072#1080#1084#1077#1085#1086#1074#1072#1085#1080#1077
+      Caption = 'Denumire'
     end
     object Label2: TLabel
       Left = 12
       Top = 59
-      Width = 108
+      Width = 77
       Height = 15
-      Caption = 'Web '#1085#1072#1080#1084#1077#1085#1086#1074#1072#1085#1080#1077
+      Caption = 'Denumire web'
     end
     object lbWarning: TLabel
       AlignWithMargins = True
       Left = 12
       Top = 569
-      Width = 831
+      Width = 828
       Height = 15
       Margins.Left = 12
       Margins.Top = 16
       Margins.Right = 12
       Margins.Bottom = 24
       Align = alTop
-      Caption = #1053#1077#1090' '#1076#1086#1087#1086#1083#1085#1080#1090#1077#1083#1100#1085#1099#1093' '#1086#1087#1080#1089#1072#1085#1080#1081' '#1076#1083#1103' '#1076#1072#1085#1085#1086#1075#1086' '#1090#1086#1074#1072#1088#1072'!'
+      Caption = 'Nu exista descrieri suplimentare pentru acest produs!'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clMaroon
       Font.Height = -12
       Font.Name = 'Segoe UI'
       Font.Style = []
       ParentFont = False
-      ExplicitWidth = 286
+      ExplicitWidth = 278
     end
     object pcPageControl: TPageControl
       AlignWithMargins = True
       Left = 8
       Top = 121
-      Width = 839
+      Width = 836
       Height = 424
       Margins.Left = 8
       Margins.Top = 0
       Margins.Right = 8
       Margins.Bottom = 8
-      ActivePage = tbsImages
+      ActivePage = tbsDescriptions
       Align = alTop
       Images = cxImageList1
       TabOrder = 6
       OnChange = pcPageControlChange
+      ExplicitWidth = 839
       object tbsDescriptions: TTabSheet
-        Caption = '&1 - '#1054#1087#1080#1089#1072#1085#1080#1077
+        Caption = '&1 - Descriere'
         ImageIndex = -1
         object mmDESCRIPTION: TMemo
           Left = 0
           Top = 0
-          Width = 831
+          Width = 828
           Height = 394
           TabStop = False
           Align = alClient
@@ -129,15 +133,16 @@ object frmGoodsQuickInfoDlg: TfrmGoodsQuickInfoDlg
           ReadOnly = True
           ScrollBars = ssVertical
           TabOrder = 0
+          ExplicitWidth = 831
         end
       end
       object tbsFields: TTabSheet
-        Caption = '&2 - '#1061#1072#1088#1072#1082#1090#1077#1088#1080#1089#1090#1080#1082#1080
+        Caption = '&2 - Caracteristici'
         ImageIndex = -1
         object cxGridInfo: TcxGrid
           Left = 0
           Top = 0
-          Width = 831
+          Width = 828
           Height = 394
           Margins.Left = 8
           Margins.Top = 0
@@ -145,6 +150,7 @@ object frmGoodsQuickInfoDlg: TfrmGoodsQuickInfoDlg
           Margins.Bottom = 8
           Align = alClient
           TabOrder = 0
+          ExplicitWidth = 831
           object cxGridInfoTable: TcxGridTableView
             Navigator.Buttons.First.Visible = True
             Navigator.Buttons.PriorPage.Visible = True
@@ -171,7 +177,7 @@ object frmGoodsQuickInfoDlg: TfrmGoodsQuickInfoDlg
             OptionsData.Editing = False
             OptionsData.Inserting = False
             OptionsSelection.InvertSelect = False
-            OptionsView.NoDataToDisplayInfoText = '<'#1053#1077#1090' '#1093#1072#1088#1072#1082#1090#1077#1088#1080#1089#1090#1080#1082'>'
+            OptionsView.NoDataToDisplayInfoText = '<Fara caracteristici>'
             OptionsView.ScrollBars = ssVertical
             OptionsView.CellAutoHeight = True
             OptionsView.ColumnAutoWidth = True
@@ -186,11 +192,11 @@ object frmGoodsQuickInfoDlg: TfrmGoodsQuickInfoDlg
               VisibleForCustomization = False
             end
             object cxGridInfo_FILTERNAME_RUS: TcxGridColumn
-              Caption = #1061#1072#1088#1072#1082#1090#1077#1088#1080#1089#1090#1080#1082#1072
+              Caption = 'Caracteristica'
               Width = 177
             end
             object cxGridInfo_PARAM_VALUE_RUS: TcxGridColumn
-              Caption = #1054#1087#1080#1089#1072#1085#1080#1077
+              Caption = 'Valoare'
               PropertiesClassName = 'TcxMemoProperties'
               Properties.WantReturns = False
               Properties.WordWrap = False
@@ -203,10 +209,10 @@ object frmGoodsQuickInfoDlg: TfrmGoodsQuickInfoDlg
         end
       end
       object tbsImages: TTabSheet
-        Caption = '&3 - '#1050#1072#1088#1090#1080#1085#1082#1080
+        Caption = '&3 - Imagini'
         ImageIndex = -1
         object lbImages: TListBox
-          Left = 651
+          Left = 648
           Top = 0
           Width = 180
           Height = 394
@@ -219,6 +225,7 @@ object frmGoodsQuickInfoDlg: TfrmGoodsQuickInfoDlg
           TabOrder = 1
           OnClick = lbImagesClick
           OnDrawItem = lbImagesDrawItem
+          ExplicitLeft = 651
         end
         object imgImage: TcxImage
           Left = 0
@@ -232,12 +239,13 @@ object frmGoodsQuickInfoDlg: TfrmGoodsQuickInfoDlg
           ZoomingOptions.MinZoom = 25
           ZoomingOptions.ShowZoomTrackBar = True
           TabOrder = 0
+          ExplicitWidth = 651
           Height = 394
-          Width = 651
+          Width = 648
         end
       end
       object tbsUsedFor: TTabSheet
-        Caption = '&4 - '#1048#1089#1087#1086#1083#1100#1079#1091#1077#1090#1089#1103' '#1076#1083#1103'...'
+        Caption = '&4 - Se foloseste pentru...'
         ImageIndex = -1
         object cxDBMemo1: TcxDBMemo
           AlignWithMargins = True
@@ -256,8 +264,9 @@ object frmGoodsQuickInfoDlg: TfrmGoodsQuickInfoDlg
           Style.Font.Style = []
           Style.IsFontAssigned = True
           TabOrder = 0
+          ExplicitWidth = 825
           Height = 388
-          Width = 825
+          Width = 822
         end
       end
       object tbsRelatedKey: TTabSheet
@@ -266,10 +275,11 @@ object frmGoodsQuickInfoDlg: TfrmGoodsQuickInfoDlg
         object cxGrid1: TcxGrid
           Left = 0
           Top = 0
-          Width = 831
+          Width = 828
           Height = 394
           Align = alClient
           TabOrder = 0
+          ExplicitWidth = 831
           object cxGrid1DBTableView1: TcxGridDBTableView
             OnKeyDown = cxGrid1DBTableView1KeyDown
             DataController.DataSource = IBCDataSourceRelatedGoods
@@ -408,24 +418,26 @@ object frmGoodsQuickInfoDlg: TfrmGoodsQuickInfoDlg
   object pnButtons: TPanel
     Left = 0
     Top = 629
-    Width = 875
+    Width = 872
     Height = 52
     Align = alTop
     BevelOuter = bvNone
     TabOrder = 2
+    ExplicitWidth = 875
     DesignSize = (
-      875
+      872
       52)
     object btnClose: TcxButton
-      Left = 765
+      Left = 762
       Top = 7
       Width = 90
       Height = 29
       Anchors = [akRight, akBottom]
       Cancel = True
-      Caption = #1047#1072#1082#1088#1099#1090#1100
+      Caption = 'Inchide'
       ModalResult = 2
       TabOrder = 0
+      ExplicitLeft = 765
     end
   end
   object IBCQuerySearchkeys: TIBCQuery

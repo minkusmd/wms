@@ -1,6 +1,12 @@
 ﻿unit uLoadProductImages;
 
+{ TLoadBombaProductImages - incarcare de proba a imaginilor de pe bomba.md (URL fix, scria direct in
+  TS_GOODS_IMAGE). Nu mai e folosit (13 oct 2026): codul e comentat, unit-ul ramine gol cit timp e
+  inregistrat in SWN.dpr. Imaginile furnizorilor din pricelist: frame78 -> "Caracteristici si imagini". }
+
 interface
+
+(*
 
 uses
     System.Net.HttpClient, IBC, MSHTML, Winapi.ActiveX;
@@ -30,7 +36,11 @@ type
         procedure LoadImages(AGoodsID: Integer; AGoodsCode: string);
     end;
 
+*)
+
 implementation
+
+(*
 
 uses
     System.Classes, System.SysUtils, System.Variants, Vcl.Imaging.jpeg, Vcl.Imaging.pngimage,
@@ -167,5 +177,6 @@ begin
   fOnParseStep := Value;
 end;
 
-end.
+*)
 
+end.

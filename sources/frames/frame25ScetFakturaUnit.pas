@@ -114,6 +114,8 @@ type
     bbDocComments: TdxBarButton;
     cxGridDBCol_GOODS_NAMEACNT: TcxGridDBColumn;
     cxGridSF_SC2_NAME: TcxGridDBColumn;
+    cxGridSF_DTSC_NAME: TcxGridDBColumn;
+    cxGridSF_PAY_INFO: TcxGridDBColumn;
     bbBringGoodsFromRashod: TdxBarButton;
     cxGridComponents_PRICE_COLUMN: TcxGridDBColumn;
     cxGridSF_FLG_EXPORTED: TcxGridDBColumn;
@@ -221,8 +223,10 @@ type
     bbEFacturaSync: TdxBarButton;
     bbEFacturaPdf: TdxBarButton;
     bbEFacturaCancel: TdxBarButton;
+    bbEFacturaMarkNotSent: TdxBarButton;
     cxGridInvoiceTable_EF_STATUS: TcxGridDBColumn;
     cxGridInvoiceTable_EF_STATUS_DATE: TcxGridDBColumn;
+    cxGridInvoiceTable_EF_LAST_ERROR: TcxGridDBColumn;
     procedure bbAddGoodsClick(Sender: TObject);
     procedure bbModifyGoodsClick(Sender: TObject);
     procedure bbModifyInvoiceClick(Sender: TObject);
@@ -312,6 +316,7 @@ type
     procedure bbEFacturaSyncClick(Sender: TObject);
     procedure bbEFacturaPdfClick(Sender: TObject);
     procedure bbEFacturaCancelClick(Sender: TObject);
+    procedure bbEFacturaMarkNotSentClick(Sender: TObject);
     procedure cxGridInvoiceTable_EF_STATUSGetDisplayText(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord;
       var AText: string);
   private
@@ -1740,15 +1745,20 @@ begin
     HasEFNumber := Trim(IBCQueryINVOICES.FieldByName('EF_SERIA_NUMBER').AsString) <> '';
   end;
   bbEFacturaSend.Enabled := IsEFactura and fSYS_Edit and (not FLG_CLOSED) and
-    ((EFStatus = cEFacturaNotSent) or (EFStatus = cEFInvPending) or (EFStatus = cEFInvCanceledBySupplier));
+    ((EFStatus = cEFacturaNotSent) or (EFStatus = cEFInvPending) or (EFStatus = cEFInvCanceledBySupplier) or
+    (EFStatus = cEFInvRejected));
   bbEFacturaSync.Enabled := fPrintInvoice and (EFStatus <> cEFacturaNotSent);
   bbEFacturaPdf.Enabled := HasEFNumber;
   // anularea e posibila doar pana semneaza cumparatorul
   bbEFacturaCancel.Enabled := HasEFNumber and fSYS_Edit and ((EFStatus = cEFInvDraft) or
     (EFStatus = cEFInvSignedBySupplier) or (EFStatus = cEFInvRejectedByBuyer) or (EFStatus = cEFInvSentToBuyer));
   // o factura aflata in e-Factura se sterge din WMS doar dupa anularea ei acolo
+  // (sau daca e-Factura a respins-o / factura nu exista acolo)
   bbDeleteInvoice.Enabled := fDelete and (not FLG_CLOSED) and
-    ((EFStatus = cEFacturaNotSent) or (EFStatus = cEFInvCanceledBySupplier));
+    ((EFStatus = cEFacturaNotSent) or (EFStatus = cEFInvCanceledBySupplier) or (EFStatus = cEFInvRejected));
+  // trimisa, fara numar si negasita in e-Factura: iesirea din "in procesare" / "Draft fara numar"
+  bbEFacturaMarkNotSent.Enabled := fSYS_Edit and (not HasEFNumber) and
+    ((EFStatus = cEFInvPending) or (EFStatus = cEFInvDraft));
 end;
 
 procedure Tframe25ScetFaktura.ModifyRecord;
@@ -2908,8 +2918,17 @@ begin
       finally
         Screen.Cursor := crDefault;
       end;
-      if not R.Found then
-        Msg := 'Factura nu apare inca in e-Factura (se proceseaza). Reincercati peste cateva minute.'
+      if R.Rejected then
+      begin
+        ShowErrorDialog('e-Factura', 'e-Factura a respins factura:' + #13#10 + R.Message + #13#10#13#10 +
+          'Corectati documentul, apoi retrimiteti factura sau stergeti-o din WMS.');
+        Msg := '';
+      end
+      else if R.InvoiceStatus = cEFInvRejected then
+        Msg := 'Factura a fost respinsa de e-Factura sau marcata ca netrimisa - poate fi retrimisa sau stearsa.'
+      else if not R.Found then
+        Msg := 'Factura nu apare inca in e-Factura (se proceseaza). Reincercati peste cateva minute.' + #13#10 +
+          'Daca nu apare nici dupa o ora, verificati in e-Factura si folositi "Marcheaza ca netrimisa".'
       else
       begin
         Msg := 'Factura ' + R.Seria + ' ' + R.Number + ': ' + EFacturaStatusName(R.InvoiceStatus) + '.';
@@ -2920,7 +2939,8 @@ begin
           (R.InvoiceStatus = cEFInvAcceptedByBuyer) or (R.InvoiceStatus = cEFInvSentToBuyer) or
           (R.InvoiceStatus = cEFInvSignedByBuyer) or (R.InvoiceStatus = cEFInvTransported));
       end;
-      ShowInfoDialog('e-Factura', Msg);
+      if Msg <> '' then
+        ShowInfoDialog('e-Factura', Msg);
     except
       on E: Exception do
         ShowEFacturaError(E);
@@ -2962,6 +2982,55 @@ begin
   end;
 end;
 
+// Factura trimisa care nu exista in e-Factura (respinsa la procesare, fara mesaj): dupa verificarea
+// in e-Factura (dupa identificatorul WMS si dupa cumparator) trece in "Respinsa / negasita" -
+// apoi poate fi stearsa din WMS sau retrimisa.
+procedure Tframe25ScetFaktura.bbEFacturaMarkNotSentClick(Sender: TObject);
+var
+  Manager: TEFacturaManager;
+  InvoiceID: Integer;
+  Copies: string;
+  Done: Boolean;
+begin
+  InvoiceID := IBCQueryINVOICES.FieldByName('INVOICEID').AsInteger;
+  Done := False;
+  Manager := TEFacturaManager.Create(dmDB.IBCConnection);
+  try
+    try
+      Screen.Cursor := crHourGlass;
+      try
+        Copies := Manager.CheckNotSent(InvoiceID);
+      finally
+        Screen.Cursor := crDefault;
+      end;
+      if Copies <> '' then
+      begin
+        if ShowAskDialog('e-Factura', 'Factura nu a fost gasita in e-Factura dupa identificatorul WMS, dar exista ' +
+          'facturi catre acelasi cumparator, inregistrate dupa trimitere, necunoscute in WMS:' + #13#10 + Copies +
+          #13#10#13#10 + 'Marcati totusi factura ca netrimisa?',
+          'Verificati in e-Factura ca niciuna nu este aceasta factura - altfel la retrimitere ea va aparea de doua ori.')
+          <> mrYes then
+          Exit;
+      end
+      else if ShowAskDialog('e-Factura', 'Factura nu exista in e-Factura. Marcati-o ca netrimisa?',
+        'Dupa marcare factura poate fi stearsa din WMS sau retrimisa.') <> mrYes then
+        Exit;
+      Manager.MarkNotSent(InvoiceID, SWNSecurityManager.LoggedUser.FullName);
+      Done := True;
+    except
+      on E: Exception do
+        ShowEFacturaError(E);
+    end;
+  finally
+    Manager.Free;
+  end;
+
+  if IBCQueryINVOICES.Active then
+    IBCQueryINVOICES.Refresh;
+  InvoiceSelectionChanged;
+  if Done then
+    ShowInfoDialog('e-Factura', 'Factura a fost marcata ca netrimisa: poate fi stearsa sau retrimisa.');
+end;
 procedure Tframe25ScetFaktura.bbEFacturaCancelClick(Sender: TObject);
 var
   Manager: TEFacturaManager;

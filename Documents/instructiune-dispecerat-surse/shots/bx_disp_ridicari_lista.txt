@@ -1,0 +1,14 @@
+dtDialogTitle=0,0,1200,64
+pnTop=0,64,1200,40
+chkOnlyActive=8,72,185,23
+btnRefresh=256,69,100,29
+btnRules=364,69,200,29
+cxGridPickups=0,104,1200,450
+pnBottom=0,554,1200,46
+btnModify=8,562,110,31
+btnAssignDriver=124,562,130,31
+btnClearDriver=260,562,120,31
+btnPicked=396,562,110,31
+btnCancelPickup=512,562,100,31
+btnReopen=618,562,100,31
+btnClose=1082,562,110,31
