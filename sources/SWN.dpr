@@ -42,6 +42,8 @@ uses
   frmCustomerEditorDlg in 'classes\Customer\frmCustomerEditorDlg.pas' {frmCustomerEditorDialog},
   RegistryAddressUnit in 'classes\Customer\RegistryAddressUnit.pas',
   frmCompanyCardDialog in 'classes\Company\frmCompanyCardDialog.pas' {frmCompanyCardDlg},
+  ECreditApiUnit in 'classes\ECredit\ECreditApiUnit.pas',
+  frmFinantareEditorDialog in 'classes\ECredit\frmFinantareEditorDialog.pas' {frmFinantareEditorDlg},
   frmCustomerAccountsDlg in 'classes\Customer\frmCustomerAccountsDlg.pas' {frmCustomerAccountDialog},
   frmCustomerCreditDlg in 'classes\Customer\frmCustomerCreditDlg.pas' {frmCustomerCreditDialog},
   frmCustomerCardDlg in 'classes\Customer\frmCustomerCardDlg.pas' {frmCustomerCardDialog},

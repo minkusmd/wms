@@ -1253,6 +1253,10 @@
         <DCCReference Include="classes\Company\frmCompanyCardDialog.pas">
             <Form>frmCompanyCardDlg</Form>
         </DCCReference>
+        <DCCReference Include="classes\ECredit\ECreditApiUnit.pas"/>
+        <DCCReference Include="classes\ECredit\frmFinantareEditorDialog.pas">
+            <Form>frmFinantareEditorDlg</Form>
+        </DCCReference>
         <DCCReference Include="classes\Customer\frmCustomerAccountsDlg.pas">
             <Form>frmCustomerAccountDialog</Form>
         </DCCReference>

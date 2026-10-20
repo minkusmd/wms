@@ -569,6 +569,15 @@ BEGIN
      where docid=:docid
      into :suma_doc, :currency_name;
 
+     /* Plata in credit (20.10.2026): cererea de finantare se creeaza din start, doar cu
+        numele, telefonul si suma; operatorul o completeaza din "Oferte" (click dreapta ->
+        "Cerere de finantare / eCredit...") si o depune la eCredit. Vezi DB Model/ecredit_api.sql. */
+     if (payment_type = 1 and not exists (select 1 from TWEB_CERERE_FINANTARE f where f.DOCID = :DOCID)) then
+       INSERT INTO TWEB_CERERE_FINANTARE (DOCID, CREDIT_SUMA, CREDIT_PERIOADA, NPP, IDEN, DATA_NASTERII,
+                                          CONTACT_TELEFON, FLG_COPY_BY_FAX)
+       VALUES (:DOCID, COALESCE(:suma_doc, 0), NULL, COALESCE(:USERFULLNAME, ''), '', '',
+               COALESCE(:USERPHONE, ''), 0);
+
      /* 05.08.2014 - Scrisoare la administratie */
      EXECUTE PROCEDURE SP_CREATE_MAIL_TO_SEND('web@fantastic.md','','Web comanda intr-un click',
                                               'Web comanda intr-un click. Data('||current_timestamp ||')<br><br>Client: <b>' || :USERFULLNAME || '</b><br/>' ||
@@ -735,7 +744,9 @@ BEGIN
                 AND D.DELETED_DATE IS NULL
                 AND COALESCE(GET_FLG_VALUE(D.FLAGS, 10), 0) = 0
                 AND D.CREATED_DATE >= DATEADD(-72 HOUR TO CURRENT_TIMESTAMP)
-                AND NOT EXISTS (SELECT 1 FROM TWEB_CERERE_FINANTARE F WHERE F.DOCID = D.DOCID)
+                AND NOT EXISTS (SELECT 1 FROM TWEB_CERERE_FINANTARE F
+                                 WHERE F.DOCID = D.DOCID
+                                   AND COALESCE(F.IDEN, '') <> '')  /* stub-ul de la "1 click" (fara IDNP) se completeaza */
                 AND (FN_PAY_IS_CREDIT(D.DTSC) = 1
                      OR EXISTS (SELECT 1 FROM TDB_DEAL_DOCS DD
                                   JOIN TDB_DEALS DL ON DL.DEAL_ID = DD.DEAL_ID
@@ -817,8 +828,9 @@ BEGIN
      EXECUTE PROCEDURE SP_ADD_DOC_COMMENTS(:DOCID, 'WEB', 'Avans: ' || Round(coalesce(:AVANS,0)) || '  Plata Lunara: '|| round(coalesce(:plata_lunara,0))||' MDL');
      EXECUTE PROCEDURE SP_ADD_DOC_COMMENTS(:DOCID, 'WEB', 'Adresa de livrare: '||:DeliveryAddress);
 
-     /* dosarul de credit */
-     INSERT INTO TWEB_CERERE_FINANTARE
+     /* dosarul de credit; UPDATE OR INSERT - comanda "1 click" cu plata in credit are deja un stub
+        (WEB_CREATE_TRANSACTION_PHONE2), care se completeaza aici */
+     UPDATE OR INSERT INTO TWEB_CERERE_FINANTARE
      (
       DOCID,
       CREDIT_SUMA, CREDIT_PERIOADA, NPP, IDEN, DATA_NASTERII, CONTACT_TELEFON,
@@ -829,7 +841,8 @@ BEGIN
       :DOCID,
       :CREDIT_SUMA, :CREDIT_PERIOADA, :NPP, :IDEN, :DATA_NASTERII, :CONTACT_TELEFON,
       :FLG_COPY_BY_FAX, :SCAN1, :SCAN2, :avans, :plata_lunara, :org_id, nullif(trim(:credit_type), '')
-     );
+     )
+     MATCHING (DOCID);
 
      /* datele comenzii in deal (nume, telefon, adresa, plata; UTM-ul din TWEB_ORDER_UTM).
         La comanda existenta (D3) nu se suprascrie ce a venit din "1 click". */

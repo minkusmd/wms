@@ -165,6 +165,7 @@ type
         bbFromAnotherDocument: TdxBarButton;
         bbAddFreeDelivery: TdxBarButton;
         bbTender: TdxBarButton;
+        bbECredit: TdxBarButton;
         dxBarButton11: TdxBarButton;
         dxBarButton12: TdxBarButton;
         bbCredit: TdxBarButton;
@@ -245,6 +246,7 @@ type
         procedure bbFromAnotherDocumentClick(Sender: TObject);
         procedure bbAddFreeDeliveryClick(Sender: TObject);
         procedure bbTenderClick(Sender: TObject);
+        procedure bbECreditClick(Sender: TObject);
         procedure dxBarButton11Click(Sender: TObject);
         procedure dxBarButton12Click(Sender: TObject);
         procedure bbCreditClick(Sender: TObject);
@@ -340,7 +342,8 @@ uses
     SWNSecurity, SWNSecurityFlags, SWNCommonDialogs, frmSelectPhoneNumberUnit,
     Vcl.Clipbrd, Vcl.Dialogs, uCreditFinalInfoDialog, frmKitchenTemplateUnit,
     frmDocumentImportBrowserDialog, System.Types, frmCustomerContractsDialog,
-    frmGoodsQuickInfoDialog, frmDocumentBrowserDialog, frmCredit01Unit, frmGoodsForeignCodeDialog;
+    frmGoodsQuickInfoDialog, frmDocumentBrowserDialog, frmCredit01Unit, frmGoodsForeignCodeDialog,
+    frmFinantareEditorDialog;
 
 {$R *.dfm}
 
@@ -1406,6 +1409,7 @@ begin
 
      // popup menu
     bbCustomerDebts.Enabled := fDebts;
+    bbECredit.Enabled := fDebts;
 
     GoodsSelectionChanged;
 end;
@@ -1488,6 +1492,13 @@ begin
     finally
         Query.Free;
     end;
+end;
+
+procedure Tframe08ConfigurationBRK.bbECreditClick(Sender: TObject);
+begin
+     // Cererea de finantare a ofertei (TWEB_CERERE_FINANTARE) + depunerea ei la eCredit
+    if cxGridBRKDBTable.DataController.RecNo > 0 then
+        TfrmFinantareEditorDlg.Execute(Self, dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger);
 end;
 
 procedure Tframe08ConfigurationBRK.bbTenderClick(Sender: TObject);

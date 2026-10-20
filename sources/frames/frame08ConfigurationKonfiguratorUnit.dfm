@@ -1483,6 +1483,13 @@ inherited frame08ConfigurationBRK: Tframe08ConfigurationBRK
         0A}
       OnClick = bbAddFreeDeliveryClick
     end
+    object bbECredit: TdxBarButton
+      Caption = 'Cerere de finantare / eCredit...'
+      Category = 0
+      Hint = 'Cererea de finantare a ofertei si depunerea ei la eCredit'
+      Visible = ivAlways
+      OnClick = bbECreditClick
+    end
     object bbTender: TdxBarButton
       Caption = 'Creaza oferta pentru tender'
       Category = 0
@@ -1944,6 +1951,11 @@ inherited frame08ConfigurationBRK: Tframe08ConfigurationBRK
       item
         Visible = True
         ItemName = 'btnVinzarePartener'
+      end
+      item
+        BeginGroup = True
+        Visible = True
+        ItemName = 'bbECredit'
       end
       item
         BeginGroup = True
