@@ -75,9 +75,10 @@ type
     // AAskMode = False: fara intrebarea "doar fara continut / toate" - se iau toate articolele din
     // AItems (apelantul le-a filtrat deja). ADelayMs = pauza dupa fiecare articol, pe fir
     // (-1 = cea pentru site-uri, cDelayBetweenItemsMs; 0 pentru fisiere statice, ex. DMLink).
+    // AThreadCount <= 0 = cMamicoThreadCount; mai putine fire pentru site-urile lente (pernamea.md).
     class procedure RunForPriceItemsEx(AItems: TDataSet; AConnection: TIBCConnection;
       ASupplierID: Integer; AFetch: TContentFetchFunc; const ASiteName: string;
-      const AAskMode: Boolean = True; const ADelayMs: Integer = -1);
+      const AAskMode: Boolean = True; const ADelayMs: Integer = -1; const AThreadCount: Integer = 0);
 
     // acelasi lucru fara interfata (WMSParsers, poate rula in orice fir): ACodes / ALinks paralele;
     // AThreadCount fire, fiecare cu conexiunea lui (clona lui AConnection), descarca, converteste
@@ -614,6 +615,7 @@ type
     Fetch: TContentFetchFunc;
     SiteName: string;
     DelayMs: Integer;                                // pauza dupa fiecare articol, pe fir
+    ThreadCount: Integer;                            // firele de lucru
     constructor Create;
     destructor Destroy; override;
     function IsCancelled: Boolean;
@@ -725,7 +727,7 @@ constructor TMamicoProgressForm.CreateProgress(AJob: TMamicoJob);
 begin
   CreateNew(Application);
   FJob := AJob;
-  Caption := Format('%s - caracteristici si imagini (%d fire)', [AJob.SiteName, cMamicoThreadCount]);
+  Caption := Format('%s - caracteristici si imagini (%d fire)', [AJob.SiteName, AJob.ThreadCount]);
   Width := 760;
   Height := 500;
   Position := poMainFormCenter;
@@ -861,7 +863,7 @@ end;
 
 class procedure TMamicoContentLoader.RunForPriceItemsEx(AItems: TDataSet;
   AConnection: TIBCConnection; ASupplierID: Integer; AFetch: TContentFetchFunc;
-  const ASiteName: string; const AAskMode: Boolean; const ADelayMs: Integer);
+  const ASiteName: string; const AAskMode: Boolean; const ADelayMs: Integer; const AThreadCount: Integer);
 var
   Job: TMamicoJob;
   Workers: TArray<TMamicoWorker>;
@@ -896,6 +898,10 @@ begin
     Job.DelayMs := ADelayMs
   else
     Job.DelayMs := cDelayBetweenItemsMs;
+  if AThreadCount > 0 then
+    Job.ThreadCount := AThreadCount
+  else
+    Job.ThreadCount := cMamicoThreadCount;
   Form := nil;
   try
     Existing := nil;
@@ -921,15 +927,15 @@ begin
       Application.MainForm.Enabled := False;
     try
       Form.AddLog(Format('%d articole de procesat in %d fire, %d sarite (au deja continut)',
-        [Total, cMamicoThreadCount, Skipped]));
+        [Total, Job.ThreadCount, Skipped]));
 
       Done := 0;
       Found := 0;
       Failed := 0;
       Images := 0;
 
-      Job.RunningWorkers := cMamicoThreadCount;
-      SetLength(Workers, cMamicoThreadCount);
+      Job.RunningWorkers := Job.ThreadCount;
+      SetLength(Workers, Job.ThreadCount);
       for I := 0 to High(Workers) do
         Workers[I] := TMamicoWorker.Create(Job);
       try

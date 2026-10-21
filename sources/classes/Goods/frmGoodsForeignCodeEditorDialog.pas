@@ -14,7 +14,7 @@ uses
 const
   // Parametrii vinzarii in rate cu dobinda 0%. Folositi doar pentru afisaj:
   // pretul insusi se calculeaza in baza. Trebuie sa ramina sincronizati cu
-  // DB Model\goods_foreign_price_credit0.sql (coloana calculata PRICE_CREDIT0
+  // DB Model\price0_global.sql (coloana calculata PRICE_CREDIT0
   // si procedura GET_GOODS_PRICE_CREDIT0).
   cCredit0Months = 6;
   cCredit0CostMarkup = 1.16;
@@ -235,8 +235,14 @@ begin
 end;
 
 procedure TfrmGoodsForeignCodeEditorDlg.btnMarginClick(Sender: TObject);
+var
+  Cost: Double;
 begin
-  fMasterDataSet.FieldByName('price4').AsFloat := fMasterDataSet.FieldByName('price7').AsFloat * 1.2;
+  // marja pe costul de achizitie (PRICE0); PRICE7 doar daca PRICE0 lipseste
+  Cost := fMasterDataSet.FieldByName('price0').AsFloat;
+  if Cost <= 0 then
+    Cost := fMasterDataSet.FieldByName('price7').AsFloat;
+  fMasterDataSet.FieldByName('price4').AsFloat := Cost * 1.2;
 end;
 
 procedure TfrmGoodsForeignCodeEditorDlg.btnResetValuesClick(Sender: TObject);
@@ -388,28 +394,28 @@ begin
 end;
 
 // PRICE_CREDIT0 este coloana calculata in baza:
-//   max(PRICE1, PRICE7 in MDL * cCredit0CostMarkup).
+//   max(PRICE1, cost in MDL * cCredit0CostMarkup),
+// cost = PRICE0 x factorul furnizorului (TPRICE_SUPPLIER_COST) sau PRICE7.
 // Aici doar se afiseaza din ce se compune si cit iese rata lunara.
-// Formula: DB Model\goods_foreign_price_credit0.sql.
+// Formula: DB Model\price0_global.sql.
 procedure TfrmGoodsForeignCodeEditorDlg.UpdateCredit0Info;
 var
   Credit0: Double;
   Price1: Double;
-  Price7Lei: Double;
 begin
   Credit0 := fMasterDataSet.FieldByName('PRICE_CREDIT0').AsFloat;
   Price1 := fMasterDataSet.FieldByName('PRICE1').AsFloat;
-  Price7Lei := fMasterDataSet.FieldByName('PRICE7_LEI').AsFloat;
 
   if Credit0 <= 0 then begin
     lbCredit0Info.Caption := 'fara pret - fara rate 0%';
     Exit;
   end;
 
-  if Price1 >= Round(Price7Lei * cCredit0CostMarkup) then
+  // valoarea vine gata din baza: daca nu e pretul Web, e costul + 16%
+  if Credit0 <= Price1 + 0.5 then
     lbCredit0Info.Caption := Format('= Web; rata %n MDL/luna', [Credit0 / cCredit0Months])
   else
-    lbCredit0Info.Caption := Format('= Indicativ +16%% (Web %n); rata %n MDL/luna',
+    lbCredit0Info.Caption := Format('= Cost +16%% (Web %n); rata %n MDL/luna',
       [Price1, Credit0 / cCredit0Months]);
 end;
 

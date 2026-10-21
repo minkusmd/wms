@@ -327,6 +327,8 @@ type
     cxDBImage1: TcxDBImage;
     IBCQueryPriceListImages: TIBCQuery;
     IBCDataSourcePricelistImages: TIBCDataSource;
+    IBCQueryPriceListImageBlob: TIBCQuery;
+    IBCDataSourcePricelistImageBlob: TIBCDataSource;
     cxGrid6DBTableView1SUPPLIERID: TcxGridDBColumn;
     cxGrid6DBTableView1SUPPLIER_GOODS_CODE: TcxGridDBColumn;
     cxGrid6DBTableView1IMAGE_URL: TcxGridDBColumn;
@@ -488,7 +490,7 @@ uses
   SWNValueStorageUnit, dxInputDialogs, frmAddGoodsfromPrices, frmAddNewGoodsUnit, frmAnalizePriceListUnit,
   frmContentGoodsEditorDialog, frmContentPackage, frmCustomersDlg, frmGoods, frmGoodsPriceListDlgUnit, frmGoodsTypeDialog,
   frmMuncitorulProgressUnit, OlisGrupContentUnit, frmPriceManageStringFieldsUnit, frmPriceTypesUnit, frmPricelistImportUnit,
-  frmSelectGoodsTypeUnit, frmSyssDataEditor, frmSyssEditorWindow, uAnalizePriceList, {uLoadProductImages,} uPythonRunner, MamicoContentUnit, ImperiaContentUnit, ArvaliscomContentUnit, FiltreContentUnit, PriceListContentTransferUnit, NexDistributionUnit, TriomacPriceListUnit, PriceGoodsCreateUnit,
+  frmSelectGoodsTypeUnit, frmSyssDataEditor, frmSyssEditorWindow, uAnalizePriceList, {uLoadProductImages,} uPythonRunner, MamicoContentUnit, ImperiaContentUnit, ArvaliscomContentUnit, FiltreContentUnit, AloContentUnit, PernaMeaContentUnit, TinaContentUnit, PriceListContentTransferUnit, NexDistributionUnit, TriomacPriceListUnit, AgroPiesePriceListUnit, PriceGoodsCreateUnit,
   System.Math,
   IBCClasses, System.JSON, System.Generics.Collections, System.Net.HttpClient, System.Net.URLClient,
   System.Win.Registry,
@@ -831,6 +833,7 @@ begin
   IBCQueryPriceCategories.Active := False;
   IBCQueryPriceItems.Active := False;
   IBCQuerySuppliers.Active := False;
+  IBCQueryPriceListImageBlob.Active := False;
   IBCQueryPriceListImages.Active := False;
   // 2. De deconectat sursele de date de la griduri
 
@@ -1648,7 +1651,8 @@ begin
     end;
   end;
 
-  // TRIOMAC - API SCOP (api.scop.md): pricelist nou din produsele cu stoc
+  // TRIOMAC - API SCOP v2 (scop.md/api/partner/v2): pricelist nou din produsele cu stoc, descrieri,
+  // imagini (descarcate si copiate la produsele legate in TTriomacPriceListImport.Run)
   if IBCQuerySuppliers.FieldByName('CustomerID').AsInteger = cTriomacSupplierID then
   begin
     var TriomacPLID := 0;
@@ -1663,6 +1667,26 @@ begin
     begin
       IBCQueryPriceData.Refresh;
       IBCQueryPriceData.Locate('PLID', TriomacPLID, []);
+    end;
+  end;
+
+  // AgroPiese TGR Grup - API angro.agropiese.md: pricelist nou din produsele cu pret engros,
+  // caracteristicile RO/RU ca descriere, imaginile (descarcate si copiate la produsele legate
+  // in TAgroPiesePriceListImport.Run)
+  if IBCQuerySuppliers.FieldByName('CustomerID').AsInteger = cAgroPieseSupplierID then
+  begin
+    var AgroPLID := 0;
+    try
+      AgroPLID := TAgroPiesePriceListImport.Run(dmDB.IBCConnection,
+        IBCQueryPriceCategories.FieldByName('PRICE_CATEGORYID').AsInteger);
+    except
+      on E: Exception do
+        ShowErrorDialog('Import AgroPiese (angro.agropiese.md)', E.Message);
+    end;
+    if AgroPLID > 0 then
+    begin
+      IBCQueryPriceData.Refresh;
+      IBCQueryPriceData.Locate('PLID', AgroPLID, []);
     end;
   end;
 
@@ -2433,6 +2457,40 @@ begin
       IBCQueryPriceData.FieldByName('PLID').AsInteger);
   end;
 
+  // AgroPiese TGR Grup (API angro.agropiese.md): caracteristicile RO/RU si URL-urile imaginilor
+  // recitite din API pentru tot catalogul (ca la import), apoi imaginile nedescarcate si copierea
+  // la produsele legate - fara pricelist nou
+  if (IBCQuerySuppliers.FieldByName('CustomerID').AsInteger = cAgroPieseSupplierID) and
+    IBCQueryPriceData.Active and not IBCQueryPriceData.IsEmpty then
+  begin
+    Screen.Cursor := crHourGlass;
+    try
+      try
+        TOlisGrupContent.SaveForSupplier(dmDB.IBCConnection, cAgroPieseSupplierID,
+          TAgroPiesePriceListImport.LoadContent(dmDB.IBCConnection,
+            procedure
+            begin
+              Application.ProcessMessages;
+            end));
+      except
+        on E: Exception do
+        begin
+          Screen.Cursor := crDefault;
+          ShowErrorDialog('Continut AgroPiese (angro.agropiese.md)', E.Message);
+          Exit;
+        end;
+      end;
+    finally
+      Screen.Cursor := crDefault;
+    end;
+    TDMLinkPriceListImport.DownloadImages(dmDB.IBCConnection, IBCQueryPriceData.FieldByName('PLID').AsInteger,
+      cAgroPieseSupplierID, cAgroPieseImageSite);
+    if IBCQueryPriceListImages.Active then
+      IBCQueryPriceListImages.Refresh;
+    TPriceListContentTransfer.Run(dmDB.IBCConnection, cAgroPieseSupplierID,
+      IBCQueryPriceData.FieldByName('PLID').AsInteger);
+  end;
+
   // arvaliscom.md (ARVALISCOM)
   if IBCQuerySuppliers.FieldByName('CustomerID').AsInteger = cArvaliscomSupplierID then
   begin
@@ -2447,6 +2505,36 @@ begin
     // cauta fiecare articol dupa SUPPLIER_GOODS_CODE pe filtre.md (verificat dupa "Cod produs"):
     // imaginile -> TS_PRICELIST_ITEMS_IMAGES, descrierea RO/RU -> TS_PRICELIST_ITEMS_DESCRIPTION
     TFiltreContentLoader.RunForPriceItems(IBCQueryPriceItems, dmDB.IBCConnection, cFiltreSupplierID);
+    if IBCQueryPriceListImages.Active then
+      IBCQueryPriceListImages.Refresh;
+  end;
+
+  // alo.md (MOBILE STOCK SRL) - API-ul JSON ecom.md al site-ului
+  if IBCQuerySuppliers.FieldByName('CustomerID').AsInteger = cAloSupplierID then
+  begin
+    // cauta fiecare articol dupa SUPPLIER_GOODS_CODE (cod exact) pe alo.md:
+    // imaginile -> TS_PRICELIST_ITEMS_IMAGES, descrierea + caracteristicile RO/RU -> TS_PRICELIST_ITEMS_DESCRIPTION
+    TAloContentLoader.RunForPriceItems(IBCQueryPriceItems, dmDB.IBCConnection, cAloSupplierID);
+    if IBCQueryPriceListImages.Active then
+      IBCQueryPriceListImages.Refresh;
+  end;
+
+  // pernamea.md (PERNAMEA S.R.L.)
+  if IBCQuerySuppliers.FieldByName('CustomerID').AsInteger = cPernaMeaSupplierID then
+  begin
+    // cauta fiecare articol dupa SUPPLIER_GOODS_CODE pe pernamea.md (cod exact):
+    // imaginile -> TS_PRICELIST_ITEMS_IMAGES, descrierea + caracteristicile RO/RU -> TS_PRICELIST_ITEMS_DESCRIPTION
+    TPernaMeaContentLoader.RunForPriceItems(IBCQueryPriceItems, dmDB.IBCConnection, cPernaMeaSupplierID);
+    if IBCQueryPriceListImages.Active then
+      IBCQueryPriceListImages.Refresh;
+  end;
+
+  // tina.md (TINA SRL, produse FIRST)
+  if IBCQuerySuppliers.FieldByName('CustomerID').AsInteger = cTinaSupplierID then
+  begin
+    // cauta fiecare articol dupa SUPPLIER_GOODS_CODE pe tina.md (verificat dupa codul produsului):
+    // imaginile -> TS_PRICELIST_ITEMS_IMAGES, descrierea RO/RU -> TS_PRICELIST_ITEMS_DESCRIPTION
+    TTinaContentLoader.RunForPriceItems(IBCQueryPriceItems, dmDB.IBCConnection, cTinaSupplierID);
     if IBCQueryPriceListImages.Active then
       IBCQueryPriceListImages.Refresh;
   end;
@@ -2525,7 +2613,10 @@ begin
         Exit;
     end;
 
-  TPriceListContentTransfer.Run(dmDB.IBCConnection, SupplierID, PLID);
+  // MOBILE STOCK (alo.md, 17 oct 2026) si TINA SRL (tina.md, 20 oct 2026): imaginile site-ului
+  // inlocuiesc imaginile existente ale produselor; la ceilalti furnizori imaginile existente nu se ating
+  TPriceListContentTransfer.Run(dmDB.IBCConnection, SupplierID, PLID,
+    (SupplierID = cAloSupplierID) or (SupplierID = cTinaSupplierID));
 end;
 
 procedure Tframe78PriceList.bbIdentifyBrandClick(Sender: TObject);
@@ -3467,17 +3558,27 @@ end;
 
 // Imaginile pozitiei (TS_PRICELIST_ITEMS_IMAGES) se citesc doar cind fila lor e deschisa: interogarea
 // e legata de fiecare pozitie selectata, iar la NexDistribution o pozitie are zeci de MB de imagini
-// (PNG-uri de 3213x5712) - deschiderea pricelistului dura peste 10 s. DeferredBlobRead (in .dfm):
-// din imaginile pozitiei se aduce doar cea afisata.
+// (PNG-uri de 3213x5712) - deschiderea pricelistului dura peste 10 s.
+// Lista imaginilor (IBCQueryPriceListImages) nu citeste blob-ul; imaginea afisata vine din
+// IBCQueryPriceListImageBlob (detaliu pe IMAGE_URL), deci se aduce doar cea selectata.
+// Nu DeferredBlobRead: conexiunea e in DisconnectedMode si inchide tranzactia dupa Open, iar
+// citirea amanata a blob-ului dadea "invalid transaction handle" (17 oct 2026, MOBILE STOCK).
 procedure Tframe78PriceList.UpdatePriceListImagesQuery;
 begin
   if cxPageControl2.ActivePage = cxTabSheet2 then
   begin
     if IBCQueryPriceItems.Active and not IBCQueryPriceListImages.Active then
       IBCQueryPriceListImages.Open;
+    if IBCQueryPriceListImages.Active and not IBCQueryPriceListImageBlob.Active then
+      IBCQueryPriceListImageBlob.Open;
   end
-  else if IBCQueryPriceListImages.Active then
-    IBCQueryPriceListImages.Close;
+  else
+  begin
+    if IBCQueryPriceListImageBlob.Active then
+      IBCQueryPriceListImageBlob.Close;
+    if IBCQueryPriceListImages.Active then
+      IBCQueryPriceListImages.Close;
+  end;
 end;
 
 procedure Tframe78PriceList.cxPageControl2Change(Sender: TObject);

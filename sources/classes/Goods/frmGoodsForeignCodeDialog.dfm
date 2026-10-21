@@ -3,7 +3,7 @@ object frmGoodsForeignCodeDlg: TfrmGoodsForeignCodeDlg
   Top = 0
   BorderStyle = bsDialog
   Caption = 'Produse coduri furnizori'
-  ClientHeight = 631
+  ClientHeight = 617
   ClientWidth = 1487
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -16,14 +16,14 @@ object frmGoodsForeignCodeDlg: TfrmGoodsForeignCodeDlg
   OnDestroy = FormDestroy
   DesignSize = (
     1487
-    631)
+    617)
   TextHeight = 15
   object pnClient: TPanel
     AlignWithMargins = True
     Left = 8
     Top = 8
     Width = 1471
-    Height = 593
+    Height = 566
     Margins.Left = 8
     Margins.Top = 8
     Margins.Right = 8
@@ -32,6 +32,7 @@ object frmGoodsForeignCodeDlg: TfrmGoodsForeignCodeDlg
     Anchors = [akLeft, akTop, akRight, akBottom]
     BevelOuter = bvNone
     TabOrder = 0
+    ExplicitHeight = 581
     object dxBarDockControl1: TdxBarDockControl
       Left = 0
       Top = 95
@@ -218,10 +219,10 @@ object frmGoodsForeignCodeDlg: TfrmGoodsForeignCodeDlg
         object TV1_PRICE1: TcxGridDBBandedColumn
           Caption = 'Web'
           DataBinding.FieldName = 'PRICE1'
+          Visible = False
           HeaderAlignmentHorz = taCenter
           MinWidth = 64
           Options.HorzSizing = False
-          Visible = False
           Width = 64
           Position.BandIndex = 8
           Position.ColIndex = 0
@@ -230,10 +231,10 @@ object frmGoodsForeignCodeDlg: TfrmGoodsForeignCodeDlg
         object TV1_CURRENCY1ID: TcxGridDBBandedColumn
           Caption = 'V1'
           DataBinding.FieldName = 'CURRENCY1NAME'
+          Visible = False
           HeaderAlignmentHorz = taCenter
           MinWidth = 64
           Options.HorzSizing = False
-          Visible = False
           Width = 64
           Position.BandIndex = 8
           Position.ColIndex = 1
@@ -242,10 +243,10 @@ object frmGoodsForeignCodeDlg: TfrmGoodsForeignCodeDlg
         object TV1_PRICE2: TcxGridDBBandedColumn
           Caption = 'Promo'
           DataBinding.FieldName = 'PRICE2_MDL'
+          Visible = False
           HeaderAlignmentHorz = taCenter
           MinWidth = 64
           Options.HorzSizing = False
-          Visible = False
           Width = 64
           Position.BandIndex = 8
           Position.ColIndex = 2
@@ -254,10 +255,10 @@ object frmGoodsForeignCodeDlg: TfrmGoodsForeignCodeDlg
         object TV1_CURRENCY2ID: TcxGridDBBandedColumn
           Caption = 'V2'
           DataBinding.FieldName = 'CURRENCY2NAME'
+          Visible = False
           HeaderAlignmentHorz = taCenter
           MinWidth = 64
           Options.HorzSizing = False
-          Visible = False
           Width = 64
           Position.BandIndex = 8
           Position.ColIndex = 3
@@ -266,10 +267,10 @@ object frmGoodsForeignCodeDlg: TfrmGoodsForeignCodeDlg
         object TV1_PRICE3: TcxGridDBBandedColumn
           Caption = 'RRP'
           DataBinding.FieldName = 'PRICE3_MDL'
+          Visible = False
           HeaderAlignmentHorz = taCenter
           MinWidth = 64
           Options.HorzSizing = False
-          Visible = False
           Width = 64
           Position.BandIndex = 8
           Position.ColIndex = 4
@@ -278,10 +279,10 @@ object frmGoodsForeignCodeDlg: TfrmGoodsForeignCodeDlg
         object TV1_CURRENCY3ID: TcxGridDBBandedColumn
           Caption = 'V3'
           DataBinding.FieldName = 'CURRENCY3NAME'
+          Visible = False
           HeaderAlignmentHorz = taCenter
           MinWidth = 64
           Options.HorzSizing = False
-          Visible = False
           Width = 64
           Position.BandIndex = 8
           Position.ColIndex = 5
@@ -290,10 +291,10 @@ object frmGoodsForeignCodeDlg: TfrmGoodsForeignCodeDlg
         object TV1_PRICE4: TcxGridDBBandedColumn
           Caption = 'V4'
           DataBinding.FieldName = 'CURRENCY4NAME'
+          Visible = False
           HeaderAlignmentHorz = taCenter
           MinWidth = 80
           Options.HorzSizing = False
-          Visible = False
           Width = 80
           Position.BandIndex = 8
           Position.ColIndex = 6
@@ -302,10 +303,10 @@ object frmGoodsForeignCodeDlg: TfrmGoodsForeignCodeDlg
         object TV1_PRICE5: TcxGridDBBandedColumn
           Caption = 'Discount'
           DataBinding.FieldName = 'PRICE5_LEI'
+          Visible = False
           HeaderAlignmentHorz = taCenter
           MinWidth = 80
           Options.HorzSizing = False
-          Visible = False
           Width = 80
           Position.BandIndex = 8
           Position.ColIndex = 7
@@ -325,10 +326,10 @@ object frmGoodsForeignCodeDlg: TfrmGoodsForeignCodeDlg
         object TV1_CURRENCY5ID: TcxGridDBBandedColumn
           Caption = 'V5'
           DataBinding.FieldName = 'CURRENCY5NAME'
+          Visible = False
           HeaderAlignmentHorz = taCenter
           MinWidth = 40
           Options.HorzSizing = False
-          Visible = False
           Width = 40
           Position.BandIndex = 8
           Position.ColIndex = 8
@@ -337,10 +338,10 @@ object frmGoodsForeignCodeDlg: TfrmGoodsForeignCodeDlg
         object TV1_PRICE6: TcxGridDBBandedColumn
           Caption = 'Diler'
           DataBinding.FieldName = 'PRICE6_LEI'
+          Visible = False
           HeaderAlignmentHorz = taCenter
           MinWidth = 80
           Options.HorzSizing = False
-          Visible = False
           Width = 80
           Position.BandIndex = 8
           Position.ColIndex = 9
@@ -360,10 +361,10 @@ object frmGoodsForeignCodeDlg: TfrmGoodsForeignCodeDlg
         object TV1_CURRENCY6ID: TcxGridDBBandedColumn
           Caption = 'V6'
           DataBinding.FieldName = 'CURRENCY6NAME'
+          Visible = False
           HeaderAlignmentHorz = taCenter
           MinWidth = 40
           Options.HorzSizing = False
-          Visible = False
           Width = 40
           Position.BandIndex = 8
           Position.ColIndex = 10
@@ -372,13 +373,13 @@ object frmGoodsForeignCodeDlg: TfrmGoodsForeignCodeDlg
         object TV1_PRICE7: TcxGridDBBandedColumn
           Caption = 'Indicativ'
           DataBinding.FieldName = 'PRICE7'
+          Visible = False
           VisibleForExpressionEditor = bFalse
           HeaderAlignmentHorz = taCenter
           MinWidth = 64
           Options.HorzSizing = False
           VisibleForCustomization = False
           VisibleForEditForm = bFalse
-          Visible = False
           Width = 64
           Position.BandIndex = 8
           Position.ColIndex = 11
@@ -387,13 +388,13 @@ object frmGoodsForeignCodeDlg: TfrmGoodsForeignCodeDlg
         object TV1_CURRENCY7ID: TcxGridDBBandedColumn
           Caption = 'V7'
           DataBinding.FieldName = 'CURRENCY7NAME'
+          Visible = False
           VisibleForExpressionEditor = bFalse
           HeaderAlignmentHorz = taCenter
           MinWidth = 64
           Options.HorzSizing = False
           VisibleForCustomization = False
           VisibleForEditForm = bFalse
-          Visible = False
           Width = 64
           Position.BandIndex = 8
           Position.ColIndex = 12
@@ -452,13 +453,13 @@ object frmGoodsForeignCodeDlg: TfrmGoodsForeignCodeDlg
         object TV1_PRICE7_LEI: TcxGridDBBandedColumn
           Caption = 'Indicativ, MDL'
           DataBinding.FieldName = 'PRICE7_LEI'
+          Visible = False
           VisibleForExpressionEditor = bTrue
           HeaderAlignmentHorz = taCenter
           MinWidth = 120
           Options.HorzSizing = False
           VisibleForCustomization = False
           VisibleForEditForm = bFalse
-          Visible = False
           Width = 120
           Position.BandIndex = 8
           Position.ColIndex = 13
@@ -866,7 +867,7 @@ object frmGoodsForeignCodeDlg: TfrmGoodsForeignCodeDlg
       Left = 3
       Top = 363
       Width = 1465
-      Height = 227
+      Height = 200
       Align = alClient
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
@@ -877,7 +878,8 @@ object frmGoodsForeignCodeDlg: TfrmGoodsForeignCodeDlg
       TabOrder = 3
       Properties.ActivePage = cxTabSheet1
       Properties.CustomButtons.Buttons = <>
-      ClientRectBottom = 223
+      ExplicitHeight = 198
+      ClientRectBottom = 196
       ClientRectLeft = 4
       ClientRectRight = 1461
       ClientRectTop = 26
@@ -894,6 +896,7 @@ object frmGoodsForeignCodeDlg: TfrmGoodsForeignCodeDlg
         Font.Style = []
         ImageIndex = 0
         ParentFont = False
+        ExplicitHeight = 179
         object ShapeQty: TShape
           Left = 1141
           Top = 18
@@ -926,7 +929,7 @@ object frmGoodsForeignCodeDlg: TfrmGoodsForeignCodeDlg
           Left = 5
           Top = 34
           Width = 524
-          Height = 148
+          Height = 131
           Margins.Left = 5
           Margins.Top = 5
           Margins.Right = 5
@@ -1159,8 +1162,8 @@ object frmGoodsForeignCodeDlg: TfrmGoodsForeignCodeDlg
     end
   end
   object btnOk: TcxButton
-    Left = 731
-    Top = 594
+    Left = 523
+    Top = 584
     Width = 90
     Height = 29
     Anchors = [akRight, akBottom]
@@ -1168,10 +1171,11 @@ object frmGoodsForeignCodeDlg: TfrmGoodsForeignCodeDlg
     Default = True
     ModalResult = 1
     TabOrder = 1
+    ExplicitTop = 596
   end
   object btnCancel: TcxButton
-    Left = 843
-    Top = 594
+    Left = 623
+    Top = 584
     Width = 90
     Height = 29
     Anchors = [akRight, akBottom]
@@ -1179,6 +1183,7 @@ object frmGoodsForeignCodeDlg: TfrmGoodsForeignCodeDlg
     Caption = 'Renunta'
     ModalResult = 2
     TabOrder = 2
+    ExplicitTop = 596
   end
   object dxBarManagerGoods: TdxBarManager
     Font.Charset = DEFAULT_CHARSET
@@ -1246,22 +1251,6 @@ object frmGoodsForeignCodeDlg: TfrmGoodsForeignCodeDlg
           BeginGroup = True
           Visible = True
           ItemName = 'bbInstrumente'
-        end
-        item
-          BeginGroup = True
-          Visible = True
-          ItemName = 'bbSupllierApi'
-        end
-        item
-          UserDefine = [udPaintStyle]
-          UserPaintStyle = psCaptionGlyph
-          Visible = True
-          ItemName = 'bbCall'
-        end
-        item
-          BeginGroup = True
-          Visible = True
-          ItemName = 'bbCopyToPartner'
         end>
       NotDocking = [dsNone, dsLeft, dsTop, dsRight, dsBottom]
       OneOnRow = True
@@ -1338,9 +1327,27 @@ object frmGoodsForeignCodeDlg: TfrmGoodsForeignCodeDlg
           ItemName = 'bbPricePolicy'
         end
         item
+          UserDefine = [udPaintStyle]
+          UserPaintStyle = psCaptionGlyph
+          Visible = True
+          ItemName = 'bbCall'
+        end
+        item
           BeginGroup = True
           Visible = True
           ItemName = 'bbAVAILABLE_QTY'
+        end
+        item
+          Visible = True
+          ItemName = 'bbSupllierApi'
+        end
+        item
+          Visible = True
+          ItemName = 'bbAskAvailability'
+        end
+        item
+          Visible = True
+          ItemName = 'bbCopyToPartner'
         end
         item
           BeginGroup = True
@@ -1375,6 +1382,16 @@ object frmGoodsForeignCodeDlg: TfrmGoodsForeignCodeDlg
       Visible = ivAlways
       ShortCut = 16467
       OnClick = bbSupllierApiClick
+    end
+    object bbAskAvailability: TdxBarButton
+      Caption = 'Verifica disponibilitatea'
+      Category = 0
+      Hint = 
+        'Intreaba in grupul Telegram de achizitii daca produsul este disp' +
+        'onibil la furnizor'
+      Visible = ivAlways
+      ShortCut = 32854
+      OnClick = bbAskAvailabilityClick
     end
     object bbDebts: TdxBarButton
       Caption = 'Creante'
@@ -1619,34 +1636,62 @@ object frmGoodsForeignCodeDlg: TfrmGoodsForeignCodeDlg
       
         '  (select title from ts_currency where currencyid = currency7id)' +
         ' currency7Name'
-      '  , round(CONVERT_AMOUNT(V.PRICE1, V.CURRENCY1ID, 498), 2) P1_MDL'
-      '  , round(CONVERT_AMOUNT(V.PRICE1, V.CURRENCY1ID, 840), 2) P1_USD'
-      '  , iif(V.PRICE1 is null, null, ''MDL'') C1_MDL'
-      '  , iif(V.PRICE1 is null, null, ''USD'') C1_USD'
-      '  , round(CONVERT_AMOUNT(V.PRICE2, V.CURRENCY2ID, 498), 2) P2_MDL'
-      '  , round(CONVERT_AMOUNT(V.PRICE2, V.CURRENCY2ID, 840), 2) P2_USD'
-      '  , iif(V.PRICE2 is null, null, ''MDL'') C2_MDL'
-      '  , iif(V.PRICE2 is null, null, ''USD'') C2_USD'
-      '  , round(CONVERT_AMOUNT(V.PRICE3, V.CURRENCY3ID, 498), 2) P3_MDL'
-      '  , round(CONVERT_AMOUNT(V.PRICE3, V.CURRENCY3ID, 840), 2) P3_USD'
-      '  , iif(V.PRICE3 is null, null, ''MDL'') C3_MDL'
-      '  , iif(V.PRICE3 is null, null, ''USD'') C3_USD'
-      '  , round(CONVERT_AMOUNT(V.PRICE4, V.CURRENCY4ID, 498), 2) P4_MDL'
-      '  , round(CONVERT_AMOUNT(V.PRICE4, V.CURRENCY4ID, 840), 2) P4_USD'
-      '  , iif(V.PRICE4 is null, null, ''MDL'') C4_MDL'
-      '  , iif(V.PRICE4 is null, null, ''USD'') C4_USD'
-      '  , round(CONVERT_AMOUNT(V.PRICE5, V.CURRENCY5ID, 498), 2) P5_MDL'
-      '  , round(CONVERT_AMOUNT(V.PRICE5, V.CURRENCY5ID, 840), 2) P5_USD'
-      '  , iif(V.PRICE5 is null, null, ''MDL'') C5_MDL'
-      '  , iif(V.PRICE5 is null, null, ''USD'') C5_USD'
-      '  , round(CONVERT_AMOUNT(V.PRICE6, V.CURRENCY6ID, 498), 2) P6_MDL'
-      '  , round(CONVERT_AMOUNT(V.PRICE6, V.CURRENCY6ID, 840), 2) P6_USD'
-      '  , iif(V.PRICE6 is null, null, ''MDL'') C6_MDL'
-      '  , iif(V.PRICE6 is null, null, ''USD'') C6_USD'
-      '  , round(CONVERT_AMOUNT(V.PRICE7, V.CURRENCY7ID, 498), 2) P7_MDL'
-      '  , round(CONVERT_AMOUNT(V.PRICE7, V.CURRENCY7ID, 840), 2) P7_USD'
-      '  , iif(V.PRICE7 is null, null, ''MDL'') C7_MDL'
-      '  , iif(V.PRICE7 is null, null, ''USD'') C7_USD'
+      
+        '  , round(CONVERT_AMOUNT(V.PRICE1, V.CURRENCY1ID, 498), 2) P1_MD' +
+        'L'
+      
+        '  , round(CONVERT_AMOUNT(V.PRICE1, V.CURRENCY1ID, 840), 2) P1_US' +
+        'D'
+      '  , iif(V.PRICE1 is null, null, '#39'MDL'#39') C1_MDL'
+      '  , iif(V.PRICE1 is null, null, '#39'USD'#39') C1_USD'
+      
+        '  , round(CONVERT_AMOUNT(V.PRICE2, V.CURRENCY2ID, 498), 2) P2_MD' +
+        'L'
+      
+        '  , round(CONVERT_AMOUNT(V.PRICE2, V.CURRENCY2ID, 840), 2) P2_US' +
+        'D'
+      '  , iif(V.PRICE2 is null, null, '#39'MDL'#39') C2_MDL'
+      '  , iif(V.PRICE2 is null, null, '#39'USD'#39') C2_USD'
+      
+        '  , round(CONVERT_AMOUNT(V.PRICE3, V.CURRENCY3ID, 498), 2) P3_MD' +
+        'L'
+      
+        '  , round(CONVERT_AMOUNT(V.PRICE3, V.CURRENCY3ID, 840), 2) P3_US' +
+        'D'
+      '  , iif(V.PRICE3 is null, null, '#39'MDL'#39') C3_MDL'
+      '  , iif(V.PRICE3 is null, null, '#39'USD'#39') C3_USD'
+      
+        '  , round(CONVERT_AMOUNT(V.PRICE4, V.CURRENCY4ID, 498), 2) P4_MD' +
+        'L'
+      
+        '  , round(CONVERT_AMOUNT(V.PRICE4, V.CURRENCY4ID, 840), 2) P4_US' +
+        'D'
+      '  , iif(V.PRICE4 is null, null, '#39'MDL'#39') C4_MDL'
+      '  , iif(V.PRICE4 is null, null, '#39'USD'#39') C4_USD'
+      
+        '  , round(CONVERT_AMOUNT(V.PRICE5, V.CURRENCY5ID, 498), 2) P5_MD' +
+        'L'
+      
+        '  , round(CONVERT_AMOUNT(V.PRICE5, V.CURRENCY5ID, 840), 2) P5_US' +
+        'D'
+      '  , iif(V.PRICE5 is null, null, '#39'MDL'#39') C5_MDL'
+      '  , iif(V.PRICE5 is null, null, '#39'USD'#39') C5_USD'
+      
+        '  , round(CONVERT_AMOUNT(V.PRICE6, V.CURRENCY6ID, 498), 2) P6_MD' +
+        'L'
+      
+        '  , round(CONVERT_AMOUNT(V.PRICE6, V.CURRENCY6ID, 840), 2) P6_US' +
+        'D'
+      '  , iif(V.PRICE6 is null, null, '#39'MDL'#39') C6_MDL'
+      '  , iif(V.PRICE6 is null, null, '#39'USD'#39') C6_USD'
+      
+        '  , round(CONVERT_AMOUNT(V.PRICE7, V.CURRENCY7ID, 498), 2) P7_MD' +
+        'L'
+      
+        '  , round(CONVERT_AMOUNT(V.PRICE7, V.CURRENCY7ID, 840), 2) P7_US' +
+        'D'
+      '  , iif(V.PRICE7 is null, null, '#39'MDL'#39') C7_MDL'
+      '  , iif(V.PRICE7 is null, null, '#39'USD'#39') C7_USD'
       'from GET_GOODS_FOREIGN(:GOODSID) v'
       'WHERE'
       '  CUSTOMERID = :CUSTOMERID AND GOODS_CODE = :GOODS_CODE'
@@ -1732,34 +1777,62 @@ object frmGoodsForeignCodeDlg: TfrmGoodsForeignCodeDlg
         '       (select TITLE from TS_CURRENCY where CURRENCYID = CURRENC' +
         'Y7ID) CURRENCY7NAME, CONVERT_AMOUNT(PRICE0, CURRENCY0ID, 498) PR' +
         'ICE0_LEI'
-      '  , round(CONVERT_AMOUNT(V.PRICE1, V.CURRENCY1ID, 498), 2) P1_MDL'
-      '  , round(CONVERT_AMOUNT(V.PRICE1, V.CURRENCY1ID, 840), 2) P1_USD'
-      '  , iif(V.PRICE1 is null, null, ''MDL'') C1_MDL'
-      '  , iif(V.PRICE1 is null, null, ''USD'') C1_USD'
-      '  , round(CONVERT_AMOUNT(V.PRICE2, V.CURRENCY2ID, 498), 2) P2_MDL'
-      '  , round(CONVERT_AMOUNT(V.PRICE2, V.CURRENCY2ID, 840), 2) P2_USD'
-      '  , iif(V.PRICE2 is null, null, ''MDL'') C2_MDL'
-      '  , iif(V.PRICE2 is null, null, ''USD'') C2_USD'
-      '  , round(CONVERT_AMOUNT(V.PRICE3, V.CURRENCY3ID, 498), 2) P3_MDL'
-      '  , round(CONVERT_AMOUNT(V.PRICE3, V.CURRENCY3ID, 840), 2) P3_USD'
-      '  , iif(V.PRICE3 is null, null, ''MDL'') C3_MDL'
-      '  , iif(V.PRICE3 is null, null, ''USD'') C3_USD'
-      '  , round(CONVERT_AMOUNT(V.PRICE4, V.CURRENCY4ID, 498), 2) P4_MDL'
-      '  , round(CONVERT_AMOUNT(V.PRICE4, V.CURRENCY4ID, 840), 2) P4_USD'
-      '  , iif(V.PRICE4 is null, null, ''MDL'') C4_MDL'
-      '  , iif(V.PRICE4 is null, null, ''USD'') C4_USD'
-      '  , round(CONVERT_AMOUNT(V.PRICE5, V.CURRENCY5ID, 498), 2) P5_MDL'
-      '  , round(CONVERT_AMOUNT(V.PRICE5, V.CURRENCY5ID, 840), 2) P5_USD'
-      '  , iif(V.PRICE5 is null, null, ''MDL'') C5_MDL'
-      '  , iif(V.PRICE5 is null, null, ''USD'') C5_USD'
-      '  , round(CONVERT_AMOUNT(V.PRICE6, V.CURRENCY6ID, 498), 2) P6_MDL'
-      '  , round(CONVERT_AMOUNT(V.PRICE6, V.CURRENCY6ID, 840), 2) P6_USD'
-      '  , iif(V.PRICE6 is null, null, ''MDL'') C6_MDL'
-      '  , iif(V.PRICE6 is null, null, ''USD'') C6_USD'
-      '  , round(CONVERT_AMOUNT(V.PRICE7, V.CURRENCY7ID, 498), 2) P7_MDL'
-      '  , round(CONVERT_AMOUNT(V.PRICE7, V.CURRENCY7ID, 840), 2) P7_USD'
-      '  , iif(V.PRICE7 is null, null, ''MDL'') C7_MDL'
-      '  , iif(V.PRICE7 is null, null, ''USD'') C7_USD'
+      
+        '  , round(CONVERT_AMOUNT(V.PRICE1, V.CURRENCY1ID, 498), 2) P1_MD' +
+        'L'
+      
+        '  , round(CONVERT_AMOUNT(V.PRICE1, V.CURRENCY1ID, 840), 2) P1_US' +
+        'D'
+      '  , iif(V.PRICE1 is null, null, '#39'MDL'#39') C1_MDL'
+      '  , iif(V.PRICE1 is null, null, '#39'USD'#39') C1_USD'
+      
+        '  , round(CONVERT_AMOUNT(V.PRICE2, V.CURRENCY2ID, 498), 2) P2_MD' +
+        'L'
+      
+        '  , round(CONVERT_AMOUNT(V.PRICE2, V.CURRENCY2ID, 840), 2) P2_US' +
+        'D'
+      '  , iif(V.PRICE2 is null, null, '#39'MDL'#39') C2_MDL'
+      '  , iif(V.PRICE2 is null, null, '#39'USD'#39') C2_USD'
+      
+        '  , round(CONVERT_AMOUNT(V.PRICE3, V.CURRENCY3ID, 498), 2) P3_MD' +
+        'L'
+      
+        '  , round(CONVERT_AMOUNT(V.PRICE3, V.CURRENCY3ID, 840), 2) P3_US' +
+        'D'
+      '  , iif(V.PRICE3 is null, null, '#39'MDL'#39') C3_MDL'
+      '  , iif(V.PRICE3 is null, null, '#39'USD'#39') C3_USD'
+      
+        '  , round(CONVERT_AMOUNT(V.PRICE4, V.CURRENCY4ID, 498), 2) P4_MD' +
+        'L'
+      
+        '  , round(CONVERT_AMOUNT(V.PRICE4, V.CURRENCY4ID, 840), 2) P4_US' +
+        'D'
+      '  , iif(V.PRICE4 is null, null, '#39'MDL'#39') C4_MDL'
+      '  , iif(V.PRICE4 is null, null, '#39'USD'#39') C4_USD'
+      
+        '  , round(CONVERT_AMOUNT(V.PRICE5, V.CURRENCY5ID, 498), 2) P5_MD' +
+        'L'
+      
+        '  , round(CONVERT_AMOUNT(V.PRICE5, V.CURRENCY5ID, 840), 2) P5_US' +
+        'D'
+      '  , iif(V.PRICE5 is null, null, '#39'MDL'#39') C5_MDL'
+      '  , iif(V.PRICE5 is null, null, '#39'USD'#39') C5_USD'
+      
+        '  , round(CONVERT_AMOUNT(V.PRICE6, V.CURRENCY6ID, 498), 2) P6_MD' +
+        'L'
+      
+        '  , round(CONVERT_AMOUNT(V.PRICE6, V.CURRENCY6ID, 840), 2) P6_US' +
+        'D'
+      '  , iif(V.PRICE6 is null, null, '#39'MDL'#39') C6_MDL'
+      '  , iif(V.PRICE6 is null, null, '#39'USD'#39') C6_USD'
+      
+        '  , round(CONVERT_AMOUNT(V.PRICE7, V.CURRENCY7ID, 498), 2) P7_MD' +
+        'L'
+      
+        '  , round(CONVERT_AMOUNT(V.PRICE7, V.CURRENCY7ID, 840), 2) P7_US' +
+        'D'
+      '  , iif(V.PRICE7 is null, null, '#39'MDL'#39') C7_MDL'
+      '  , iif(V.PRICE7 is null, null, '#39'USD'#39') C7_USD'
       'from GET_GOODS_FOREIGN(:GOODSID) V'
       'order by FLG_IN_PRICE desc, PRICE0, PRICE7_LEI')
     RefreshOptions = [roAfterInsert, roAfterUpdate]

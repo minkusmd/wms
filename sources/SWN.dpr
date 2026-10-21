@@ -181,7 +181,7 @@ uses
   ECCFiscalDevice in 'FiscalPrinter\ECC\ECCFiscalDevice.pas',
   ECCReconcileUnit in 'FiscalPrinter\ECC\ECCReconcileUnit.pas',
   ECCDeliveryUnit in 'FiscalPrinter\ECC\ECCDeliveryUnit.pas',
-  ECCReceiptSendUnit in 'FiscalPrinter\ECC\ECCReceiptSendUnit.pas',
+  ECCReceiptSendUnit in 'FiscalPrinter\ECC\ECCReceiptSendUnit.pas' {frmECCReceiptSendDialog in 'FiscalPrinter\ECC\frmECCReceiptSendDialog.pas' {frmECCReceiptSendDlg},
   frmECCReceiptSendDialog in 'FiscalPrinter\ECC\frmECCReceiptSendDialog.pas' {frmECCReceiptSendDlg},
   frmECCCouriersDialog in 'FiscalPrinter\ECC\frmECCCouriersDialog.pas' {frmECCCouriersDlg},
   frmECCReconcileDialog in 'FiscalPrinter\ECC\frmECCReconcileDialog.pas' {frmECCReconcileDlg},
@@ -779,6 +779,7 @@ uses
   ImperiaContentUnit in 'frameUtils\78 - Pricelist\ImperiaContentUnit.pas',
   NexDistributionUnit in 'frameUtils\78 - Pricelist\NexDistributionUnit.pas',
   TriomacPriceListUnit in 'frameUtils\78 - Pricelist\TriomacPriceListUnit.pas',
+  AgroPiesePriceListUnit in 'frameUtils\78 - Pricelist\AgroPiesePriceListUnit.pas',
   PriceGoodsCreateUnit in 'frameUtils\78 - Pricelist\PriceGoodsCreateUnit.pas',
   ArvaliscomContentUnit in 'frameUtils\78 - Pricelist\ArvaliscomContentUnit.pas',
   FiltreContentUnit in 'frameUtils\78 - Pricelist\FiltreContentUnit.pas',
@@ -914,7 +915,10 @@ uses
   uThreadInfoForm in 'Utils\uThreadInfoForm.pas',
   frmImportPricelistErrorUnit in 'frameUtils\78 - Pricelist\frmImportPricelistErrorUnit.pas' {frmImportPricelistErrorDlg},
   uPythonRunnerGoogle in 'Utils\uPythonRunnerGoogle.pas',
-  frmSelectGoodsAcntUnit in 'classes\GoodsACNT\frmSelectGoodsAcntUnit.pas' {Form3};
+  frmSelectGoodsAcntUnit in 'classes\GoodsACNT\frmSelectGoodsAcntUnit.pas' {Form3},
+  AloContentUnit in 'frameUtils\78 - Pricelist\AloContentUnit.pas',
+  PernaMeaContentUnit in 'frameUtils\78 - Pricelist\PernaMeaContentUnit.pas',
+  TinaContentUnit in 'frameUtils\78 - Pricelist\TinaContentUnit.pas';
 
 {$R 'swn_images.res' 'Resources\swn_images.rc'}
 {$R *.res}
@@ -1025,8 +1029,8 @@ procedure CreateCoreDataModules;
 begin
   // cream data module-urile inainte de conectarea explicita la baza de date
     Application.CreateForm(TdmAdditions, dmAdditions);
-    Application.CreateForm(TdmDB, dmDB);
-end;
+  Application.CreateForm(TdmDB, dmDB);
+  end;
 
 procedure InitVisuals(const AppTitle: string);
 begin

@@ -73,7 +73,7 @@ uses
   B2B.DMLink.Thread,
   B2B.DMLinkClient,
   SCOPAPIClientUnit,
-  B2BClientUltra;
+  B2BClientUltra, cxCurrencyEdit;
 
 const
   // Credentialele API-urilor de furnizor NU stau in cod: se citesc din
@@ -82,8 +82,7 @@ const
   // Setari > Configurari API. Aici raman doar codurile si valorile implicite.
   C_UltraApiCode = 'ULTRA_ESHOP';
   C_UltraApiDefaultURL = 'https://eshop.ultra.md/api';
-  C_ScopApiCode = 'SCOP';
-  C_ScopApiDefaultURL = 'https://api.scop.md';
+  // SCOP (Triomac): API_KEY / API_SECRET, citite de SCOPAPIClientUnit.CreateFromConfig
   // DMLink nu se apeleaza prin HTTP din WMS, ci prin DLL-ul construit din
   // proiectul separat sources\b2b.api\dmlink\B2BDMLInkDLL.dproj (adresa
   // serviciului este in DLL). Calea se poate suprascrie cu parametrul DLL_PATH.
@@ -206,6 +205,7 @@ TfrmGoodsForeignCodeDlg = class(TSWNCustomForm)
     lbURL: TcxDBLabel;
     IBCDataSourceCustomerInfo: TIBCDataSource;
     bbSupllierApi: TdxBarButton;
+    bbAskAvailability: TdxBarButton;
     bbSelectCreditOption: TdxBarButton;
     bbDebts: TdxBarButton;
     TV1_PRICE0_LEI: TcxGridDBBandedColumn;
@@ -256,6 +256,7 @@ TfrmGoodsForeignCodeDlg = class(TSWNCustomForm)
     procedure TV1_CURRENCY7IDCustomDrawCell(Sender: TcxCustomGridTableView; ACanvas: TcxCanvas; AViewInfo:
       TcxGridTableDataCellViewInfo; var ADone: Boolean);
     procedure bbSupllierApiClick(Sender: TObject);
+    procedure bbAskAvailabilityClick(Sender: TObject);
     procedure bbSelectCreditOptionClick(Sender: TObject);
     procedure bbDebtsClick(Sender: TObject);
     procedure dxBarButton1Click(Sender: TObject);
@@ -288,11 +289,15 @@ TfrmGoodsForeignCodeDlg = class(TSWNCustomForm)
     procedure GetDoxyterraProductStock(AGoodsCode: string);
     procedure GetEuroTermProductStock(AGoodsCode: string);
     procedure GetGoodsBalance_198;
+    procedure GetHiTechProductStock(AGoodsCode: string);
     procedure GetImperiaProductStock(AGoodsCode: string);
     procedure GetTechnodomProductStock(AGoodsCode: string);
+    procedure GetTrisautoProductStock(AGoodsCode: string);
     procedure GetMuncitorulProductStock(GoodsCode: string);
     procedure GetScopProductStock(GoodsCode: string);
     procedure GetSnaigeProductStock(AGoodsCode: string);
+    procedure GetAloProductStock(AGoodsCode: string);
+    procedure GetPernaMeaProductStock(AGoodsCode: string);
     procedure GetUltraProductStock(GoodsCode: string);
     procedure ReadApiConfig(const AApiCode: string; AValues: TStrings);
     procedure LoadApiConfig(const AApiCode, ADefaultURL: string;
@@ -352,7 +357,9 @@ uses
   System.DateUtils,
   AccentGuidRepo,
   AccentAuthService,
-  ImperiaContentUnit;
+  ImperiaContentUnit,
+  PernaMeaContentUnit,
+  TelegramApiUnit;
 
 {$R *.dfm}
 
@@ -591,6 +598,84 @@ begin
   IBCQueryForeign.Post;
 end;
 
+// "Verifica disponibilitatea": intrebarea despre produsul furnizorului se trimite
+// direct in grupul Telegram de achizitii, in forma
+//   Furnizor <b>"COD" cantitate</b> Denumire la furnizor?
+// Tokenul botului vine din TS_API_CONFIG (API_CODE = 'TELEGRAM'). Chat-ul e cel
+// din canalul SUPPLIER_STOCK din TELEGRAM_CHANNELS, daca a fost creat (Setari >
+// Notificari Telegram), altfel grupul fix cAskAvailabilityChatID.
+procedure TfrmGoodsForeignCodeDlg.bbAskAvailabilityClick(Sender: TObject);
+const
+  cAskAvailabilityChatID = '-4974887695';
+var
+  Values: TStringList;
+  Query: TIBCQuery;
+  Token: string;
+  ChatID: string;
+  ThreadID: Integer;
+  QtyValue: Double;
+  MsgText: string;
+  Res: TTelegramSendResult;
+begin
+  if IBCQueryForeign.IsEmpty then
+    Exit;
+
+  Values := TStringList.Create;
+  try
+    ReadApiConfig('TELEGRAM', Values);
+    Token := Values.Values['BOT_TOKEN'];
+  finally
+    Values.Free;
+  end;
+  if Token = '' then
+  begin
+    MessageDlg('Completati BOT_TOKEN in Setari > Configurari API (Cod API = TELEGRAM).',
+      mtWarning, [mbOK], 0);
+    Exit;
+  end;
+
+  ChatID := cAskAvailabilityChatID;
+  ThreadID := 0;
+  Query := TIBCQuery.Create(Self);
+  try
+    dmDB.OpenQuery(Query, 'select CHAT_ID, THREAD_ID from TELEGRAM_CHANNELS' +
+      ' where CHANNEL_CODE = ''SUPPLIER_STOCK'' and FLG_ACTIVE = 1', []);
+    if (not Query.Eof) and (Trim(Query.FieldByName('CHAT_ID').AsString) <> '') then
+    begin
+      ChatID := Trim(Query.FieldByName('CHAT_ID').AsString);
+      ThreadID := Query.FieldByName('THREAD_ID').AsInteger;
+    end;
+  finally
+    Query.Free;
+  end;
+
+  // Din nomenclator Qty vine ca deficit (negativ); fara cantitate intrebam de 1 buc.
+  QtyValue := Abs(FQty);
+  if QtyValue = 0 then
+    QtyValue := 1;
+
+  MsgText := Format('%s <b>"%s"</b> %s <b>%s</b>?', [
+    TelegramEscapeHtml(Trim(IBCQueryForeign.FieldByName('CUSTOMER_NAME').AsString)),
+    TelegramEscapeHtml(Trim(IBCQueryForeign.FieldByName('GOODS_CODE').AsString)),
+    TelegramEscapeHtml(Trim(IBCQueryForeign.FieldByName('GOODS_TITLE').AsString)),
+    FormatFloat('0.###', dmDB.ibcqueryJurnal.FieldByName('QTY').AsFloat)]);
+
+  Screen.Cursor := crHourGlass;
+  try
+    Res := TelegramSendMessage(Token, ChatID, ThreadID, MsgText, 'HTML', False);
+  finally
+    Screen.Cursor := crDefault;
+  end;
+
+  if Res.Ok then
+    MessageDlg('Intrebarea a fost trimisa in Telegram:' + sLineBreak + sLineBreak +
+      TelegramStripHtml(MsgText), mtInformation, [mbOK], 0)
+  else
+    MessageDlg(Format('Telegram a refuzat mesajul (HTTP %d): %s' + sLineBreak + sLineBreak +
+      'Verificati ca botul este membru in grupul %s.',
+      [Res.HttpCode, Res.Description, ChatID]), mtError, [mbOK], 0);
+end;
+
 procedure TfrmGoodsForeignCodeDlg.bbSupllierApiClick(Sender: TObject);
 begin
     // accent
@@ -636,6 +721,22 @@ begin
     // AIEA SRL - snaige.md
   if (ibcqueryforeign.fieldbyname('customerid').AsInteger = 74995) then
     GetSnaigeProductStock(IBCQueryForeign.FieldByName('GOODS_CODE').AsString)
+  else
+    // MOBILE STOCK SRL - alo.md
+  if (ibcqueryforeign.fieldbyname('customerid').AsInteger = 246795) then
+    GetAloProductStock(IBCQueryForeign.FieldByName('GOODS_CODE').AsString)
+  else
+    // PERNAMEA S.R.L. - pernamea.md
+  if (ibcqueryforeign.fieldbyname('customerid').AsInteger = cPernaMeaSupplierID) then
+    GetPernaMeaProductStock(IBCQueryForeign.FieldByName('GOODS_CODE').AsString)
+  else
+    // HI-Tech SRL - h-t.md
+  if (ibcqueryforeign.fieldbyname('customerid').AsInteger = 262735) then
+    GetHiTechProductStock(IBCQueryForeign.FieldByName('GOODS_CODE').AsString)
+  else
+    // Tris SRL - trisauto.md (www.tris.md)
+  if (ibcqueryforeign.fieldbyname('customerid').AsInteger = 8606) then
+    GetTrisautoProductStock(IBCQueryForeign.FieldByName('GOODS_CODE').AsString)
   else
     MessageDlg('nu este implimentata procedura!', TMsgDlgType.mtInformation, [TMsgDlgBtn.mbOK],0);
 end;
@@ -2137,6 +2238,818 @@ begin
   end;
 end;
 
+// -- pernamea.md (PERNAMEA S.R.L. 307501) -----------------------------------
+// Cautarea dupa cod si parsarea paginii sint in PernaMeaContentUnit (aceleasi si pentru
+// incarcarea continutului din frame78): search?s=<cod> sare direct pe produs (302) doar la
+// codul exact; codul se verifica in <div class="cod-item">. Statutul vine din JSON-LD
+// (offers.availability + price), disponibilitatea pe magazine (Centru, Ciocana, Botanica)
+// din lista "Disponibilitate". Cantitatile nu se publica.
+procedure TfrmGoodsForeignCodeDlg.GetPernaMeaProductStock(AGoodsCode: string);
+var
+  Stock: TPernaMeaStock;
+  Candidates, I, InStores: Integer;
+  StatusText, StatusClass: string;
+  Locations: TStringList;
+  Dialog: TfrmATehnoStockResultDlg;
+begin
+  AGoodsCode := Trim(AGoodsCode);
+  if AGoodsCode = '' then
+    Exit;
+
+  Screen.Cursor := crHourGlass;
+  Locations := TStringList.Create;
+  try
+    try
+      if not TPernaMeaContentLoader.GetStock(AGoodsCode, Stock, Candidates) then
+      begin
+        Screen.Cursor := crDefault;
+        if Candidates = 0 then
+          MessageDlg(Format('Codul "%s" nu a fost gasit pe pernamea.md ' +
+            '(produsul lipseste din catalogul site-ului).', [AGoodsCode]), mtWarning, [mbOK], 0)
+        else
+          MessageDlg(Format('Codul "%s" nu a fost gasit pe pernamea.md ' +
+            '(cautarea a intors %d produse, niciunul cu acest articol).',
+            [AGoodsCode, Candidates]), mtWarning, [mbOK], 0);
+        Exit;
+      end;
+
+      InStores := 0;
+      for I := 0 to High(Stock.Stores) do
+        if Stock.Stores[I].Available then
+          Inc(InStores);
+
+      if SameText(Stock.Availability, 'InStock') or SameText(Stock.Availability, 'LimitedAvailability') then
+      begin
+        StatusText := 'In stoc';
+        StatusClass := 'product-available';
+      end
+      else if SameText(Stock.Availability, 'OutOfStock') or SameText(Stock.Availability, 'SoldOut') or
+        SameText(Stock.Availability, 'Discontinued') then
+      begin
+        StatusText := 'Indisponibil';
+        StatusClass := 'product-not-available';
+      end
+      else if Stock.Availability <> '' then
+      begin
+        // PreOrder / BackOrder / OnlineOnly...
+        StatusText := 'La comanda (' + Stock.Availability + ')';
+        StatusClass := 'product-only-order';
+      end
+      else
+      begin
+        // fara JSON-LD - dupa magazine
+        if InStores > 0 then
+        begin
+          StatusText := 'In stoc';
+          StatusClass := 'product-available';
+        end
+        else
+        begin
+          StatusText := 'Statut necunoscut';
+          StatusClass := 'product-only-order';
+        end;
+      end;
+      if Stock.Price <> '' then
+        StatusText := StatusText + ' - ' + Stock.Price + ' lei';
+
+      for I := 0 to High(Stock.Stores) do
+        Locations.Add(Stock.Stores[I].Name + ': ' + Stock.Stores[I].Status);
+      if Stock.SiteStatus <> '' then
+        Locations.Add('Pe site: ' + Stock.SiteStatus);
+      if (Length(Stock.Stores) > 0) and (InStores = 0) and (StatusClass = 'product-available') then
+        Locations.Add('Atentie: site-ul spune "in stoc", dar niciun magazin nu are produsul (doar depozit / online).');
+      Locations.Add('Cantitatea exacta nu este publicata pe pernamea.md.');
+
+      Dialog := TfrmATehnoStockResultDlg.Create(Self);
+      try
+        Dialog.ShowStockInfo(AGoodsCode, Stock.Title, StatusText, StatusClass, Stock.Url, Locations);
+        Dialog.Caption := 'Stoc pernamea.md (PERNAMEA)';
+        Dialog.lbLocationsCaption.Caption := 'Disponibilitate in magazine:';
+        Dialog.ShowModal;
+      finally
+        Dialog.Free;
+      end;
+    except
+      on E: Exception do
+        MessageDlg('pernamea.md: ' + E.Message, mtError, [mbOK], 0);
+    end;
+  finally
+    Locations.Free;
+    Screen.Cursor := crDefault;
+  end;
+end;
+// -- alo.md (MOBILE STOCK SRL 246795, API JSON al platformei ecom.md) --------
+// Acelasi flux ca la snaige.md: cautarea dupa cod -> candidatii verificati dupa
+// cod -> fisa produsului -> statut + pret. Site-ul (Nuxt) isi ia datele din
+// API-ul public al platformei ecom.md (https://admin.ecom.md), nu din HTML:
+//   GET general/v2/search/search/?query=<cod> -> products[] {code, url, stock,
+//       available, price, old_price, title}. Cautarea e aproximativa
+//       ("MI0000311" intoarce 8 produse), deci se accepta doar code = GOODS_CODE;
+//   GET general/v2/product/<url>/             -> product {stock, available,
+//       to_order, to_order_days, preorder, old_price, brand, availability}.
+// Antetul "token" alege magazinul: fara el (sau cu altul) raspund produsele
+// altui magazin ecom.md. Tokenul e public, in configurarea Nuxt a paginii
+// (TOKEN:"..."); il recitim o data pe sesiune de pe alo.md, cu valoarea din
+// 17 oct 2026 ca rezerva. Spre deosebire de snaige.md, alo.md publica si
+// cantitatea (stock). Pagina publica: https://alo.md/ro/product/<url>.
+var
+  GAloShopToken: string = '';
+
+procedure TfrmGoodsForeignCodeDlg.GetAloProductStock(AGoodsCode: string);
+const
+  C_AloApi = 'https://admin.ecom.md/';
+  C_AloSite = 'https://alo.md/';
+  C_AloDefaultToken = 'xqp!pgw5bfc6KNF@chu';
+var
+  HttpClient: THTTPClient;
+  Response: IHTTPResponse;
+  Json: TJSONValue;
+  Item: TJSONValue;
+  Product: TJSONObject;
+  Availability: TJSONObject;
+  ProductSlug: string;
+  ProductURL: string;
+  ProductTitle: string;
+  Brand: string;
+  ToOrderDays: string;
+  Candidates: Integer;
+  Stock: Double;
+  Price: Double;
+  OldPrice: Double;
+  Available: Boolean;
+  ToOrder: Boolean;
+  StatusText: string;
+  StatusClass: string;
+  Locations: TStringList;
+  Dialog: TfrmATehnoStockResultDlg;
+  M: TMatch;
+
+  function JValue(AObj: TJSONObject; const AName: string): TJSONValue;
+  begin
+    Result := nil;
+    if Assigned(AObj) then
+    begin
+      Result := AObj.GetValue(AName);
+      if Result is TJSONNull then
+        Result := nil;
+    end;
+  end;
+
+  function JStr(AObj: TJSONObject; const AName: string): string;
+  var
+    V: TJSONValue;
+  begin
+    V := JValue(AObj, AName);
+    if (V = nil) or (V is TJSONObject) or (V is TJSONArray) then
+      Result := ''
+    else
+      Result := Trim(V.Value);
+  end;
+
+  // pretul vine uneori ca text ("5999.00")
+  function JNum(AObj: TJSONObject; const AName: string): Double;
+  var
+    V: TJSONValue;
+  begin
+    Result := 0;
+    V := JValue(AObj, AName);
+    if V is TJSONNumber then
+      Result := TJSONNumber(V).AsDouble
+    else if Assigned(V) and not (V is TJSONObject) and not (V is TJSONArray) then
+      Result := StrToFloatDef(StringReplace(Trim(V.Value), ',', '.', [rfReplaceAll]), 0,
+        TFormatSettings.Invariant);
+  end;
+
+  function JBool(AObj: TJSONObject; const AName: string): Boolean;
+  var
+    V: TJSONValue;
+  begin
+    V := JValue(AObj, AName);
+    Result := (V is TJSONBool) and TJSONBool(V).AsBoolean;
+  end;
+
+  function JObj(AObj: TJSONObject; const AName: string): TJSONObject;
+  var
+    V: TJSONValue;
+  begin
+    V := JValue(AObj, AName);
+    if V is TJSONObject then
+      Result := TJSONObject(V)
+    else
+      Result := nil;
+  end;
+
+  function GetJson(const AURL: string): TJSONObject;
+  var
+    V: TJSONValue;
+  begin
+    Response := HttpClient.Get(AURL, nil, [TNetHeader.Create('token', GAloShopToken),
+      TNetHeader.Create('Accept-Language', 'ro'), TNetHeader.Create('Accept', 'application/json')]);
+    if Response.StatusCode <> 200 then
+      raise Exception.CreateFmt('cererea a esuat (HTTP %d).'#13#10'%s', [Response.StatusCode, AURL]);
+    V := TJSONObject.ParseJSONValue(Response.ContentAsString(TEncoding.UTF8));
+    if not (V is TJSONObject) then
+    begin
+      V.Free;
+      raise Exception.Create('raspuns invalid de la API-ul ecom.md.'#13#10 + AURL);
+    end;
+    Result := TJSONObject(V);
+  end;
+
+  function Lei(AValue: Double): string;
+  begin
+    Result := FormatFloat('0.##', AValue) + ' lei';
+  end;
+
+begin
+  AGoodsCode := Trim(AGoodsCode);
+  if AGoodsCode = '' then
+    Exit;
+
+  Screen.Cursor := crHourGlass;
+  Locations := TStringList.Create;
+  try
+    try
+      ProductSlug := '';
+      Candidates := 0;
+      HttpClient := THTTPClient.Create;
+      try
+        HttpClient.ConnectionTimeout := 15000;
+        HttpClient.ResponseTimeout := 30000;
+        HttpClient.CustomHeaders['User-Agent'] := 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)';
+
+        // tokenul magazinului din configurarea Nuxt a site-ului (o data pe sesiune)
+        if GAloShopToken = '' then
+        begin
+          try
+            Response := HttpClient.Get(C_AloSite);
+            if Response.StatusCode = 200 then
+            begin
+              M := TRegEx.Match(Response.ContentAsString(TEncoding.UTF8), 'TOKEN:"([^"\\]+)"');
+              if M.Success then
+                GAloShopToken := M.Groups[1].Value;
+            end;
+          except
+            // pagina nu s-a deschis - ramine valoarea de rezerva
+          end;
+          if GAloShopToken = '' then
+            GAloShopToken := C_AloDefaultToken;
+        end;
+
+        // cautarea e aproximativa - se accepta doar produsul cu exact acest cod
+        Json := GetJson(C_AloApi + 'general/v2/search/search/?query=' + TNetEncoding.URL.Encode(AGoodsCode));
+        try
+          Item := JValue(TJSONObject(Json), 'products');
+          if Item is TJSONArray then
+          begin
+            Candidates := TJSONArray(Item).Count;
+            for Item in TJSONArray(Item) do
+              if (Item is TJSONObject) and SameText(JStr(TJSONObject(Item), 'code'), AGoodsCode) then
+              begin
+                ProductSlug := JStr(TJSONObject(Item), 'url');
+                Break;
+              end;
+          end;
+        finally
+          Json.Free;
+        end;
+
+        if ProductSlug = '' then
+        begin
+          Screen.Cursor := crDefault;
+          if Candidates = 0 then
+            MessageDlg(Format('Codul "%s" nu a fost gasit pe alo.md ' +
+              '(produsul lipseste din catalogul site-ului).', [AGoodsCode]), mtWarning, [mbOK], 0)
+          else
+            MessageDlg(Format('Codul "%s" nu a fost gasit pe alo.md ' +
+              '(cautarea a intors %d produse, niciunul cu acest cod).',
+              [AGoodsCode, Candidates]), mtWarning, [mbOK], 0);
+          Exit;
+        end;
+
+        // fisa produsului: stocul, statutul "la comanda", pretul vechi
+        Json := GetJson(C_AloApi + 'general/v2/product/' + TNetEncoding.URL.Encode(ProductSlug) + '/');
+        try
+          Product := JObj(TJSONObject(Json), 'product');
+          if Product = nil then
+            raise Exception.Create('fisa produsului nu a venit de la API-ul ecom.md.');
+          ProductTitle := JStr(Product, 'title');
+          Stock := JNum(Product, 'stock');
+          Price := JNum(Product, 'price');
+          OldPrice := JNum(Product, 'old_price');
+          Available := JBool(Product, 'available');
+          ToOrder := JBool(Product, 'to_order') or JBool(Product, 'preorder');
+          ToOrderDays := JStr(Product, 'to_order_days');
+          Brand := JStr(JObj(Product, 'brand'), 'name');
+          Availability := JObj(Product, 'availability');
+
+          if Available and (Stock > 0) then
+          begin
+            StatusText := Format('In stoc: %s buc.', [FormatFloat('0.##', Stock)]);
+            StatusClass := 'product-available';
+          end
+          else if ToOrder or JBool(Availability, 'to_order') then
+          begin
+            StatusText := 'La comanda';
+            if ToOrderDays <> '' then
+              StatusText := StatusText + Format(' (%s zile)', [ToOrderDays]);
+            StatusClass := 'product-only-order';
+          end
+          else
+          begin
+            StatusText := 'Indisponibil';
+            StatusClass := 'product-not-available';
+          end;
+
+          // Pretul se afiseaza langa statutul de stoc
+          if Price > 0 then
+            StatusText := StatusText + ' - ' + Lei(Price);
+
+          Locations.Add(Format('Cantitate pe site: %s buc.', [FormatFloat('0.##', Stock)]));
+          if OldPrice > Price then
+            Locations.Add(Format('Pret redus de la %s la %s', [Lei(OldPrice), Lei(Price)]));
+          if JBool(Availability, 'in_showroom') then
+            Locations.Add('Disponibil in showroom.');
+          if JBool(Availability, 'in_outlet') and (JNum(Availability, 'outlet_qty') > 0) then
+            Locations.Add(Format('Outlet: %s buc.', [FormatFloat('0.##', JNum(Availability, 'outlet_qty'))]));
+          if StatusClass = 'product-available' then
+            Locations.Add('Produsul poate fi comandat online.');
+          if Brand <> '' then
+            Locations.Add('Brand: ' + Brand);
+          if not SameText(JStr(Product, 'code'), AGoodsCode) then
+            Locations.Add(Format('Atentie: fisa produsului are codul %s.', [JStr(Product, 'code')]));
+        finally
+          Json.Free;
+        end;
+      finally
+        HttpClient.Free;
+      end;
+
+      ProductURL := C_AloSite + 'ro/product/' + ProductSlug;
+      Screen.Cursor := crDefault;
+      Dialog := TfrmATehnoStockResultDlg.Create(Self);
+      try
+        Dialog.ShowStockInfo(AGoodsCode, ProductTitle, StatusText, StatusClass,
+          ProductURL, Locations);
+        Dialog.Caption := 'Stoc alo.md (Mobile Stock)';
+        Dialog.lbLocationsCaption.Caption := 'Detalii stoc:';
+        Dialog.ShowModal;
+      finally
+        Dialog.Free;
+      end;
+    except
+      on E: Exception do
+      begin
+        Screen.Cursor := crDefault;
+        MessageDlg('alo.md: ' + E.Message, mtError, [mbOK], 0);
+      end;
+    end;
+  finally
+    Locations.Free;
+    Screen.Cursor := crDefault;
+  end;
+end;
+
+// -- h-t.md (HI-Tech SRL 262735, scraping, fara API) -------------------------
+// Magazin CS-Cart. GOODS_CODE = "COD" de pe site (ex. "T-000077698", cu T
+// chirilic). Cautarea dupa codul intreg nu gaseste nimic, dar dupa partea
+// numerica (q=000077698&pcode_from_q=Y) da; la un singur rezultat site-ul
+// redirectioneaza direct pe pagina produsului. Produsul il identificam dupa
+// COD (id="sku_<product_id>"), apoi citim tabelul "Disponibilitate" pe magazine
+// (ty-warehouses-store__group / __name / __availability). Ne intereseaza
+// randul "Chisinau" - "Depozit": "In stoc", "La comanda (1-3 zile)" sau
+// "Nu este disponibil". Cantitatea nu se publica (verificat 15 oct 2026).
+procedure TfrmGoodsForeignCodeDlg.GetHiTechProductStock(AGoodsCode: string);
+const
+  C_HiTechHost = 'https://h-t.md/md/';
+var
+  HttpClient: THTTPClient;
+  Response: IHTTPResponse;
+  SearchURL: string;
+  ResponseContent: string;
+  CodeNumber: string;
+  Matches: TMatchCollection;
+  ProductID: string;
+  ProductURL: string;
+  ProductTitle: string;
+  SiteStatus: string;
+  PriceText: string;
+  OldPriceText: string;
+  StoresHtml: string;
+  Groups: TArray<string>;
+  GroupName: string;
+  StoreName: string;
+  StoreAvailability: string;
+  DepotAvailability: string;
+  StatusText: string;
+  StatusClass: string;
+  i, j, p: Integer;
+  OtherStores: TStringList;
+  Locations: TStringList;
+  Dialog: TfrmATehnoStockResultDlg;
+
+  // Text fara taguri, cu entitatile decodate (si &nbsp; ca spatiu).
+  function CleanHtml(const AText: string): string;
+  begin
+    Result := TRegEx.Replace(AText, '<[^>]*>', ' ');
+    Result := TNetEncoding.HTML.Decode(Result).Replace(#160, ' ');
+    Result := Trim(TRegEx.Replace(Result, '\s+', ' '));
+  end;
+
+  // Primul grup din APattern, curatat.
+  function HtmlValue(const AText, APattern: string): string;
+  var
+    M: TMatch;
+  begin
+    Result := '';
+    M := TRegEx.Match(AText, APattern, [roIgnoreCase, roSingleLine]);
+    if M.Success then
+      Result := CleanHtml(M.Groups[1].Value);
+  end;
+
+  // Partea numerica a codului: "T-000077698" -> "000077698".
+  function CodeDigits(const ACode: string): string;
+  begin
+    Result := TRegEx.Replace(Trim(ACode), '^\D+-', '');
+  end;
+
+begin
+  AGoodsCode := Trim(AGoodsCode);
+  if AGoodsCode = '' then
+    Exit;
+
+  Screen.Cursor := crHourGlass;
+  OtherStores := TStringList.Create;
+  Locations := TStringList.Create;
+  try
+    try
+      CodeNumber := CodeDigits(AGoodsCode);
+      SearchURL := C_HiTechHost + '?dispatch=products.search&q=' +
+        TNetEncoding.URL.Encode(CodeNumber) + '&pcode_from_q=Y&search_performed=Y';
+
+      HttpClient := THTTPClient.Create;
+      try
+        HttpClient.ConnectionTimeout := 15000;
+        HttpClient.ResponseTimeout := 30000;
+        HttpClient.CustomHeaders['User-Agent'] :=
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64)';
+        HttpClient.CustomHeaders['Accept'] := 'text/html,application/xhtml+xml,*/*';
+
+        Response := HttpClient.Get(SearchURL);
+        if Response.StatusCode <> 200 then
+        begin
+          MessageDlg(Format('h-t.md: cautarea a esuat (HTTP %d).',
+            [Response.StatusCode]), mtError, [mbOK], 0);
+          Exit;
+        end;
+        ResponseContent := Response.ContentAsString(TEncoding.UTF8);
+
+        // Produsul cu acest COD - pe pagina de produs sau in lista de rezultate
+        // (pagina mai contine si produse recomandate, deci comparam codul).
+        ProductID := '';
+        Matches := TRegEx.Matches(ResponseContent,
+          'id="sku_(\d+)">\s*COD:\s*</label>\s*<span[^>]*>\s*([^<]*?)\s*<', [roIgnoreCase]);
+        for i := 0 to Matches.Count - 1 do
+          if SameText(CodeDigits(Matches[i].Groups[2].Value), CodeNumber) then
+          begin
+            ProductID := Matches[i].Groups[1].Value;
+            Break;
+          end;
+
+        if ProductID = '' then
+        begin
+          MessageDlg(Format('Codul "%s" nu a fost gasit pe h-t.md ' +
+            '(produsul lipseste din catalogul site-ului).', [AGoodsCode]), mtWarning, [mbOK], 0);
+          Exit;
+        end;
+
+        // Cautarea a intors o lista - deschidem pagina produsului.
+        if not ResponseContent.Contains('id="warehouses_stock_availability_' + ProductID + '"') then
+        begin
+          Response := HttpClient.Get(C_HiTechHost + '?dispatch=products.view&product_id=' + ProductID);
+          if Response.StatusCode <> 200 then
+          begin
+            MessageDlg(Format('h-t.md: nu s-a putut deschide pagina produsului (HTTP %d).',
+              [Response.StatusCode]), mtError, [mbOK], 0);
+            Exit;
+          end;
+          ResponseContent := Response.ContentAsString(TEncoding.UTF8);
+        end;
+      finally
+        HttpClient.Free;
+      end;
+
+      ProductURL := HtmlValue(ResponseContent, '<link\s+rel="canonical"\s+href="([^"]+)"');
+      if ProductURL = '' then
+        ProductURL := C_HiTechHost + '?dispatch=products.view&product_id=' + ProductID;
+      ProductTitle := HtmlValue(ResponseContent, '<h1[^>]*>(.*?)</h1>');
+      // Statutul general de langa pret: "in magazine" / "pre-comanda"
+      SiteStatus := HtmlValue(ResponseContent, 'id="in_stock_info_' + ProductID +
+        '"[^>]*>.*?</span>\s*<span class="stock-type">(.*?)</span>');
+      PriceText := HtmlValue(ResponseContent, 'id="sec_discounted_price_' + ProductID + '"[^>]*>(.*?)</span>');
+      OldPriceText := HtmlValue(ResponseContent, 'id="sec_list_price_' + ProductID + '"[^>]*>(.*?)</span>');
+      if PriceText <> '' then
+        PriceText := PriceText + ' MDL';
+      if OldPriceText <> '' then
+        OldPriceText := OldPriceText + ' MDL';
+
+      // Tabelul de magazine: grupe (localitate) cu magazinele lor.
+      DepotAvailability := '';
+      StoresHtml := '';
+      i := Pos('id="warehouses_list_items_', ResponseContent);
+      if i > 0 then
+      begin
+        p := Pos('_not_found"', ResponseContent, i);
+        if p = 0 then
+          p := Length(ResponseContent) + 1;
+        StoresHtml := Copy(ResponseContent, i, p - i);
+      end;
+      Groups := StoresHtml.Split(['class="ty-warehouses-store__group"'], TStringSplitOptions.None);
+      for i := 1 to High(Groups) do
+      begin
+        GroupName := HtmlValue(Groups[i], 'ty-warehouses-store__group-name"[^>]*>(.*?)</div>');
+        Matches := TRegEx.Matches(Groups[i],
+          'ty-warehouses-store__name"[^>]*>(.*?)</a>.*?ty-warehouses-store__availability"[^>]*>(.*?)</div>',
+          [roIgnoreCase, roSingleLine]);
+        for j := 0 to Matches.Count - 1 do
+        begin
+          StoreName := CleanHtml(Matches[j].Groups[1].Value);
+          StoreAvailability := CleanHtml(Matches[j].Groups[2].Value);
+          if SameText(StoreName, 'Depozit') and GroupName.ToLower.Contains('chisinau') then
+            DepotAvailability := StoreAvailability
+          else
+            OtherStores.Add(Format('%s - %s: %s', [GroupName, StoreName, StoreAvailability]));
+        end;
+      end;
+
+      if DepotAvailability = '' then
+      begin
+        StatusText := 'Depozit Chisinau: fara informatie';
+        if SiteStatus <> '' then
+          StatusText := StatusText + ' (pe site: ' + SiteStatus + ')';
+        StatusClass := '';
+      end
+      else
+      begin
+        StatusText := 'Depozit Chisinau: ' + DepotAvailability;
+        if DepotAvailability.ToLower.Contains('comand') then
+          StatusClass := 'product-only-order'
+        else if DepotAvailability.ToLower.Contains('stoc') then
+          StatusClass := 'product-available'
+        else
+          StatusClass := 'product-not-available';
+      end;
+
+      // Pretul se afiseaza langa statutul de stoc
+      if PriceText <> '' then
+        StatusText := StatusText + ' - ' + PriceText;
+      if (OldPriceText <> '') and (OldPriceText <> PriceText) then
+        Locations.Add(Format('Pret redus de la %s la %s', [OldPriceText, PriceText]));
+      if SiteStatus <> '' then
+        Locations.Add('Statut general pe site: ' + SiteStatus);
+      if OtherStores.Count > 0 then
+      begin
+        Locations.Add('Alte magazine:');
+        for i := 0 to OtherStores.Count - 1 do
+          Locations.Add('  ' + OtherStores[i]);
+      end;
+      Locations.Add('Cantitatea exacta nu este publicata pe h-t.md.');
+
+      Dialog := TfrmATehnoStockResultDlg.Create(Self);
+      try
+        Dialog.ShowStockInfo(AGoodsCode, ProductTitle, StatusText, StatusClass,
+          ProductURL, Locations);
+        Dialog.Caption := 'Stoc h-t.md (HI-Tech)';
+        Dialog.lbLocationsCaption.Caption := 'Detalii stoc:';
+        Dialog.ShowModal;
+      finally
+        Dialog.Free;
+      end;
+    except
+      on E: Exception do
+        MessageDlg('h-t.md: ' + E.Message, mtError, [mbOK], 0);
+    end;
+  finally
+    OtherStores.Free;
+    Locations.Free;
+    Screen.Cursor := crDefault;
+  end;
+end;
+
+// -- trisauto.md (Tris SRL 8606, scraping, fara API) --------------------------
+// www.tris.md redirectioneaza pe trisauto.md (anvelope/jante). GOODS_CODE =
+// articolul de pe site (ex. 36830). Cautarea ro/podbor?search_type=searchbar&
+// searchword=<cod> da carduri li.item-wrapper; deschidem candidatii si
+// acceptam pagina al carei <ngcart-addtocart article="..."> este codul.
+// Acelasi tag are: exist (2 = "Disponibil", 1 = "Suna la depozit" - cantitate
+// insuficienta, 0 = "Nu este disponibil"), price / old-price (lei) si DOUA
+// atribute quantity: primul e cantitatea din formular (1), al doilea - stocul
+// (verificat 15 oct 2026).
+procedure TfrmGoodsForeignCodeDlg.GetTrisautoProductStock(AGoodsCode: string);
+const
+  C_TrisHost = 'https://trisauto.md/';
+  C_MaxCandidates = 5;
+var
+  HttpClient: THTTPClient;
+  Response: IHTTPResponse;
+  SearchURL: string;
+  ResponseContent: string;
+  ResultsHtml: string;
+  Matches: TMatchCollection;
+  Links: TStringList;
+  ProductURL: string;
+  ProductTag: string;
+  TagMatch: TMatch;
+  ProductTitle: string;
+  ExistValue: string;
+  Quantity: Integer;
+  PriceText: string;
+  OldPriceText: string;
+  StatusText: string;
+  StatusClass: string;
+  i, p: Integer;
+  Locations: TStringList;
+  Dialog: TfrmATehnoStockResultDlg;
+
+  // Primul grup din APattern, fara taguri HTML si cu entitatile decodate.
+  function HtmlValue(const AText, APattern: string): string;
+  var
+    M: TMatch;
+  begin
+    Result := '';
+    M := TRegEx.Match(AText, APattern, [roIgnoreCase, roSingleLine]);
+    if M.Success then
+    begin
+      Result := TRegEx.Replace(M.Groups[1].Value, '<[^>]*>', ' ');
+      Result := TRegEx.Replace(Result, '\s+', ' ');
+      Result := Trim(TNetEncoding.HTML.Decode(Result));
+    end;
+  end;
+
+  // Valoarea atributului AName din tag; ALast = ultima aparitie (quantity e dublat).
+  function TagAttr(const ATag, AName: string; ALast: Boolean = False): string;
+  var
+    M: TMatchCollection;
+  begin
+    Result := '';
+    M := TRegEx.Matches(ATag, '\s' + AName + '="([^"]*)"', [roIgnoreCase]);
+    if M.Count > 0 then
+      if ALast then
+        Result := M[M.Count - 1].Groups[1].Value
+      else
+        Result := M[0].Groups[1].Value;
+  end;
+
+begin
+  AGoodsCode := Trim(AGoodsCode);
+  if AGoodsCode = '' then
+    Exit;
+
+  Screen.Cursor := crHourGlass;
+  Links := TStringList.Create;
+  Locations := TStringList.Create;
+  try
+    try
+      SearchURL := C_TrisHost + 'ro/podbor?search_type=searchbar&searchword=' +
+        TNetEncoding.URL.Encode(AGoodsCode);
+
+      ProductURL := '';
+      ProductTag := '';
+      HttpClient := THTTPClient.Create;
+      try
+        HttpClient.ConnectionTimeout := 15000;
+        HttpClient.ResponseTimeout := 30000;
+        HttpClient.CustomHeaders['User-Agent'] :=
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64)';
+        HttpClient.CustomHeaders['Accept'] := 'text/html,application/xhtml+xml,*/*';
+
+        Response := HttpClient.Get(SearchURL);
+        if Response.StatusCode <> 200 then
+        begin
+          MessageDlg(Format('trisauto.md: cautarea a esuat (HTTP %d).',
+            [Response.StatusCode]), mtError, [mbOK], 0);
+          Exit;
+        end;
+        ResponseContent := Response.ContentAsString(TEncoding.UTF8);
+
+        // Doar blocul cu rezultatele cautarii (restul paginii are alte link-uri).
+        ResultsHtml := '';
+        i := Pos('id="search-results"', ResponseContent);
+        if i > 0 then
+        begin
+          p := Pos('pagination-block', ResponseContent, i);
+          if p = 0 then
+            p := Length(ResponseContent) + 1;
+          ResultsHtml := Copy(ResponseContent, i, p - i);
+        end;
+        Matches := TRegEx.Matches(ResultsHtml,
+          '<li\s+class="item-wrapper"[^>]*>\s*<a\s+href="([^"]+)"', [roIgnoreCase]);
+        for i := 0 to Matches.Count - 1 do
+          if Links.IndexOf(Matches[i].Groups[1].Value) < 0 then
+            Links.Add(Matches[i].Groups[1].Value);
+
+        // Cautarea e dupa text - verificam articolul fiecarui candidat.
+        for i := 0 to Links.Count - 1 do
+        begin
+          if i >= C_MaxCandidates then
+            Break;
+          Response := HttpClient.Get(Links[i]);
+          if Response.StatusCode <> 200 then
+            Continue;
+          ResponseContent := Response.ContentAsString(TEncoding.UTF8);
+          TagMatch := TRegEx.Match(ResponseContent, '<ngcart-addtocart\s[^>]*>', [roIgnoreCase]);
+          if TagMatch.Success then
+            ProductTag := TagMatch.Value
+          else
+            ProductTag := '';
+          if SameText(TagAttr(ProductTag, 'article'), AGoodsCode) then
+          begin
+            ProductURL := Links[i];
+            Break;
+          end;
+        end;
+      finally
+        HttpClient.Free;
+      end;
+
+      if ProductURL = '' then
+      begin
+        if Links.Count = 0 then
+          MessageDlg(Format('Codul "%s" nu a fost gasit pe trisauto.md ' +
+            '(produsul lipseste din catalogul site-ului).', [AGoodsCode]), mtWarning, [mbOK], 0)
+        else
+          MessageDlg(Format('Codul "%s" nu a fost gasit pe trisauto.md ' +
+            '(cautarea a intors %d produse, niciunul cu acest articol).',
+            [AGoodsCode, Links.Count]), mtWarning, [mbOK], 0);
+        Exit;
+      end;
+
+      ProductTitle := HtmlValue(ResponseContent, '<h1[^>]*>(.*?)</h1>');
+      ExistValue := TagAttr(ProductTag, 'exist');
+      Quantity := StrToIntDef(TagAttr(ProductTag, 'quantity', True), 0);
+      PriceText := TagAttr(ProductTag, 'price');
+      OldPriceText := TagAttr(ProductTag, 'old-price');
+      if PriceText <> '' then
+        PriceText := PriceText + ' lei';
+      if (OldPriceText = '') or (OldPriceText = '0') then
+        OldPriceText := ''
+      else
+        OldPriceText := OldPriceText + ' lei';
+
+      if ExistValue = '2' then
+      begin
+        StatusText := Format('Disponibil (%d buc.)', [Quantity]);
+        StatusClass := 'product-available';
+      end
+      else if ExistValue = '1' then
+      begin
+        StatusText := Format('Cantitate limitata - suna la depozit (%d buc.)', [Quantity]);
+        StatusClass := 'product-only-order';
+      end
+      else if ExistValue = '0' then
+      begin
+        StatusText := 'Nu este disponibil';
+        StatusClass := 'product-not-available';
+      end
+      else
+      begin
+        StatusText := 'Statut necunoscut';
+        StatusClass := '';
+      end;
+
+      // Pretul se afiseaza langa statutul de stoc
+      if PriceText <> '' then
+        StatusText := StatusText + ' - ' + PriceText;
+      Locations.Add(Format('Stoc pe site: %d buc.', [Quantity]));
+      if (OldPriceText <> '') and (OldPriceText <> PriceText) then
+        Locations.Add(Format('Pret redus de la %s la %s', [OldPriceText, PriceText]));
+      if TagAttr(ProductTag, 'data') <> '' then
+        Locations.Add('Dimensiune: ' + TagAttr(ProductTag, 'data'));
+      if ExistValue = '1' then
+        Locations.Add('Site-ul cere confirmarea cantitatii la depozit: ' +
+          HtmlValue(ResponseContent, 'class="product-availability-phone"[^>]*>(.*?)</h2>'));
+
+      Dialog := TfrmATehnoStockResultDlg.Create(Self);
+      try
+        Dialog.ShowStockInfo(AGoodsCode, ProductTitle, StatusText, StatusClass,
+          ProductURL, Locations);
+        Dialog.Caption := 'Stoc trisauto.md (Tris)';
+        Dialog.lbLocationsCaption.Caption := 'Detalii stoc:';
+        Dialog.ShowModal;
+      finally
+        Dialog.Free;
+      end;
+    except
+      on E: Exception do
+        MessageDlg('trisauto.md: ' + E.Message, mtError, [mbOK], 0);
+    end;
+  finally
+    Links.Free;
+    Locations.Free;
+    Screen.Cursor := crDefault;
+  end;
+end;
+
 // -- muncitorul.md (Olis Grup SRL 251465, API JSON) --------------------------
 // GET https://price.muncitorul.md/api/product.php/?sku=<cod> intoarce produsul
 // din dump-ul 1C: code, titluRO/RU, pret_vinz, pret_online, stoc (cantitate),
@@ -2316,45 +3229,118 @@ begin
 end;
 
 procedure TfrmGoodsForeignCodeDlg.GetScopProductStock(GoodsCode: string);
+// API-ul de parteneri SCOP v2 (Triomac 209280). GOODS_CODE = sku-ul SCOP; API-ul nu cauta
+// dupa sku, asa ca FindBySku parcurge catalogul compact (11 pagini, cateva secunde).
+// Peste prag (azi 10) stocul vine ca "10 si mai mult" (stock_exact = false) - afisam "10+".
 var
   APIClient: TSCOPAPIClient;
-  ProductInfo: TScopProductInfo;
-  BaseURL: string;
-  User: string;
-  Password: string;
-begin
-  // Credentialele stau in TS_API_CONFIG (API_CODE = 'SCOP'), nu in cod.
-  try
-    LoadApiConfig(C_ScopApiCode, C_ScopApiDefaultURL, BaseURL, User, Password);
-  except
-    on E: Exception do
-    begin
-      MessageDlg('SCOP API: ' + E.Message, mtError, [mbOK], 0);
-      Exit;
-    end;
+  Products: TArray<TScopProduct>;
+  P: TScopProduct;
+  V: TScopVariation;
+  Locations: TStringList;
+  StatusText, StatusClass, PriceText: string;
+  Dialog: TfrmATehnoStockResultDlg;
+  I: Integer;
+
+  function Opt(ACondition: Boolean; const AText: string): string;
+  begin
+    if ACondition then
+      Result := AText
+    else
+      Result := '';
   end;
 
+begin
+  GoodsCode := Trim(GoodsCode);
+  if GoodsCode = '' then
+    Exit;
+
   Screen.Cursor := crHourGlass;
+  Locations := TStringList.Create;
   try
-    APIClient := TSCOPAPIClient.Create(User, Password);
     try
-      APIClient.BaseURL := BaseURL;
-      // Login automat la prima cerere
-      if APIClient.GetProductInfoBySKU(GoodsCode, ProductInfo) then
-        MessageDlg(Format('Produs: %s'#13#10'Pret: %.2f'#13#10'Stoc: %d',
-          [ProductInfo.Name, ProductInfo.Price, ProductInfo.StockQuantity]),
-          mtInformation, [mbOK], 0)
-      else
-        MessageDlg(Format('Codul "%s" nu a fost gasit in API-ul SCOP.', [GoodsCode]),
+      // credentialele stau in TS_API_CONFIG (API_CODE = 'SCOP'), nu in cod
+      APIClient := TSCOPAPIClient.CreateFromConfig(dmDB.IBCConnection);
+      try
+        Products := APIClient.FindBySku(GoodsCode);
+      finally
+        APIClient.Free;
+      end;
+      Screen.Cursor := crDefault;
+
+      if Length(Products) = 0 then
+      begin
+        MessageDlg(Format('Codul "%s" nu a fost gasit in catalogul SCOP (Triomac).', [GoodsCode]),
           mtWarning, [mbOK], 0);
-    finally
-      APIClient.Free;
+        Exit;
+      end;
+
+      P := Products[0];
+      if P.TotalStock > 0 then
+      begin
+        StatusText := Format('In stoc: %s buc.', [P.StockText]);
+        StatusClass := 'product-available';
+      end
+      else
+      begin
+        StatusText := 'Lipsa in stoc';
+        StatusClass := 'product-not-available';
+      end;
+      if P.Price > 0 then
+      begin
+        PriceText := Format('%s %s', [FormatFloat('0.00', P.Price), P.Currency]);
+        if P.PriceMDL > 0 then
+          PriceText := PriceText + Format(' (~%s lei)', [FormatFloat('0.00', P.PriceMDL)]);
+        StatusText := StatusText + ' - ' + PriceText;
+      end;
+      if P.CallForPricing or not P.PriceAvailable then
+        StatusText := StatusText + ' - pret la cerere';
+
+      for I := 0 to High(Products) do
+      begin
+        P := Products[I];
+        if Length(Products) > 1 then
+          Locations.Add(Format('[%d] %s', [I + 1, P.NameRo]));
+        Locations.Add(Format('Stoc: %s', [P.StockText]) +
+          Opt((P.TotalStock > 0) and not P.TotalStockExact, ' (pragul SCOP - poate fi mai mult)'));
+        if P.Price > 0 then
+          Locations.Add(Format('Pret contract: %s %s', [FormatFloat('0.00', P.Price), P.Currency]) +
+            Opt(P.PriceMDL > 0, Format(' = %s lei', [FormatFloat('0.00', P.PriceMDL)])));
+        if P.Rrp > 0 then
+          Locations.Add(Format('Pret recomandat (RRP): %s lei', [FormatFloat('0.00', P.Rrp)]));
+        for V in P.Variations do
+          Locations.Add(Format('  culoare %s (cod %s): %d%s', [V.Colour, V.Code, V.Stock,
+            Opt((V.Stock > 0) and not V.StockExact, '+')]));
+        Locations.Add(Format('Cod SCOP: %s; articul: %s', [P.Code, P.Articul]) +
+          Opt(P.Brand <> '', '; brand: ' + P.Brand));
+        if not SameText(P.Sku, GoodsCode) then
+          Locations.Add(Format('Atentie: gasit dupa articul / cod SCOP, sku = %s.', [P.Sku]));
+        if P.UpdatedAt <> '' then
+          Locations.Add('Actualizat la SCOP: ' + P.UpdatedAt);
+      end;
+      if Length(Products) > 1 then
+        Locations.Insert(0, Format('Atentie: %d produse SCOP au acest sku.', [Length(Products)]));
+
+      Dialog := TfrmATehnoStockResultDlg.Create(Self);
+      try
+        Dialog.ShowStockInfo(GoodsCode, Products[0].NameRo, StatusText, StatusClass, '', Locations);
+        Dialog.Caption := 'Stoc SCOP (Triomac)';
+        Dialog.lbLocationsCaption.Caption := 'Detalii stoc:';
+        Dialog.ShowModal;
+      finally
+        Dialog.Free;
+      end;
+    except
+      on E: Exception do
+      begin
+        Screen.Cursor := crDefault;
+        MessageDlg('SCOP API: ' + E.Message, mtError, [mbOK], 0);
+      end;
     end;
-  except
-    on E: Exception do
-      MessageDlg('SCOP API: ' + E.Message, mtError, [mbOK], 0);
+  finally
+    Locations.Free;
+    Screen.Cursor := crDefault;
   end;
-  Screen.Cursor := crDefault;
 end;
 
 // -- Ultra.md eShop REST API (https://eshop.ultra.md/api) --------------------

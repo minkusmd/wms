@@ -23,6 +23,12 @@ unit PriceListContentTransferUnit;
     - blob-urile se copiaza pe server (INSERT ... SELECT / MERGE), nu trec prin client;
     - commit la fiecare cCommitEvery produse; oprirea pastreaza ce s-a copiat pina atunci.
 
+  Exceptie - AReplaceImages (MOBILE STOCK / alo.md, 17 oct 2026): imaginile furnizorului
+  inlocuiesc imaginile existente ale produsului (delete + insert), daca furnizorul are imagini
+  si setul difera de cel al produsului (numar sau IMAGE_HASH = hash(IMAGE)); seturile identice
+  nu se rescriu, deci rularea repetata nu schimba nimic. Un produs legat de mai multe coduri
+  primeste imaginile primului cod care are imagini. Descrierile raman fara suprascriere.
+
   CREATED_BY vine din contextul sesiunii (USER_SESSION.UserID), setat de WMS la logare.
 }
 
@@ -37,6 +43,8 @@ type
     GoodsImages: Integer;    // produse care au primit imagini
     Images: Integer;         // imagini copiate
     Descriptions: Integer;   // produse la care s-a scris / completat descrierea
+    ReplacedGoods: Integer;  // AReplaceImages: produse ale caror imagini au fost inlocuite
+    DeletedImages: Integer;  // AReplaceImages: imaginile vechi sterse
     Stopped: Boolean;
   end;
 
@@ -47,13 +55,15 @@ type
   TPriceListContentTransfer = class
   public
     // estimarea inainte de copiere: produse legate, cite pot primi imagini / descriere
+    // (AReplaceImages: AForImages = produsele pentru care furnizorul are imagini)
     class procedure Preview(AConnection: TIBCConnection; ASupplierID, APLID: Integer;
-      out AGoods, AForImages, AForDescriptions: Integer);
+      out AGoods, AForImages, AForDescriptions: Integer; AReplaceImages: Boolean = False);
     // copierea propriu-zisa, fara interfata
     class function Execute(AConnection: TIBCConnection; ASupplierID, APLID: Integer;
-      AProgress: TContentTransferProgress = nil): TContentTransferStats;
+      AProgress: TContentTransferProgress = nil; AReplaceImages: Boolean = False): TContentTransferStats;
     // cu confirmare, fereastra de progres si rezumat - apelata din frame78
-    class function Run(AConnection: TIBCConnection; ASupplierID, APLID: Integer): Boolean;
+    class function Run(AConnection: TIBCConnection; ASupplierID, APLID: Integer;
+      AReplaceImages: Boolean = False): Boolean;
   end;
 
 implementation
@@ -78,8 +88,8 @@ const
 
   cSqlPreview =
     'select count(distinct p.GOODSID), ' +
-    '  count(distinct iif(not exists(select 1 from TS_GOODS_IMAGE x where x.GOODSID = p.GOODSID) ' +
-    '    and exists(select 1 from TS_PRICELIST_ITEMS_IMAGES pi where pi.SUPPLIERID = :SUPPLIERID ' +
+    '  count(distinct iif(/*NEW_ONLY*/ ' +
+    '    exists(select 1 from TS_PRICELIST_ITEMS_IMAGES pi where pi.SUPPLIERID = :SUPPLIERID ' +
     '      and pi.SUPPLIER_GOODS_CODE = p.CODE and pi.IMAGE is not null), p.GOODSID, null)), ' +
     '  count(distinct iif(exists(select 1 from TS_PRICELIST_ITEMS_DESCRIPTION pd ' +
     '      where pd.SUPPLIERID = :SUPPLIERID and pd.SUPPLIER_GOODS_CODE = p.CODE ' +
@@ -94,8 +104,31 @@ const
     '      from TS_PRICELIST_ITEMS i where i.PLID = :PLID) p ' +
     'join TS_GOODS g on g.GOODSID = p.GOODSID and coalesce(g.FLG_FOLDER, 0) = 0';
 
+  // in cSqlPreview, fara AReplaceImages: doar produsele fara nicio imagine
+  cSqlPreviewNewOnly = 'not exists(select 1 from TS_GOODS_IMAGE x where x.GOODSID = p.GOODSID) and ';
+
   cSqlHasImages =
     'select count(*) from TS_GOODS_IMAGE where GOODSID = :GOODSID';
+
+  // AReplaceImages: imaginile furnizorului (fara repetari), imaginile produsului si cite imagini
+  // ale furnizorului lipsesc la produs - seturile identice nu se rescriu
+  cSqlCompareImages =
+    'select ' +
+    '  (select count(*) from TS_PRICELIST_ITEMS_IMAGES pi ' +
+    '   where pi.SUPPLIERID = :SUPPLIERID and pi.SUPPLIER_GOODS_CODE = :CODE and pi.IMAGE is not null ' +
+    '     and not exists(select 1 from TS_PRICELIST_ITEMS_IMAGES p2 ' +
+    '       where p2.SUPPLIERID = pi.SUPPLIERID and p2.SUPPLIER_GOODS_CODE = pi.SUPPLIER_GOODS_CODE ' +
+    '         and p2.IMAGE is not null and coalesce(p2.ORDERNO, 0) < coalesce(pi.ORDERNO, 0) ' +
+    '         and hash(p2.IMAGE) = hash(pi.IMAGE))), ' +
+    '  (select count(*) from TS_GOODS_IMAGE g where g.GOODSID = :GOODSID), ' +
+    '  (select count(*) from TS_PRICELIST_ITEMS_IMAGES pi ' +
+    '   where pi.SUPPLIERID = :SUPPLIERID and pi.SUPPLIER_GOODS_CODE = :CODE and pi.IMAGE is not null ' +
+    '     and not exists(select 1 from TS_GOODS_IMAGE g where g.GOODSID = :GOODSID ' +
+    '       and g.IMAGE_HASH = hash(pi.IMAGE))) ' +
+    'from RDB$DATABASE';
+
+  cSqlDeleteImages =
+    'delete from TS_GOODS_IMAGE where GOODSID = :GOODSID';
 
   // imaginile furnizorului, in ordinea lui, fara repetarea aceleiasi imagini
   cSqlCopyImages =
@@ -141,7 +174,7 @@ end;
 { TPriceListContentTransfer }
 
 class procedure TPriceListContentTransfer.Preview(AConnection: TIBCConnection; ASupplierID,
-  APLID: Integer; out AGoods, AForImages, AForDescriptions: Integer);
+  APLID: Integer; out AGoods, AForImages, AForDescriptions: Integer; AReplaceImages: Boolean);
 var
   Tr: TIBCTransaction;
   Q: TIBCQuery;
@@ -154,7 +187,8 @@ begin
   try
     Tr.DefaultConnection := AConnection;
     Tr.IsolationLevel := iblReadOnlyReadCommitted;
-    Q := NewQuery(AConnection, Tr, cSqlPreview);
+    Q := NewQuery(AConnection, Tr, StringReplace(cSqlPreview, '/*NEW_ONLY*/',
+      IfThen(AReplaceImages, '', cSqlPreviewNewOnly), []));
     Tr.StartTransaction;
     try
       Q.ParamByName('SUPPLIERID').AsInteger := ASupplierID;
@@ -174,7 +208,7 @@ begin
 end;
 
 class function TPriceListContentTransfer.Execute(AConnection: TIBCConnection; ASupplierID,
-  APLID: Integer; AProgress: TContentTransferProgress): TContentTransferStats;
+  APLID: Integer; AProgress: TContentTransferProgress; AReplaceImages: Boolean): TContentTransferStats;
 type
   TPair = record
     GoodsID: Integer;
@@ -182,9 +216,9 @@ type
   end;
 var
   TrRead, TrWrite: TIBCTransaction;
-  QPairs, QHas, QImg, QDsc: TIBCQuery;
+  QPairs, QHas, QImg, QDsc, QCmp, QDel: TIBCQuery;
   Pairs: TArray<TPair>;
-  I, N, Copied: Integer;
+  I, N, Copied, LastReplacedID: Integer;
   Stats: TContentTransferStats;
 begin
   Stats := Default(TContentTransferStats);
@@ -194,6 +228,9 @@ begin
   QHas := nil;
   QImg := nil;
   QDsc := nil;
+  QCmp := nil;
+  QDel := nil;
+  LastReplacedID := 0;
   try
     TrRead.DefaultConnection := AConnection;
     TrRead.IsolationLevel := iblReadOnlyReadCommitted;
@@ -226,27 +263,67 @@ begin
     QHas := NewQuery(AConnection, TrWrite, cSqlHasImages);
     QImg := NewQuery(AConnection, TrWrite, cSqlCopyImages);
     QDsc := NewQuery(AConnection, TrWrite, cSqlMergeDesc);
+    QCmp := NewQuery(AConnection, TrWrite, cSqlCompareImages);
+    QDel := NewQuery(AConnection, TrWrite, cSqlDeleteImages);
 
     // 2. copierea, cu commit la fiecare cCommitEvery perechi
     TrWrite.StartTransaction;
     try
       for I := 0 to High(Pairs) do
       begin
-        // imaginile - doar la produsul fara nicio imagine
-        QHas.ParamByName('GOODSID').AsInteger := Pairs[I].GoodsID;
-        QHas.Open;
-        try
-          Copied := 0;
-          if QHas.Fields[0].AsInteger = 0 then
+        Copied := 0;
+        if AReplaceImages then
+        begin
+          // imaginile furnizorului inlocuiesc imaginile produsului (o data pe produs -
+          // perechile sint ordonate dupa GOODSID)
+          if Pairs[I].GoodsID <> LastReplacedID then
           begin
-            QImg.ParamByName('GOODSID').AsInteger := Pairs[I].GoodsID;
-            QImg.ParamByName('SUPPLIERID').AsInteger := ASupplierID;
-            QImg.ParamByName('CODE').AsString := Pairs[I].Code;
-            QImg.ExecSQL;
-            Copied := QImg.RowsAffected;
+            QCmp.ParamByName('GOODSID').AsInteger := Pairs[I].GoodsID;
+            QCmp.ParamByName('SUPPLIERID').AsInteger := ASupplierID;
+            QCmp.ParamByName('CODE').AsString := Pairs[I].Code;
+            QCmp.Open;
+            try
+              if QCmp.Fields[0].AsInteger > 0 then
+              begin
+                LastReplacedID := Pairs[I].GoodsID;
+                if (QCmp.Fields[0].AsInteger <> QCmp.Fields[1].AsInteger) or (QCmp.Fields[2].AsInteger > 0) then
+                begin
+                  QDel.ParamByName('GOODSID').AsInteger := Pairs[I].GoodsID;
+                  QDel.ExecSQL;
+                  if QDel.RowsAffected > 0 then
+                  begin
+                    Inc(Stats.ReplacedGoods);
+                    Inc(Stats.DeletedImages, QDel.RowsAffected);
+                  end;
+                  QImg.ParamByName('GOODSID').AsInteger := Pairs[I].GoodsID;
+                  QImg.ParamByName('SUPPLIERID').AsInteger := ASupplierID;
+                  QImg.ParamByName('CODE').AsString := Pairs[I].Code;
+                  QImg.ExecSQL;
+                  Copied := QImg.RowsAffected;
+                end;
+              end;
+            finally
+              QCmp.Close;
+            end;
           end;
-        finally
-          QHas.Close;
+        end
+        else
+        begin
+          // imaginile - doar la produsul fara nicio imagine
+          QHas.ParamByName('GOODSID').AsInteger := Pairs[I].GoodsID;
+          QHas.Open;
+          try
+            if QHas.Fields[0].AsInteger = 0 then
+            begin
+              QImg.ParamByName('GOODSID').AsInteger := Pairs[I].GoodsID;
+              QImg.ParamByName('SUPPLIERID').AsInteger := ASupplierID;
+              QImg.ParamByName('CODE').AsString := Pairs[I].Code;
+              QImg.ExecSQL;
+              Copied := QImg.RowsAffected;
+            end;
+          finally
+            QHas.Close;
+          end;
         end;
         if Copied > 0 then
         begin
@@ -282,6 +359,8 @@ begin
       raise;
     end;
   finally
+    QDel.Free;
+    QCmp.Free;
     QDsc.Free;
     QImg.Free;
     QHas.Free;
@@ -348,7 +427,7 @@ begin
 end;
 
 class function TPriceListContentTransfer.Run(AConnection: TIBCConnection; ASupplierID,
-  APLID: Integer): Boolean;
+  APLID: Integer; AReplaceImages: Boolean): Boolean;
 var
   Goods, ForImages, ForDesc: Integer;
   Form: TTransferProgressForm;
@@ -358,7 +437,7 @@ begin
   Result := False;
   Screen.Cursor := crHourGlass;
   try
-    Preview(AConnection, ASupplierID, APLID, Goods, ForImages, ForDesc);
+    Preview(AConnection, ASupplierID, APLID, Goods, ForImages, ForDesc, AReplaceImages);
   finally
     Screen.Cursor := crDefault;
   end;
@@ -375,7 +454,18 @@ begin
       'sau furnizorul nu are continut pentru ele.', [Goods]), mtInformation, [mbOK], 0);
     Exit;
   end;
-  if MessageDlg(Format('Pricelist %d, furnizor %d'#13#10#13#10 +
+  if AReplaceImages then
+  begin
+    if MessageDlg(Format('Pricelist %d, furnizor %d'#13#10#13#10 +
+      'Produse legate: %d'#13#10 +
+      '  au imagini de la furnizor: %d - imaginile lor existente se STERG si se inlocuiesc ' +
+      'cu cele ale furnizorului (seturile deja identice nu se rescriu)'#13#10 +
+      '  vor primi descriere RO/RU (lipsa sau incompleta): %d'#13#10#13#10 +
+      'Descrierile existente nu se modifica. Continuati?',
+      [APLID, ASupplierID, Goods, ForImages, ForDesc]), mtWarning, [mbYes, mbNo], 0) <> mrYes then
+      Exit;
+  end
+  else if MessageDlg(Format('Pricelist %d, furnizor %d'#13#10#13#10 +
     'Produse legate: %d'#13#10 +
     '  vor primi imagini (nu au nicio imagine): %d'#13#10 +
     '  vor primi descriere RO/RU (lipsa sau incompleta): %d'#13#10#13#10 +
@@ -402,7 +492,7 @@ begin
           Application.ProcessMessages;
         end;
         Result := not Form.StopRequested;
-      end);
+      end, AReplaceImages);
   finally
     Form.OnCloseQuery := nil;
     Form.Free;
@@ -411,9 +501,11 @@ begin
   MessageDlg(Format('%s'#13#10#13#10 +
     'Produse procesate: %d'#13#10 +
     'Imagini copiate: %d (la %d produse)'#13#10 +
-    'Descrieri scrise / completate: %d',
+    'Descrieri scrise / completate: %d%s',
     [IfThen(Stats.Stopped, 'Oprit de utilizator - ce s-a copiat pina acum ramine salvat.', 'Gata.'),
-     Stats.Pairs, Stats.Images, Stats.GoodsImages, Stats.Descriptions]), mtInformation, [mbOK], 0);
+     Stats.Pairs, Stats.Images, Stats.GoodsImages, Stats.Descriptions,
+     IfThen(AReplaceImages, Format(#13#10'Produse cu imaginile inlocuite: %d (imagini vechi sterse: %d)',
+       [Stats.ReplacedGoods, Stats.DeletedImages]), '')]), mtInformation, [mbOK], 0);
   Result := True;
 end;
 
