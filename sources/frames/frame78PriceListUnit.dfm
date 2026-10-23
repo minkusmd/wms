@@ -536,7 +536,7 @@ inherited frame78PriceList: Tframe78PriceList
             Font.Style = []
             ParentFont = False
             TabOrder = 1
-            Properties.ActivePage = tsAllPriceGoods
+            Properties.ActivePage = tbsNewSupplierGoods
             Properties.CustomButtons.Buttons = <>
             OnPageChanging = pcPricesAnalizePageChanging
             ExplicitWidth = 1012
@@ -946,7 +946,7 @@ inherited frame78PriceList: Tframe78PriceList
                 Height = 193
                 Align = alBottom
                 TabOrder = 2
-                Properties.ActivePage = tsLog
+                Properties.ActivePage = cxTabSheet2
                 Properties.CustomButtons.Buttons = <>
                 OnChange = cxPageControl2Change
                 ExplicitWidth = 1004
@@ -2281,6 +2281,10 @@ inherited frame78PriceList: Tframe78PriceList
         end
         item
           Visible = True
+          ItemName = 'bbAddBrandToPricelist'
+        end
+        item
+          Visible = True
           ItemName = 'bbSetupGoodsType'
         end
         item
@@ -2927,6 +2931,15 @@ inherited frame78PriceList: Tframe78PriceList
         0A3C2F7376673E0D0A}
       ShortCut = 32852
       OnClick = bbSetupGoodsTypeClick
+    end
+    object bbAddBrandToPricelist: TdxBarButton
+      Caption = 'Adauga brand in pricelist'
+      Category = 1
+      Hint = 
+        'Completeaza "Brandul" pentru toate produsele din pricelist dupa c' +
+        'oloana "Brand furnizor" (TS_SYSS, grupa 1)'
+      Visible = ivAlways
+      OnClick = bbAddBrandToPricelistClick
     end
     object bbSetupBrand: TdxBarButton
       Caption = 'Seteaza "Brandul"...'

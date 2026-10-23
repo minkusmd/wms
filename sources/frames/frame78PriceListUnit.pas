@@ -74,6 +74,7 @@ type
     bbIdentifyBrand: TdxBarButton;
     bbSetupGoodsType: TdxBarButton;
     bbSetupBrand: TdxBarButton;
+    bbAddBrandToPricelist: TdxBarButton;
     bbAddSelectedGoodsToCatalog: TdxBarButton;
     dxBarButton4: TdxBarButton;
     IBCDataSourceNewGoods: TIBCDataSource;
@@ -350,6 +351,7 @@ type
     procedure bbIdentifyBrandClick(Sender: TObject);
     procedure bbSetupGoodsTypeClick(Sender: TObject);
     procedure bbSetupBrandClick(Sender: TObject);
+    procedure bbAddBrandToPricelistClick(Sender: TObject);
     procedure bbAddSelectedGoodsToCatalogClick(Sender: TObject);
     procedure bbChangeGoodsNameClick(Sender: TObject);
     procedure bbPricePolicyClick(Sender: TObject);
@@ -2079,6 +2081,76 @@ begin
   DoCreateReevaluare(FlgImportWithRRP, cxGridDBTVPricesDown, true);
 
   dxStatusBar2.Panels[0].Text := 'Reevaluare finisata cu succes!';
+end;
+
+// "Adauga brand in pricelist": completeaza SYSTEM_VENDORID pentru toate produsele
+// din pricelistul curent dupa coloana SUPPLIER_GOODS_BRAND - se cauta (fara litere
+// mari/mici, fara spatii la capete) in TS_SYSS, grupa PARENTID = 1 (branduri), dupa TITLE.
+// La titluri duplicate se ia SYSSID-ul cel mai mic; rindurile fara potrivire ramin neatinse.
+procedure Tframe78PriceList.bbAddBrandToPricelistClick(Sender: TObject);
+const
+  cBrandMatch = 'select first 1 s.syssid from ts_syss s where s.parentid = 1 ' +
+    'and upper(trim(s.title)) = upper(trim(pli.supplier_goods_brand)) order by s.syssid';
+var
+  q: TIBCSQL;
+  PLID, Updated: Integer;
+begin
+  if (not IBCQueryPriceData.Active) or IBCQueryPriceData.IsEmpty then
+    Exit;
+  PLID := IBCQueryPriceData.FieldByName('PLID').AsInteger;
+
+  if MessageDlg(Format('Se completeaza "Brandul" (SYSTEM_VENDORID) pentru produsele din pricelistul #%d ' +
+    'dupa coloana "Brand furnizor" (cautare in nomenclatorul de branduri dupa denumire).' + sLineBreak +
+    'Continuati?', [PLID]), mtConfirmation, [mbYes, mbNo], 0) <> mrYes then
+    Exit;
+
+  if IBCQueryPriceItems.Active and (IBCQueryPriceItems.State in dsEditModes) then
+    IBCQueryPriceItems.Post;
+
+  q := TIBCSQL.Create(nil);
+  try
+    q.Transaction := dmDB.IBCTrDefaultUpdate;
+    q.AutoCommit := False;
+    q.SQL.Text :=
+      'update ts_pricelist_items pli set pli.system_vendorid = (' + cBrandMatch + ') ' +
+      'where pli.plid = :plid ' +
+      'and pli.supplier_goods_brand is not null and trim(pli.supplier_goods_brand) <> '''' ' +
+      'and exists (select 1 from ts_syss s where s.parentid = 1 ' +
+      '  and upper(trim(s.title)) = upper(trim(pli.supplier_goods_brand))) ' +
+      'and coalesce(pli.system_vendorid, 0) <> (' + cBrandMatch + ')';
+    q.ParamByName('PLID').AsInteger := PLID;
+
+    if not q.Transaction.Active then
+      q.Transaction.StartTransaction;
+    try
+      Screen.Cursor := crHourGlass;
+      try
+        q.Execute;
+        Updated := q.RowsAffected;
+      finally
+        Screen.Cursor := crDefault;
+      end;
+      q.Transaction.Commit;
+    except
+      if q.Transaction.Active then
+        q.Transaction.Rollback;
+      raise;
+    end;
+  finally
+    q.Free;
+  end;
+
+  if IBCQueryPriceItems.Active then
+  begin
+    IBCQueryPriceItems.DisableControls;
+    try
+      IBCQueryPriceItems.Refresh;
+    finally
+      IBCQueryPriceItems.EnableControls;
+    end;
+  end;
+
+  MessageDlg(Format('Brandul a fost completat pentru %d produse.', [Updated]), mtInformation, [mbOK], 0);
 end;
 
 procedure Tframe78PriceList.bbSetupBrandClick(Sender: TObject);
