@@ -10,7 +10,7 @@
         <MainSource>SWN.dpr</MainSource>
         <Platform Condition="'$(Platform)'==''">Win32</Platform>
         <ProjectGuid>{FC7F2A2D-F41C-4662-8955-01E912471EFA}</ProjectGuid>
-        <ProjectVersion>20.4</ProjectVersion>
+        <ProjectVersion>20.5</ProjectVersion>
         <TargetedPlatforms>1</TargetedPlatforms>
         <ProjectName Condition="'$(ProjectName)'==''">SWN</ProjectName>
     </PropertyGroup>
@@ -90,14 +90,14 @@
         <DCC_UnitSearchPath>D:\Projects\MyProjects\WMS\sources\frames;C:\Projects\MyProjects\WMS\sources\frameUtils;C:\Projects\MyProjects\WMS\sources\classes;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <Debugger_HostApplication>C:\Program Files (x86)\Embarcadero\Studio\19.0\bin\bds.exe</Debugger_HostApplication>
         <VerInfo_AutoIncVersion>true</VerInfo_AutoIncVersion>
-        <VerInfo_Keys>CompanyName=;FileVersion=7.6.4.6;LegalCopyright=;LegalTrademarks=iC Trade;ProductName=CRM+;ProductVersion=6.6.7;ProgramID=com.embarcadero.SWN;FileDescription=SWN</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=;FileVersion=7.6.4.8;LegalCopyright=;LegalTrademarks=iC Trade;ProductName=CRM+;ProductVersion=6.6.7;ProgramID=com.embarcadero.SWN;FileDescription=SWN</VerInfo_Keys>
         <VerInfo_MajorVer>7</VerInfo_MajorVer>
         <VerInfo_Release>4</VerInfo_Release>
         <VerInfo_MinorVer>6</VerInfo_MinorVer>
         <DCC_DebugInformation>2</DCC_DebugInformation>
         <DCC_LocalDebugSymbols>true</DCC_LocalDebugSymbols>
         <DCC_MapFile>3</DCC_MapFile>
-        <VerInfo_Build>6</VerInfo_Build>
+        <VerInfo_Build>8</VerInfo_Build>
         <AppEnableRuntimeThemes>false</AppEnableRuntimeThemes>
         <VerInfo_AutoGenVersion>false</VerInfo_AutoGenVersion>
         <VerInfo_Locale>2073</VerInfo_Locale>

@@ -104,3 +104,9 @@ Atenție codare: `frame24WebZakazUnit.pas`, `DataModuleDB.pas`, `MainForm.pas` s
 - **Faza B**: compilată (dcu 23 oct 21:53); `SWN.exe` **nelinkat** (F2039, aplicația era deschisă). Netestat în aplicație.
 - **Faza C**: `MarketingController.php` + `views/marketing/_node.php` editate, `php -l` OK; necomis, nedeployat.
 - Regula „comandă web" în proceduri: `CREATED_BY = 9` și `DOCTYPEID IN (134, 115)`; `SP_CREATE_RASHOD` închide părintele 115 doar dacă `CREATED_BY = 9` (ofertele manuale rămân deschise).
+
+## Lansat (23 oct 2026, noaptea)
+
+- Scriptul `weborder_to_offer.sql` **rulat pe SW** de S.M.; `SWN.exe` 7.6.4.8 construit din IDE (23:35).
+- Test pe SW: comanda reală 2182069 mutată prin `SP_WEBORDER_TO_OFFER` → 115 deschisă, STATEID 1, responsabil 204, deal 3225 `PIPE_IN_WORK` (sursa `SITE_CART_ORDER` păstrată), linii și comentarii intacte, `TLOG_DOCS` are rândul „Web-Order mutat in Oferte", `TDB_DEAL_LOG` gol. **Verificat vizual în WMS de S.M.: merge.**
+- Rămân: exe-ul la toți operatorii, deploy-ul site-ului (commit 3317ad3 în fantastic.web).
