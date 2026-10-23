@@ -1049,11 +1049,32 @@ end;
 
 // URNStatus_v9 pica uneori in gateway ("Unexpected element ...CreationDate", 20.10.2026) -
 // se incearca pe rind v9, v8, v4, v3, v2 (toate au RequestStatus / DocumentStatus; v6/v7 au doar ID-uri).
+// {"X_Multi": {"X_One": [{...}]}} -> clona primului obiect din lista; nil daca nu e asa impachetat.
+function UnwrapMulti(AObj: TJSONObject): TJSONObject;
+var
+    P, Q: TJSONPair;
+    Arr: TJSONValue;
+begin
+    Result := nil;
+    if not Assigned(AObj) then
+        Exit;
+    for P in AObj do
+        if (P.JsonValue is TJSONObject) and (Pos('_MULTI', UpperCase(P.JsonString.Value)) > 0) then
+            for Q in TJSONObject(P.JsonValue) do
+            begin
+                Arr := Q.JsonValue;
+                if (Arr is TJSONArray) and (TJSONArray(Arr).Count > 0) and (TJSONArray(Arr).Items[0] is TJSONObject) then
+                    Exit(TJSONObject(TJSONArray(Arr).Items[0].Clone));
+                if Arr is TJSONObject then
+                    Exit(TJSONObject(Arr.Clone));
+            end;
+end;
+
 function TECreditApiClient.GetStatus(const AURN: string): TECreditStatus;
 const
     cMethods: array[0..4] of string = ('URNStatus_v9', 'URNStatus_v8', 'URNStatus_v4', 'URNStatus_v3', 'URNStatus_v2');
 var
-    B, O: TJSONObject;
+    B, O, Inner: TJSONObject;
     I: Integer;
     S, M: string;
 begin
@@ -1080,6 +1101,14 @@ begin
     end;
     try
         CheckStatus(O, FLastMethod);
+        // Gateway-ul (din 21.10.2026) incuibeaza raspunsul v8: {"Status": "OK",
+        // "URNStatus_v8_Multi": {"URNStatus_v8_One": [{...}]}} - luam primul element.
+        Inner := UnwrapMulti(O);
+        if Assigned(Inner) then
+        begin
+            O.Free;
+            O := Inner;
+        end;
         Result.URN := FirstNonEmpty([JStr(O, 'URN'), AURN]);
         Result.UIN := JStr(O, 'UIN');
         Result.RequestStatus := JStr(O, 'RequestStatus');

@@ -509,7 +509,8 @@ begin
         Q.SQL.Text := 'SELECT CREDIT_SUMA, CREDIT_PERIOADA, NPP, IDEN, DATA_NASTERII, CONTACT_TELEFON, ' +
             'LOCUL_DE_TRAI, DOMICILIU_TELEFON, WORK_ANGAJATOR, WORK_TELEFON, WORK_JOB_TITLE, WORK_SALARY, ' +
             'WORK_DURATION, FLG_COPY_BY_FAX, AVANS, PLATA_LUNARA, ORG_ID, CREDIT_TYPE, SCAN1_NAME, SCAN2_NAME, ' +
-            'IIF(SCAN1 IS NULL, 0, 1) AS HAS1, IIF(SCAN2 IS NULL, 0, 1) AS HAS2' +
+            'IIF(SCAN1 IS NULL OR OCTET_LENGTH(SCAN1) < 64, 0, 1) AS HAS1, ' +
+            'IIF(SCAN2 IS NULL OR OCTET_LENGTH(SCAN2) < 64, 0, 1) AS HAS2' +
             IfThen(FHasEcredit, ', EMAIL, ECREDIT_URN, ECREDIT_PRODUCT_ID, ECREDIT_FIRST_PAY_DATE, ' +
             'ECREDIT_LAST_NAME, ECREDIT_FIRST_NAME, ECREDIT_FATHER_NAME, ECREDIT_REQ_STATUS, ' +
             'ECREDIT_DOC_STATUS, ECREDIT_MESSAGE, ECREDIT_INSTALLMENT, ECREDIT_FILES_URL', '') +
@@ -1497,10 +1498,48 @@ begin
     end;
 end;
 
+// Extensia dupa continut (primii octeti), nu dupa nume: site-ul scrie uneori un blob de 1 octet ("0")
+// in loc de scan, iar numele lipseste. '' = nu e un fisier acceptat de eCredit.
+function SniffScanExt(const APath: string): string;
+var
+    F: TFileStream;
+    B: array[0..15] of Byte;
+    N: Integer;
+begin
+    Result := '';
+    if not FileExists(APath) then
+        Exit;
+    F := TFileStream.Create(APath, fmOpenRead or fmShareDenyWrite);
+    try
+        if F.Size < 64 then
+            Exit;
+        FillChar(B, SizeOf(B), 0);
+        N := F.Read(B, SizeOf(B));
+        if N < 12 then
+            Exit;
+        if (B[0] = $FF) and (B[1] = $D8) and (B[2] = $FF) then
+            Result := '.jpg'
+        else if (B[0] = $89) and (B[1] = $50) and (B[2] = $4E) and (B[3] = $47) then
+            Result := '.png'
+        else if (B[0] = $25) and (B[1] = $50) and (B[2] = $44) and (B[3] = $46) then
+            Result := '.pdf'
+        else if (B[0] = $52) and (B[1] = $49) and (B[2] = $46) and (B[3] = $46) and (B[8] = $57) and (B[9] = $45) then
+            Result := '.webp'
+        else if (B[4] = $66) and (B[5] = $74) and (B[6] = $79) and (B[7] = $70) then
+            Result := '.heic'
+        else if (B[0] = $42) and (B[1] = $4D) then
+            Result := '.bmp'
+        else if ((B[0] = $49) and (B[1] = $49) and (B[2] = $2A)) or ((B[0] = $4D) and (B[1] = $4D) and (B[2] = 0) and (B[3] = $2A)) then
+            Result := '.tiff';
+    finally
+        F.Free;
+    end;
+end;
+
 function TfrmFinantareEditorDlg.ScanToFile(const AIndex: Integer; out AIsTemp: Boolean): string;
 var
     Q: TIBCQuery;
-    Col, Ext: string;
+    Col, Ext, Tmp: string;
     Pending: string;
     HasScan: Boolean;
 begin
@@ -1519,22 +1558,40 @@ begin
         Col := 'SCAN2';
     end;
     if Pending <> '' then
+    begin
+        if SniffScanExt(Pending) = '' then
+        begin
+            Log(Format('Scanul %d (%s) nu e o imagine / PDF recunoscut; nu se trimite.', [AIndex, ExtractFileName(Pending)]));
+            Exit;
+        end;
         Exit(Pending);
+    end;
     if not HasScan then
         Exit;
     Q := NewReadQuery;
     try
-        Q.SQL.Text := Format('SELECT %s AS S, %s_NAME AS N FROM TWEB_CERERE_FINANTARE WHERE DOCID = :D', [Col, Col]);
+        Q.SQL.Text := Format('SELECT %s AS S FROM TWEB_CERERE_FINANTARE WHERE DOCID = :D', [Col]);
         Q.ParamByName('D').AsInteger := FFinDocID;
         Q.Open;
         if Q.IsEmpty or Q.FieldByName('S').IsNull then
             Exit;
-        Ext := LowerCase(ExtractFileExt(Trim(Q.FieldByName('N').AsString)));
-        if ECreditMimeType('x' + Ext) = '' then
-            Ext := '.jpg';   // scanurile vechi de pe site nu au nume; sint JPEG
-        Result := TPath.Combine(TPath.GetTempPath, Format('finantare_%d_%s_%s%s',
-            [FFinDocID, LowerCase(Col), FormatDateTime('hhnnss', Now), Ext]));
-        TBlobField(Q.FieldByName('S')).SaveToFile(Result);
+        Tmp := TPath.Combine(TPath.GetTempPath, Format('finantare_%d_%s_%s', [FFinDocID, LowerCase(Col),
+            FormatDateTime('hhnnss', Now)]));
+        TBlobField(Q.FieldByName('S')).SaveToFile(Tmp);
+        Ext := SniffScanExt(Tmp);
+        if Ext = '' then
+        begin
+            DeleteFile(Tmp);
+            Log(Format('Scanul %d din baza nu e o imagine / PDF recunoscut (%d octeti); nu se trimite.',
+                [AIndex, Q.FieldByName('S').DataSize]));
+            Exit;
+        end;
+        Result := Tmp + Ext;
+        if not RenameFile(Tmp, Result) then
+        begin
+            DeleteFile(Tmp);
+            Exit('');
+        end;
         AIsTemp := True;
     finally
         Q.Free;
@@ -1594,8 +1651,10 @@ begin
     end;
     if Length(Files) = 0 then
     begin
+        Log('Fisiere: cererea nu are o copie a buletinului valida (imagine sau PDF) de trimis.');
         if AInteractive then
-            ShowInfoDialog('eCredit', 'Cererea nu are copia buletinului de trimis.');
+            ShowInfoDialog('eCredit', 'Cererea nu are copia buletinului de trimis (imagine sau PDF).'#13#10 +
+                'Incarcati scanurile cu "Incarca..." si salvati.');
         Exit;
     end;
     C := CreateClient;
