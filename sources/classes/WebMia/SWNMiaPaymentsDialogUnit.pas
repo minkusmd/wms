@@ -37,13 +37,18 @@ procedure ShowMiaPaymentDialog(AOwner: TComponent; const ADocID: Integer; const 
   (gol cind comanda nu are o astfel de plata). }
 function ConfirmDeleteUnpaidMiaOrder(AOwner: TComponent; const ADocID: Integer; out ANote: string): Boolean;
 
+{ Nota de la stergerea unei comenzi cu plata MIA neachitata (ConfirmDeleteUnpaidMiaOrder):
+  ramine in deal (deal-ul supravietuieste stergerii documentului); fara deal, in
+  comentariile documentului. Folosita din Web-Order (frame24) si Oferte (frame08). }
+procedure SaveMiaDeleteNote(const ADocID: Integer; const ANote: string);
+
 implementation
 
 uses
   System.SysUtils, System.Variants, System.UITypes, System.Generics.Collections, Winapi.Windows,
   Vcl.Forms, Vcl.Controls, Vcl.StdCtrls, Vcl.Dialogs, Vcl.Graphics, Vcl.Clipbrd,
   cxGridCustomTableView, cxGridTableView,
-  DataModuleDB, SWNMiaPaymentsUnit;
+  DataModuleDB, SWNMiaPaymentsUnit, SWNDealsUnit;
 
 const
   cColumnHelperName = 'MiaPayColumnHelper';
@@ -584,6 +589,20 @@ begin
   finally
     frm.Free;
   end;
+end;
+
+
+procedure SaveMiaDeleteNote(const ADocID: Integer; const ANote: string);
+var
+  dealID: Int64;
+begin
+  dealID := FindDealByDoc(ADocID);
+  if dealID > 0 then
+    ExecDealSQL('UPDATE TDB_DEALS SET NOTE = SUBSTRING(COALESCE(NOTE || '' | '', '''') || :note FROM 1 FOR 1000) ' +
+      'WHERE DEAL_ID = :dealid', ['note', ANote, 'dealid', dealID])
+  else
+    ExecDealSQL('EXECUTE PROCEDURE SP_ADD_DOC_COMMENTS(:docid, :prefix, :note)',
+      ['docid', ADocID, 'prefix', 'MIA: ', 'note', ANote]);
 end;
 
 end.

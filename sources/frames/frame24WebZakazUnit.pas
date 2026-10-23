@@ -212,7 +212,6 @@ type
     procedure ShowAddGoodsDialog;
     procedure ShowModifyGoodsDialog;
     procedure DeleteSelectedGoods;
-    procedure SaveMiaDeleteNote(const ADocID: Integer; const ANote: string);
     procedure CreateRashodnaiaNakladnaia;
     procedure CreateSciotNaOplatu;
     procedure CloseCurrentDocument;
@@ -370,27 +369,20 @@ procedure Tframe24WebZakaz.CreateConfigurator;
 var
   docID: integer;
 begin
-  if ShowAskDialog('Web Order', 'Crearea oferte din Web-Order?') = mrYes then
+  if not dmDB.IBCQueryDocs.Active or dmDB.IBCQueryDocs.IsEmpty then
+    Exit;
+  docID := dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger;
+  if ShowAskDialog('Web Order', Format('Mutarea comenzii #%d in "Oferte"?'#13#10#13#10 +
+    'Comanda ramine acelasi document (acelasi numar) si trece in lista "Oferte"; ' +
+    'plata, dosarul de credit, livrarea si deal-ul ramin pe ea.', [docID])) <> mrYes then
+    Exit;
+  // 23.10.2026: nu se mai creeaza o copie 115 (SP_CREATE_CONFIGURATOR) cu comanda inchisa in urma;
+  // documentul isi schimba tipul 134 -> 115 (SP_WEBORDER_TO_OFFER), DOCID ramine. Responsabilul
+  // il pune procedura (cel care muta, daca lipseste), deal-ul trece singur in "In lucru".
+  if dmDB.MoveWebOrderToOffer_DB(docID) then
   begin
-    // Daca Web-Order-ul nu are responsabil (NULL, 0 sau -1), cine creeaza oferta devine responsabil;
-    // un responsabil existent ramine. SP_CREATE_CONFIGURATOR copiaza RESPONSIBLE_USERID de pe
-    // Web-Order pe oferta, deci ajunge si acolo.
-    try
-      dmDB.ExecuteQuery('UPDATE TDB_DOCS SET RESPONSIBLE_USERID = :USERID' +
-        ' WHERE DOCID = :DOCID AND DOCTYPEID = 134 AND COALESCE(RESPONSIBLE_USERID, -1) <= 0',
-        [dmDB.CurrentUserID, dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger]);
-    except
-      on E: Exception do
-      begin
-        ShowErrorDialog('Web-Order', 'Responsabilul nu a putut fi setat: ' + E.Message);
-        Exit;
-      end;
-    end;
-    // CreateConfiguratorDoc_DB inchide deja Web-Order-ul (SP_CLOSE_WEBZAKAZ in aceeasi tranzactie);
-    // aici doar se reincarca lista, fara a doua inchidere.
-    docID := dmDB.CreateConfiguratorDoc_DB(dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger);
-    if docID <> -1 then
-      dmDB.FullRefresh;
+    dmDB.FullRefresh;
+    ShowInfoDialog('Web Order', Format('Comanda #%d este acum in "Oferte".', [docID]));
   end;
 end;
 
@@ -576,21 +568,6 @@ procedure Tframe24WebZakaz.cxGridWZ_DATAGetDisplayText(Sender: TcxCustomGridTabl
 begin
   if not VarIsNull(ARecord.Values[cxGridWZ_DATA.Index]) then
     AText := FormatDateTime('dd.mm.yyyy hh:nn', ARecord.Values[cxGridWZ_DATA.Index]);
-end;
-
-procedure Tframe24WebZakaz.SaveMiaDeleteNote(const ADocID: Integer; const ANote: string);
-var
-  dealID: Int64;
-begin
-  // nota ramine in deal (deal-ul supravietuieste stergerii documentului);
-  // fara deal, in comentariile documentului
-  dealID := FindDealByDoc(ADocID);
-  if dealID > 0 then
-    ExecDealSQL('UPDATE TDB_DEALS SET NOTE = SUBSTRING(COALESCE(NOTE || '' | '', '''') || :note FROM 1 FOR 1000) ' +
-      'WHERE DEAL_ID = :dealid', ['note', ANote, 'dealid', dealID])
-  else
-    ExecDealSQL('EXECUTE PROCEDURE SP_ADD_DOC_COMMENTS(:docid, :prefix, :note)',
-      ['docid', ADocID, 'prefix', 'MIA: ', 'note', ANote]);
 end;
 
 procedure Tframe24WebZakaz.DeleteRecord;

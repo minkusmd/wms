@@ -701,6 +701,28 @@ object frmConfigurationDocDlg: TfrmConfigurationDocDlg
         Style.TransparentBorder = False
         TabOrder = 12
       end
+      object lbCashback: TLabel
+        Left = 248
+        Top = 399
+        Width = 90
+        Height = 15
+        Caption = 'Cashback folosit'
+        Transparent = True
+        Visible = False
+      end
+      object ceCashback: TcxDBCalcEdit
+        Left = 352
+        Top = 396
+        Hint = 'Cashback utilizat in comanda de pe site'
+        DataBinding.DataField = 'CASHBACK_USED'
+        DataBinding.DataSource = IBCDataSourceCashback
+        ParentShowHint = False
+        Properties.ReadOnly = True
+        ShowHint = True
+        TabOrder = 16
+        Visible = False
+        Width = 140
+      end
     end
   end
   object btnOk: TcxButton
@@ -777,6 +799,25 @@ object frmConfigurationDocDlg: TfrmConfigurationDocDlg
     DataSet = IBCQueryDocProps
     Left = 344
     Top = 4
+  end
+  object IBCQueryCashback: TIBCQuery
+    Connection = dmDB.IBCConnection
+    SQL.Strings = (
+      'select * from TDB_DOCS_CASHBACK_USED cu'
+      'where cu.docid=:DOCID')
+    Left = 344
+    Top = 52
+    ParamData = <
+      item
+        DataType = ftInteger
+        Name = 'DOCID'
+        Value = nil
+      end>
+  end
+  object IBCDataSourceCashback: TIBCDataSource
+    DataSet = IBCQueryCashback
+    Left = 344
+    Top = 100
   end
   object IBCQuery1: TIBCQuery
     Connection = dmDB.IBCConnection

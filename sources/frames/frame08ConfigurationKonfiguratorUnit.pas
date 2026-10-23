@@ -17,7 +17,8 @@ uses SWNDealsUnit,
     cxLookAndFeelPainters, cxFilter, cxData, cxDataStorage, cxEdit, cxNavigator,
     dxDateRanges, dxScrollbarAnnotations, cxImageComboBox, cxCurrencyEdit,
     cxLabel, cxCheckBox, dxBarBuiltInMenu, cxGridCustomPopupMenu, MemDS,
-    cxClasses, dxUIAClasses;
+    cxClasses, dxUIAClasses,
+    Vcl.StdCtrls, cxVGrid, cxDBVGrid, cxInplaceContainer, cxImage, cxTextEdit, cxDBEdit;
 
 type
     TStringArray = array of string;
@@ -166,6 +167,7 @@ type
         bbAddFreeDelivery: TdxBarButton;
         bbTender: TdxBarButton;
         bbECredit: TdxBarButton;
+        bbToFinantare: TdxBarButton;
         dxBarButton11: TdxBarButton;
         dxBarButton12: TdxBarButton;
         bbCredit: TdxBarButton;
@@ -190,6 +192,46 @@ type
     bbLibrareSubMenu: TdxBarSubItem;
     bbLivrareRepublica: TdxBarButton;
     bbLivrareSuburbii: TdxBarButton;
+        cxGridBRKDB_PAYMENT_METHOD: TcxGridDBColumn;
+        cxGridBRKDB_CREATED_BY: TcxGridDBColumn;
+        bbEcommInfo: TdxBarButton;
+        bbCancelCashback: TdxBarButton;
+        bbWebOnly: TdxBarButton;
+        bbCreditOnly: TdxBarButton;
+        tbsCredit: TcxTabSheet;
+        pnCreditState: TPanel;
+        lbCreditState: TLabel;
+        sbCredit: TScrollBox;
+        pnCreditInfo: TPanel;
+        lbCreditInfo: TLabel;
+        cxDBVerticalGridCredit: TcxDBVerticalGrid;
+        vgrCreditOrg: TcxDBEditorRow;
+        vgrCreditType: TcxDBEditorRow;
+        vgrCreditSuma: TcxDBEditorRow;
+        vgrCreditPerioada: TcxDBEditorRow;
+        vgrCreditRata: TcxDBEditorRow;
+        vgrCreditAvans: TcxDBEditorRow;
+        pnCreditPerson: TPanel;
+        lbCreditPerson: TLabel;
+        cxDBVerticalGridPerson: TcxDBVerticalGrid;
+        vgrPersonNPP: TcxDBEditorRow;
+        vgrPersonIDNP: TcxDBEditorRow;
+        vgrPersonBirth: TcxDBEditorRow;
+        vgrPersonPhone: TcxDBEditorRow;
+        vgrPersonFax: TcxDBEditorRow;
+        imgCreditScan1: TcxDBImage;
+        imgCreditScan2: TcxDBImage;
+        edCreditScan1Name: TcxDBTextEdit;
+        edCreditScan2Name: TcxDBTextEdit;
+        IBCQueryCredit: TIBCQuery;
+        IBCDataSourceCredit: TIBCDataSource;
+        procedure bbEcommInfoClick(Sender: TObject);
+        procedure bbCancelCashbackClick(Sender: TObject);
+        procedure bbWebOnlyClick(Sender: TObject);
+        procedure bbCreditOnlyClick(Sender: TObject);
+        procedure cxGridBRKDB_PAYMENT_METHODGetDisplayText(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord; var AText: string);
+        procedure cxPageControlComplectChange(Sender: TObject);
+        procedure IBCDataSourceCreditDataChange(Sender: TObject; Field: TField);
         procedure bbGoodsNewClick(Sender: TObject);
         procedure cxGridComponentsTableStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
         procedure bbGoodsModifyClick(Sender: TObject);
@@ -247,6 +289,7 @@ type
         procedure bbAddFreeDeliveryClick(Sender: TObject);
         procedure bbTenderClick(Sender: TObject);
         procedure bbECreditClick(Sender: TObject);
+        procedure bbToFinantareClick(Sender: TObject);
         procedure dxBarButton11Click(Sender: TObject);
         procedure dxBarButton12Click(Sender: TObject);
         procedure bbCreditClick(Sender: TObject);
@@ -260,6 +303,16 @@ type
         fLastDocID: Integer;
         fLastGoodsID: Integer;
         fSECURITY_CanView, fSECURITY_CanNew, fSECURITY_CanEdit, fSECURITY_CanDelete: Boolean;
+        // comenzile web mutate in Oferte (CREATED_BY = 9): fila Credit (dreptul 1792), Ecomm, cashback, MIA
+        fSEC_ViewCredit, fSEC_WebEcomm, fSEC_WebCashback: Boolean;
+        function IsWebOrderRow: Boolean;
+        function IsCreditRow(ARecord: TcxCustomGridRecord): Boolean;
+        procedure UpdateCreditTab;
+        procedure ShowCreditState;
+        procedure ApplyWebFilters;
+        procedure AssignResponsibleOnOpen;
+        procedure MiaPaymentClick(Sender: TObject);
+        procedure ShowEcommInformation(DocID: Integer);
         procedure WhenDocGrid_FocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
         procedure DocumentSelectionChanged;
         procedure WhenGoodsGrid_FocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
@@ -343,9 +396,13 @@ uses
     Vcl.Clipbrd, Vcl.Dialogs, uCreditFinalInfoDialog, frmKitchenTemplateUnit,
     frmDocumentImportBrowserDialog, System.Types, frmCustomerContractsDialog,
     frmGoodsQuickInfoDialog, frmDocumentBrowserDialog, frmCredit01Unit, frmGoodsForeignCodeDialog,
-    frmFinantareEditorDialog;
+    frmFinantareEditorDialog,
+    frmWebEcommInfoUnit, SWNMiaPaymentsDialogUnit;
 
 {$R *.dfm}
+
+const
+    cWebSiteUserID = 9;   // TS_USERS: WEB SITE - creatorul documentelor venite de pe site
 
 { Tframe08ConfigurationBRK }
 
@@ -1155,6 +1212,15 @@ begin
         ACanvas.Brush.Color := clWebLightGreen;
     end;
 
+    // comanda pe credit (metoda de plata din deal / analitica de credit): fundal verde deschis, ca in Web-Order
+    if IsCreditRow(AViewInfo.GridRecord) then
+    begin
+        if not AViewInfo.Selected then
+            ACanvas.Brush.Color := $E6F7E6;
+        if AViewInfo.Item = cxGridBRKDB_PAYMENT_METHOD then
+            ACanvas.Font.Style := ACanvas.Font.Style + [fsBold];
+    end;
+
      // highlight selected row
     if AViewInfo.RecordViewInfo.Focused and AViewInfo.Focused then
     begin
@@ -1356,9 +1422,19 @@ begin
 end;
 
 procedure Tframe08ConfigurationBRK.DeleteRecord;
+var
+    docID: Integer;
+    miaNote: string;
 begin
-    if ShowAskDialog(cMSG_DELETERECORD_DeleteDocument, Format(cMSG_DELETERECORD_Конфигуратор, [dmDB.IBCQueryDocs.FieldByName('DOCID').asInteger])) = mrYes then
+    docID := dmDB.IBCQueryDocs.FieldByName('DOCID').asInteger;
+    // comanda web cu plata MIA neachitata: dialogul cere nota cu rezultatul apelului
+    // catre client si tine loc de confirmare
+    if not ConfirmDeleteUnpaidMiaOrder(Self, docID, miaNote) then
+        Exit;
+    if (miaNote <> '') or (ShowAskDialog(cMSG_DELETERECORD_DeleteDocument, Format(cMSG_DELETERECORD_Конфигуратор, [docID])) = mrYes) then
     begin
+        if miaNote <> '' then
+            SaveMiaDeleteNote(docID, miaNote);
         dmDB.IBCQueryDocs.UpdateTransaction.StartTransaction;
         try
             dmDB.IBCQueryDocs.Delete;
@@ -1376,7 +1452,7 @@ end;
 
 procedure Tframe08ConfigurationBRK.DocumentSelectionChanged;
 var
-    fDocNew, fDocEdit, fDocDelete, fDebts: Boolean;
+    fDocNew, fDocEdit, fDocDelete, fDebts, fToFin: Boolean;
     FLG_CLOSED, DocChanged: Boolean;
 begin
     fDocNew := fSECURITY_CanNew;
@@ -1384,6 +1460,7 @@ begin
     fDocDelete := False;
 
     fDebts := False;
+    fToFin := False;
 
     DocChanged := True;
 
@@ -1393,6 +1470,8 @@ begin
 
         fDocEdit := fSECURITY_CanEdit and not FLG_CLOSED or fSECURITY_CanView;
         fDocDelete := fSECURITY_CanDelete and not FLG_CLOSED;
+         // oferta deschisa si cu drept de modificare poate deveni cerere de finantare
+        fToFin := fSECURITY_CanEdit and not FLG_CLOSED;
 
         DocChanged := fLastDocID <> dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger;
         fLastDocID := dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger;
@@ -1410,6 +1489,10 @@ begin
      // popup menu
     bbCustomerDebts.Enabled := fDebts;
     bbECredit.Enabled := fDebts;
+    bbToFinantare.Enabled := fDebts and fToFin;
+    // functiile comenzilor de pe site (Ecomm, cashback) doar pe rindurile cu CREATED_BY = 9
+    bbEcommInfo.Enabled := fDebts and IsWebOrderRow;
+    bbCancelCashback.Enabled := fDebts and IsWebOrderRow;
 
     GoodsSelectionChanged;
 end;
@@ -1418,6 +1501,7 @@ procedure Tframe08ConfigurationBRK.DoFrameHide;
 begin
      // inchidem datele interne
     IBCQueryJurnalKit.Close;
+    IBCQueryCredit.Close;
 
      // inchidem sursele de date externe conform "GetExternalDataSourceTypes"
     CloseExternalData;
@@ -1447,6 +1531,10 @@ begin
      // 1. Legam grid-urile de datasource-sele
     cxGridBRKDBTable.DataController.DataSource := dmDB.IBCDataSourceDocs;
     AddDealColumns(cxGridBRKDBTable);
+    // comenzile web mutate in Oferte: coloana "Plata MIA" si butonul "Plata MIA..." din meniul contextual
+    AddMiaColumn(cxGridBRKDBTable);
+    if fSEC_WebEcomm then
+        AddMiaButton(dxBarManager, dxPopupMenuRBK, MiaPaymentClick);
     cxGridComponentsTable.DataController.DataSource := dmDB.IBCDataSourceJurnal;
     cxGridComplectTable.DataController.DataSource := IBCDataSourceJurnalKit;
 
@@ -1460,6 +1548,8 @@ begin
      // deschidem datele interne
     IBCQueryJurnalKit.Active := True;
     dmDB.IBCQueryAchizitii.Active := True;
+    // dosarul de credit se citeste doar cind fila "Credit" e deschisa
+    UpdateCreditTab;
 
      // 4. Selection update
     DocumentSelectionChanged;
@@ -1499,6 +1589,93 @@ begin
      // Cererea de finantare a ofertei (TWEB_CERERE_FINANTARE) + depunerea ei la eCredit
     if cxGridBRKDBTable.DataController.RecNo > 0 then
         TfrmFinantareEditorDlg.Execute(Self, dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger);
+end;
+
+const
+     // Oferta (115) devine cerere de finantare, ca Web-Order-ul 134 creat de site din
+     // formularul de credit (SP_WEB_REGISTER_FINANTARE, finantare_weborder_faza2.sql):
+     //   - dosarul de credit se cauta pe oferta si in sus pe PARENTDOCID (ca in
+     //     frmFinantareEditorDialog.ResolveFinDoc); fara dosar nu se schimba nimic;
+     //   - analitica de plata DTSC = Credit 0% / Credit cu dobanda, dupa CREDIT_TYPE;
+     //   - metoda de plata "Credit" in deal (SP_DEAL_SET_WEB_ORDER_INFO);
+     //   - axa FIN a deal-ului = FIN_REQUESTED daca era FIN_NONE (SP_DEAL_RECALC_STATES
+     //     pune FIN_REQUESTED singura doar la 1791 si la 134 cu DTSC de credit).
+    cSQL_OfferToFinantare =
+        'EXECUTE BLOCK (A_DOCID INTEGER = :A_DOCID, A_USERID INTEGER = :A_USERID) AS ' +
+        'DECLARE VARIABLE V_CUR INTEGER; ' +
+        'DECLARE VARIABLE V_FINDOC INTEGER; ' +
+        'DECLARE VARIABLE V_I INTEGER; ' +
+        'DECLARE VARIABLE V_DTSC INTEGER; ' +
+        'DECLARE VARIABLE V_DEAL BIGINT; ' +
+        'DECLARE VARIABLE V_FIN VARCHAR(32); ' +
+        'BEGIN ' +
+        '  V_CUR = :A_DOCID; V_I = 0; V_FINDOC = NULL; ' +
+        '  WHILE (V_CUR IS NOT NULL AND V_CUR > 0 AND V_I < 6) DO ' +
+        '  BEGIN ' +
+        '    IF (EXISTS(SELECT 1 FROM TWEB_CERERE_FINANTARE F WHERE F.DOCID = :V_CUR)) THEN ' +
+        '    BEGIN ' +
+        '      V_FINDOC = :V_CUR; ' +
+        '      LEAVE; ' +
+        '    END ' +
+        '    SELECT D.PARENTDOCID FROM TDB_DOCS D WHERE D.DOCID = :V_CUR INTO :V_CUR; ' +
+        '    V_I = :V_I + 1; ' +
+        '  END ' +
+        '  IF (V_FINDOC IS NULL) THEN EXIT; ' +
+        '  SELECT FN_PAY_DTSC(IIF(COALESCE(TRIM(F.CREDIT_TYPE), '''') SIMILAR TO ''0+([.,]0+)?'', ' +
+        '                         ''PAY_CREDIT0'', ''PAY_CREDIT'')) ' +
+        '    FROM TWEB_CERERE_FINANTARE F WHERE F.DOCID = :V_FINDOC INTO :V_DTSC; ' +
+        '  IF (V_DTSC IS NOT NULL) THEN ' +
+        '    UPDATE TDB_DOCS SET DTSC = :V_DTSC WHERE DOCID = :A_DOCID AND DTSC IS DISTINCT FROM :V_DTSC; ' +
+        '  EXECUTE PROCEDURE SP_DEAL_SET_WEB_ORDER_INFO(:A_DOCID, NULL, NULL, NULL, NULL, ''Credit'', ' +
+        '                                               NULL, NULL, NULL, NULL, NULL, 1); ' +
+        '  FOR SELECT DD.DEAL_ID, TRIM(S.CODE) ' +
+        '        FROM TDB_DEAL_DOCS DD ' +
+        '        JOIN TDB_DEALS DL ON DL.DEAL_ID = DD.DEAL_ID ' +
+        '        LEFT JOIN TS_DEAL_STATES S ON S.STATE_ID = DL.FIN_STATE_ID ' +
+        '       WHERE DD.DOCID = :A_DOCID ' +
+        '        INTO :V_DEAL, :V_FIN ' +
+        '  DO ' +
+        '    IF (COALESCE(:V_FIN, ''FIN_NONE'') = ''FIN_NONE'') THEN ' +
+        '      EXECUTE PROCEDURE SP_DEAL_SET_STATE(:V_DEAL, ''FIN_REQUESTED'', :A_USERID, 0); ' +
+        '  EXECUTE PROCEDURE SP_ADD_DOC_COMMENTS(:A_DOCID, ''WMS'', ' +
+        '      ''Oferta transformata in cerere de finantare (dosar pe documentul #'' || :V_FINDOC || '')''); ' +
+        'END';
+
+procedure Tframe08ConfigurationBRK.bbToFinantareClick(Sender: TObject);
+var
+    DocID: Integer;
+begin
+     // Transforma oferta curenta in cerere de finantare: intai dosarul de credit
+     // (acelasi dialog ca "Cerere de finantare / eCredit..."), apoi, daca a fost
+     // salvat, analitica de plata, metoda de plata si starea FIN (cSQL_OfferToFinantare)
+    if cxGridBRKDBTable.DataController.RecNo <= 0 then
+        Exit;
+    DocID := dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger;
+
+    if ShowAskDialog('Cerere de finantare',
+        Format('Transformati oferta #%d in cerere de finantare?', [DocID]),
+        'Se deschide dosarul de credit al ofertei. Dupa salvarea lui oferta primeste ' +
+        'analitica de plata "Credit" si starea de finantare "Solicitat" in deal.') <> mrYes then
+        Exit;
+
+     // dosarul: Renunta / eroare la salvare -> oferta ramine neschimbata
+    if not TfrmFinantareEditorDlg.Execute(Self, DocID) then
+        Exit;
+
+    try
+        dmDB.ExecuteQuery(cSQL_OfferToFinantare, [DocID, dmDB.CurrentUserID]);
+    except
+        on E: Exception do
+        begin
+            ShowErrorDialog('Cerere de finantare',
+                'Dosarul de credit a fost salvat, dar oferta nu a putut fi marcata ca cerere de finantare.',
+                E.Message);
+            Exit;
+        end;
+    end;
+
+    dmDB.IBCQueryDocs.Refresh;
+    ShowInfoDialog('Cerere de finantare', Format('Oferta #%d este acum cerere de finantare.', [DocID]));
 end;
 
 procedure Tframe08ConfigurationBRK.bbTenderClick(Sender: TObject);
@@ -2135,6 +2312,9 @@ begin
     if not fSECURITY_CanEdit then
         Exit;
 
+    // comanda de pe site fara responsabil: cine o deschide devine responsabil (ca in Web-Order)
+    AssignResponsibleOnOpen;
+
     dialog := TfrmConfigurationDocDlg.Create(Self);
     try
         dialog.CreateNewDocument := False;
@@ -2531,6 +2711,14 @@ begin
     fSECURITY_CanEdit := SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_КОНФИГУРАЦИИ_Конфигуратор_Изменить);
     fSECURITY_CanDelete := SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_КОНФИГУРАЦИИ_Конфигуратор_Удалить);
 
+    // comenzile web mutate in Oferte: aceleasi drepturi ca in Web-Order
+    fSEC_ViewCredit := SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_WEB_CerereFinantare_Vizualizare);
+    fSEC_WebEcomm := SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_WEB_Web_Order_Ecomm_transactii);
+    fSEC_WebCashback := SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_WEB_Web_Order_Anulare_cashback);
+    tbsCredit.TabVisible := fSEC_ViewCredit;
+    bbEcommInfo.Visible := iif(fSEC_WebEcomm, ivAlways, ivNever);
+    bbCancelCashback.Visible := iif(fSEC_WebCashback, ivAlways, ivNever);
+
      // Coloana preturi
     if not SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_Справочники_Товары_Колонка_цен_0) then
         bbPriceCol0.Visible := ivNever;
@@ -2599,6 +2787,222 @@ begin
         cxGridPopupMenuCOMPONENTS.PopupMenus.Clear;
     if (dxBarPopupMenuCOMPLECT.ItemLinks.VisibleItemCount = 0) then
         cxGridPopupMenuCOMPLECT.PopupMenus.Clear;
+end;
+
+{ ---- comenzile web mutate in Oferte (SP_WEBORDER_TO_OFFER): acelasi DOCID, CREATED_BY = 9 ---- }
+
+function Tframe08ConfigurationBRK.IsWebOrderRow: Boolean;
+begin
+    Result := dmDB.IBCQueryDocs.Active and (not dmDB.IBCQueryDocs.IsEmpty) and
+        (dmDB.IBCQueryDocs.FieldByName('CREATED_BY').AsInteger = cWebSiteUserID);
+end;
+
+// Credit = metoda de plata din deal (site: cos / "1 click") sau analitica de credit (Credit 0% / cu dobanda)
+function Tframe08ConfigurationBRK.IsCreditRow(ARecord: TcxCustomGridRecord): Boolean;
+begin
+    Result := False;
+    if ARecord = nil then
+        Exit;
+    Result := (Pos('CREDIT', UpperCase(VarToStr(ARecord.Values[cxGridBRKDB_PAYMENT_METHOD.Index]))) = 1) or
+        (Pos('CREDIT', UpperCase(VarToStr(ARecord.Values[cxGridBRKDB_dtsc_name.Index]))) = 1);
+end;
+
+procedure Tframe08ConfigurationBRK.cxGridBRKDB_PAYMENT_METHODGetDisplayText(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord; var AText: string);
+var
+    Analytic: string;
+begin
+    if ARecord = nil then
+        Exit;
+    if IsCreditRow(ARecord) then
+    begin
+        // analitica precizeaza tipul creditului (Credit 0% / Credit cu dobanda)
+        Analytic := VarToStr(ARecord.Values[cxGridBRKDB_dtsc_name.Index]);
+        if Pos('CREDIT', UpperCase(Analytic)) = 1 then
+            AText := Analytic
+        else
+            AText := 'Credit';
+    end
+    else if SameText(AText, 'La primire') then
+        // "1 click": plata integrala la primirea marfii
+        AText := 'Integral, la primire';
+end;
+
+procedure Tframe08ConfigurationBRK.cxPageControlComplectChange(Sender: TObject);
+begin
+    if csLoading in ComponentState then
+        Exit;
+    UpdateCreditTab;
+end;
+
+// dosarul de credit (IDNP, buletin) se citeste doar cind fila "Credit" e deschisa
+procedure Tframe08ConfigurationBRK.UpdateCreditTab;
+begin
+    if fSEC_ViewCredit and (cxPageControlComplect.ActivePage = tbsCredit) then
+    begin
+        if not IBCQueryCredit.Active then
+            IBCQueryCredit.Open;
+    end
+    else if IBCQueryCredit.Active then
+        IBCQueryCredit.Close;
+    ShowCreditState;
+end;
+
+procedure Tframe08ConfigurationBRK.IBCDataSourceCreditDataChange(Sender: TObject; Field: TField);
+begin
+    // Field = nil: dosarul s-a reincarcat (alt document selectat)
+    if Field = nil then
+        ShowCreditState;
+end;
+
+// Documentul are dosar (rind in TWEB_CERERE_FINANTARE) -> datele lui; comanda pe credit fara dosar
+// ("1 click" cu credit) -> operatorul trebuie sa ceara actele clientului.
+procedure Tframe08ConfigurationBRK.ShowCreditState;
+var
+    HasFile: Boolean;
+begin
+    if not IBCQueryCredit.Active then
+        Exit;
+    HasFile := not IBCQueryCredit.IsEmpty;
+    sbCredit.Visible := HasFile;
+    pnCreditState.Visible := not HasFile;
+    if HasFile then
+        Exit;
+    if IsCreditRow(cxGridBRKDBTable.Controller.FocusedRecord) then
+    begin
+        lbCreditState.Font.Color := clRed;
+        lbCreditState.Caption := 'Dosar de credit lipsa - cereti actele clientului (buletinul).';
+    end
+    else
+    begin
+        lbCreditState.Font.Color := clGrayText;
+        lbCreditState.Caption := 'Documentul nu este pe credit - nu are dosar de credit ("Cerere de finantare / eCredit" din meniul contextual).';
+    end;
+end;
+
+procedure Tframe08ConfigurationBRK.bbWebOnlyClick(Sender: TObject);
+begin
+    ApplyWebFilters;
+end;
+
+procedure Tframe08ConfigurationBRK.bbCreditOnlyClick(Sender: TObject);
+begin
+    ApplyWebFilters;
+end;
+
+// Filtre rapide din meniul contextual: "Doar comenzi de pe site" (CREATED_BY = 9) si "Doar pe credit"
+// (metoda de plata din deal sau analitica de plata incep cu "Credit"), combinate cu SI
+procedure Tframe08ConfigurationBRK.ApplyWebFilters;
+var
+    Filter: TcxDataFilterCriteria;
+    CreditList: TcxFilterCriteriaItemList;
+begin
+    Filter := cxGridBRKDBTable.DataController.Filter;
+    Filter.BeginUpdate;
+    try
+        Filter.Root.Clear;
+        Filter.Root.BoolOperatorKind := fboAnd;
+        if bbWebOnly.Down then
+            Filter.Root.AddItem(cxGridBRKDB_CREATED_BY, foEqual, cWebSiteUserID, IntToStr(cWebSiteUserID));
+        if bbCreditOnly.Down then
+        begin
+            Filter.Options := Filter.Options + [fcoCaseInsensitive];
+            CreditList := Filter.Root.AddItemList(fboOr);
+            CreditList.AddItem(cxGridBRKDB_PAYMENT_METHOD, foLike, 'Credit%', 'Credit%');
+            CreditList.AddItem(cxGridBRKDB_dtsc_name, foLike, 'Credit%', 'Credit%');
+        end;
+        Filter.Active := bbWebOnly.Down or bbCreditOnly.Down;
+    finally
+        Filter.EndUpdate;
+    end;
+end;
+
+procedure Tframe08ConfigurationBRK.bbEcommInfoClick(Sender: TObject);
+begin
+    if IsWebOrderRow then
+        ShowEcommInformation(dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger);
+end;
+
+procedure Tframe08ConfigurationBRK.ShowEcommInformation(DocID: Integer);
+var
+    dialog: TfrmWebEcommInfoDialog;
+begin
+    dialog := TfrmWebEcommInfoDialog.Create(Self, dmDB.IBCConnection);
+    try
+        dialog.DocID := DocID;
+        dialog.ShowModal;
+    finally
+        dialog.Free;
+    end;
+end;
+
+procedure Tframe08ConfigurationBRK.bbCancelCashbackClick(Sender: TObject);
+begin
+    if not IsWebOrderRow then
+        Exit;
+    dmDB.ExecuteQuery('execute procedure sp_cancel_cashback(:docid)', [dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger]);
+end;
+
+procedure Tframe08ConfigurationBRK.MiaPaymentClick(Sender: TObject);
+begin
+    if not dmDB.IBCQueryDocs.Active or dmDB.IBCQueryDocs.IsEmpty then
+        Exit;
+    ShowMiaPaymentDialog(Self, dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger, fSECURITY_CanEdit);
+    // fereastra a putut schimba starea (link nou, rambursare ceruta): coloana se reincarca
+    AddMiaColumn(cxGridBRKDBTable);
+    cxGridBRKDBTable.LayoutChanged;
+    dmDB.IBCQueryDocComments.Refresh;
+end;
+
+// Comanda de pe site, deschisa, fara responsabil: cine o deschide pentru modificare devine
+// responsabil (primul castiga, ca in Web-Order). Un responsabil existent ramine.
+procedure Tframe08ConfigurationBRK.AssignResponsibleOnOpen;
+var
+    DocID, Winner: Integer;
+    Query: TIBCQuery;
+begin
+    if not IsWebOrderRow then
+        Exit;
+    if (dmDB.IBCQueryDocs.FieldByName('FLG_CLOSED').AsInteger = 1) or
+        (dmDB.IBCQueryDocs.FieldByName('RESPONSIBLE_USERID').AsInteger > 0) then
+        Exit;
+
+    DocID := dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger;
+    try
+        dmDB.ExecuteQuery('UPDATE TDB_DOCS SET RESPONSIBLE_USERID = :USERID' +
+            ' WHERE DOCID = :DOCID AND DOCTYPEID IN (115, 134) AND COALESCE(RESPONSIBLE_USERID, -1) <= 0',
+            [dmDB.CurrentUserID, DocID]);
+
+        // cine a castigat: noi sau un coleg care a deschis-o cu o clipa inainte
+        Winner := 0;
+        Query := TIBCQuery.Create(nil);
+        try
+            Query.Connection := dmDB.IBCConnection;
+            Query.Transaction := dmDB.IBCTrDefaultSelect;
+            Query.SQL.Text := 'SELECT COALESCE(RESPONSIBLE_USERID, 0) FROM TDB_DOCS WHERE DOCID = :DOCID';
+            Query.ParamByName('DOCID').AsInteger := DocID;
+            Query.Open;
+            if not Query.Eof then
+                Winner := Query.Fields[0].AsInteger;
+            Query.Close;
+        finally
+            Query.Free;
+        end;
+
+        if Winner > 0 then
+        begin
+            dmDB.IBCQueryDocs.DisableControls;
+            try
+                dmDB.IBCQueryDocs.Refresh;
+                dmDB.IBCQueryDocs.Locate('DOCID', DocID, []);
+            finally
+                dmDB.IBCQueryDocs.EnableControls;
+            end;
+        end;
+    except
+        // preluarea automata nu are voie sa blocheze deschiderea documentului
+        if dmDB.IBCQueryDocs.State in [dsEdit, dsInsert] then
+            dmDB.IBCQueryDocs.Cancel;
+    end;
 end;
 
 procedure Tframe08ConfigurationBRK.ShowKitchenTemplate;

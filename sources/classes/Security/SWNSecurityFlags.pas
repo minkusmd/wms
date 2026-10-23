@@ -746,6 +746,7 @@ const
 		// Cerere de finantare
 		cSecurityFlag_WEB_Заявка_на_финансирование = 1791;
 			cSecurityFlag_WEB_ЗНФ_Просмотр = 1792;		// Vizualizare
+			cSecurityFlag_WEB_CerereFinantare_Vizualizare = 1792;		// alias ASCII al dreptului de mai sus (pentru unitatile cp1251)
 			cSecurityFlag_WEB_ЗНФ_Редактировать = 1793;		// Editare
 			cSecurityFlag_WEB_ЗНФ_Удалить = 1794;		// Sterge
 			cSecurityFlag_WEB_ЗНФ_Создать_Расходную_накладную = 1796;		// Creare "Nakladnaia de iesire"

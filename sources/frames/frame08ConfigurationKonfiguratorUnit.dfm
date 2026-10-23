@@ -261,6 +261,21 @@ inherited frame08ConfigurationBRK: Tframe08ConfigurationBRK
         Options.HorzSizing = False
         Width = 100
       end
+      object cxGridBRKDB_PAYMENT_METHOD: TcxGridDBColumn
+        Caption = 'Plata'
+        DataBinding.FieldName = 'PAYMENT_METHOD'
+        OnGetDisplayText = cxGridBRKDB_PAYMENT_METHODGetDisplayText
+        HeaderAlignmentHorz = taCenter
+        MinWidth = 64
+        Options.Editing = False
+        Width = 110
+      end
+      object cxGridBRKDB_CREATED_BY: TcxGridDBColumn
+        DataBinding.FieldName = 'CREATED_BY'
+        Visible = False
+        MinWidth = 13
+        VisibleForCustomization = False
+      end
     end
     object cxGridBRKLevel: TcxGridLevel
       GridView = cxGridBRKDBTable
@@ -299,6 +314,7 @@ inherited frame08ConfigurationBRK: Tframe08ConfigurationBRK
       Properties.ActivePage = tbsGoods
       Properties.CustomButtons.Buttons = <>
       Properties.TabPosition = tpBottom
+      OnChange = cxPageControlComplectChange
       ClientRectBottom = 236
       ClientRectLeft = 4
       ClientRectRight = 1234
@@ -999,6 +1015,280 @@ inherited frame08ConfigurationBRK: Tframe08ConfigurationBRK
           UseOwnSunkenBorder = True
         end
       end
+      object tbsCredit: TcxTabSheet
+        Caption = 'Credit (&3)'
+        ImageIndex = 2
+        object pnCreditState: TPanel
+          Left = 0
+          Top = 0
+          Width = 966
+          Height = 28
+          Align = alTop
+          BevelOuter = bvNone
+          TabOrder = 0
+          Visible = False
+          object lbCreditState: TLabel
+            AlignWithMargins = True
+            Left = 8
+            Top = 3
+            Width = 955
+            Height = 22
+            Margins.Left = 8
+            Align = alClient
+            AutoSize = False
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = clRed
+            Font.Height = -13
+            Font.Name = 'Segoe UI'
+            Font.Style = [fsBold]
+            ParentFont = False
+            Layout = tlCenter
+          end
+        end
+        object sbCredit: TScrollBox
+          Left = 0
+          Top = 28
+          Width = 966
+          Height = 178
+          HorzScrollBar.Smooth = True
+          Align = alClient
+          BevelInner = bvNone
+          BevelOuter = bvNone
+          BorderStyle = bsNone
+          TabOrder = 1
+          object pnCreditInfo: TPanel
+            Left = 0
+            Top = 0
+            Width = 320
+            Height = 178
+            Align = alLeft
+            BevelOuter = bvNone
+            TabOrder = 0
+            object lbCreditInfo: TLabel
+              Left = 0
+              Top = 0
+              Width = 320
+              Height = 20
+              Align = alTop
+              AutoSize = False
+              Caption = 'Creditul'
+              Font.Charset = DEFAULT_CHARSET
+              Font.Color = clWindowText
+              Font.Height = -12
+              Font.Name = 'Segoe UI'
+              Font.Style = [fsBold]
+              ParentFont = False
+              Layout = tlCenter
+            end
+            object cxDBVerticalGridCredit: TcxDBVerticalGrid
+              Left = 0
+              Top = 20
+              Width = 320
+              Height = 158
+              Align = alClient
+              OptionsView.RowHeaderWidth = 140
+              OptionsBehavior.ImmediateEditor = False
+              OptionsBehavior.AllowChangeRecord = False
+              OptionsData.Editing = False
+              OptionsData.Appending = False
+              OptionsData.Deleting = False
+              OptionsData.Inserting = False
+              ScrollbarAnnotations.CustomAnnotations = <>
+              Styles.Header = dmAdditions.cxStyle_Goods_GeneralHeader
+              TabOrder = 0
+              DataController.DataSource = IBCDataSourceCredit
+              Version = 1
+              object vgrCreditOrg: TcxDBEditorRow
+                Properties.Caption = 'Organizatia'
+                Properties.DataBinding.FieldName = 'ORG_TITLE'
+                ID = 0
+                ParentID = -1
+                Index = 0
+                Version = 1
+              end
+              object vgrCreditType: TcxDBEditorRow
+                Properties.Caption = 'Tipul creditului'
+                Properties.DataBinding.FieldName = 'CREDIT_TYPE_NAME'
+                ID = 1
+                ParentID = -1
+                Index = 1
+                Version = 1
+              end
+              object vgrCreditSuma: TcxDBEditorRow
+                Properties.Caption = 'Suma creditului'
+                Properties.EditPropertiesClassName = 'TcxCurrencyEditProperties'
+                Properties.EditProperties.DisplayFormat = ',0.00'
+                Properties.DataBinding.FieldName = 'CREDIT_SUMA'
+                ID = 2
+                ParentID = -1
+                Index = 2
+                Version = 1
+              end
+              object vgrCreditPerioada: TcxDBEditorRow
+                Properties.Caption = 'Termen (luni)'
+                Properties.DataBinding.FieldName = 'CREDIT_PERIOADA'
+                ID = 3
+                ParentID = -1
+                Index = 3
+                Version = 1
+              end
+              object vgrCreditRata: TcxDBEditorRow
+                Properties.Caption = 'Rata lunara'
+                Properties.EditPropertiesClassName = 'TcxCurrencyEditProperties'
+                Properties.EditProperties.DisplayFormat = ',0.00'
+                Properties.DataBinding.FieldName = 'PLATA_LUNARA'
+                ID = 4
+                ParentID = -1
+                Index = 4
+                Version = 1
+              end
+              object vgrCreditAvans: TcxDBEditorRow
+                Properties.Caption = 'Avans'
+                Properties.EditPropertiesClassName = 'TcxCurrencyEditProperties'
+                Properties.EditProperties.DisplayFormat = ',0.00'
+                Properties.DataBinding.FieldName = 'AVANS'
+                ID = 5
+                ParentID = -1
+                Index = 5
+                Version = 1
+              end
+            end
+          end
+          object pnCreditPerson: TPanel
+            Left = 322
+            Top = 0
+            Width = 340
+            Height = 178
+            Align = alLeft
+            BevelOuter = bvNone
+            TabOrder = 1
+            object lbCreditPerson: TLabel
+              Left = 0
+              Top = 0
+              Width = 340
+              Height = 20
+              Align = alTop
+              AutoSize = False
+              Caption = 'Persoana care solicita creditul'
+              Font.Charset = DEFAULT_CHARSET
+              Font.Color = clWindowText
+              Font.Height = -12
+              Font.Name = 'Segoe UI'
+              Font.Style = [fsBold]
+              ParentFont = False
+              Layout = tlCenter
+            end
+            object cxDBVerticalGridPerson: TcxDBVerticalGrid
+              Left = 0
+              Top = 20
+              Width = 340
+              Height = 158
+              Align = alClient
+              OptionsView.RowHeaderWidth = 170
+              OptionsBehavior.ImmediateEditor = False
+              OptionsBehavior.AllowChangeRecord = False
+              OptionsData.Editing = False
+              OptionsData.Appending = False
+              OptionsData.Deleting = False
+              OptionsData.Inserting = False
+              ScrollbarAnnotations.CustomAnnotations = <>
+              Styles.Header = dmAdditions.cxStyle_Goods_GeneralHeader
+              TabOrder = 0
+              DataController.DataSource = IBCDataSourceCredit
+              Version = 1
+              object vgrPersonNPP: TcxDBEditorRow
+                Properties.Caption = 'Numele, prenumele'
+                Properties.DataBinding.FieldName = 'NPP'
+                ID = 0
+                ParentID = -1
+                Index = 0
+                Version = 1
+              end
+              object vgrPersonIDNP: TcxDBEditorRow
+                Properties.Caption = 'IDNP'
+                Properties.DataBinding.FieldName = 'IDEN'
+                ID = 1
+                ParentID = -1
+                Index = 1
+                Version = 1
+              end
+              object vgrPersonBirth: TcxDBEditorRow
+                Properties.Caption = 'Data nasterii'
+                Properties.DataBinding.FieldName = 'DATA_NASTERII'
+                ID = 2
+                ParentID = -1
+                Index = 2
+                Version = 1
+              end
+              object vgrPersonPhone: TcxDBEditorRow
+                Properties.Caption = 'Telefon de contact'
+                Properties.DataBinding.FieldName = 'CONTACT_TELEFON'
+                ID = 3
+                ParentID = -1
+                Index = 3
+                Version = 1
+              end
+              object vgrPersonFax: TcxDBEditorRow
+                Properties.Caption = 'Copia buletinului prin fax'
+                Properties.EditPropertiesClassName = 'TcxCheckBoxProperties'
+                Properties.EditProperties.ValueChecked = 1
+                Properties.EditProperties.ValueUnchecked = 0
+                Properties.DataBinding.FieldName = 'FLG_COPY_BY_FAX'
+                ID = 4
+                ParentID = -1
+                Index = 4
+                Version = 1
+              end
+            end
+          end
+          object imgCreditScan1: TcxDBImage
+            Left = 672
+            Top = 20
+            DataBinding.DataField = 'SCAN1'
+            DataBinding.DataSource = IBCDataSourceCredit
+            Properties.GraphicClassName = 'TdxSmartImage'
+            Properties.ReadOnly = True
+            TabOrder = 2
+            Height = 130
+            Width = 180
+          end
+          object imgCreditScan2: TcxDBImage
+            Left = 860
+            Top = 20
+            DataBinding.DataField = 'SCAN2'
+            DataBinding.DataSource = IBCDataSourceCredit
+            Properties.GraphicClassName = 'TdxSmartImage'
+            Properties.ReadOnly = True
+            TabOrder = 3
+            Height = 130
+            Width = 180
+          end
+          object edCreditScan1Name: TcxDBTextEdit
+            Left = 672
+            Top = 152
+            Hint = 'Numele fisierului incarcat de client (buletin, fata)'
+            DataBinding.DataField = 'SCAN1_NAME'
+            DataBinding.DataSource = IBCDataSourceCredit
+            ParentShowHint = False
+            Properties.ReadOnly = True
+            ShowHint = True
+            TabOrder = 4
+            Width = 180
+          end
+          object edCreditScan2Name: TcxDBTextEdit
+            Left = 860
+            Top = 152
+            Hint = 'Numele fisierului incarcat de client (buletin, verso)'
+            DataBinding.DataField = 'SCAN2_NAME'
+            DataBinding.DataSource = IBCDataSourceCredit
+            ParentShowHint = False
+            Properties.ReadOnly = True
+            ShowHint = True
+            TabOrder = 5
+            Width = 180
+          end
+        end
+      end
     end
   end
   object cxSplitter: TcxSplitter
@@ -1490,6 +1780,15 @@ inherited frame08ConfigurationBRK: Tframe08ConfigurationBRK
       Visible = ivAlways
       OnClick = bbECreditClick
     end
+    object bbToFinantare: TdxBarButton
+      Caption = 'Transforma in cerere de finantare'
+      Category = 0
+      Hint = 
+        'Oferta devine cerere de finantare: dosar de credit, analitica de ' +
+        'plata Credit si starea de finantare in deal'
+      Visible = ivAlways
+      OnClick = bbToFinantareClick
+    end
     object bbTender: TdxBarButton
       Caption = 'Creaza oferta pentru tender'
       Category = 0
@@ -1525,6 +1824,36 @@ inherited frame08ConfigurationBRK: Tframe08ConfigurationBRK
       Visible = ivAlways
       ShortCut = 49238
       OnClick = btnVinzarePartenerClick
+    end
+    object bbEcommInfo: TdxBarButton
+      Caption = 'Info transactie Ecomm'
+      Category = 0
+      Hint = 'Info transactie Ecomm (comanda de pe site)'
+      Visible = ivAlways
+      OnClick = bbEcommInfoClick
+    end
+    object bbCancelCashback: TdxBarButton
+      Caption = 'Anuleaza cashback'
+      Category = 0
+      Hint = 'Anuleaza cashback-ul folosit in comanda de pe site'
+      Visible = ivAlways
+      OnClick = bbCancelCashbackClick
+    end
+    object bbWebOnly: TdxBarButton
+      Caption = 'Doar comenzi de pe site'
+      Category = 0
+      Hint = 'Arata doar ofertele venite ca Web-Order de pe site'
+      Visible = ivAlways
+      ButtonStyle = bsChecked
+      OnClick = bbWebOnlyClick
+    end
+    object bbCreditOnly: TdxBarButton
+      Caption = 'Doar pe credit'
+      Category = 0
+      Hint = 'Arata doar documentele cu plata pe credit'
+      Visible = ivAlways
+      ButtonStyle = bsChecked
+      OnClick = bbCreditOnlyClick
     end
     object dxBarSubItem4: TdxBarSubItem
       Caption = 'Instrumente'
@@ -1955,7 +2284,29 @@ inherited frame08ConfigurationBRK: Tframe08ConfigurationBRK
       item
         BeginGroup = True
         Visible = True
+        ItemName = 'bbEcommInfo'
+      end
+      item
+        Visible = True
+        ItemName = 'bbCancelCashback'
+      end
+      item
+        BeginGroup = True
+        Visible = True
+        ItemName = 'bbWebOnly'
+      end
+      item
+        Visible = True
+        ItemName = 'bbCreditOnly'
+      end
+      item
+        BeginGroup = True
+        Visible = True
         ItemName = 'bbECredit'
+      end
+      item
+        Visible = True
+        ItemName = 'bbToFinantare'
       end
       item
         BeginGroup = True
@@ -2086,5 +2437,45 @@ inherited frame08ConfigurationBRK: Tframe08ConfigurationBRK
       end>
     Left = 464
     Top = 68
+  end
+  object IBCQueryCredit: TIBCQuery
+    Connection = dmDB.IBCConnection
+    Transaction = dmDB.IBCTrDefaultSelect
+    SQL.Strings = (
+      
+        'SELECT F.DOCID, F.CREDIT_SUMA, F.CREDIT_PERIOADA, F.PLATA_LUNARA' +
+        ', F.AVANS,'
+      '  F.ORG_ID, O.TITLE AS ORG_TITLE,'
+      '  IIF(TRIM(COALESCE(F.CREDIT_TYPE, '#39#39')) = '#39#39', NULL,'
+      '    IIF(TRIM(F.CREDIT_TYPE) = '#39'0'#39', '#39'Credit 0%'#39','
+      
+        '      '#39'Credit cu dobanda '#39' || TRIM(F.CREDIT_TYPE) || '#39'%'#39')) AS CR' +
+        'EDIT_TYPE_NAME,'
+      
+        '  F.NPP, F.IDEN, F.DATA_NASTERII, F.CONTACT_TELEFON, F.FLG_COPY_' +
+        'BY_FAX,'
+      '  IIF(OCTET_LENGTH(F.SCAN1) > 16, F.SCAN1, NULL) AS SCAN1,'
+      '  IIF(OCTET_LENGTH(F.SCAN2) > 16, F.SCAN2, NULL) AS SCAN2,'
+      '  F.SCAN1_NAME, F.SCAN2_NAME'
+      'FROM TWEB_CERERE_FINANTARE F'
+      'LEFT JOIN TS_FINANCE_CUSTOMER O ON O.UID = F.ORG_ID'
+      'WHERE F.DOCID = :DOCID')
+    MasterSource = dmDB.IBCDataSourceDocs
+    ReadOnly = True
+    Options.DetailDelay = 100
+    Left = 216
+    Top = 140
+    ParamData = <
+      item
+        DataType = ftInteger
+        Name = 'DOCID'
+        Value = nil
+      end>
+  end
+  object IBCDataSourceCredit: TIBCDataSource
+    DataSet = IBCQueryCredit
+    OnDataChange = IBCDataSourceCreditDataChange
+    Left = 296
+    Top = 140
   end
 end

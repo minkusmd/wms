@@ -639,7 +639,8 @@ end;
 { tipurile de document in al caror dialog se arata analitica deal-ului }
 function DealAnalyticsForDocType(const ADocTypeID: Integer): Boolean;
 begin
-  Result := ADocTypeID = 134;
+  // 134 Web-Order si 115 Oferta (comanda web mutata in Oferte pastreaza DOCID-ul)
+  Result := (ADocTypeID = 134) or (ADocTypeID = 115);
 end;
 
 { analitica deal-ului: sumele din V_DEAL_ANALYTICS (MDL), ca in fisa deal-ului.

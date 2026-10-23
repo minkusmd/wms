@@ -245,6 +245,8 @@ type
     // Creare "Dispozitie de plata"
         function CreateRashodniiKasoviiOrder(const DocID, CurrencyID, FLG_ACNT: Integer; const RATE: Double; const SUMA: Currency): Boolean;
         function CreateConfiguratorDoc_DB(const DocID: Integer; const CustomUserID: Integer = -1; const CustomComments: string = ''): Integer;
+        // 23.10.2026: comanda web (134) devine Oferta (115) in loc - acelasi DOCID (SP_WEBORDER_TO_OFFER)
+        function MoveWebOrderToOffer_DB(const DocID: Integer; const Comments: string = ''): Boolean;
 
     // Ordin de plata bancar
         function CreateBPP(const DocID: Integer; const SUMA: Currency): Boolean;
@@ -922,6 +924,40 @@ begin
     end;
 
     dmDB.IBCQueryDocs.Refresh;
+end;
+
+function TdmDB.MoveWebOrderToOffer_DB(const DocID: Integer; const Comments: string): Boolean;
+var
+    Query: TIBCQuery;
+begin
+    Result := False;
+    Query := TIBCQuery.Create(Self);
+    try
+        Query.Connection := IBCConnection;
+        Query.Transaction := IBCTrDefaultUpdate;
+        Query.SQL.Text := 'SELECT DOCID FROM SP_WEBORDER_TO_OFFER(:DOCID, :USERID, :CM)';
+        Query.ParamByName('DOCID').AsInteger := DocID;
+        Query.ParamByName('USERID').AsInteger := CurrentUserID;
+        if Comments <> '' then
+            Query.ParamByName('CM').AsString := Comments;
+
+        Query.Transaction.StartTransaction;
+        try
+            Query.Open;
+            Result := (not Query.Eof) and (Query.Fields[0].AsInteger = DocID);
+            Query.Close;
+            Query.Transaction.Commit;
+        except
+            on E: Exception do
+            begin
+                Query.Transaction.Rollback;
+                if not ProcessSWNError(E) then
+                    raise;
+            end;
+        end;
+    finally
+        Query.Free;
+    end;
 end;
 
 function TdmDB.CreateDocumentProvodka(const DocID: Integer): Boolean;
@@ -2089,7 +2125,15 @@ end;
 
 procedure TdmDB.IBCQueryDocsBeforeUpdateExecute(Sender: TDataSet; StatementTypes: TStatementTypes; Params: TDAParams);
 begin
-    if Assigned(Params.FindParam('DOCTYPEID')) then
+    if not Assigned(Params.FindParam('DOCTYPEID')) then
+        Exit;
+    // 23.10.2026: la UPDATE tipul ramine cel al rindului, nu al frame-ului curent - o comanda web
+    // mutata in Oferte (SP_WEBORDER_TO_OFFER) nu trebuie readusa la 134 dintr-un rind vechi din
+    // Web-Order (baza are si ea garda in TRG_TDB_DOCS_BU0); la INSERT tipul e cel al frame-ului
+    if (stUpdate in StatementTypes) and Assigned(Sender.FindField('DOCTYPEID')) and
+       (not Sender.FieldByName('DOCTYPEID').IsNull) then
+        Params.ParamByName('DOCTYPEID').AsInteger := Sender.FieldByName('DOCTYPEID').AsInteger
+    else
         Params.ParamByName('DOCTYPEID').AsInteger := FCurrentDocTypeID;
 end;
 

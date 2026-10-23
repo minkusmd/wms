@@ -995,9 +995,9 @@ inherited frame24WebZakaz: Tframe24WebZakaz
       OnClick = bbDocCloseClick
     end
     object bbAction_Configurator: TdxBarButton
-      Caption = 'Creaza "Oferta"...'
+      Caption = 'Muta in "Oferte"...'
       Category = 1
-      Hint = 'Creaza "Oferta"'
+      Hint = 'Muta comanda in "Oferte" (acelasi document, acelasi numar)'
       Visible = ivAlways
       ShortCut = 49219
       OnClick = bbAction_ConfiguratorClick

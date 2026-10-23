@@ -82,6 +82,10 @@ type
     beContract: TcxButtonEdit;
     lcbCURRENCY: TcxDBLookupComboBox;
     cbFLG_FURNITURE: TcxDBCheckBox;
+    lbCashback: TLabel;
+    ceCashback: TcxDBCalcEdit;
+    IBCQueryCashback: TIBCQuery;
+    IBCDataSourceCashback: TIBCDataSource;
     lblSecDocument: TLabel;
     lblAnaliticaOrg: TLabel;
     lblSecFinante: TLabel;
@@ -446,6 +450,18 @@ begin
         beContract.Text := '';
     end;
 
+    // cashback folosit in comanda de pe site (TDB_DOCS_CASHBACK_USED) - doar la afisare, cind exista
+    IBCQueryCashback.Close;
+    lbCashback.Visible := False;
+    ceCashback.Visible := False;
+    if not fCreateNewDocument then
+    begin
+      IBCQueryCashback.ParamByName('DOCID').AsInteger := dmDB.IBCQueryDocs.FieldByName('DOCID').AsInteger;
+      IBCQueryCashback.Open;
+      lbCashback.Visible := not IBCQueryCashback.IsEmpty;
+      ceCashback.Visible := lbCashback.Visible;
+    end;
+
     dmDB.IBCQueryAnalitica.Active := True;
     dmDB.IBCQuerySYSSList.ParambyName('PARENTID').AsInteger := 46;
     dmDB.IBCQuerySYSSList.Active := True;
@@ -605,6 +621,7 @@ procedure TfrmConfigurationDocDlg.CloseAdditionalDataSources;
 begin
      // close additional datasets
   frameDelivery.CloseData;
+  IBCQueryCashback.Close;
   dmDB.IBCQueryCurrency.Close;
   dmDB.IBCQueryAnalitica.Close;
   dmDB.IBCQueryAnalytics.Close;
