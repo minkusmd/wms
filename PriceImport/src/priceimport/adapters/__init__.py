@@ -4,10 +4,11 @@ from __future__ import annotations
 
 from .agropiese import AgroPieseAdapter
 from .base import AdapterError, DeadlineExceeded, RunContext, SupplierAdapter
+from .excel import ExcelAdapter
 from .external_plid import ExternalPlidAdapter
 
 ADAPTERS: dict[str, type[SupplierAdapter]] = {
-    cls.code: cls for cls in (ExternalPlidAdapter, AgroPieseAdapter)
+    cls.code: cls for cls in (ExternalPlidAdapter, AgroPieseAdapter, ExcelAdapter)
 }
 
 

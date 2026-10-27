@@ -32,6 +32,20 @@ Data: 27 oct 2026 · Autor: plan pregătit pentru Prime Store SRL / fantastic.md
 
 **Ordinea de pornire:** stage2.sql + grants pe SW → `apply-test` pe un PLID neprelucrat (documente reale, ROLLBACK) → `FLG_AUTO_APPLY = 1` pe 1–2 furnizori → `PI_APPLY_ENABLED=true` pe serviciu → ceilalți furnizori.
 
+### Etapa 3 (28 oct 2026): botul Telegram pentru furnizorii manuali, scris și testat local
+
+| Ce | Stare |
+|---|---|
+| DDL `DB Model/price_import_stage3.sql` (+ `_rollback`, `_grants`): `TPI_BOT_USER`, `TPI_INBOX_FILE`, `TPI_FILE_RULE`, `TPI_BOT_STATE` | **Rulat pe SW 28 oct 2026**, verificat: 4 tabele goale, 9 indecși activi, cheile (inclusiv FK spre `TPI_SUPPLIER`), drepturile PRICEIMPORT |
+| `pi bot`: recepția fișierelor, recunoașterea furnizorului (`#ID`, reguli, antetul învățat, coduri comune cu `TS_GOODS_FOREIGN`), previzualizare + `.xlsx`, butoanele Aplică / Doar raport / Anulează, comenzile `/status /carantina /aproba /respinge /run /mute` | 6 teste cap-coadă cu Bot API simulat; 100 de teste în total |
+| Adaptorul `excel`: antet automat RO/RU/EN, mapare YAML, șablonul `wms16` (frame78), titluri de grupă = categorie, CSV cp1251/UTF-8, protecție zip-bomb | 6 teste; **netestat pe fișiere reale de la furnizori** (lipsesc mostre) |
+| CLI: `bot`, `bot-user`, `supplier-add`, `mapping-suggest`, `import-file` | — |
+| Docker: serviciul `pi-bot` în `compose.yaml` (imaginea 0.3) | Imaginea se construiește; nedeployată |
+
+Abatere de la plan: botul folosește un client Bot API propriu (sincron, peste `httpx`), nu aiogram. Sunt doar 7 metode, codul rămâne sincron ca restul serviciului și se testează cu `respx`.
+
+**Pentru pornire:** un bot nou din @BotFather (token în `secrets/bot_token.txt`), `pi bot-user <ID Telegram> <nume> --role APPLY` pentru fiecare operator, `pi supplier-add <ID>` pentru fiecare furnizor manual, apoi 2–3 fișiere reale per furnizor ca să verificăm maparea.
+
 Găsit la implementare (schimbă §4.4–4.5):
 - `ADJUST_RRP_REEVALUATION` scade `TS_CUSTOMER.RRP_DISCOUNT` (1–3%) din RRP la fiecare reevaluare. De aceea comparația brută (și cea din WMS) arată la fiecare import „+1%” la toate produsele pe RRP. Diff-ul Python aplică aceeași formulă înainte de comparare. La NATVEX 6111, falsele creșteri scad de la 1 187 la 0, iar la AgroPiese de la 952 la 812.
 - Pragul de zgomot implicit e **0%**: se ignoră doar diferențele care dispar la rotunjirea la 2 zecimale. Un prag procentual (0,5%) ar fi ascuns 629 de schimbări reale mici doar la AgroPiese.

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+from pathlib import Path
 from typing import Optional
 
 import typer
@@ -310,6 +311,87 @@ def watchdog() -> None:
         n = db.scalar("EXECUTE PROCEDURE SP_PI_WATCHDOG")
         db.commit()
     typer.echo(f"alerte trimise: {n}")
+
+
+# --- etapa 3 -------------------------------------------------------------------------------
+
+@app.command()
+def bot() -> None:
+    """Procesul pi-bot: fisierele furnizorilor manuali prin Telegram + comenzile de carantina."""
+    from .bot.runner import run_bot
+    run_bot(_settings())
+
+
+@app.command("mapping-suggest")
+def mapping_suggest(path: Path) -> None:
+    """Maparea coloanelor propusa pentru un fisier nou (de verificat si salvat in suppliers/<id>.yaml)."""
+    from .excelparse import ExcelError, suggest_mapping
+    try:
+        typer.echo(suggest_mapping(path))
+    except ExcelError as exc:
+        typer.echo(f"{exc.error_class}: {exc}")
+        raise typer.Exit(1)
+
+
+@app.command("import-file")
+def import_file(supplier_id: int, path: Path,
+                apply_now: bool = typer.Option(False, "--apply", help="aplica dupa analiza (PI_APPLY_ENABLED)")) -> None:
+    """Un fisier Excel / CSV al unui furnizor manual, fara bot: analiza (+ aplicarea, la cerere)."""
+    from .coordinator import apply_items, record_applied
+    from .excelparse import file_sha256
+    from .report import build_message
+    settings = _settings()
+    with open_db(settings) as db:
+        supplier = repo.load_supplier(db, supplier_id)
+        db.commit()
+    if supplier is None:
+        typer.echo(f"Furnizorul {supplier_id} nu e in TPI_SUPPLIER (vezi supplier-add)")
+        raise typer.Exit(1)
+    supplier.adapter_code = "excel"
+    outcome = run_supplier(settings, supplier, trigger="MANUAL", file_path=path, allow_apply=False,
+                           idempotency_key=f"{supplier_id}|file|{file_sha256(path)}")
+    if apply_now and outcome.status.value == "DRY_RUN" and outcome.baseline == "gf":
+        if not settings.apply_enabled:
+            typer.echo("Aplicarea e oprita (PI_APPLY_ENABLED=false): doar analiza.")
+        else:
+            applied, outcome.plid = apply_items(settings, outcome.run_id, supplier, outcome.items or [], None)
+            record_applied(outcome, applied)
+    typer.echo(build_message(f"Fisier · {supplier.name} · {path.name}", [outcome],
+                             dry_run=not (apply_now and settings.apply_enabled)))
+    typer.echo(f"\n{outcome.note or ''}")
+
+
+@app.command("supplier-add")
+def supplier_add(supplier_id: int, adapter: str = typer.Option("excel"), kind: str = typer.Option("B"),
+                 max_up: float = 20.0, max_down: float = 20.0) -> None:
+    """Un furnizor nou in TPI_SUPPLIER (implicit manual: excel, fara ferestre, fara aplicare automata)."""
+    settings = _settings(log_to_file=False)
+    with open_db(settings) as db:
+        if repo.load_supplier(db, supplier_id):
+            typer.echo(f"{supplier_id} exista deja")
+            raise typer.Exit(1)
+        name = db.scalar("SELECT NAME FROM TS_CUSTOMER WHERE CUSTOMERID = ?", (supplier_id,))
+        if name is None:
+            typer.echo(f"{supplier_id} nu exista in TS_CUSTOMER")
+            raise typer.Exit(1)
+        db.execute("INSERT INTO TPI_SUPPLIER (SUPPLIERID, ADAPTER_CODE, SOURCE_KIND, WINDOW_MASK, PRIORITY, MAX_UP_PCT, "
+                   "MAX_DOWN_PCT, FLG_AUTO_APPLY, FLG_ACTIVE, NOTE) VALUES (?, ?, ?, ?, 60, ?, ?, 0, 1, ?)",
+                   (supplier_id, adapter, kind.upper()[:1], 0 if adapter == "excel" else 3, max_up, max_down,
+                    f"adaugat din CLI ({adapter})"))
+        db.commit()
+    typer.echo(f"{supplier_id} {name.strip()}: adaugat ({adapter}, {kind.upper()[:1]})")
+
+
+@app.command("bot-user")
+def bot_user_cmd(tg_user_id: int, name: str, role: str = typer.Option("VIEW", help="VIEW sau APPLY"),
+                 disable: bool = False) -> None:
+    """Adauga / modifica un utilizator al botului (TPI_BOT_USER)."""
+    settings = _settings(log_to_file=False)
+    with open_db(settings) as db:
+        db.execute("UPDATE OR INSERT INTO TPI_BOT_USER (TG_USER_ID, NAME, ROLE_CODE, FLG_ACTIVE) VALUES (?, ?, ?, ?) "
+                   "MATCHING (TG_USER_ID)", (tg_user_id, name[:128], role.upper(), 0 if disable else 1))
+        db.commit()
+    typer.echo(f"{tg_user_id} {name}: {role.upper()}{' (dezactivat)' if disable else ''}")
 
 
 def main() -> None:

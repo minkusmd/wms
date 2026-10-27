@@ -41,6 +41,13 @@ class Settings(BaseSettings):
     approval_memory_days: int = 30
     alert_repeat_min: int = 360
 
+    # etapa 3 - botul Telegram pi-bot (bot SEPARAT de cel al SWNService: getUpdates are un singur consumator)
+    bot_token: str = ""
+    bot_token_file: Path | None = None
+    telegram_api_base: str = "https://api.telegram.org"
+    bot_max_file_mb: int = 20                 # limita Bot API pentru getFile
+    preview_max_age_hours: int = 6            # "Aplica" pe o previzualizare mai veche cere una noua
+
     timezone: str = "Europe/Chisinau"
     data_dir: Path = PROJECT_DIR / "data"
     suppliers_dir: Path = PROJECT_DIR / "suppliers"
@@ -67,6 +74,11 @@ class Settings(BaseSettings):
         if self.fb_password_file and self.fb_password_file.exists():
             return self.fb_password_file.read_text(encoding="utf-8").strip()
         return self.fb_password
+
+    def token(self) -> str:
+        if self.bot_token_file and self.bot_token_file.exists():
+            return self.bot_token_file.read_text(encoding="utf-8").strip()
+        return self.bot_token
 
     def dsn(self) -> str:
         if not self.fb_host:

@@ -13,9 +13,12 @@ import structlog
 _SECRET_RE = re.compile(r"(?i)(api_token|token|password|passwd|secret|authorization)=([^&\s]+)")
 
 
+_BOT_TOKEN_RE = re.compile(r"bot\d{5,}:[A-Za-z0-9_-]{20,}")
+
+
 def mask_secrets(text: str) -> str:
-    """Ascunde valorile parametrilor sensibili din URL-uri / mesaje."""
-    return _SECRET_RE.sub(r"\1=***", text)
+    """Ascunde valorile parametrilor sensibili din URL-uri / mesaje (inclusiv tokenul botului din URL)."""
+    return _BOT_TOKEN_RE.sub("bot***", _SECRET_RE.sub(r"\1=***", text))
 
 
 def _mask_processor(_logger, _name, event_dict):

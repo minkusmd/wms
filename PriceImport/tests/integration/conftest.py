@@ -13,7 +13,8 @@ ISQL = FB_HOME / "isql.exe"
 REPO = Path(__file__).resolve().parents[3]
 BASE_SCHEMA = Path(__file__).resolve().parents[1] / "schema" / "base_schema.sql"
 DDL = [REPO / "DB Model" / name for name in (
-    "price_import_stage1.sql", "price_import_grants.sql", "price_import_stage2.sql", "price_import_stage2_grants.sql")]
+    "price_import_stage1.sql", "price_import_grants.sql", "price_import_stage2.sql", "price_import_stage2_grants.sql",
+    "price_import_stage3.sql", "price_import_stage3_grants.sql")]
 
 needs_fb = pytest.mark.skipif(not ISQL.exists(), reason="Firebird 5 local lipseste")
 

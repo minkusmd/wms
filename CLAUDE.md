@@ -60,7 +60,7 @@ msbuild SWN.dproj /p:Config=Release /p:Platform=Win32
 
 `Parsers/WMSParsers.dpr` (`WMSParsers.exe`) — парсеры поставщиков и импорт прайс-листов по API; отдельный проект, в `wms project.groupproj` **не входит**. Детали — `Parsers/CLAUDE.md`.
 
-`PriceImport/` — сервис на **Python** (не Delphi): автоматический импорт прайс-листов поставщиков в окна 09–10 и 15–16, сравнение с `TS_GOODS_FOREIGN` (повторяет 4 переоценки WMS), пороги с карантином, отчёт в Telegram (`PRICELIST_IMPORT`). Сейчас этап 1 — только dry-run: пишет лишь в `TPI_*`. Схема — `DB Model/price_import_stage1.sql`, план — `Documents/plan-import-automat-pricelisturi-2026-10-27.md`. Детали — `PriceImport/CLAUDE.md`.
+`PriceImport/` — сервис на **Python** (не Delphi): автоматический импорт прайс-листов поставщиков в окна 09–10 и 15–16, сравнение с `TS_GOODS_FOREIGN` (повторяет 4 переоценки WMS), пороги с карантином, отчёт в Telegram (`PRICELIST_IMPORT`). Этапы: 1 — dry-run, 2 — применение через документы 1414 (по умолчанию выключено), 3 — Telegram-бот `pi bot` для Excel поставщиков без API. Схема — `DB Model/price_import_stage1..3.sql`, план — `Documents/plan-import-automat-pricelisturi-2026-10-27.md`. Детали — `PriceImport/CLAUDE.md`.
 
 ## Architecture
 

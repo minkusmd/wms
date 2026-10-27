@@ -30,19 +30,41 @@ Plan și decizii: `Documents/plan-import-automat-pricelisturi-2026-10-27.md`. **
 - `windows.py` gestionează ferestrele (ordine după prioritate și durată, maximum `PI_MAX_PARALLEL`, un adaptor per host, termene soft/hard) și trimite raportul. `service.py` conține scheduler-ul APScheduler + heartbeat-ul.
 - `repo.py` adună **tot** SQL-ul. Biții: `TS_GOODS_FOREIGN.FLAGS` bitul 3 = în pricelist (valoarea 8), bitul 4 = EPP (16); `TS_PRICELISTS.FLAGS` valoarea 2 = API, 16 = prelucrat.
 
+## Botul Telegram pentru furnizorii manuali (etapa 3)
+
+- **Procesul:** `pi bot` (`bot/runner.py`, long polling peste `httpx`, fără aiogram). Offset-ul `getUpdates` stă în `TPI_BOT_STATE`, iar heartbeat-ul în `TPI_HEARTBEAT` cu `pi-bot`. Tokenul vine din `PI_BOT_TOKEN` / `PI_BOT_TOKEN_FILE` și trebuie să fie un **bot separat** de cel al SWNService, pentru că `getUpdates` acceptă un singur consumator. `log.mask_secrets` ascunde tokenul din URL-uri (`bot***`).
+- **Accesul:** doar utilizatorii din `TPI_BOT_USER` (`pi bot-user ID NUME --role VIEW|APPLY`). Unui necunoscut i se răspunde cu ID-ul lui, ca să poată fi adăugat.
+- **Fluxul unui fișier** (`bot/handler.py`):
+  1. Se verifică extensia (`.xlsx .xls .xlsb .ods .csv`) și mărimea (≤ 20 MB).
+  2. Fișierul se descarcă și se salvează în `data/inbox/<sha256>.<ext>` (numele pe disc nu vine de la utilizator), iar în `TPI_INBOX_FILE` primește un rând. Același `file_unique_id` sau același conținut = mesaj „primit deja”.
+  3. `recognize.py` caută furnizorul: `#ID` în text decide singur; altfel se combină (noisy-or) regulile din `TPI_FILE_RULE` și suprapunerea codurilor cu `TS_GOODS_FOREIGN`. Decizia e automată doar la un scor ≥ 0.9 cu un câștigător clar și doar pentru furnizorii cu `ADAPTER_CODE = 'excel'`. Altfel botul pune butoane, sau se răspunde la mesajul lui cu `#ID`.
+  4. Previzualizarea e `run_supplier(..., allow_apply=False, idempotency_key=furnizor|tg|sha256)`, plus mesajul de raport și fișierul .xlsx.
+  5. Butonul „Aplică” (doar cu rolul APPLY, cu `PI_APPLY_ENABLED` și o previzualizare de ≤ `PI_PREVIEW_MAX_AGE_HOURS`) recitește fișierul și face `apply_items` (snapshot în `TS_PRICELISTS` + documentele 1414). „Doar raport” / „Anulează” nu schimbă prețuri.
+  6. Semnătura antetului se învață automat (`HEADER_SIG`, `FLG_LEARNED = 1`).
+- **Comenzi:** `/status`, `/carantina [ID]`, `/aproba QID…`, `/respinge QID…`, `/run ID` (furnizori cu API), `/mute ID [ore]`; deciziile cer rolul APPLY.
+- **Excel (`excelparse.py`, adaptorul `excel`):**
+  - Antetul se caută în primele 40 de rânduri, cu alias-uri RO/RU/EN: cod, denumire, preț cost / indicativ / RRP, stoc, monedă, brand, categorie, EAN. Se suprascriu din `suppliers/<id>.yaml` (`columns: {câmp: {header: regex}}` sau `{column: "C"}`, `currency`, `file.sheet.name_re`).
+  - Șablonul `template: wms16` = cele 16 coloane fixe ale importului din frame78.
+  - Rândurile-titlu (o singură celulă cu text, des chiar în coloana codului) devin categoria rândurilor de sub ele.
+  - Un singur preț = PRICE0 = PRICE7 (convenția furnizorilor fără cost separat).
+  - Produsele fără stoc și cele fără preț se sar; codurile repetate se numără.
+  - Fișierele zip mai mari de 200 MB decomprimat se refuză.
+- **Furnizor manual nou:** `pi supplier-add ID` (excel, B, fără ferestre, fără aplicare automată) → `pi mapping-suggest fișier.xlsx` → YAML în `suppliers/ID.yaml`, doar dacă alias-urile nu ajung. Fără bot: `pi import-file ID fișier.xlsx [--apply]`.
+
 ## DDL (le rulează DBA-ul)
 
-`DB Model/price_import_stage1.sql` (tabelele `TPI_*`, canalul `PRICELIST_IMPORT` **inactiv**, furnizorii inițiali cu `FLG_AUTO_APPLY = 0`) + `_rollback.sql` + `price_import_grants.sql` (utilizatorul `PRICEIMPORT`, creat de DBA cu parola lui). Indexul parțial `UX_TPI_RUN_ACTIVE` (Firebird 5) garantează o singură rulare activă per furnizor. `SOURCE_TABLE = -50` în `TELEGRAM_MESSAGES`.
+`DB Model/price_import_stage3.sql` (+ `_rollback`, `_grants`) = tabelele botului (`TPI_BOT_USER`, `TPI_INBOX_FILE`, `TPI_FILE_RULE`, `TPI_BOT_STATE`). `DB Model/price_import_stage1.sql` (tabelele `TPI_*`, canalul `PRICELIST_IMPORT` **inactiv**, furnizorii inițiali cu `FLG_AUTO_APPLY = 0`) + `_rollback.sql` + `price_import_grants.sql` (utilizatorul `PRICEIMPORT`, creat de DBA cu parola lui). Indexul parțial `UX_TPI_RUN_ACTIVE` (Firebird 5) garantează o singură rulare activă per furnizor. `SOURCE_TABLE = -50` în `TELEGRAM_MESSAGES`.
 
 ## Comenzi
 
 ```
-.venv/Scripts/python -m pytest                       # 83 de teste; cele de integrare cer Firebird 5 local (embedded)
+.venv/Scripts/python -m pytest                       # 100 de teste; cele de integrare cer Firebird 5 local (embedded)
 python -m priceimport preview 14805 --plid 6115      # analiză FĂRĂ scriere (merge și fără DDL)
 python -m priceimport compare-wms 6115               # echivalența cu cele 4 interogări WMS (PLID neprelucrat)
 python -m priceimport check | run 198 | window 0 --only 198 | status | serve | health
 python -m priceimport apply-test 14805               # rulare + aplicare de TEST (documente reale, apoi ROLLBACK)
 python -m priceimport quarantine | approve 12 --by nume [--apply] | reject 12 --by nume | apply RUNID [--test] | rollback RUNID [--test] | mute 198 | watchdog
+python -m priceimport bot | bot-user 397948500 Nume --role APPLY | supplier-add 74852 | mapping-suggest f.xlsx | import-file 74852 f.xlsx [--apply]
 ```
 
 Configurarea e în variabile `PI_*` (vezi `.env.example`), iar parola în `PI_FB_PASSWORD` / `PI_FB_PASSWORD_FILE`. Parametrii unei surse stau în `suppliers/<id>.yaml`; cei operaționali (fereastră, praguri, activ) în `TPI_SUPPLIER`. Deploy-ul se face cu `compose.yaml` (Docker pe .240) sau `pi serve` sub NSSM.

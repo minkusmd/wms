@@ -13,6 +13,8 @@ import time
 import uuid
 from dataclasses import dataclass, field
 from datetime import datetime
+from pathlib import Path
+from typing import Any
 
 import zstandard
 from firebird.driver import DatabaseError
@@ -95,10 +97,14 @@ def _prev_run_sha(db: Db, supplier_id: int, run_id: int) -> str | None:
 
 
 def run_supplier(settings: Settings, supplier: SupplierConfig, *, trigger: str = "MANUAL",
-                 slot: str | None = None, deadline: float | None = None, plid: int | None = None) -> RunOutcome:
+                 slot: str | None = None, deadline: float | None = None, plid: int | None = None,
+                 file_path: Path | None = None, allow_apply: bool = True,
+                 idempotency_key: str | None = None) -> RunOutcome:
+    """`allow_apply=False`: doar analiza (botul aplica abia dupa "Aplica"); `idempotency_key` = acelasi fisier
+    trimis de doua ori intoarce rularea existenta."""
     started = time.monotonic()
     outcome = RunOutcome(supplier=supplier, status=RunStatus.ERROR, trigger=trigger)
-    key = make_key(supplier.supplier_id, trigger, slot)
+    key = idempotency_key or make_key(supplier.supplier_id, trigger, slot)
     with open_db(settings) as db:
         existing = repo.find_run_by_key(db, key)
         if existing:
@@ -124,7 +130,7 @@ def run_supplier(settings: Settings, supplier: SupplierConfig, *, trigger: str =
         log.info("run_start", run_id=run_id, supplier=supplier.supplier_id, adapter=supplier.adapter_code,
                  trigger=trigger, slot=slot)
         try:
-            _run_stages(settings, db, supplier, outcome, deadline, plid)
+            _run_stages(settings, db, supplier, outcome, deadline, plid, file_path, allow_apply)
         except AdapterError as exc:
             db.rollback()
             outcome.status = RunStatus.TIMEOUT if isinstance(exc, DeadlineExceeded) else RunStatus.ERROR
@@ -160,13 +166,14 @@ def _finish_failed(settings: Settings, run_id: int, message: str) -> None:
 
 
 def _run_stages(settings: Settings, db: Db, supplier: SupplierConfig, outcome: RunOutcome,
-                deadline: float | None, plid: int | None) -> None:
+                deadline: float | None, plid: int | None, file_path: Path | None = None,
+                allow_apply: bool = True) -> None:
     run_id = outcome.run_id
     assert run_id is not None
     params = load_supplier_yaml(settings, supplier.supplier_id)
     iso, rates = repo.load_currencies(db)
     ctx = RunContext(settings=settings, supplier=supplier, db=db, params=params, currency_ids=iso,
-                     deadline=deadline, plid=plid,
+                     deadline=deadline, plid=plid, file_path=file_path,
                      progress=lambda msg: log.info("progress", run_id=run_id, msg=msg))
 
     # --- FETCH
@@ -214,7 +221,8 @@ def _run_stages(settings: Settings, db: Db, supplier: SupplierConfig, outcome: R
         if err.error_class in {code for code, _ in problems}:
             repo.insert_errors(db, run_id, "DIFF", [err])
     n_quarantine = sum(1 for c in result.changes if c.decision == Decision.QUARANTINE)
-    will_apply = (stage2 and settings.apply_enabled and supplier.auto_apply and status == RunStatus.DRY_RUN
+    will_apply = (allow_apply and stage2 and settings.apply_enabled and supplier.auto_apply
+                  and status == RunStatus.DRY_RUN
                   and result.baseline == BASELINE_GF and not (fetch.plid is not None and fetch.plid_processed))
     repo.update_run(db, run_id, finished=not will_apply, status=status.value,
                     stage="APPLY" if will_apply else "DONE", n_matched=result.n_matched,
@@ -231,31 +239,32 @@ def _run_stages(settings: Settings, db: Db, supplier: SupplierConfig, outcome: R
         _apply_stage(settings, db, supplier, outcome, fetch)
 
 
+def apply_items(settings: Settings, run_id: int, supplier: SupplierConfig, items: list,
+                plid: int | None) -> tuple[Any, int | None]:
+    """Aplicarea unei rulari analizate: la adaptoarele native (fara PLID) pricelistul se salveaza intii in
+    TS_PRICELISTS, ca la importurile din WMS. Intoarce (ApplyResult, PLID)."""
+    from .apply import apply_run
+
+    if plid is None:
+        with open_db(settings) as db:
+            repo.set_session_user(db, settings.wms_user_id)
+            plid = repo.insert_snapshot(db, supplier.supplier_id, supplier.price_category_id,
+                                        f"PriceImport, rularea {run_id}", items)
+            repo.update_run(db, run_id, plid=plid)
+            db.commit()
+    return apply_run(settings, run_id, items=items), plid
+
+
 def _apply_stage(settings: Settings, db: Db, supplier: SupplierConfig, outcome: RunOutcome,
                  fetch: FetchResult) -> None:
-    from .apply import ApplyError, apply_run
+    from .apply import ApplyError
 
     run_id = outcome.run_id
     assert run_id is not None
     try:
-        if fetch.plid is None:
-            # adaptor nativ: pricelistul se salveaza ca la importurile din WMS, apoi se aplica din el
-            repo.set_session_user(db, settings.wms_user_id)
-            outcome.plid = repo.insert_snapshot(db, supplier.supplier_id, supplier.price_category_id,
-                                                f"PriceImport, rularea {run_id}", fetch.items)
-            repo.update_run(db, run_id, plid=outcome.plid)
-            db.commit()
-        applied = apply_run(settings, run_id, items=fetch.items)
-        outcome.status = RunStatus.PARTIAL if (applied.rejected or applied.error) else RunStatus.APPLIED
-        outcome.n_applied, outcome.docids = applied.n_applied, applied.docids
-        outcome.n_rejected = len(applied.rejected)
-        if applied.rejected:
-            outcome.errors.append(RowError("CLOSE_REJECTED", f"{len(applied.rejected)} produse respinse de "
-                                           f"CLOSE_REEVALUARE (in carantina): " + ", ".join(
-                                               code for code, _ in list(applied.rejected)[:10]),
-                                           severity=Severity.WARN))
+        applied, outcome.plid = apply_items(settings, run_id, supplier, fetch.items, fetch.plid)
+        record_applied(outcome, applied)
         if applied.error:
-            outcome.errors.append(RowError("APPLY", applied.error, severity=Severity.CRIT))
             repo.insert_error(db, run_id, Severity.CRIT, "APPLY", "APPLY", applied.error)
     except (ApplyError, DatabaseError) as exc:
         db.rollback()
@@ -265,6 +274,19 @@ def _apply_stage(settings: Settings, db: Db, supplier: SupplierConfig, outcome: 
         repo.update_run(db, run_id, status=RunStatus.ERROR.value, error_text=f"aplicare: {exc}")
     repo.update_run(db, run_id, finished=True, stage="DONE")
     db.commit()
+
+
+def record_applied(outcome: RunOutcome, applied) -> None:
+    """Rezultatul aplicarii in RunOutcome (status, documente, respinse) - pentru raport."""
+    outcome.status = RunStatus.PARTIAL if (applied.rejected or applied.error) else RunStatus.APPLIED
+    outcome.n_applied, outcome.docids = applied.n_applied, applied.docids
+    outcome.n_rejected = len(applied.rejected)
+    if applied.rejected:
+        outcome.errors.append(RowError("CLOSE_REJECTED", f"{len(applied.rejected)} produse respinse de "
+                                       "CLOSE_REEVALUARE (in carantina): " + ", ".join(
+                                           code for code, _ in list(applied.rejected)[:10]), severity=Severity.WARN))
+    if applied.error:
+        outcome.errors.append(RowError("APPLY", applied.error, severity=Severity.CRIT))
 
 
 def analyze(db: Db, supplier: SupplierConfig, fetch: FetchResult, params: dict, rates: dict[int, float],

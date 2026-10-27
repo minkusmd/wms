@@ -547,3 +547,94 @@ def mute_alerts(db: Db, key_prefix: str, hours: int) -> int:
     db.execute("UPDATE TPI_ALERT_STATE SET MUTED_UNTIL = DATEADD(? HOUR TO CURRENT_TIMESTAMP) "
                "WHERE ALERT_KEY STARTING WITH ?", (hours, key_prefix))
     return int(db.scalar("SELECT COUNT(*) FROM TPI_ALERT_STATE WHERE ALERT_KEY STARTING WITH ?", (key_prefix,)) or 0)
+
+
+# --- etapa 3: botul Telegram ---------------------------------------------------------------
+
+def bot_user(db: Db, tg_user_id: int) -> dict[str, Any] | None:
+    return db.query_one("SELECT TG_USER_ID, NAME, ROLE_CODE FROM TPI_BOT_USER WHERE TG_USER_ID = ? AND FLG_ACTIVE = 1",
+                        (tg_user_id,))
+
+
+def bot_state_get(db: Db, name: str) -> str | None:
+    return db.scalar("SELECT PARAM_VALUE FROM TPI_BOT_STATE WHERE PARAM_NAME = ?", (name,))
+
+
+def bot_state_set(db: Db, name: str, value: str) -> None:
+    db.execute("UPDATE OR INSERT INTO TPI_BOT_STATE (PARAM_NAME, PARAM_VALUE, UPDATED_AT) "
+               "VALUES (?, ?, CURRENT_TIMESTAMP) MATCHING (PARAM_NAME)", (name, value[:1024]))
+
+
+def inbox_by_unique_id(db: Db, unique_id: str) -> dict[str, Any] | None:
+    return db.query_one("SELECT * FROM TPI_INBOX_FILE WHERE TG_FILE_UNIQUE_ID = ?", (unique_id,))
+
+
+def inbox_by_sha(db: Db, sha: str) -> dict[str, Any] | None:
+    return db.query_one("SELECT FIRST 1 * FROM TPI_INBOX_FILE WHERE SHA256 = ? AND STATUS <> 'DUPLICATE' "
+                        "ORDER BY FILEID", (sha,))
+
+
+def inbox_get(db: Db, file_id: int) -> dict[str, Any] | None:
+    return db.query_one("SELECT * FROM TPI_INBOX_FILE WHERE FILEID = ?", (file_id,))
+
+
+def inbox_insert(db: Db, **values: Any) -> int:
+    cols = list(values)
+    return db.execute_returning(
+        f"INSERT INTO TPI_INBOX_FILE ({', '.join(cols)}) VALUES ({', '.join('?' * len(cols))}) RETURNING FILEID",
+        [values[c] for c in cols])
+
+
+_INBOX_COLUMNS = {"SUPPLIERID", "DETECT_METHOD", "DETECT_SCORE", "STATUS", "RUNID", "DECIDED_BY", "NOTE",
+                  "STORAGE_PATH"}
+
+
+def inbox_update(db: Db, file_id: int, decided: bool = False, **fields: Any) -> None:
+    sets, params = [], []
+    for key, value in fields.items():
+        col = key.upper()
+        if col not in _INBOX_COLUMNS:
+            raise KeyError(col)
+        if col == "NOTE" and value is not None:
+            value = str(value)[:1024]
+        sets.append(f"{col} = ?")
+        params.append(value)
+    if decided:
+        sets.append("DECIDED_AT = CURRENT_TIMESTAMP")
+    db.execute(f"UPDATE TPI_INBOX_FILE SET {', '.join(sets)} WHERE FILEID = ?", params + [file_id])
+
+
+def file_rules(db: Db) -> list[dict[str, Any]]:
+    return db.query("SELECT SUPPLIERID, RULE_TYPE, PATTERN, WEIGHT FROM TPI_FILE_RULE WHERE FLG_ACTIVE = 1")
+
+
+def learn_file_rule(db: Db, supplier_id: int, rule_type: str, pattern: str) -> bool:
+    """Regula invatata dintr-o alegere facuta in bot (o singura data per furnizor + valoare)."""
+    exists = db.scalar("SELECT 1 FROM RDB$DATABASE WHERE EXISTS (SELECT 1 FROM TPI_FILE_RULE WHERE SUPPLIERID = ? "
+                       "AND RULE_TYPE = ? AND PATTERN = ?)", (supplier_id, rule_type, pattern))
+    if exists:
+        return False
+    db.execute("INSERT INTO TPI_FILE_RULE (SUPPLIERID, RULE_TYPE, PATTERN, FLG_LEARNED) VALUES (?, ?, ?, 1)",
+               (supplier_id, rule_type, pattern[:1024]))
+    return True
+
+
+def sku_overlap(db: Db, codes: list[str]) -> dict[int, int]:
+    """Furnizor -> cite dintre coduri exista deja in TS_GOODS_FOREIGN la el."""
+    counts: dict[int, int] = {}
+    unique = sorted(set(codes))
+    for i in range(0, len(unique), 200):
+        chunk = unique[i:i + 200]
+        rows = db.query("SELECT CUSTOMERID, COUNT(DISTINCT GOODS_CODE) AS N FROM TS_GOODS_FOREIGN "
+                        f"WHERE GOODS_CODE IN ({','.join('?' * len(chunk))}) GROUP BY CUSTOMERID", chunk)
+        for r in rows:
+            counts[r["CUSTOMERID"]] = counts.get(r["CUSTOMERID"], 0) + int(r["N"])
+    return counts
+
+
+def supplier_names(db: Db, ids: Iterable[int]) -> dict[int, str]:
+    ids = sorted(set(ids))
+    if not ids:
+        return {}
+    rows = db.query(f"SELECT CUSTOMERID, NAME FROM TS_CUSTOMER WHERE CUSTOMERID IN ({','.join('?' * len(ids))})", ids)
+    return {r["CUSTOMERID"]: (r["NAME"] or "").strip() for r in rows}

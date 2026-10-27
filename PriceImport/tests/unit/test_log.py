@@ -6,6 +6,8 @@ from priceimport.log import SecretMaskFilter, mask_secrets, setup_logging
 def test_mask_secrets():
     assert mask_secrets("GET /products?api_token=abc123&page=2") == "GET /products?api_token=***&page=2"
     assert mask_secrets("password=x token=y") == "password=*** token=***"
+    url = "https://api.telegram.org/bot123456789:AAHdqTcvCH1vGWJxfSeofSAs0K5PALDsaw/getUpdates"
+    assert mask_secrets(url) == "https://api.telegram.org/bot***/getUpdates"
 
 
 def test_library_log_records_are_masked():

@@ -6,6 +6,7 @@ import hashlib
 import json
 import time
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any, Callable, ClassVar
 
 from ..config import Settings
@@ -40,6 +41,7 @@ class RunContext:
     currency_ids: dict[str, int]            # ISO -> CURRENCYID
     deadline: float | None = None           # time.monotonic()
     plid: int | None = None                 # external_plid: pricelistul cerut explicit
+    file_path: Path | None = None           # excel: fisierul primit (bot / linia de comanda)
     progress: Callable[[str], None] = field(default=lambda _msg: None)
 
     def check_deadline(self) -> None:
