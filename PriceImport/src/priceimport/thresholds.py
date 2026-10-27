@@ -6,7 +6,7 @@ import statistics
 from dataclasses import dataclass
 
 from .models import PRICE_COST, PRICE_LIST, Change, ChangeType, Decision, FetchResult
-from .repo import SupplierConfig, ThresholdRule
+from .repo import SupplierConfig, ThresholdRule, approval_key
 
 USD = 840
 EUR = 976
@@ -125,6 +125,24 @@ def apply_thresholds(changes: list[Change], cfg: SupplierConfig, rules: list[Thr
         if change.decision == Decision.APPLY and (change.code, change.goodsid) in blocked \
                 and change.change_type in (*_PRICE_TYPES, ChangeType.RETURNED):
             change.decision, change.reason = Decision.QUARANTINE, "ITEM_QUARANTINED"
+
+
+def apply_approvals(changes: list[Change], approved: set[tuple]) -> int:
+    """Valorile aprobate deja din carantina (aceeasi coloana, acelasi pret nou) trec direct pe APPLY."""
+    if not approved:
+        return 0
+    released = 0
+    for c in changes:
+        if c.decision == Decision.QUARANTINE and c.reason != "ITEM_QUARANTINED" and approval_key(
+                c.code, c.goodsid, c.price_field, c.new_price, c.new_cur) in approved:
+            c.decision, c.reason = Decision.APPLY, "APPROVED"
+            released += 1
+    still = {(c.code, c.goodsid) for c in changes if c.decision == Decision.QUARANTINE
+             and c.reason != "ITEM_QUARANTINED"}
+    for c in changes:
+        if c.reason == "ITEM_QUARANTINED" and (c.code, c.goodsid) not in still:
+            c.decision, c.reason = Decision.APPLY, "APPROVED"
+    return released
 
 
 def run_guards(fetch: FetchResult, n_prev: int | None, changes: list[Change], n_matched_in_price: int,

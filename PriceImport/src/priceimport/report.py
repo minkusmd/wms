@@ -25,6 +25,7 @@ REASON_TEXT = {
     "ZERO_PRICE": "preț 0", "NEGATIVE_PRICE": "preț negativ", "CURRENCY_CHANGED": "monedă schimbată",
     "CURRENCY_MISMATCH": "monedă greșită (≈ curs)", "ABSURD_PRICE_LOW": "preț absurd de mic",
     "ABSURD_PRICE_HIGH": "preț absurd de mare", "ITEM_QUARANTINED": "alt preț al produsului în carantină",
+    "CLOSE_REJECTED": "respins de CLOSE_REEVALUARE",
 }
 
 PRICE_FIELD_TEXT = {0: "cost", 3: "RRP", 7: "indicativ"}
@@ -85,6 +86,10 @@ def _supplier_line(o: RunOutcome) -> str:
         quarantine = len({(c.code, c.goodsid) for c in d.changes if c.decision == Decision.QUARANTINE})
         if quarantine:
             parts.append(f"🧪{quarantine}")
+    if o.n_applied or o.docids:
+        parts.append(f"📝 {o.n_applied} aplicate" + (f" (doc {', '.join(map(str, o.docids))})" if o.docids else ""))
+    if o.n_rejected:
+        parts.append(f"⛔ {o.n_rejected} respinse")
     line = f"{icon} {name} — " + " · ".join(parts)
     if o.status == RunStatus.BLOCKED:
         line += f"\n    🛑 BLOCAT: {_e(_short(o.note, 150))}"

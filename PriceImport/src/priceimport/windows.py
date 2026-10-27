@@ -102,8 +102,33 @@ def _skip(settings: Settings, supplier: SupplierConfig, slot: str, reason: str) 
     return RunOutcome(supplier=supplier, status=RunStatus.SKIPPED, run_id=run_id, trigger="SCHEDULE", note=reason)
 
 
+CRITICAL = (RunStatus.ERROR, RunStatus.TIMEOUT, RunStatus.BLOCKED)
+
+
+def alert_key(o: RunOutcome) -> str:
+    """Aceeasi problema = aceeasi cheie (furnizor + status + clasa primei erori critice)."""
+    crit = next((e for e in o.errors if e.severity.value == "CRIT"), None)
+    return f"RUN|{o.supplier.supplier_id}|{o.status.value}|{crit.error_class if crit else '-'}"
+
+
+def select_alerts(db, settings: Settings, outcomes: list[RunOutcome]) -> tuple[list[RunOutcome], list[RunOutcome]]:
+    """(de trimis, rezolvate): aceeasi problema se trimite cel mult o data la alert_repeat_min minute."""
+    if not repo.has_table(db, "TPI_ALERT_STATE"):
+        return [o for o in outcomes if o.status in CRITICAL], []
+    to_send, resolved = [], []
+    for o in outcomes:
+        if o.status in CRITICAL:
+            message = o.errors[0].message if o.errors else (o.note or "")
+            if repo.alert_should_send(db, alert_key(o), "CRIT", message, settings.alert_repeat_min,
+                                      o.supplier.supplier_id):
+                to_send.append(o)
+        elif o.status != RunStatus.SKIPPED and repo.resolve_alerts(db, f"RUN|{o.supplier.supplier_id}|"):
+            resolved.append(o)
+    return to_send, resolved
+
+
 def send_report(settings: Settings, title: str, outcomes: list[RunOutcome], label: str) -> str:
-    text = build_message(title, outcomes)
+    text = build_message(title, outcomes, dry_run=not settings.apply_enabled)
     try:
         write_xlsx(report_path(settings.data_dir, label), outcomes)
     except OSError:
@@ -112,12 +137,15 @@ def send_report(settings: Settings, title: str, outcomes: list[RunOutcome], labe
         with open_db(settings) as db:
             first_run = next((o.run_id for o in outcomes if o.run_id), None)
             repo.telegram_send(db, settings.telegram_channel, text, first_run)
-            critical = [o for o in outcomes if o.status in (RunStatus.ERROR, RunStatus.TIMEOUT, RunStatus.BLOCKED)]
-            if critical and settings.telegram_errors_channel:
-                lines = "\n".join(html.escape(f"• {o.supplier.name} {o.supplier.supplier_id}: {o.status.value} — "
-                                              f"{(o.errors[0].message if o.errors else o.note or '')[:150]}",
-                                              quote=False) for o in critical)
+            critical, resolved = select_alerts(db, settings, outcomes)
+            if (critical or resolved) and settings.telegram_errors_channel:
+                lines = [html.escape(f"• {o.supplier.name} {o.supplier.supplier_id}: {o.status.value} — "
+                                     f"{(o.errors[0].message if o.errors else o.note or '')[:150]}", quote=False)
+                         for o in critical]
+                lines += [html.escape(f"✅ {o.supplier.name} {o.supplier.supplier_id}: rezolvat ({o.status.value})",
+                                      quote=False) for o in resolved]
                 repo.telegram_send(db, settings.telegram_errors_channel,
-                                   f"<b>PriceImport</b> · {html.escape(title)}\n{lines}"[:4096], first_run, priority=1)
+                                   (f"<b>PriceImport</b> · {html.escape(title)}\n" + "\n".join(lines))[:4096],
+                                   first_run, priority=1 if critical else 0)
             db.commit()
     return text

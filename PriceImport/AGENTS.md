@@ -2,7 +2,21 @@
 
 Se încarcă atunci când lucrul se face în `PriceImport/`. Regulile generale (codare, build Delphi) sunt în `CLAUDE.md` din rădăcină. Alături stă `AGENTS.md`, o copie identică: ține-le pe amândouă la fel.
 
-Plan și decizii: `Documents/plan-import-automat-pricelisturi-2026-10-27.md`. **Acum e etapa 1 (dry-run)**: serviciul citește pricelisturile, le compară cu `TS_GOODS_FOREIGN`, aplică pragurile și trimite raportul. Scrie **doar** în `TPI_*` și în coada `TELEGRAM_MESSAGES`, nu creează documente 1414 și nu atinge prețurile.
+Plan și decizii: `Documents/plan-import-automat-pricelisturi-2026-10-27.md`. **Acum e etapa 2 (aplicarea), oprită implicit.** Fără comutatoare, serviciul doar citește pricelisturile, le compară cu `TS_GOODS_FOREIGN`, aplică pragurile și trimite raportul (dry-run). Prețurile se aplică doar dacă **amândouă** comutatoarele sunt pornite:
+- `PI_APPLY_ENABLED=true` (global);
+- `TPI_SUPPLIER.FLG_AUTO_APPLY = 1` (per furnizor).
+
+## Aplicarea (etapa 2)
+
+- **Fluxul:** `apply.py` construiește rândurile (regulile `BuildRow` din `Parsers/PriceListReevaluationUnit.pas`, portate 1:1). Le pune în `TPI_APPLY_BATCH` / `TPI_APPLY_ROW`, iar `SP_PI_APPLY_KIND` (SQL SECURITY DEFINER) face câte un document 1414 per tip: 0 noi, 1 vechi, 2 mărite, 3 scăzute. Fiecare document trece prin `SP_CREATE_NEW_DOCUMENT` → `TDB_GOODS_PRICE` → `ADJUST_RRP_REEVALUATION` → `CLOSE_REEVALUARE`, iar produsul respins („goodscode: X [...]”) se scoate și închiderea se reia, ca în WMSParsers. Fiecare tip e o tranzacție. Închiderile trec pe rând (`APPLY_LOCK`).
+- **Firma și utilizatorul documentelor:** `TPI_SUPPLIER.FIRMAID`, altfel `PI_DEFAULT_FIRMA_ID` (307225 PRIME STORE); utilizatorul `PI_WMS_USER_ID` (204), la fel ca WMSParsers.
+- **Când se aplică:** doar rulările cu `TPI_RUN.BASELINE = 'gf'`. Baza `prev` (PLID deja prelucrat de WMS) nu se aplică niciodată și nu creează carantină. Un PLID cu `FLAGS` 16 se aplică doar dacă l-a prelucrat chiar PriceImport (aprobări ulterioare).
+- **Adaptoarele native** scriu întâi pricelistul în `TS_PRICELISTS` (`FLAGS = 2`, `CREATED_BY` = utilizatorul WMS), apoi aplică din el. La final PLID-ul primește `FLAGS` bitul 4 (prelucrat).
+- **Carantina** (`TPI_QUARANTINE`): rândurile cu motiv propriu (nu `ITEM_QUARANTINED`). O rulare nouă pe baza `gf` le marchează pe cele vechi `SUPERSEDED`. Aprobarea trece produsul întreg pe APPLY, iar aceeași valoare (coloană + preț nou + monedă) trece automat la rulările din următoarele 30 de zile. Produsele respinse de `CLOSE_REEVALUARE` intră în carantină cu `CLOSE_REJECTED`.
+- **Anularea:** `rollback RUNID` creează un document 1414 compensatoriu cu valorile vechi, fără `ADJUST_RRP` (PRICE3 vechi e deja ajustat). Produsele schimbate de o rulare ulterioară se sar (`CHANGED_LATER`).
+- **Alertele** din `ERRORS` sunt deduplicate în `TPI_ALERT_STATE` (cheia `RUN|furnizor|status|clasă`, cel mult o dată la `PI_ALERT_REPEAT_MIN`, „rezolvat” o singură dată). `SP_PI_WATCHDOG` e dead man's switch-ul (heartbeat + fereastră nerulată) și **trebuie programat în SWNService** la 15 minute.
+- **Outbox pentru site:** `TPI_GOODS_EVENT` (GOODSID + PRICE/STOCK). Încă nu îl consumă nimeni (Yii2 cache / Meilisearch / Laravel).
+- **DDL:** `DB Model/price_import_stage2.sql` (+ `_rollback.sql`, `price_import_stage2_grants.sql`). PRICEIMPORT nu primește UPDATE pe `TS_GOODS_FOREIGN`, `TDB_DOCS` sau `TDB_GOODS_PRICE`: testul de integrare verifică asta, ca utilizator PRICEIMPORT în mod embedded.
 
 ## Structură
 
@@ -23,10 +37,12 @@ Plan și decizii: `Documents/plan-import-automat-pricelisturi-2026-10-27.md`. **
 ## Comenzi
 
 ```
-.venv/Scripts/python -m pytest                       # 67 de teste; cele de integrare cer Firebird 5 local (embedded)
+.venv/Scripts/python -m pytest                       # 83 de teste; cele de integrare cer Firebird 5 local (embedded)
 python -m priceimport preview 14805 --plid 6115      # analiză FĂRĂ scriere (merge și fără DDL)
 python -m priceimport compare-wms 6115               # echivalența cu cele 4 interogări WMS (PLID neprelucrat)
 python -m priceimport check | run 198 | window 0 --only 198 | status | serve | health
+python -m priceimport apply-test 14805               # rulare + aplicare de TEST (documente reale, apoi ROLLBACK)
+python -m priceimport quarantine | approve 12 --by nume [--apply] | reject 12 --by nume | apply RUNID [--test] | rollback RUNID [--test] | mute 198 | watchdog
 ```
 
 Configurarea e în variabile `PI_*` (vezi `.env.example`), iar parola în `PI_FB_PASSWORD` / `PI_FB_PASSWORD_FILE`. Parametrii unei surse stau în `suppliers/<id>.yaml`; cei operaționali (fereastră, praguri, activ) în `TPI_SUPPLIER`. Deploy-ul se face cu `compose.yaml` (Docker pe .240) sau `pi serve` sub NSSM.
@@ -36,5 +52,6 @@ Configurarea e în variabile `PI_*` (vezi `.env.example`), iar parola în `PI_FB
 - **EUR e 976 în `TS_CURRENCY`** (nu 978): monedele se rezolvă după `TITLE`, nu după codul ISO numeric.
 - Comparația brută a RRP-ului (ca în WMS) arată la fiecare import „+RRP_DISCOUNT%” la toate produsele EPP. `compare-wms` o folosește intenționat, ca să rămână identic cu WMS.
 - Pentru `external_plid`, WMSParsers/frame78 fac reevaluările imediat. După ele `TS_GOODS_FOREIGN` conține deja pricelistul, de unde vine și baza `prev`.
-- Testele embedded: Firebird în mod embedded ține fișierul exclusiv, deci isql (DDL) rulează înainte de conexiunile Python, nu în paralel.
+- Testele embedded: Firebird în mod embedded ține fișierul exclusiv, deci isql (DDL) rulează înainte de conexiunile Python, nu în paralel. `tests/schema/base_schema.sql` are un `CLOSE_REEVALUARE` **simplificat** (respinge codurile `BAD*`); procedura reală se verifică doar pe SW, cu `apply-test`.
+- `httpx` scrie la INFO URL-ul complet, cu `api_token`: `log.setup_logging` îl oprește la WARNING și maschează secretele și în logurile bibliotecilor.
 - Fișierele noi se scriu în UTF-8 (Python). DDL-ul din `DB Model/` rămâne ASCII.

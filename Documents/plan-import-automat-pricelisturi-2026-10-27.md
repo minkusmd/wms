@@ -15,6 +15,23 @@ Data: 27 oct 2026 · Autor: plan pregătit pentru Prime Store SRL / fantastic.md
 | Prima rulare dry-run pe SW (27 oct, 23:10, fără Telegram) | RUNID 6–12: 6 × DRY_RUN, DMLink BLOCKED (garda de volum: 5 054 vs 10 802 poziții); 13 257 de schimbări în `TPI_ITEM_CHANGE`, nimic aplicat |
 | Imaginea Docker (`compose.yaml`) | Se construiește; clientul `libfbclient2` se conectează la SW. Nedeployată pe .240 |
 
+### Etapa 2 (28 oct 2026): aplicarea, scrisă și testată local; **oprită implicit**
+
+| Ce | Stare |
+|---|---|
+| DDL `DB Model/price_import_stage2.sql` (+ `_rollback`, `price_import_stage2_grants.sql`) | **Rulat pe SW 28 oct 2026**, verificat: 5 tabele, `TPI_RUN.BASELINE`, procedurile DEFINER valide, 14 indecși, drepturile (PRICEIMPORT: doar SELECT pe `TS_GOODS_FOREIGN`) |
+| `apply-test` pe SW, AgroPiese PLID 6115 (RUNID 13, lotul 1) | 3 documente 1414 reale (noi 62, mărite 812, scăzute 4), **0 respinse** de `CLOSE_REEVALUARE`, ~2,5 s; ROLLBACK: prețurile AgroPiese, documentele 1414, `TDB_GOODS_FLAGS` și PLID 6115 identice cu starea dinainte. S-au consumat doar DOCID 2182230–2182232 |
+| `SP_PI_APPLY_KIND` (DEFINER): document 1414 per tip, `ADJUST_RRP_REEVALUATION`, `CLOSE_REEVALUARE` cu scoaterea produsului respins și reluare | Testat local cu un `CLOSE_REEVALUARE` simplificat; procedura reală se verifică doar pe SW (`apply-test`, cu ROLLBACK) |
+| Python: `BuildRow` portat, aplicare (TEST_ONLY / real), snapshot pentru adaptoarele native, carantină + aprobări cu memorie de 30 de zile, anulare compensatorie, deduplicarea alertelor, outbox `TPI_GOODS_EVENT` | 83 de teste (inclusiv drepturile utilizatorului `PRICEIMPORT` în embedded) |
+| `SP_PI_WATCHDOG` (heartbeat + fereastră nerulată → `ERRORS`, deduplicat) | Testat local; **de programat în SWNService** (DB Service Manager: sarcină `SP_PI_WATCHDOG`, la interval de 15 min) |
+| Regulă nouă | O rulare comparată cu pricelistul precedent (`TPI_RUN.BASELINE = 'prev'`, PLID deja prelucrat de WMS) nu se aplică și nu creează carantină |
+
+**Prima aplicare reală (28 oct 2026, cerută de user):** rularea 13, AgroPiese PLID 6115 → documentele 1414 **2182233** (62 produse noi), **2182234** (812 prețuri mărite), **2182235** (4 scăzute), toate închise, 0 respinse, firma 307225, utilizatorul 204; PLID 6115 marcat prelucrat (FLAGS 18); 878 de evenimente în `TPI_GOODS_EVENT`. Efect pe site (`get_goods_price(id, 1, 498)`): 62 de produse au intrat din nou în vânzare (212 703 lei în total); din celelalte 816, 146 și-au schimbat prețul (mediana +0,44%, între −2,54% și +4,94%), 670 nu (variația costului sub pasul de rotunjire al politicii sau alt furnizor e mai ieftin); suma lor +0,07%. Anulare posibilă cu `python -m priceimport rollback 13`.
+
+**Nefăcut din etapa 2:** avertismentul din frame78/WMSParsers când PriceImport are o rulare activă (Delphi); consumatorul `TPI_GOODS_EVENT` (cache site / Meilisearch); comenzile de carantină din botul Telegram (etapa 3; acum sunt în CLI).
+
+**Ordinea de pornire:** stage2.sql + grants pe SW → `apply-test` pe un PLID neprelucrat (documente reale, ROLLBACK) → `FLG_AUTO_APPLY = 1` pe 1–2 furnizori → `PI_APPLY_ENABLED=true` pe serviciu → ceilalți furnizori.
+
 Găsit la implementare (schimbă §4.4–4.5):
 - `ADJUST_RRP_REEVALUATION` scade `TS_CUSTOMER.RRP_DISCOUNT` (1–3%) din RRP la fiecare reevaluare. De aceea comparația brută (și cea din WMS) arată la fiecare import „+1%” la toate produsele pe RRP. Diff-ul Python aplică aceeași formulă înainte de comparare. La NATVEX 6111, falsele creșteri scad de la 1 187 la 0, iar la AgroPiese de la 952 la 812.
 - Pragul de zgomot implicit e **0%**: se ignoră doar diferențele care dispar la rotunjirea la 2 zecimale. Un prag procentual (0,5%) ar fi ascuns 629 de schimbări reale mici doar la AgroPiese.

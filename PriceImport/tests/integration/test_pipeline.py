@@ -2,55 +2,31 @@
 
 from __future__ import annotations
 
-import os
-import subprocess
 from datetime import datetime
 from pathlib import Path
 
 import httpx
 import pytest
 import respx
+from conftest import DDL, build_db, make_settings, needs_fb
 
 from priceimport import repo
-from priceimport.config import Settings
 from priceimport.coordinator import run_supplier
 from priceimport.db import open_db
 from priceimport.models import RunStatus
 from priceimport.windows import run_window, send_report
 from priceimport.wmscheck import compare_plid
 
-FB_HOME = Path(os.environ.get("PI_TEST_FB_HOME", r"C:\Program Files\Firebird\Firebird_5_0"))
-ISQL = FB_HOME / "isql.exe"
-REPO = Path(__file__).resolve().parents[3]
-BASE_SCHEMA = Path(__file__).resolve().parents[1] / "schema" / "base_schema.sql"
-STAGE1 = REPO / "DB Model" / "price_import_stage1.sql"
-
-pytestmark = [pytest.mark.integration,
-              pytest.mark.skipif(not ISQL.exists(), reason="Firebird 5 local lipseste")]
+pytestmark = [pytest.mark.integration, needs_fb]
 
 IN_PRICE, EPP, PL_API, PL_DONE = 8, 16, 2, 16
 
 
-def _isql(db_path: Path | None, script: Path) -> None:
-    env = {**os.environ, "ISC_USER": "SYSDBA", "ISC_PASSWORD": "x"}
-    args = [str(ISQL), "-q", "-b", "-i", str(script)] + ([str(db_path)] if db_path else [])
-    res = subprocess.run(args, capture_output=True, text=True, env=env)
-    assert res.returncode == 0 and "Statement failed" not in res.stderr, res.stderr + res.stdout
-
-
 @pytest.fixture(scope="module")
-def settings(tmp_path_factory) -> Settings:
+def settings(tmp_path_factory):
     folder = tmp_path_factory.mktemp("fb")
-    db_path = folder / "pi_it.fdb"
-    create = folder / "create.sql"
-    create.write_text(f"create database '{db_path.as_posix()}' page_size 8192 default character set UTF8;\n")
-    _isql(None, create)
-    _isql(db_path, BASE_SCHEMA)
-    _isql(db_path, STAGE1)
-    _isql(db_path, STAGE1)                      # scriptul e re-rulabil
-    s = Settings(fb_host="", fb_database=str(db_path), fb_user="SYSDBA", fb_password="x",
-                 fb_client_library=str(FB_HOME / "fbclient.dll"), data_dir=folder / "data",
-                 suppliers_dir=folder / "suppliers")
+    db_path = build_db(folder, DDL[:1] + DDL[:1])       # etapa 1, rulata de doua ori (re-rulabila)
+    s = make_settings(db_path, folder)
     with open_db(s) as db:
         _seed(db)
         db.commit()

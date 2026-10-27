@@ -25,7 +25,7 @@ from .diff import BASELINE_GF, DiffResult, diff_against_gf, diff_against_prev
 from .log import get_logger
 from .models import ChangeType, Decision, FetchResult, RowError, RunStatus, Severity
 from .repo import SupplierConfig
-from .thresholds import apply_thresholds, run_guards
+from .thresholds import apply_approvals, apply_thresholds, run_guards
 
 log = get_logger(__name__)
 
@@ -59,6 +59,10 @@ class RunOutcome:
     error_http: int | None = None
     error_retries: int = 0
     note: str | None = None
+    n_applied: int = 0
+    n_rejected: int = 0
+    docids: list[int] = field(default_factory=list)
+    items: list | None = None              # pozitiile citite (pentru aplicarea de test din CLI)
 
     @property
     def changes(self):
@@ -197,15 +201,23 @@ def _run_stages(settings: Settings, db: Db, supplier: SupplierConfig, outcome: R
     result, problems = analyze(db, supplier, fetch, params, rates, outcome, threshold_table=True)
     db.commit()
 
-    # --- REZULTAT (etapa 1: nimic nu se aplica)
+    # --- REZULTAT: schimbarile + carantina; aplicarea doar daca e permisa (etapa 2)
+    stage2 = repo.stage2_ready(db)
     repo.insert_changes(db, run_id, supplier.supplier_id, result.changes)
+    if stage2:
+        repo.update_run(db, run_id, baseline=result.baseline)
+        if result.baseline == BASELINE_GF:
+            # o rulare pe baza 'prev' nu poate aplica nimic: nici carantina ei nu e actionabila
+            repo.create_quarantine(db, run_id, supplier.supplier_id, settings.quarantine_expire_days)
     status = outcome.status
     for err in outcome.errors:
         if err.error_class in {code for code, _ in problems}:
             repo.insert_errors(db, run_id, "DIFF", [err])
     n_quarantine = sum(1 for c in result.changes if c.decision == Decision.QUARANTINE)
-    repo.update_run(db, run_id, finished=True, status=status.value, stage="DONE",
-                    n_matched=result.n_matched,
+    will_apply = (stage2 and settings.apply_enabled and supplier.auto_apply and status == RunStatus.DRY_RUN
+                  and result.baseline == BASELINE_GF and not (fetch.plid is not None and fetch.plid_processed))
+    repo.update_run(db, run_id, finished=not will_apply, status=status.value,
+                    stage="APPLY" if will_apply else "DONE", n_matched=result.n_matched,
                     n_new=result.count(ChangeType.NEW), n_returned=result.count(ChangeType.RETURNED),
                     n_gone=result.count(ChangeType.GONE), n_pending_gone=result.count(ChangeType.PENDING_GONE),
                     n_price_up=_real(result, ChangeType.PRICE_UP), n_price_down=_real(result, ChangeType.PRICE_DOWN),
@@ -213,6 +225,45 @@ def _run_stages(settings: Settings, db: Db, supplier: SupplierConfig, outcome: R
     durations = repo.recent_durations(db, supplier.supplier_id)
     if durations:
         repo.set_est_duration(db, supplier.supplier_id, int(statistics.median(durations)))
+    db.commit()
+    outcome.items = fetch.items
+    if will_apply:
+        _apply_stage(settings, db, supplier, outcome, fetch)
+
+
+def _apply_stage(settings: Settings, db: Db, supplier: SupplierConfig, outcome: RunOutcome,
+                 fetch: FetchResult) -> None:
+    from .apply import ApplyError, apply_run
+
+    run_id = outcome.run_id
+    assert run_id is not None
+    try:
+        if fetch.plid is None:
+            # adaptor nativ: pricelistul se salveaza ca la importurile din WMS, apoi se aplica din el
+            repo.set_session_user(db, settings.wms_user_id)
+            outcome.plid = repo.insert_snapshot(db, supplier.supplier_id, supplier.price_category_id,
+                                                f"PriceImport, rularea {run_id}", fetch.items)
+            repo.update_run(db, run_id, plid=outcome.plid)
+            db.commit()
+        applied = apply_run(settings, run_id, items=fetch.items)
+        outcome.status = RunStatus.PARTIAL if (applied.rejected or applied.error) else RunStatus.APPLIED
+        outcome.n_applied, outcome.docids = applied.n_applied, applied.docids
+        outcome.n_rejected = len(applied.rejected)
+        if applied.rejected:
+            outcome.errors.append(RowError("CLOSE_REJECTED", f"{len(applied.rejected)} produse respinse de "
+                                           f"CLOSE_REEVALUARE (in carantina): " + ", ".join(
+                                               code for code, _ in list(applied.rejected)[:10]),
+                                           severity=Severity.WARN))
+        if applied.error:
+            outcome.errors.append(RowError("APPLY", applied.error, severity=Severity.CRIT))
+            repo.insert_error(db, run_id, Severity.CRIT, "APPLY", "APPLY", applied.error)
+    except (ApplyError, DatabaseError) as exc:
+        db.rollback()
+        outcome.status = RunStatus.ERROR
+        outcome.errors.append(RowError("APPLY", str(exc), severity=Severity.CRIT))
+        repo.insert_error(db, run_id, Severity.CRIT, "APPLY", "APPLY", str(exc))
+        repo.update_run(db, run_id, status=RunStatus.ERROR.value, error_text=f"aplicare: {exc}")
+    repo.update_run(db, run_id, finished=True, stage="DONE")
     db.commit()
 
 
@@ -238,6 +289,8 @@ def analyze(db: Db, supplier: SupplierConfig, fetch: FetchResult, params: dict, 
     rules = repo.load_threshold_rules(db, supplier.supplier_id) if threshold_table else []
     groups = repo.load_goods_groups(db, (c.goodsid for c in result.changes if c.goodsid is not None))
     apply_thresholds(result.changes, supplier, rules, groups, rates)
+    if threshold_table and repo.has_table(db, "TPI_QUARANTINE"):
+        apply_approvals(result.changes, repo.approved_keys(db, supplier.supplier_id, 30))
     problems = run_guards(fetch, len(prev_codes) if prev_codes else None, result.changes,
                           result.n_matched_in_price, supplier, params)
     for code, message in problems:

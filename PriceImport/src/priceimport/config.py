@@ -31,8 +31,15 @@ class Settings(BaseSettings):
     fb_password_file: Path | None = None
     fb_client_library: str | None = None
     fb_charset: str = "UTF8"
-    # utilizatorul WMS in numele caruia se scriu documentele (etapa 2); 0 = nesetat
-    wms_user_id: int = 0
+    # etapa 2 - aplicarea preturilor. Comutatorul global e OPRIT implicit; in plus fiecare furnizor
+    # trebuie sa aiba TPI_SUPPLIER.FLG_AUTO_APPLY = 1.
+    apply_enabled: bool = False
+    # utilizatorul WMS si firma documentelor 1414 (ca WMSParsers: /user:204 /firma:307225 PRIME STORE)
+    wms_user_id: int = 204
+    default_firma_id: int = 307225
+    quarantine_expire_days: int = 3
+    approval_memory_days: int = 30
+    alert_repeat_min: int = 360
 
     timezone: str = "Europe/Chisinau"
     data_dir: Path = PROJECT_DIR / "data"
