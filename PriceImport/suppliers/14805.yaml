@@ -1,0 +1,6 @@
+# AgroPiese TGR Grup - adaptorul `agropiese` (src/priceimport/adapters/agropiese.py)
+# Parametrii operationali (fereastra, praguri, activ) stau in TPI_SUPPLIER; aici doar ce tine de sursa.
+api_config_code: AGROPIESE      # TS_API_CONFIG.API_CODE (API_TOKEN, optional BASE_URL)
+page_length: 500
+# ~860 de produse diferite au acelasi sku in catalog (20 oct 2026) -> garda implicita de 5% ar bloca
+max_duplicate_share: 0.15

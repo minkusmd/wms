@@ -1,0 +1,21 @@
+name: priceimport
+
+services:
+  pi-worker:
+    build: .
+    image: priceimport:0.1
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      PI_FB_PASSWORD_FILE: /run/secrets/fb_password
+    secrets:
+      - fb_password
+    volumes:
+      - ./data:/app/data
+    # un singur proces: indexul UX_TPI_RUN_ACTIVE apara oricum de rulari suprapuse
+    deploy:
+      replicas: 1
+
+secrets:
+  fb_password:
+    file: ./secrets/fb_password.txt
