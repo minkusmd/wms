@@ -65,7 +65,22 @@ Ce a corectat evaluarea pe date reale:
 
 **Criteriul din plan (≥ 80% legate sau propuse la furnizorii cu EAN) nu se poate măsura acum:** niciun pricelist nu aduce EAN, iar `TS_GOODS_BARCODE` e goală. Partea mare a produselor nelegate (piesele auto AgroPiese) nu există deloc în catalog, deci trebuie create, nu legate.
 
-**Rămân din etapa 4:** (b) imaginile și descrierile, incremental + `SP_PI_CONTENT_TRANSFER`; (c) portarea în Python a celor 5 adaptoare WMSParsers, de care `external_plid` depinde azi.
+### Etapa 4c (28 oct 2026): adaptoarele WMSParsers portate în Python
+
+| Ce | Stare |
+|---|---|
+| `accent`, `dmlink`, `olisgrup`, `nex`, `triomac` (doar prețurile, aceleași reguli ca în Delphi) + `pi compare-source` | 16 teste noi; 125 în total |
+| Echivalența pe SW (descărcare reală, fără scriere), față de ultimul PLID Delphi | Accent 2 599 / PLID 6114 (27 oct): 2 595 de coduri comune, prețuri diferite doar la 3 indicative și 84 de costuri (oscilații de curs). DMLink 5 225 / 6034 (5 oct), Olis 4 207 / 6069 (14 oct), Nex 426 / 6092 (19 oct), Triomac 1 191 / 6052 (9 oct): diferențele vin din timpul scurs și din API-ul nou SCOP (categoriile) |
+| Previzualizarea completă (diff + praguri + gărzi) pe toți 5 | Nicio rulare BLOCKED. Carantina: Accent 118, DMLink 465 (458 de scăderi > 20% față de 5 oct), Olis 1 162, Triomac 6, Nex 0 |
+| DDL `DB Model/price_import_stage4c.sql` (+ `_rollback`): `TS_API_CONFIG` `ACCENT` + comutarea `ADAPTER_CODE` | Testat local (re-rulare, parola neînlocuită, rollback). **Rulat pe SW 28 oct 2026**: cei 5 furnizori pe adaptoarele native (`FLG_AUTO_APPLY` = 0, deci tot dry-run), login-ul Accent verificat cu datele din `TS_API_CONFIG` |
+
+Găsit la portare:
+- **Olis Grup:** feed-ul `price.muncitorul.md` nu mai are deloc `pret_online` (prețul de achiziție). La fel arată PLID-ul 6069 din 14 oct, unde PRICE0 = PRICE7 = 0 pe toate cele 4 212 rânduri. Problema e la furnizor: adaptorul dă avertismentul `NO_COST_PRICE`, iar carantina oprește cele 1 161 de prețuri 0.
+- **Accent:** datele de acces erau scrise în cod (`ApiAccentUnit.pas`). Acum stau în `TS_API_CONFIG`.
+- **Triomac:** Delphi folosea pentru EUR codul 978, dar în `TS_CURRENCY` EUR are 976.
+- **Pricelistul nativ** primea categoria `-1` din `TPI_SUPPLIER`. Acum primește categoria ultimului pricelist, ca WMSParsers.
+
+**Rămâne din etapa 4:** (b) imaginile și descrierile, incremental + `SP_PI_CONTENT_TRANSFER`. Până atunci, conținutul celor 5 furnizori vine doar din WMSParsers / frame78.
 
 Găsit la implementare (schimbă §4.4–4.5):
 - `ADJUST_RRP_REEVALUATION` scade `TS_CUSTOMER.RRP_DISCOUNT` (1–3%) din RRP la fiecare reevaluare. De aceea comparația brută (și cea din WMS) arată la fiecare import „+1%” la toate produsele pe RRP. Diff-ul Python aplică aceeași formulă înainte de comparare. La NATVEX 6111, falsele creșteri scad de la 1 187 la 0, iar la AgroPiese de la 952 la 812.

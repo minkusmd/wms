@@ -187,6 +187,8 @@ def test_5_native_adapter_writes_snapshot_and_applies(env):
     assert _count(live, "SELECT COUNT(*) FROM TS_PRICELIST_ITEMS WHERE PLID = ?", (outcome.plid,)) == 2
     assert _count(live, "SELECT FLAGS FROM TS_PRICELISTS WHERE PLID = ?", (outcome.plid,)) == 18
     assert _count(live, "SELECT CREATED_BY FROM TS_PRICELISTS WHERE PLID = ?", (outcome.plid,)) == 204
+    # TPI_SUPPLIER.PRICE_CATEGORYID = -1: categoria ultimului pricelist, altfel cea implicita a adaptorului
+    assert _count(live, "SELECT PRICE_CATEGORYID FROM TS_PRICELISTS WHERE PLID = ?", (outcome.plid,)) == 228
 
 
 def test_6_service_user_privileges(env):

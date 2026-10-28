@@ -77,6 +77,7 @@ def parse_products(products: list[Any], mdl: int) -> FetchResult:
 class AgroPieseAdapter(SupplierAdapter):
     code = "agropiese"
     host = "angro.agropiese.md"
+    default_price_category = 228          # categoria pricelisturilor AgroPiese din frame78
 
     def fetch(self, ctx: RunContext) -> FetchResult:
         config = repo.load_api_config(ctx.db, ctx.params.get("api_config_code", API_CODE))

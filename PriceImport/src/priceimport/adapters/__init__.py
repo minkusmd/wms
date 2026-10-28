@@ -2,13 +2,19 @@
 
 from __future__ import annotations
 
+from .accent import AccentAdapter
 from .agropiese import AgroPieseAdapter
 from .base import AdapterError, DeadlineExceeded, RunContext, SupplierAdapter
+from .dmlink import DMLinkAdapter
 from .excel import ExcelAdapter
 from .external_plid import ExternalPlidAdapter
+from .nex import NexAdapter
+from .olisgrup import OlisGrupAdapter
+from .triomac import TriomacAdapter
 
 ADAPTERS: dict[str, type[SupplierAdapter]] = {
-    cls.code: cls for cls in (ExternalPlidAdapter, AgroPieseAdapter, ExcelAdapter)
+    cls.code: cls for cls in (ExternalPlidAdapter, AgroPieseAdapter, ExcelAdapter, AccentAdapter, DMLinkAdapter,
+                              OlisGrupAdapter, NexAdapter, TriomacAdapter)
 }
 
 

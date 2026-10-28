@@ -20,7 +20,7 @@ import zstandard
 from firebird.driver import DatabaseError
 
 from . import repo
-from .adapters import AdapterError, DeadlineExceeded, RunContext, get_adapter
+from .adapters import ADAPTERS, AdapterError, DeadlineExceeded, RunContext, get_adapter
 from .config import Settings, load_supplier_yaml
 from .db import Db, open_db
 from .diff import BASELINE_GF, DiffResult, diff_against_gf, diff_against_prev
@@ -248,8 +248,12 @@ def apply_items(settings: Settings, run_id: int, supplier: SupplierConfig, items
     if plid is None:
         with open_db(settings) as db:
             repo.set_session_user(db, settings.wms_user_id)
-            plid = repo.insert_snapshot(db, supplier.supplier_id, supplier.price_category_id,
-                                        f"PriceImport, rularea {run_id}", items)
+            category = supplier.price_category_id
+            if category <= 0:
+                adapter = ADAPTERS.get(supplier.adapter_code)
+                category = (repo.last_price_category(db, supplier.supplier_id)
+                            or (adapter.default_price_category if adapter else -1))
+            plid = repo.insert_snapshot(db, supplier.supplier_id, category, f"PriceImport, rularea {run_id}", items)
             repo.update_run(db, run_id, plid=plid)
             db.commit()
     return apply_run(settings, run_id, items=items), plid

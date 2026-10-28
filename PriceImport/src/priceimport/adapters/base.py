@@ -59,6 +59,8 @@ class SupplierAdapter:
     code: ClassVar[str]
     # gazda API-ului: doua adaptoare cu aceeasi gazda nu ruleaza simultan (None = fara limita)
     host: ClassVar[str | None] = None
+    # categoria pricelistului cind furnizorul nu are inca niciunul cu categorie (ca in WMSParsers)
+    default_price_category: ClassVar[int] = -1
 
     def fetch(self, ctx: RunContext) -> FetchResult:
         raise NotImplementedError

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import time
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
@@ -165,6 +166,40 @@ def compare_wms(plid: int) -> None:
         for code, goodsid in sorted(c.only_python)[:5]:
             typer.echo(f"      doar Python: {code} / {goodsid}")
     raise typer.Exit(0 if all_equal else 3)
+
+
+@app.command("compare-source")
+def compare_source(supplier_id: int, adapter: str = typer.Option(..., help="adaptorul nativ, ex. accent"),
+                   plid: Optional[int] = typer.Option(None, help="implicit ultimul pricelist al furnizorului"),
+                   examples: int = typer.Option(5)) -> None:
+    """Adaptorul nativ vs pricelistul creat de importul Delphi (WMSParsers / frame78), FARA scriere."""
+    from .adapters import RunContext, get_adapter
+    from .config import load_supplier_yaml
+    from .sourcecompare import compare_items, format_diff
+
+    settings = _settings(log_to_file=False)
+    with open_db(settings) as db:
+        supplier = repo.load_supplier(db, supplier_id)
+        if supplier is None:
+            raise typer.BadParameter(f"furnizorul {supplier_id} lipseste din TPI_SUPPLIER")
+        supplier.adapter_code = adapter
+        info = repo.pricelist_info(db, plid) if plid else repo.latest_pricelist(db, supplier_id)
+        if info is None:
+            raise typer.BadParameter("pricelistul de comparat nu exista")
+        old = repo.load_pricelist_items(db, info["PLID"])
+        iso, _rates = repo.load_currencies(db)
+        ctx = RunContext(settings=settings, supplier=supplier, db=db, params=load_supplier_yaml(settings, supplier_id),
+                         currency_ids=iso, progress=lambda msg: typer.echo(f"  {msg}", err=True))
+        started = time.monotonic()
+        fetch = get_adapter(adapter).fetch(ctx)
+        db.commit()
+    typer.echo(f"{supplier.name} {supplier_id}: adaptorul {adapter} - {len(fetch.items)} pozitii "
+               f"(citite {fetch.n_fetched}, sarite {fetch.n_skipped}, repetate {fetch.n_duplicates}, erori "
+               f"{len(fetch.row_errors)}, {fetch.n_http_calls} cereri, {time.monotonic() - started:.1f} s)")
+    if fetch.note:
+        typer.echo(f"  {fetch.note}")
+    typer.echo(f"PLID {info['PLID']} din {info['DATA']} ({(info.get('MENTIUNI') or '').strip()}): {len(old)} pozitii")
+    typer.echo(format_diff(compare_items(fetch.items, old), examples))
 
 
 # --- etapa 2 -------------------------------------------------------------------------------

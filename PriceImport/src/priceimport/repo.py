@@ -168,6 +168,12 @@ def latest_pricelist(db: Db, supplier_id: int, before_plid: int | None = None) -
     return db.query_one(sql, params)
 
 
+def last_price_category(db: Db, supplier_id: int) -> int | None:
+    """Categoria ultimului pricelist al furnizorului care are una (ca WMSParsers / frame78)."""
+    return db.scalar("SELECT FIRST 1 PRICE_CATEGORYID FROM TS_PRICELISTS WHERE SUPPLIERID = ? "
+                     "AND PRICE_CATEGORYID > 0 ORDER BY PLID DESC", (supplier_id,))
+
+
 def pricelist_info(db: Db, plid: int) -> dict[str, Any] | None:
     return db.query_one("SELECT PLID, SUPPLIERID, DATA, FLAGS, MENTIUNI, "
                         "DATEDIFF(MINUTE FROM DATA TO CURRENT_TIMESTAMP) AS AGE_MIN "

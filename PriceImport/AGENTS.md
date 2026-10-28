@@ -23,6 +23,7 @@ Plan și decizii: `Documents/plan-import-automat-pricelisturi-2026-10-27.md`. **
 - `src/priceimport/adapters/`: câte un adaptor per sursă, înregistrat în `adapters/__init__.py` (`ADAPTERS`, cheia = `TPI_SUPPLIER.ADAPTER_CODE`).
   - `external_plid` citește cel mai nou `TS_PRICELISTS` creat de WMSParsers, frame78 sau `ultra2_sync.py`.
   - `agropiese` e un adaptor nativ pe API (respectă regulile din `AgroPiesePriceListUnit.pas`).
+  - `accent`, `dmlink`, `olisgrup`, `nex`, `triomac` sunt portate din WMSParsers (etapa 4c, vezi mai jos).
   - Clientul HTTP comun (`http.py`) are timeouts, retry cu backoff + jitter, `Retry-After`, rate limit, fără retry la 401/403 și ascunde token-urile din mesaje.
 - `diff.py` reproduce cele 4 reevaluări WMS (baza `gf`). Când WMS a prelucrat deja PLID-ul (`TS_PRICELISTS.FLAGS` valoarea 16), compară cu pricelistul precedent (baza `prev`). RRP-ul se compară după `TS_CUSTOMER.RRP_DISCOUNT`, exact ca `ADJUST_RRP_REEVALUATION`. Un produs „dispărut” devine GONE abia la a doua lipsă.
 - `thresholds.py` face carantina pe rând: prag ±, preț 0/negativ, monedă schimbată/greșită (factor ≈ curs), preț absurd. Cât timp o coloană a produsului e în carantină, tot produsul rămâne în carantină. Tot aici sunt gărzile de rulare (EMPTY, VOLUME, INVALID_ROWS, DUPLICATES, MASS_SHIFT) → statusul BLOCKED.
@@ -71,16 +72,30 @@ Plan și decizii: `Documents/plan-import-automat-pricelisturi-2026-10-27.md`. **
 - **Legarea:** `SP_PI_LINK_GOODS` (DEFINER) adaugă un rând în `TS_GOODS_FOREIGN` cu FLAGS = 0, adică în afara pricelistului și fără prețuri. Produsul intră în preț la următoarea rulare, ca „produs nou”. Respingerea rămâne memorată (nu se mai propune).
 - **Raportul ferestrei** arată câte propuneri așteaptă o decizie.
 
+## Adaptoarele portate din WMSParsers (etapa 4c)
+
+- **Ce sunt:** cele 5 importuri API din `Parsers/PriceListApiJobsUnit.pas`, rescrise 1:1 (doar prețurile; descrierile și imaginile rămân la WMSParsers / frame78 până la etapa 4b). Regulile fiecărui furnizor sunt în docstring-ul modulului lui; câmpurile JSON se citesc cu `adapters/jsonval.py` (`JStr` / `JFloat` / `JLang` din Delphi: lipsă = "" sau 0).
+  - `accent` (198): login `/loginuser/getid` → `guid` → `/hard/{guid}/catalogandstock/0`. Intră doar ce are `qty > 0`. PRICE0 = `price`, PRICE7 = `dprice1` (USD), PRICE3 = `promoprice` (mereu lei). Datele de acces erau scrise în `ApiAccentUnit.pas`: acum se citesc din `TS_API_CONFIG` `ACCENT`.
+  - `dmlink` (229466): tot catalogul vine într-un singur răspuns (~35 MB, timeout 300 s). Produsele cu `stock <= 0` se sar. Un sku repetat între produsele cu stoc se sare **la toate aparițiile**. PRICE0 = `nprice`, altfel `sprice`.
+  - `olisgrup` (251465): feed fără autentificare. PRICE0 = PRICE7 = `pret_online`, PRICE3 = `pret_vinz`. **Din ~14 oct 2026 feed-ul nu mai are `pret_online`**, deci prețul de achiziție e 0 la toate produsele (și la WMS). Adaptorul dă avertismentul `NO_COST_PRICE`, iar produsele legate ajung în carantină cu „preț 0”.
+  - `nex` (275640): cheia `api-token` se obține prin GraphQL (login → `user.api_token`, iar `generateApiToken` doar dacă lipsește). Paginile se citesc secvențial. Un RRP sub jumătate din `price_mdl` e în EUR și se convertește.
+  - `triomac` (209280): SCOP v2 (`/auth/token`, cursor). Stocul e suma culorilor. Un sku repetat la același preț adună stocul, altfel rămâne primul. **EUR se rezolvă după TITLE (976)**, nu 978 ca în Delphi.
+- **Categoria pricelistului:** cea a ultimului pricelist al furnizorului (`PRICE_CATEGORYID > 0`), altfel `default_price_category` al adaptorului, ca în WMSParsers. Se aplică doar când `TPI_SUPPLIER.PRICE_CATEGORYID` ≤ 0.
+- **Echivalența:** `pi compare-source ID --adapter X [--plid P]` descarcă prin adaptorul nou și compară câmp cu câmp cu un PLID creat de Delphi, fără nicio scriere. Pe SW (28 oct): prețurile, codurile și brandurile coincid. Diferențele vin din timpul scurs de la PLID-ul vechi și din diacriticele pierdute de importul vechi (`ș` → `?`).
+- **Comutarea:** `DB Model/price_import_stage4c.sql` trece `TPI_SUPPLIER.ADAPTER_CODE` pe adaptoarele native. Accent se mută doar dacă parola e înlocuită în script. **Rulat pe SW pe 28 oct 2026** (toți 5 comutați, inclusiv Accent). Rollback: `_rollback.sql`, care revine la `external_plid`. După comutare, WMSParsers nu mai trebuie programat pentru prețuri.
+- Coloanele pe care pricelistul nativ nu le mai scrie (`WARANTY`, `SUPPLIER_GOODSTYPE`, `PRODUCT_LINK`) nu sunt folosite de reevaluări.
+
 ## DDL (le rulează DBA-ul)
 
-`DB Model/price_import_stage4.sql` (+ `_rollback`, `_grants`) = `TPI_MATCH_CANDIDATE` + `SP_PI_LINK_GOODS`. `DB Model/price_import_stage3.sql` (+ `_rollback`, `_grants`) = tabelele botului (`TPI_BOT_USER`, `TPI_INBOX_FILE`, `TPI_FILE_RULE`, `TPI_BOT_STATE`). `DB Model/price_import_stage1.sql` (tabelele `TPI_*`, canalul `PRICELIST_IMPORT` **inactiv**, furnizorii inițiali cu `FLG_AUTO_APPLY = 0`) + `_rollback.sql` + `price_import_grants.sql` (utilizatorul `PRICEIMPORT`, creat de DBA cu parola lui). Indexul parțial `UX_TPI_RUN_ACTIVE` (Firebird 5) garantează o singură rulare activă per furnizor. `SOURCE_TABLE = -50` în `TELEGRAM_MESSAGES`.
+`DB Model/price_import_stage4c.sql` (+ `_rollback`) = adaptoarele native pentru cei 5 furnizori WMSParsers + `TS_API_CONFIG` `ACCENT`. `DB Model/price_import_stage4.sql` (+ `_rollback`, `_grants`) = `TPI_MATCH_CANDIDATE` + `SP_PI_LINK_GOODS`. `DB Model/price_import_stage3.sql` (+ `_rollback`, `_grants`) = tabelele botului (`TPI_BOT_USER`, `TPI_INBOX_FILE`, `TPI_FILE_RULE`, `TPI_BOT_STATE`). `DB Model/price_import_stage1.sql` (tabelele `TPI_*`, canalul `PRICELIST_IMPORT` **inactiv**, furnizorii inițiali cu `FLG_AUTO_APPLY = 0`) + `_rollback.sql` + `price_import_grants.sql` (utilizatorul `PRICEIMPORT`, creat de DBA cu parola lui). Indexul parțial `UX_TPI_RUN_ACTIVE` (Firebird 5) garantează o singură rulare activă per furnizor. `SOURCE_TABLE = -50` în `TELEGRAM_MESSAGES`.
 
 ## Comenzi
 
 ```
-.venv/Scripts/python -m pytest                       # 109 teste; cele de integrare cer Firebird 5 local (embedded)
+.venv/Scripts/python -m pytest                       # 125 de teste; cele de integrare cer Firebird 5 local (embedded)
 python -m priceimport preview 14805 --plid 6115      # analiză FĂRĂ scriere (merge și fără DDL)
 python -m priceimport compare-wms 6115               # echivalența cu cele 4 interogări WMS (PLID neprelucrat)
+python -m priceimport compare-source 229466 --adapter dmlink   # adaptorul nativ vs ultimul PLID Delphi, fără scriere
 python -m priceimport check | run 198 | window 0 --only 198 | status | serve | health
 python -m priceimport apply-test 14805               # rulare + aplicare de TEST (documente reale, apoi ROLLBACK)
 python -m priceimport quarantine | approve 12 --by nume [--apply] | reject 12 --by nume | apply RUNID [--test] | rollback RUNID [--test] | mute 198 | watchdog

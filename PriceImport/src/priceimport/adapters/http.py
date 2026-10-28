@@ -41,7 +41,7 @@ class RateLimiter:
 
 class HttpClient:
     def __init__(self, ctx: RunContext, rate_per_sec: float | None = None,
-                 headers: dict[str, str] | None = None, sleep=None):
+                 headers: dict[str, str] | None = None, sleep=None, read_timeout: float | None = None):
         s = ctx.settings
         self.ctx = ctx
         self.max_attempts = s.http_max_attempts
@@ -49,8 +49,10 @@ class HttpClient:
         self.sleep = sleep            # None = time.sleep (cautat la apel, se poate inlocui in teste)
         self.calls = 0
         self.retries = 0
+        self.bytes_received = 0
         self.client = httpx.Client(
-            timeout=httpx.Timeout(s.http_read_timeout, connect=s.http_connect_timeout),
+            # read_timeout: catalogul DMLink se genereaza ~15 s si are ~35 MB
+            timeout=httpx.Timeout(read_timeout or s.http_read_timeout, connect=s.http_connect_timeout),
             headers={"User-Agent": f"WMS-PriceImport/{__version__}", "Accept": "application/json",
                      **(headers or {})},
             follow_redirects=True)
@@ -72,7 +74,20 @@ class HttpClient:
                 pass
         return min(2.0 ** attempt, 60.0) + random.uniform(0, 1.0)
 
-    def get_json(self, url: str, params: dict[str, Any] | None = None) -> Any:
+    def get_json(self, url: str, params: dict[str, Any] | None = None,
+                 headers: dict[str, str] | None = None) -> Any:
+        return self.request_json("GET", url, params=params, headers=headers)
+
+    def post_json(self, url: str, body: Any = None, headers: dict[str, str] | None = None,
+                  ok: tuple[int, ...] = (200, 201)) -> Any:
+        """POST cu corp JSON (`body` None = corp gol, ca la Accent)."""
+        if body is None:
+            return self.request_json("POST", url, content=b"", headers=headers, ok=ok)
+        return self.request_json("POST", url, json=body, headers=headers, ok=ok)
+
+    def request_json(self, method: str, url: str, *, params: dict[str, Any] | None = None, json: Any = None,
+                     content: bytes | None = None, headers: dict[str, str] | None = None,
+                     ok: tuple[int, ...] = (200,)) -> Any:
         endpoint = urlsplit(url).path
         last_status: int | None = None
         last_error = ""
@@ -81,13 +96,15 @@ class HttpClient:
             self.limiter.wait()
             self.calls += 1
             try:
-                response = self.client.get(url, params=params)
+                response = self.client.request(method, url, params=params, json=json, content=content,
+                                               headers=headers)
             except httpx.TransportError as exc:
                 last_status, last_error = None, f"{type(exc).__name__}: {exc}"
                 retry_after = None
             else:
                 last_status = response.status_code
-                if response.status_code == 200:
+                if response.status_code in ok:
+                    self.bytes_received += len(response.content)
                     try:
                         return response.json()
                     except ValueError as exc:
