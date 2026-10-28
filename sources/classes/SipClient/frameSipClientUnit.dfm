@@ -32,7 +32,6 @@ object frameSipClient: TframeSipClient
     ParentBackground = False
     ParentFont = False
     TabOrder = 1
-    ExplicitHeight = 253
     object cxPageControl1: TcxPageControl
       Left = 0
       Top = 0
@@ -48,7 +47,6 @@ object frameSipClient: TframeSipClient
       TabOrder = 0
       Properties.ActivePage = cxTabSheet1
       Properties.CustomButtons.Buttons = <>
-      ExplicitHeight = 249
       ClientRectBottom = 305
       ClientRectLeft = 4
       ClientRectRight = 320
@@ -56,7 +54,6 @@ object frameSipClient: TframeSipClient
       object cxTabSheet1: TcxTabSheet
         Caption = 'Istoria sunetelor'
         ImageIndex = 0
-        ExplicitHeight = 221
         object cxGrid1: TcxGrid
           AlignWithMargins = True
           Left = 5
@@ -77,7 +74,6 @@ object frameSipClient: TframeSipClient
           TabOrder = 0
           LookAndFeel.NativeStyle = True
           LookAndFeel.ScrollbarMode = sbmClassic
-          ExplicitHeight = 211
           object cxGrid1DBTableView1: TcxGridDBTableView
             PopupMenu = PopupMenu1
             OnDblClick = cxGrid1DBTableView1DblClick
@@ -129,8 +125,10 @@ object frameSipClient: TframeSipClient
               Properties.ArrowsForYear = False
               Properties.DateOnError = deToday
               Properties.ShowToday = False
+              OnGetDisplayText = cxGrid1DBTableView1_DATAGetDisplayText
               HeaderAlignmentHorz = taCenter
               MinWidth = 35
+              Options.Editing = False
               Width = 106
             end
             object cxGrid1DBTableView1_PHONENUMBER: TcxGridDBColumn
@@ -221,6 +219,9 @@ object frameSipClient: TframeSipClient
       object tsDial: TcxTabSheet
         Caption = 'Dial'
         ImageIndex = 1
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
         ExplicitHeight = 341
         object btnDtmf1: TcxButton
           Tag = 1

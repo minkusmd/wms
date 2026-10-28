@@ -15,7 +15,9 @@ Regulile importului din WMS:
   altfel ramine primul produs; PRICE0 = PRICE7 = price.value (valuta listei, azi USD), PRICE3 = rrp.value
   (mereu lei); name.ro (altfel .ru), brand, calea categoriei.
 EUR se rezolva dupa TS_CURRENCY.TITLE (976 in SW), nu 978 ca in Delphi.
-Descrierile si imaginile raman la WMSParsers pina la etapa 4b.
+Continutul (etapa 4b): description + "<br>" + specification (HTML), pe limbi; description egal cu denumirea
+  (~60% din produse) si specification care e doar un link (~70%) nu conteaza; RU identic cu RO nu se scrie
+  (SCOP trimite azi in "ru" textul romanesc). Imaginile = images[] ({url} sau sir).
 Datele de acces: TS_API_CONFIG, API_CODE = 'SCOP' (API_KEY, API_SECRET, optional BASE_URL).
 """
 
@@ -25,9 +27,10 @@ import json
 from typing import Any
 
 from .. import repo
-from ..models import FetchResult, RowError, SupplierItem
+from ..models import ContentItem, FetchResult, RowError, SupplierItem
 from ..normalize import NormalizeError, clean_text, normalize_code
 from .base import AdapterError, RunContext, SupplierAdapter, sha256_json
+from .contenttext import CRLF, strip_tags, unique_urls
 from .http import HttpClient
 from .jsonval import jbool, jfloat, jlang, jobj, jstr, trunc
 
@@ -130,10 +133,40 @@ def parse_catalog(products: list[Any], categories: dict[int, str], currency_ids:
     return result
 
 
+def _only_link(text: str) -> bool:
+    lower = text.lower()
+    return not text or (lower.startswith(("http://", "https://")) and " " not in text)
+
+
+def build_description(desc: str, spec: str, name: str) -> str:
+    desc, spec = desc.strip(), spec.strip()
+    if strip_tags(desc).lower() == name.strip().lower():
+        desc = ""
+    if _only_link(strip_tags(spec)):
+        spec = ""
+    return f"{desc}<br>{CRLF}{spec}" if desc and spec else desc + spec
+
+
+def content_of(product: Any, code: str) -> ContentItem | None:
+    if not isinstance(product, dict):
+        return None
+    name_ru = jlang(product, "name", "ru")
+    name = jlang(product, "name", "ro") or name_ru
+    ro = build_description(jlang(product, "description", "ro"), jlang(product, "specification", "ro"), name)
+    ru = build_description(jlang(product, "description", "ru"), jlang(product, "specification", "ru"), name_ru)
+    images = product.get("images")
+    urls = unique_urls(jstr(i, "url") if isinstance(i, dict) else i for i in images) if isinstance(images, list) else []
+    return ContentItem(code=code, desc_ro=ro, desc_ru="" if ru == ro else ru, images=urls)
+
+
 class TriomacAdapter(SupplierAdapter):
     code = "triomac"
     host = "scop.md"
     default_price_category = 26
+    has_content = True
+
+    def content_of(self, product: Any, code: str) -> ContentItem | None:
+        return content_of(product, code)
 
     def fetch(self, ctx: RunContext) -> FetchResult:
         config = repo.load_api_config(ctx.db, ctx.params.get("api_config_code", API_CODE))

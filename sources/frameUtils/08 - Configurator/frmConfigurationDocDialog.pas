@@ -73,7 +73,6 @@ type
     lbContractTitle: TLabel;
     Label2: TLabel;
     Label3: TLabel;
-    Label4: TLabel;
     ceRATE: TcxDBCalcEdit;
     mmCOMMENTS: TcxDBMemo;
     cbFLG_ACNT: TcxDBCheckBox;

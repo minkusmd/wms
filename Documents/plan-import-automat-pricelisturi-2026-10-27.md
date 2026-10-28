@@ -80,7 +80,21 @@ Găsit la portare:
 - **Triomac:** Delphi folosea pentru EUR codul 978, dar în `TS_CURRENCY` EUR are 976.
 - **Pricelistul nativ** primea categoria `-1` din `TPI_SUPPLIER`. Acum primește categoria ultimului pricelist, ca WMSParsers.
 
-**Rămâne din etapa 4:** (b) imaginile și descrierile, incremental + `SP_PI_CONTENT_TRANSFER`. Până atunci, conținutul celor 5 furnizori vine doar din WMSParsers / frame78.
+### Etapa 4b (28 oct 2026): imaginile și descrierile
+
+| Ce | Stare |
+|---|---|
+| `content.py` + `content_images.py`, `content_of` în `dmlink` / `olisgrup` / `nex` / `triomac`, `pi content`, jobul de la 11:00 și 22:00 | 12 teste noi; 137 în total |
+| DDL `DB Model/price_import_stage4b.sql` (+ `_grants`, `_rollback`): `TPI_CONTENT_RUN` + `SP_PI_CONTENT_TRANSFER` (DEFINER) | Testat local (re-rulare, drepturi, rollback). **Nerulat pe SW** |
+| Previzualizare pe SW (`pi content --dry`, fără scriere) | Nex: din 424 de descrieri doar 3 diferă de cele scrise de Delphi (text schimbat la furnizor), deci formatul e identic. DMLink: 71 de descrieri schimbate și 107 liste de imagini. Olis și Triomac: staging-ul era **gol** pe SW, deci totul e nou (4 204 și 508 descrieri) |
+| Descărcarea reală (4 coduri / furnizor, în memorie) | Toate imaginile descărcate și convertite (PNG ≤ 1200 px), fără erori |
+
+Găsit la portare:
+- **Imaginile se descarcă doar unde folosesc.** Dintre cele ~8 000 de coduri cu imagini nedescărcate, doar ~870 sunt legate de produse fără nicio imagine: DMLink 47, Olis 818, Triomac 2, Nex 0. Celelalte ar fi adăugat câțiva GB de PNG în SW fără niciun efect; rămân cu URL-ul și se descarcă dacă devin utile.
+- **Estimarea primei rulări** (produse care primesc conținut; nimic nu se suprascrie): DMLink 2 056 descrieri RO + 110 produse cu imagini; Olis 1 552 RO + 1 968 RU + 818 cu imagini; Triomac 189 RO + 2 cu imagini; Nex nimic (conținutul lui e deja copiat). Pe SW conținutul Olis / Triomac nu ajunsese deloc în staging, iar descrierile DMLink nu fuseseră copiate la produse.
+- **Comutarea din etapa 4c nu oprește WMSParsers.** Cât timp `FLG_AUTO_APPLY = 0`, prețurile acestor furnizori le actualizează tot WMSParsers; serviciul doar raportează.
+
+**Rămâne după etapa 4:** rularea `price_import_stage4b.sql` + `_grants` pe SW, apoi prima rulare `pi content` (sau jobul din serviciu, după deploy).
 
 Găsit la implementare (schimbă §4.4–4.5):
 - `ADJUST_RRP_REEVALUATION` scade `TS_CUSTOMER.RRP_DISCOUNT` (1–3%) din RRP la fiecare reevaluare. De aceea comparația brută (și cea din WMS) arată la fiecare import „+1%” la toate produsele pe RRP. Diff-ul Python aplică aceeași formulă înainte de comparare. La NATVEX 6111, falsele creșteri scad de la 1 187 la 0, iar la AgroPiese de la 952 la 812.
@@ -1147,7 +1161,7 @@ Fără pandas: volumele (zeci de mii de rânduri) nu justifică dependența, iar
 
 **Etapa 4**
 - [ ] Restul furnizorilor A; portarea adaptoarelor Delphi la nevoie
-- [ ] Conținut incremental + `SP_PI_CONTENT_TRANSFER`
+- [x] Conținut incremental + `SP_PI_CONTENT_TRANSFER` (cod gata 28 oct 2026; DDL nerulat pe SW)
 - [ ] Matching EAN/MPN/fuzzy cu propuneri în `TPI_MATCH_CANDIDATE`
 
 **Etapa 5**

@@ -352,6 +352,15 @@ begin
     '</s:Envelope>';
 end;
 
+// pagina HTML de eroare a serverului/gateway-ului, in locul plicului SOAP
+function IsHtmlPage(const ABody: string): Boolean;
+var
+  S: string;
+begin
+  S := LowerCase(Copy(TrimLeft(ABody), 1, 64));
+  Result := (Pos('<!doctype html', S) = 1) or (Pos('<html', S) = 1);
+end;
+
 function TEFacturaApiClient.Execute(const AOperation, ABody: string): IXMLNode;
 var
   Http: THTTPClient;
@@ -391,6 +400,11 @@ begin
 
   if Trim(Body) = '' then
     raise EEFacturaApiError.CreateFmt('e-Factura: raspuns gol la %s (HTTP %d).', [AOperation, StatusCode]);
+  // serverul SFS cazut / gateway-ul lui (HTTP 502, 503...) intoarce o pagina HTML, nu SOAP
+  // (20.10.2026: 502 chiar si la ?singleWsdl) - mesaj scurt, nu dump-ul paginii
+  if (StatusCode >= 500) or IsHtmlPage(Body) then
+    raise EEFacturaApiError.CreateFmt('Serviciul e-Factura (API SFS) nu este disponibil acum: HTTP %d la %s.' +
+      sLineBreak + 'Problema este la serverul SFS - incercati mai tarziu.', [StatusCode, AOperation]);
   try
     Doc := LoadXMLData(Body);
   except

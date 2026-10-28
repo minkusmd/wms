@@ -70,6 +70,20 @@ class SupplierItem:
 
 
 @dataclass(slots=True)
+class ContentItem:
+    """Continutul unui cod (etapa 4b) pentru TS_PRICELIST_ITEMS_DESCRIPTION / _IMAGES.
+    None = coloana nu se scrie (DMLink da doar romana); "" = furnizorul nu are text."""
+    code: str
+    desc_ro: str | None = None
+    desc_ru: str | None = None
+    category: str | None = None          # PRODUCT_CATEGORIES (doar NexDistribution)
+    images: list[str] = field(default_factory=list)   # URL-urile, in ordinea furnizorului (ORDERNO 1 = principala)
+
+    def has_description(self) -> bool:
+        return bool(self.desc_ro or self.desc_ru)
+
+
+@dataclass(slots=True)
 class GfRow:
     """Starea curenta a unui rand TS_GOODS_FOREIGN al furnizorului."""
     goodsid: int

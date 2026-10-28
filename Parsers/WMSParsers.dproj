@@ -109,10 +109,13 @@
         <DCCReference Include="MaximumContentUnit.pas"/>
         <DCCReference Include="..\sources\Tools\ApiAccent\ApiAccentUnit.pas"/>
         <DCCReference Include="..\sources\frameUtils\78 - Pricelist\MamicoContentUnit.pas"/>
+        <DCCReference Include="..\sources\Utils\libwebp.pas"/>
+        <DCCReference Include="..\sources\Utils\WebpHelpers.pas"/>
         <DCCReference Include="..\sources\frameUtils\78 - Pricelist\PriceListContentTransferUnit.pas"/>
         <DCCReference Include="..\sources\b2b.api\dmlink\B2B.DMLinkPriceListImport.pas"/>
         <DCCReference Include="..\sources\frameUtils\78 - Pricelist\NexDistributionUnit.pas"/>
         <DCCReference Include="..\sources\frameUtils\78 - Pricelist\TriomacPriceListUnit.pas"/>
+        <DCCReference Include="..\sources\b2b.api\scop\SCOPAPIClientUnit.pas"/>
         <DCCReference Include="..\sources\b2b.api\Muncitorul\OlisGrupContentUnit.pas"/>
         <DCCReference Include="OlisGrupPriceListUnit.pas"/>
         <DCCReference Include="PriceListReevaluationUnit.pas"/>

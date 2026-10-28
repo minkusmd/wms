@@ -58,6 +58,9 @@ type
     cxGridGoodsWEBGOODSTITLERU: TcxGridDBColumn;
     cxGrid_FoldersColumn3: TcxGridDBColumn;
     Label5: TLabel;
+    pmGoods: TPopupMenu;
+    miChangeGoodsType: TMenuItem;
+    miChangeParent: TMenuItem;
     procedure cxGridDBTableView1KeyDown(Sender: TObject; var Key: Word; Shift:
         TShiftState);
     procedure cxGridGoodsKeyDown(Sender: TObject; var Key: Word; Shift:
@@ -70,12 +73,18 @@ type
     procedure IBCDataSourceWebCatalogDataChange(Sender: TObject; Field: TField);
     procedure SWNButtonEdit1PropertiesButtonClick(Sender: TObject;
       AButtonIndex: Integer);
+    procedure pmGoodsPopup(Sender: TObject);
+    procedure miChangeGoodsTypeClick(Sender: TObject);
+    procedure miChangeParentClick(Sender: TObject);
   private
     FGoodsFolderID: Integer;
     FGoodsFolderName: string;
     procedure SetGoodsFolderID(const Value: Integer);
     procedure SetGoodsFolderName(const Value: string);
     procedure OpenWebCatalogPath;
+    function GetSelectedGoodsIDs(Titles: TStrings = nil): TArray<Integer>;
+    procedure ChangeSelectedGoodsType;
+    procedure MoveSelectedGoodsToFolder;
     { Private declarations }
   protected
     procedure Prepare; override;
@@ -96,7 +105,7 @@ var
 implementation
 
 uses
-  frmGoods, SWNUtils;
+  frmGoods, SWNUtils, DataModuleDB, frmGoodsTypeDialog, frmChangeParentFolderDialog;
 
 {$R *.dfm}
 
@@ -242,6 +251,132 @@ begin
     finally
       d.Free;
     end;
+end;
+
+// Produsele selectate in cxGridGoods: ID-urile in Result, denumirile (optional) in Titles
+function TfrmAddNewGoodsDlg.GetSelectedGoodsIDs(Titles: TStrings): TArray<Integer>;
+var
+  i, RecIdx: Integer;
+  GoodsID: Variant;
+begin
+  Result := nil;
+  if not IBCQueryGoods.Active then
+    Exit;
+  for i := 0 to cxGridGoods.Controller.SelectedRecordCount - 1 do
+  begin
+    RecIdx := cxGridGoods.Controller.SelectedRecords[i].RecordIndex;
+    GoodsID := cxGridGoods.DataController.Values[RecIdx, cxGridGoodsColumn1.Index];
+    if VarIsNull(GoodsID) then
+      Continue;
+    Result := Result + [Integer(GoodsID)];
+    if Assigned(Titles) then
+      Titles.Add(VarToStr(cxGridGoods.DataController.Values[RecIdx, cxGridGoodsColumn2.Index]));
+  end;
+end;
+
+procedure TfrmAddNewGoodsDlg.pmGoodsPopup(Sender: TObject);
+var
+  HasSelection: Boolean;
+begin
+  HasSelection := IBCQueryGoods.Active and (cxGridGoods.Controller.SelectedRecordCount > 0);
+  miChangeGoodsType.Enabled := HasSelection;
+  miChangeParent.Enabled := HasSelection;
+end;
+
+procedure TfrmAddNewGoodsDlg.miChangeGoodsTypeClick(Sender: TObject);
+begin
+  ChangeSelectedGoodsType;
+end;
+
+procedure TfrmAddNewGoodsDlg.miChangeParentClick(Sender: TObject);
+begin
+  MoveSelectedGoodsToFolder;
+end;
+
+// Tipul de produs (TS_GOODS.WEBGOODSTYPE_ID) la toate produsele selectate, ales din
+// nomenclatorul de tipuri (TfrmGoodsTypeDlg), la fel ca in nomenclatorul de produse
+procedure TfrmAddNewGoodsDlg.ChangeSelectedGoodsType;
+var
+  d: TfrmGoodsTypeDlg;
+  q: TIBCQuery;
+  IDs: TArray<Integer>;
+  GoodsID: Integer;
+begin
+  IDs := GetSelectedGoodsIDs;
+  if Length(IDs) = 0 then
+  begin
+    MessageDlg('Selectati produsele carora le schimbati tipul!', mtError, [mbOK], 0);
+    Exit;
+  end;
+  d := TfrmGoodsTypeDlg.Create(Self);
+  try
+    // implicit: tipul produsului curent din grid
+    if not d.SelectGoodsType(IBCQueryGoods.FieldByName('WEBGOODSTYPE_ID').AsInteger) then
+      Exit;
+    q := TIBCQuery.Create(Self);
+    try
+      q.Connection := dmDB.IBCConnection;
+      q.Transaction := dmDB.IBCTrDefaultUpdate;
+      q.AutoCommit := False;
+      q.SQL.Text := 'UPDATE TS_GOODS SET WEBGOODSTYPE_ID = :WEBGOODSTYPE_ID WHERE GOODSID = :GOODSID';
+      q.ParamByName('WEBGOODSTYPE_ID').AsInteger := d.GoodsTypeID;
+      if not q.Transaction.Active then
+        q.Transaction.StartTransaction;
+      try
+        for GoodsID in IDs do
+        begin
+          q.ParamByName('GOODSID').AsInteger := GoodsID;
+          q.ExecSQL;
+        end;
+        q.Transaction.Commit;
+      except
+        if q.Transaction.Active then
+          q.Transaction.Rollback;
+        raise;
+      end;
+    finally
+      q.Free;
+    end;
+    IBCQueryGoods.Refresh;
+  finally
+    d.Free;
+  end;
+end;
+
+// Muta produsele selectate in alta mapa: dialogul TfrmChangeParentFolderDlg (acelasi ca in
+// nomenclator) alege mapa si scrie singur PARENTID; aici doar reincarcam mapele si lista
+procedure TfrmAddNewGoodsDlg.MoveSelectedGoodsToFolder;
+var
+  d: TfrmChangeParentFolderDlg;
+  IDs: TArray<Integer>;
+  Titles: TStringList;
+  i: Integer;
+begin
+  Titles := TStringList.Create;
+  try
+    IDs := GetSelectedGoodsIDs(Titles);
+    if Length(IDs) = 0 then
+    begin
+      MessageDlg('Selectati produsele pe care le mutati in alta mapa!', mtError, [mbOK], 0);
+      Exit;
+    end;
+    d := TfrmChangeParentFolderDlg.Create(Self);
+    try
+      d.DBTable := dbtGOODS;
+      d.FolderObjectID := IBCQueryGoodsFolders.FieldByName('PARENTID').AsInteger;
+      for i := 0 to High(IDs) do
+        d.AddObjectInfo(IDs[i], Titles[i]);
+      if d.ShowModal = mrOk then
+      begin
+        IBCQueryGoodsFolders.Refresh; // GOODS_CNT al mapelor s-a schimbat
+        ShowGoodsList;
+      end;
+    finally
+      d.Free;
+    end;
+  finally
+    Titles.Free;
+  end;
 end;
 
 procedure TfrmAddNewGoodsDlg.WhenCancelForm;

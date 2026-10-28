@@ -40,6 +40,8 @@ type
     FCreateNewType: Boolean;
     procedure SetCreateNewType(const Value: Boolean);
     function CheckParams: Boolean;
+    procedure SelectGoodsFolderFromTree;
+    procedure SetGoodsFolder(const AFolderID: Integer; const AFolderTitle: string);
   protected
     { protected declarations }
     procedure BindingDataSource; override;
@@ -58,7 +60,7 @@ implementation
 
 uses
   SWNUtils, SWNConst, frmGoods, frmWebDescriptionTemplateDialog,
-  frmGoodsTypeFiltersDialog, frmGoodsTypeServicesDialog;
+  frmGoodsTypeFiltersDialog, frmGoodsTypeServicesDialog, frmGoodsTypeFolderSuggestDialog;
 
 {$R *.dfm}
 
@@ -132,8 +134,38 @@ begin
   end;
 end;
 
+// Butonul folderului: se propun folderele in care stau deja produsele acestui tip (dupa
+// numarul de produse); "Alt folder..." sau un tip nou -> alegerea din arborele de produse.
 procedure TfrmGoodsTypeEditorDlg.beGoodsFolderPropertiesButtonClick(
   Sender: TObject; AButtonIndex: Integer);
+var
+  d: TfrmGoodsTypeFolderSuggestDlg;
+  gtid: Integer;
+begin
+  gtid := fMasterDataSet.FieldByName('GOODSTYPEID').AsInteger;
+  if FCreateNewType or (gtid <= 0) then
+  begin
+    SelectGoodsFolderFromTree;
+    Exit;
+  end;
+
+  d := TfrmGoodsTypeFolderSuggestDlg.Create(Self, IBCConnection);
+  try
+    d.GoodsTypeID := gtid;
+    d.GoodsTypeTitle := fMasterDataSet.FieldByName('TITLE').AsString;
+    d.CurrentFolderID := beGoodsFolder.Tag;
+    case d.ShowModal of
+      mrOk:
+        SetGoodsFolder(d.FolderID, d.FolderTitle);
+      mrRetry:
+        SelectGoodsFolderFromTree;
+    end;
+  finally
+    d.Free;
+  end;
+end;
+
+procedure TfrmGoodsTypeEditorDlg.SelectGoodsFolderFromTree;
 var
     d: TfrmGoodsBrowser;
 begin
@@ -142,16 +174,19 @@ begin
         if d.SelectGoods(-1, true) then
         begin
             if d.GoodsIsFolder then
-            begin
-                MasterDataSet.Edit;
-                MasterDataSet.FieldByName('GOODS_FOLDERID').AsInteger := d.Goodsid;
-                beGoodsFolder.Tag := d.GoodsID;
-                beGoodsFolder.Text := d.GoodsTitle;
-            end;
+                SetGoodsFolder(d.GoodsID, d.GoodsTitle);
         end;
     finally
         d.Free;
     end;
+end;
+
+procedure TfrmGoodsTypeEditorDlg.SetGoodsFolder(const AFolderID: Integer; const AFolderTitle: string);
+begin
+  MasterDataSet.Edit;
+  MasterDataSet.FieldByName('GOODS_FOLDERID').AsInteger := AFolderID;
+  beGoodsFolder.Tag := AFolderID;
+  beGoodsFolder.Text := AFolderTitle;
 end;
 
 procedure TfrmGoodsTypeEditorDlg.BindingDataSource;

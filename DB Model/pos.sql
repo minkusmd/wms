@@ -22,7 +22,7 @@
                         2 = incasat, 3 = anulat, 4 = returnat (total/partial)
    TPOS_SALE_ITEM     - liniile bonului pina la incasare (dupa = TDB_JURNAL)
    TPOS_SALE_PAYMENT  - platile bonului (plata mixta); PAY_CODE = codul stabil
-                        din TS_SYSS.VALUE_STR (PAY_CASH, PAY_POS, PAY_QR_MIA)
+                        din TS_SYSS.VALUE_STR (PAY_CASH, PAY_POS, PAY_QR_MIA_POS)
                         + POS_VOUCHER, POS_CASHBACK
 
    Script RE-RULABIL: se poate executa de mai multe ori fara efecte adverse.
@@ -568,7 +568,7 @@ END^
 
 /* Creeaza lantul de documente al bonului POS, in tranzactia apelantului:
      Vinzare 107 (+ linii, partide FIFO, seriale) -> Factura fiscala 112 ->
-     cite o incasare per plata: 116 (PAY_CASH) sau 120 (PAY_POS, PAY_QR_MIA),
+     cite o incasare per plata: 116 (PAY_CASH) sau 120 (PAY_POS, PAY_QR_MIA_POS),
      cu parintele 107 si analitica din codul platii.
    NU scrie TDB_DOCS_RECEIPT si NU schimba starea bonului: apelantul tipareste
    bonul fiscal si abia apoi cheama SP_POS_REGISTER_RECEIPT + COMMIT. Daca
@@ -646,7 +646,7 @@ BEGIN
     IF (ITEMS_SUMA <> PAY_SUMA) THEN
         EXCEPTION ERR_POS 'Platile (' || :PAY_SUMA || ') nu acopera exact bonul (' || :ITEMS_SUMA || ').';
     IF (EXISTS(SELECT 1 FROM TPOS_SALE_PAYMENT
-               WHERE SALE_ID = :ASALE_ID AND PAY_CODE NOT IN ('PAY_CASH', 'PAY_POS', 'PAY_QR_MIA'))) THEN
+               WHERE SALE_ID = :ASALE_ID AND PAY_CODE NOT IN ('PAY_CASH', 'PAY_POS', 'PAY_QR_MIA_POS', 'PAY_QR_MIA'))) THEN
         EXCEPTION ERR_POS 'Tip de plata neacceptat inca la casa (voucher / cashback = faza 5).';
     IF (EXISTS(SELECT 1 FROM TPOS_SALE_PAYMENT WHERE SALE_ID = :ASALE_ID AND SUMA <= 0)) THEN
         EXCEPTION ERR_POS 'Plata cu suma negativa sau zero.';

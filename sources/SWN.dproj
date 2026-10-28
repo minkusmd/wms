@@ -3104,6 +3104,9 @@
         <DCCReference Include="classes\GoodsType\frmGoodsByTypeUnit.pas">
             <Form>frmGoodsByType</Form>
         </DCCReference>
+        <DCCReference Include="classes\GoodsType\frmGoodsTypeFolderSuggestDialog.pas">
+            <Form>frmGoodsTypeFolderSuggestDlg</Form>
+        </DCCReference>
         <DCCReference Include="classes\GoodsType\frmMergeGoodsTypesUnit.pas">
             <Form>frmMergeGoodsTypesDlg</Form>
         </DCCReference>
@@ -3733,6 +3736,9 @@
         <DCCReference Include="frameUtils\78 - Pricelist\AloContentUnit.pas"/>
         <DCCReference Include="frameUtils\78 - Pricelist\PernaMeaContentUnit.pas"/>
         <DCCReference Include="frameUtils\78 - Pricelist\TinaContentUnit.pas"/>
+        <DCCReference Include="frameUtils\78 - Pricelist\TrisContentUnit.pas"/>
+        <DCCReference Include="frameUtils\78 - Pricelist\TyreContentCommonUnit.pas"/>
+        <DCCReference Include="frameUtils\78 - Pricelist\NatvexContentUnit.pas"/>
         <RcCompile Include="Resources\swn_images.rc">
             <Form>swn_images.res</Form>
         </RcCompile>

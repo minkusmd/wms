@@ -481,6 +481,8 @@ type
     procedure SetBrandByName(BrandName, GoodsCode: string; PLID: Integer);
     procedure SetParentID(AParentID: Integer);
     procedure SetPriceListGoodsTypeID;
+    procedure SetSelectedItemsField(ATableView: TcxGridDBTableView; const APLIField, AGoodsField: string; ANewID: Integer;
+      out APLICount, AGoodsCount: Integer; AFolderID: Integer = 0);
     { Public declarations }
     procedure SetupDefaultFocus; override;
   end;
@@ -492,7 +494,7 @@ uses
   SWNValueStorageUnit, dxInputDialogs, frmAddGoodsfromPrices, frmAddNewGoodsUnit, frmAnalizePriceListUnit,
   frmContentGoodsEditorDialog, frmContentPackage, frmCustomersDlg, frmGoods, frmGoodsPriceListDlgUnit, frmGoodsTypeDialog,
   frmMuncitorulProgressUnit, OlisGrupContentUnit, frmPriceManageStringFieldsUnit, frmPriceTypesUnit, frmPricelistImportUnit,
-  frmSelectGoodsTypeUnit, frmSyssDataEditor, frmSyssEditorWindow, uAnalizePriceList, {uLoadProductImages,} uPythonRunner, MamicoContentUnit, ImperiaContentUnit, ArvaliscomContentUnit, FiltreContentUnit, AloContentUnit, PernaMeaContentUnit, TinaContentUnit, PriceListContentTransferUnit, NexDistributionUnit, TriomacPriceListUnit, AgroPiesePriceListUnit, PriceGoodsCreateUnit,
+  frmSelectGoodsTypeUnit, frmSyssDataEditor, frmSyssEditorWindow, uAnalizePriceList, {uLoadProductImages,} uPythonRunner, MamicoContentUnit, ImperiaContentUnit, ArvaliscomContentUnit, FiltreContentUnit, AloContentUnit, PernaMeaContentUnit, TinaContentUnit, TrisContentUnit, NatvexContentUnit, PriceListContentTransferUnit, NexDistributionUnit, TriomacPriceListUnit, AgroPiesePriceListUnit, PriceGoodsCreateUnit,
   System.Math,
   IBCClasses, System.JSON, System.Generics.Collections, System.Net.HttpClient, System.Net.URLClient,
   System.Win.Registry,
@@ -2153,77 +2155,33 @@ begin
   MessageDlg(Format('Brandul a fost completat pentru %d produse.', [Updated]), mtInformation, [mbOK], 0);
 end;
 
+// "Seteaza Brandul": brandul ales se scrie la randurile selectate in
+// TS_PRICELIST_ITEMS.SYSTEM_VENDORID si, la produsele deja create, in TS_GOODS.VENDOR_ID.
 procedure Tframe78PriceList.bbSetupBrandClick(Sender: TObject);
 var
-  ARecordIndex: Integer;
-  I: Integer;
+  GoodsCount: Integer;
+  PLICount: Integer;
   syssEditor: TfrmSelectSyssEditorWin;
-  q: TIBCSQL;
-  SupplierGoodsCode: string;
   TableView: TcxGridDBTableView;
 begin
   TableView := GetActiveTableView(pcPricesAnalize.ActivePageIndex);
+  if (TableView = nil) or (TableView.Controller.SelectedRecordCount = 0) then
+    Exit;
 
-  TableView.DataController.BeginUpdate;
   syssEditor := TfrmSelectSyssEditorWin.Create(Self);
   try
     syssEditor.SetDefaultGroup(1);
     syssEditor.SelectMode := true;
-
-    if syssEditor.ShowModal = mrOK then
-    begin
-      q := TIBCSQL.Create(nil);
-      q.Transaction := dmDB.IBCTrDefaultUpdate;
-      q.AutoCommit := False;
-      q.SQL.Text :=
-        'update ts_pricelist_items set system_vendorid=:system_vendorID where plid=:plid and supplier_goods_code = :supplier_goods_code';
-      q.Prepare;
-      try
-        if not q.Transaction.Active then
-          q.Transaction.StartTransaction;
-        try
-
-          for I := 0 to TableView.Controller.SelectedRowCount - 1 do
-          begin
-            ARecordIndex := TableView.Controller.SelectedRecords[I].RecordIndex;
-            SupplierGoodsCode := TableView.DataController.Values[ARecordIndex, TableView.GetColumnByFieldName('SUPPLIER_GOODS_CODE').Index];
-            q.ParamByName('SYSTEM_VENDORID').AsInteger := syssEditor.SYSSID;
-            q.ParamByName('PLID').AsInteger := IBCQueryPriceData.FieldByName('PLID').AsInteger;
-            q.ParamByName('SUPPLIER_GOODS_CODE').AsString := SupplierGoodsCode;
-            q.Execute;
-
-            dxStatusBar1.SimplePanelStyle.Text := '[' + I.ToString + '] / [' + TableView.Controller.SelectedRowCount.ToString
-              + ']';
-
-            TableView.DataController.Values[ARecordIndex, TableView.GetColumnByFieldName('SYSTEM_VENDOR_NAME').Index] :=
-              syssEditor.SyssTitle;
-            TableView.DataController.Values[ARecordIndex, TableView.GetColumnByFieldName('SYSTEM_VENDORID').Index] :=
-              syssEditor.SYSSID;
-
-            Application.ProcessMessages;
-//            cxGridItemsDBTableView1.DataController.Refresh;
-          end;
-          dxStatusBar1.SimplePanelStyle.Text := 'Commiting...';
-                    // if active transaction then commit
-          if q.Transaction.Active then
-            q.Transaction.Commit;
-//          cxGridItemsDBTableView1.DataController.Refresh;
-        except
-          on e: Exception do
-          begin
-            e.Create('Produs problematic: ' + SupplierGoodsCode + #13#10 + e.Message);
-          end;
-        end;
-      finally
-        q.Free;
-        dxStatusBar1.SimplePanelStyle.Text := '';
-
-      end;
-    end;
+    if syssEditor.ShowModal <> mrOK then
+      Exit;
+    SetSelectedItemsField(TableView, 'SYSTEM_VENDORID', 'VENDOR_ID', syssEditor.SYSSID, PLICount, GoodsCount);
   finally
     syssEditor.Free;
-    TableView.DataController.EndUpdate;
   end;
+
+  TableView.DataController.DataSet.Refresh;
+  MessageDlg(Format('Brandul a fost setat: %d randuri din pricelist, %d produse create (TS_GOODS).',
+    [PLICount, GoodsCount]), mtInformation, [mbOK], 0);
 end;
 
 procedure Tframe78PriceList.bbDeleteAllGoodsFromCatalogClick(Sender: TObject);
@@ -2474,11 +2432,34 @@ end;
 
 procedure Tframe78PriceList.bbGoodsPropertiesDownloadClick(Sender: TObject);
 begin
+  // TRIS (trisauto.md, 25 oct 2026): anvelopele fara imagini sau fara caracteristici - sezonul si
+  // imaginea modelului de pe site (imaginea in TS_PRICELIST_ITEMS_IMAGES, copiata mai jos la
+  // produse), caracteristicile din denumire + site direct la produse; vezi TrisContentUnit
+  if IBCQuerySuppliers.FieldByName('CustomerID').AsInteger = cTrisSupplierID then
+  begin
+    if not TTrisContentLoader.RunForPriceList(dmDB.IBCConnection, IBCQueryPriceData.FieldbyName('plid').AsInteger, dmDB.CurrentUserID) then
+      Exit;
+    if IBCQueryPriceListImages.Active then
+      IBCQueryPriceListImages.Refresh;
+  end;
+
+  // NATVEX-COM (autoplanet.md, 25 oct 2026): anvelopele fara imagini sau fara caracteristici -
+  // imaginea modelului de pe site (potrivire dupa denumire, codul Natvex nu e pe site) in
+  // TS_PRICELIST_ITEMS_IMAGES, caracteristicile din denumire direct la produse; vezi NatvexContentUnit
+  if IBCQuerySuppliers.FieldByName('CustomerID').AsInteger = cNatvexSupplierID then
+  begin
+    if not TNatvexContentLoader.RunForPriceList(dmDB.IBCConnection, IBCQueryPriceData.FieldbyName('plid').AsInteger, dmDB.CurrentUserID) then
+      Exit;
+    if IBCQueryPriceListImages.Active then
+      IBCQueryPriceListImages.Refresh;
+  end;
+
   // maximum electronic
   if IBCQuerySuppliers.FieldByName('CustomerID').AsInteger = 229873 then
   begin
 
   end;
+
   // mamico.md Ad web invest srl
   if IBCQuerySuppliers.FieldByName('CustomerID').AsInteger = 315715 then
   begin
@@ -2614,13 +2595,9 @@ begin
   //Teocom lux
   if IBCQuerySuppliers.FieldByName('CustomerID').AsInteger = 74852 then
   begin
-
-
     if IBCQueryPriceListImages.Active then
       IBCQueryPriceListImages.Refresh;
   end;
-
-
 end;
 
 // imaginile si descrierile furnizorului (TS_PRICELIST_ITEMS_IMAGES / _DESCRIPTION) ->
@@ -3832,54 +3809,170 @@ begin
   end;
 end;
 
+// "Seteaza Tip produs": tipul ales se scrie la randurile selectate in
+// TS_PRICELIST_ITEMS.GOODSTYPEID si, la produsele deja create, in TS_GOODS.WEBGOODSTYPE_ID;
+// daca tipul are folder (TS_GOODS_TYPE.GOODS_FOLDERID), produsele create se muta si in el.
 procedure Tframe78PriceList.SetPriceListGoodsTypeID;
 var
   ACurrentWebGoodsTypeID: Integer;
-  aRowIndex: Integer;
-  // dialog: TfrmSelectGoodsTypeDlg;
-  editor: TfrmGoodsTypeDlg;
-  I: Integer;
-  SupplierGoodsCode: string;
-  Query: TIBCSQL;
   ATableView: TcxGridDBTableView;
+  ATypeColumn: TcxGridDBColumn;
+  editor: TfrmGoodsTypeDlg;
+  FolderID: Integer;
+  FolderTitle: string;
+  GoodsCount: Integer;
+  PLICount: Integer;
+  q: TIBCQuery;
 begin
   ATableView := GetActiveTableView(pcPricesAnalize.ActivePageIndex);
-  Query := TIBCSQL.Create(Self);
-  Query.Transaction := dmDB.IBCTrDefaultUpdate;
-  Query.AutoCommit := False;
-  Query.SQL.Text :=
-    'update ts_pricelist_items set goodstypeid=:goodstypeid where plid=:plid and supplier_goods_code = :supplier_goods_code';
-  Query.Prepare;
+  if (ATableView = nil) or (ATableView.Controller.SelectedRecordCount = 0) then
+    Exit;
+
+  ACurrentWebGoodsTypeID := -1;
+  ATypeColumn := ATableView.GetColumnByFieldName('GOODSTYPEID');
+  if (ATypeColumn <> nil) and (ATableView.Controller.FocusedRecord <> nil) and
+    ATableView.Controller.FocusedRecord.IsData then
+    ACurrentWebGoodsTypeID := StrToIntDef(VarToStr(ATableView.Controller.FocusedRecord.Values[ATypeColumn.Index]), -1);
+  if (ACurrentWebGoodsTypeID = 0) then
+    ACurrentWebGoodsTypeID := -1;
 
   editor := TfrmGoodsTypeDlg.Create(Self);
   try
-    ACurrentWebGoodsTypeID := iif(VarIsNull(ATableView.DataController.Values[ATableView.Controller.FocusedRecord.Index,
-      ATableView.GetColumnByFieldName('GOODSTYPEID').Index]), -1, ATableView.DataController.Values[ATableView.Controller.FocusedRecord.Index,
-      ATableView.GetColumnByFieldName('GOODSTYPEID').Index]);
+    if not editor.SelectGoodsType(ACurrentWebGoodsTypeID) then
+      Exit;
 
-    if (ACurrentWebGoodsTypeID = 0) then
-      ACurrentWebGoodsTypeID := -1;
-
-    if editor.SelectGoodsType(ACurrentWebGoodsTypeID) then
-    begin
-      if not Query.Transaction.Active then
-        Query.Transaction.StartTransaction;
-      for I := 0 to ATableView.Controller.SelectedRowCount - 1 do
+    FolderID := 0;
+    FolderTitle := '';
+    q := TIBCQuery.Create(nil);
+    try
+      q.Connection := dmDB.IBCConnection;
+      q.SQL.Text := 'select gt.goods_folderid, f.title from ts_goods_type gt ' +
+        'join ts_goods f on f.goodsid = gt.goods_folderid and f.flg_folder = 1 ' +
+        'where gt.goodstypeid = :goodstypeid';
+      q.ParamByName('goodstypeid').AsInteger := editor.GoodsTypeID;
+      q.Open;
+      if not q.IsEmpty then
       begin
-        aRowIndex := ATableView.ViewData.Records[ATableView.Controller.SelectedRecords[I].Index].RecordIndex;
-        SupplierGoodsCode := ATableView.DataController.Values[aRowIndex, ATableView.GetColumnByFieldName('SUPPLIER_GOODS_CODE').Index];
-        Query.ParamByName('goodstypeid').AsInteger := editor.GoodsTypeID;
-        Query.ParamByName('plid').AsInteger := IBCQueryPriceData.FieldByName('PLID').AsInteger;
-        Query.ParamByName('supplier_goods_code').AsString := SupplierGoodsCode;
-        Query.Execute;
+        FolderID := q.FieldByName('GOODS_FOLDERID').AsInteger;
+        FolderTitle := q.FieldByName('TITLE').AsString;
       end;
-      Query.Transaction.Commit;
-      ATableView.DataController.DataSet.Refresh;
-//            ATableView.DataController.RefreshExternalData;
+    finally
+      q.Free;
+    end;
+
+    SetSelectedItemsField(ATableView, 'GOODSTYPEID', 'WEBGOODSTYPE_ID', editor.GoodsTypeID, PLICount, GoodsCount,
+      FolderID);
+  finally
+    editor.Free;
+  end;
+
+  ATableView.DataController.DataSet.Refresh;
+  if FolderID > 0 then
+    MessageDlg(Format('Tipul produsului a fost setat: %d randuri din pricelist, %d produse create (TS_GOODS).' +
+      sLineBreak + 'Produsele create sunt in folderul tipului: "%s".', [PLICount, GoodsCount, FolderTitle]),
+      mtInformation, [mbOK], 0)
+  else
+    MessageDlg(Format('Tipul produsului a fost setat: %d randuri din pricelist, %d produse create (TS_GOODS).' +
+      sLineBreak + 'Tipul nu are folder - produsele create raman in folderul lor.', [PLICount, GoodsCount]),
+      mtInformation, [mbOK], 0);
+end;
+
+// Scrie ANewID la randurile selectate din ATableView: in TS_PRICELIST_ITEMS.<APLIField>
+// si, pentru produsele deja create (legate dupa codul furnizorului prin TS_GOODS_FOREIGN,
+// ca in VW_TS_PRICELIST_ITEMS), in TS_GOODS.<AGoodsField>; cu AFolderID > 0 produsele
+// create se muta si in folderul AFolderID (TS_GOODS.PARENTID). Totul intr-o singura tranzactie.
+procedure Tframe78PriceList.SetSelectedItemsField(ATableView: TcxGridDBTableView; const APLIField, AGoodsField: string;
+  ANewID: Integer; out APLICount, AGoodsCount: Integer; AFolderID: Integer);
+var
+  ACodeColumn: TcxGridDBColumn;
+  ARecord: TcxCustomGridRecord;
+  I: Integer;
+  PLID: Integer;
+  QGoods: TIBCSQL;
+  QPLI: TIBCSQL;
+  SupplierGoodsCode: string;
+  SupplierID: Integer;
+begin
+  APLICount := 0;
+  AGoodsCount := 0;
+  ACodeColumn := ATableView.GetColumnByFieldName('SUPPLIER_GOODS_CODE');
+  if ACodeColumn = nil then
+    raise Exception.Create('Lista curenta nu are coloana "SUPPLIER_GOODS_CODE".');
+  PLID := IBCQueryPriceData.FieldByName('PLID').AsInteger;
+  SupplierID := IBCQueryPriceData.FieldByName('SUPPLIERID').AsInteger;
+
+  QPLI := TIBCSQL.Create(nil);
+  QGoods := TIBCSQL.Create(nil);
+  try
+    QPLI.Transaction := dmDB.IBCTrDefaultUpdate;
+    QPLI.AutoCommit := False;
+    QPLI.SQL.Text := 'update ts_pricelist_items set ' + APLIField + ' = :newid ' +
+      'where plid = :plid and supplier_goods_code = :supplier_goods_code';
+
+    QGoods.Transaction := dmDB.IBCTrDefaultUpdate;
+    QGoods.AutoCommit := False;
+    QGoods.SQL.Text := 'merge into ts_goods g ' +
+      'using (select distinct gf.goodsid from ts_goods_foreign gf ' +
+      '  where gf.goods_code = :supplier_goods_code and gf.customerid = :supplierid) s ' +
+      'on g.goodsid = s.goodsid ';
+    if AFolderID > 0 then
+      QGoods.SQL.Text := QGoods.SQL.Text +
+        'when matched and (g.' + AGoodsField + ' is distinct from :newid_old ' +
+        '  or g.parentid is distinct from :folderid_old) then ' +
+        '  update set g.' + AGoodsField + ' = :newid, g.parentid = :folderid'
+    else
+      QGoods.SQL.Text := QGoods.SQL.Text +
+        'when matched and g.' + AGoodsField + ' is distinct from :newid_old then ' +
+        '  update set g.' + AGoodsField + ' = :newid';
+
+    if not QPLI.Transaction.Active then
+      QPLI.Transaction.StartTransaction;
+    SupplierGoodsCode := '';
+    try
+      for I := 0 to ATableView.Controller.SelectedRecordCount - 1 do
+      begin
+        ARecord := ATableView.Controller.SelectedRecords[I];
+        if not ARecord.IsData then
+          Continue;
+        SupplierGoodsCode := VarToStr(ARecord.Values[ACodeColumn.Index]);
+        if SupplierGoodsCode = '' then
+          Continue;
+
+        QPLI.ParamByName('newid').AsInteger := ANewID;
+        QPLI.ParamByName('plid').AsInteger := PLID;
+        QPLI.ParamByName('supplier_goods_code').AsString := SupplierGoodsCode;
+        QPLI.Execute;
+        Inc(APLICount, QPLI.RowsAffected);
+
+        QGoods.ParamByName('newid').AsInteger := ANewID;
+        QGoods.ParamByName('newid_old').AsInteger := ANewID;
+        QGoods.ParamByName('supplier_goods_code').AsString := SupplierGoodsCode;
+        QGoods.ParamByName('supplierid').AsInteger := SupplierID;
+        if AFolderID > 0 then
+        begin
+          QGoods.ParamByName('folderid').AsInteger := AFolderID;
+          QGoods.ParamByName('folderid_old').AsInteger := AFolderID;
+        end;
+        QGoods.Execute;
+        Inc(AGoodsCount, QGoods.RowsAffected);
+
+        dxStatusBar1.SimplePanelStyle.Text := Format('[%d] / [%d]', [I + 1, ATableView.Controller.SelectedRecordCount]);
+        Application.ProcessMessages;
+      end;
+      dxStatusBar1.SimplePanelStyle.Text := 'Commiting...';
+      QPLI.Transaction.Commit;
+    except
+      on E: Exception do
+      begin
+        if QPLI.Transaction.Active then
+          QPLI.Transaction.Rollback;
+        raise Exception.Create('Produs problematic: ' + SupplierGoodsCode + sLineBreak + E.Message);
+      end;
     end;
   finally
-    Query.Free;
-    editor.Free;
+    QGoods.Free;
+    QPLI.Free;
+    dxStatusBar1.SimplePanelStyle.Text := '';
   end;
 end;
 

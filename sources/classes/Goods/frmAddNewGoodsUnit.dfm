@@ -179,6 +179,7 @@ object frmAddNewGoodsDlg: TfrmAddNewGoodsDlg
     Top = 344
     Width = 577
     Height = 252
+    PopupMenu = pmGoods
     TabOrder = 3
     object cxGridGoods: TcxGridDBTableView
       OnKeyDown = cxGridGoodsKeyDown
@@ -197,6 +198,7 @@ object frmAddNewGoodsDlg: TfrmAddNewGoodsDlg
       OptionsData.DeletingConfirmation = False
       OptionsData.Editing = False
       OptionsData.Inserting = False
+      OptionsSelection.MultiSelect = True
       OptionsView.ColumnAutoWidth = True
       OptionsView.GroupByBox = False
       object cxGridGoodsColumn1: TcxGridDBColumn
@@ -379,8 +381,8 @@ object frmAddNewGoodsDlg: TfrmAddNewGoodsDlg
     KeyFields = 'goodsid'
     SQL.Strings = (
       
-        'select goodsid, title, g.webgoodstype_title, g.webgoodstype_titl' +
-        'e_ru,'
+        'select goodsid, title, g.webgoodstype_id, g.webgoodstype_title, ' +
+        'g.webgoodstype_title_ru,'
       '       (select price_mdl'
       
         '        from get_goods_price(goodsid, 1, 498)) price1_lei, get_f' +
@@ -437,5 +439,18 @@ object frmAddNewGoodsDlg: TfrmAddNewGoodsDlg
     DataSet = IBCQueryWebCatalogGoods
     Left = 737
     Top = 340
+  end
+  object pmGoods: TPopupMenu
+    OnPopup = pmGoodsPopup
+    Left = 200
+    Top = 352
+    object miChangeGoodsType: TMenuItem
+      Caption = 'Schimba tipul de produs la produsele selectate...'
+      OnClick = miChangeGoodsTypeClick
+    end
+    object miChangeParent: TMenuItem
+      Caption = 'Muta produsele selectate in alta mapa...'
+      OnClick = miChangeParentClick
+    end
   end
 end

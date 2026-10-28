@@ -9,7 +9,8 @@ Regulile importului din WMS:
   un sku repetat intre produsele CU STOC se sare la toate aparitiile (un cod ambiguu nu se poate lega);
   PRICE0 = nprice (cost) daca e > 0, altfel sprice; PRICE7 = sprice (USD); PRICE3 = rprice (RRP, lei);
   brand.name, category.name, stock -> STOCK_QTY.
-Descrierile si imaginile (TS_PRICELIST_ITEMS_DESCRIPTION / _IMAGES) raman la WMSParsers pina la etapa 4b.
+Continutul (etapa 4b): description (altfel shortDescription) -> doar DESCRIPTION_RO; images vin ca
+[["url"], ...] - se accepta si "url" sau {"url"|"path"|"image"|"src": ...}.
 Datele de acces: TS_API_CONFIG, API_CODE = 'DMLINK' (USERNAME, PASSWORD).
 """
 
@@ -20,9 +21,10 @@ from collections import Counter
 from typing import Any
 
 from .. import repo
-from ..models import FetchResult, RowError, SupplierItem
+from ..models import ContentItem, FetchResult, RowError, SupplierItem
 from ..normalize import NormalizeError, clean_text, normalize_code
 from .base import AdapterError, RunContext, SupplierAdapter, sha256_json
+from .contenttext import unique_urls
 from .http import HttpClient
 from .jsonval import jfloat, jobj, jstr, trunc
 
@@ -83,10 +85,41 @@ def parse_catalog(products: list[Any], usd: int, mdl: int) -> FetchResult:
     return result
 
 
+def image_url(item: Any) -> str:
+    """JImageURL: primul URL dintr-un sir / o lista (recursiv) / un obiect."""
+    if isinstance(item, str):
+        return item.strip()
+    if isinstance(item, list):
+        for value in item:
+            url = image_url(value)
+            if url:
+                return url
+        return ""
+    if isinstance(item, dict):
+        for key in ("url", "path", "image", "src"):
+            url = jstr(item, key)
+            if url:
+                return url
+    return ""
+
+
+def content_of(product: Any, code: str) -> ContentItem | None:
+    if not isinstance(product, dict):
+        return None
+    description = jstr(product, "description") or jstr(product, "shortDescription")
+    images = product.get("images")
+    urls = unique_urls(image_url(i) for i in images) if isinstance(images, list) else []
+    return ContentItem(code=code, desc_ro=description, images=urls)
+
+
 class DMLinkAdapter(SupplierAdapter):
     code = "dmlink"
     host = "b2b.dmlink.md"
     default_price_category = 10
+    has_content = True
+
+    def content_of(self, product: Any, code: str) -> ContentItem | None:
+        return content_of(product, code)
 
     def fetch(self, ctx: RunContext) -> FetchResult:
         config = repo.load_api_config(ctx.db, ctx.params.get("api_config_code", API_CODE))

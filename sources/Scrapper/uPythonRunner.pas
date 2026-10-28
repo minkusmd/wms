@@ -47,6 +47,9 @@ type
     FOnOutput   : TOutputProc;
     FOnFinished : TFinishedProc;
     FExitCode   : Integer;
+    FThreadsAllowed: Boolean;
+    // textul scris de Python dupa ultimul #10 (print trimite bucatile separat)
+    FPendingOutput: string;
 
     // Helper — evită W1058 la fiecare apel ExecString
     procedure Exec(const Code: string);
@@ -54,8 +57,14 @@ type
     procedure OnSendUniData(Sender: TObject; const Data: UnicodeString);
     procedure OnThreadFinished(Sender: TObject);
   public
-    constructor Create;
+    // ADllPath: python3xx.dll explicit (ex. 'C:\Python\Python313-32\python313.dll' -
+    // WMS e Win32, deci Python pe 32 de biti); gol = ultima versiune inregistrata.
+    // Python nu se poate reinitializa sigur in acelasi proces - un singur runner pe aplicatie.
+    constructor Create(const ADllPath: string = '');
     destructor  Destroy; override;
+
+    // sys.argv pentru urmatorul Run (ExecFile nu primeste argumente; sys.argv initial = ParamStr)
+    procedure SetArgs(const Args: array of string);
 
     procedure Run(const ScriptPath: string);
     procedure Cancel;
@@ -100,7 +109,7 @@ end;
 
 { TPythonRunner }
 
-constructor TPythonRunner.Create;
+constructor TPythonRunner.Create(const ADllPath: string);
 begin
   inherited Create;
   FExitCode := 0;
@@ -109,6 +118,13 @@ begin
   FEngine                     := TPythonEngine.Create(nil);
   FEngine.AutoLoad            := True;
   FEngine.UseLastKnownVersion := True;
+  // DLL-ul trebuie ales inainte de LoadDll (SetPythonDLL dupa Create nu mai are efect)
+  if ADllPath <> '' then
+  begin
+    FEngine.DllPath             := ExtractFilePath(ADllPath);
+    FEngine.DllName             := ExtractFileName(ADllPath);
+    FEngine.UseLastKnownVersion := False;
+  end;
 
   // ── TPythonInputOutput ────────────────────────────────────────────────────
   FIO               := TPythonInputOutput.Create(nil);
@@ -129,6 +145,12 @@ begin
         E.Message + sLineBreak +
         'Dacă folosești venv, apelează SetPythonDLL înainte de Run.');
   end;
+
+  // Dupa initializare firul principal tine GIL-ul; TScriptThread (emNewState) face
+  // PyGILState_Ensure si ar astepta la nesfirsit - eliberam GIL-ul aici, iar Exec il ia
+  // doar pe durata apelului.
+  TPythonThread.Py_Begin_Allow_Threads;
+  FThreadsAllowed := True;
 end;
 
 destructor TPythonRunner.Destroy;
@@ -138,6 +160,12 @@ begin
   begin
     FThread.WaitFor;
     FreeAndNil(FThread);
+  end;
+  // GIL-ul inapoi la firul principal inainte de finalizarea interpretorului
+  if FThreadsAllowed then
+  begin
+    TPythonThread.Py_End_Allow_Threads;
+    FThreadsAllowed := False;
   end;
   FEngine.IO := nil;
   FreeAndNil(FIO);
@@ -154,8 +182,34 @@ end;
 // Wrapper peste ExecString care convertește corect string → UTF-8 AnsiString.
 // Evită W1058 "Implicit string cast with potential data loss" la fiecare apel.
 procedure TPythonRunner.Exec(const Code: string);
+var
+  GilState: PyGILstate_STATE;
 begin
-  FEngine.ExecString(UTF8Encode(Code));
+  GilState := FEngine.PyGILState_Ensure;
+  try
+    FEngine.ExecString(UTF8Encode(Code));
+  finally
+    FEngine.PyGILState_Release(GilState);
+  end;
+end;
+
+procedure TPythonRunner.SetArgs(const Args: array of string);
+var
+  S: string;
+  I: Integer;
+begin
+  if IsRunning then
+    raise Exception.Create('Nu poți schimba argumentele în timp ce rulează un script.');
+  S := '';
+  for I := 0 to High(Args) do
+  begin
+    if I > 0 then
+      S := S + ', ';
+    // literal Python intre apostrofuri: \ si ' escapate
+    S := S + '''' + StringReplace(StringReplace(Args[I], '\', '\\', [rfReplaceAll]),
+      '''', '\''', [rfReplaceAll]) + '''';
+  end;
+  Exec('import sys; sys.argv = [' + S + ']');
 end;
 
 procedure TPythonRunner.SetPythonDLL(const DLLPath: string);
@@ -180,35 +234,45 @@ end;
 // Apelat de P4D când Python scrie pe stdout sau stderr (UnicodeIO = True).
 // Data = UnicodeString — conține textul Unicode corect (ț, ș, î, â, ă etc.)
 // Rulează pe thread-ul scriptului → sincronizăm pe main thread pentru UI.
+// Cu RawOutput, print("a", b) ajunge in bucati ("a", " ", "b", #10) - se trimit doar
+// rindurile complete, restul asteapta urmatorul #10 (sau sfirsitul scriptului).
 procedure TPythonRunner.OnSendUniData(Sender: TObject; const Data: UnicodeString);
 var
-  Lines : TStringList;
-  i     : Integer;
+  P     : Integer;
   Line  : string;
+  Proc  : TOutputProc;
 begin
-  if not Assigned(FOnOutput) then Exit;
-
-  Lines := TStringList.Create;
-  try
-    Lines.Text := Data;
-    for i := 0 to Lines.Count - 1 do
-    begin
-      Line := Lines[i];
-      TThread.Queue(nil, procedure begin FOnOutput(Line) end);
-    end;
-  finally
-    Lines.Free;
+  FPendingOutput := FPendingOutput + Data;
+  P := Pos(#10, FPendingOutput);
+  while P > 0 do
+  begin
+    Line := Copy(FPendingOutput, 1, P - 1);
+    Delete(FPendingOutput, 1, P);
+    if Line.EndsWith(#13) then
+      SetLength(Line, Length(Line) - 1);
+    Proc := FOnOutput;
+    if Assigned(Proc) then
+      TThread.Queue(nil, procedure begin Proc(Line) end);
+    P := Pos(#10, FPendingOutput);
   end;
 end;
 
 // ── OnThreadFinished ──────────────────────────────────────────────────────────
+// Ruleaza pe firul principal, prin Synchronize din DoTerminate, cu firul scriptului inca
+// in asteptare. TThread.Queue din firul principal executa imediat - FreeAndNil(FThread) ar
+// face WaitFor pe firul care asteapta Synchronize (deadlock). ForceQueue amina cu adevarat.
 procedure TPythonRunner.OnThreadFinished(Sender: TObject);
 var
   ExCode: Integer;
+  Rest  : string;
 begin
   ExCode := FExitCode;
-  TThread.Queue(nil, procedure
+  Rest := FPendingOutput;
+  FPendingOutput := '';
+  TThread.ForceQueue(nil, procedure
   begin
+    if (Rest <> '') and Assigned(FOnOutput) then
+      FOnOutput(Rest);
     if Assigned(FOnFinished) then
       FOnFinished(ExCode);
     FreeAndNil(FThread);
@@ -225,6 +289,7 @@ begin
 
   FreeAndNil(FThread);
   FExitCode := 0;
+  FPendingOutput := '';
 
   // Adăugăm directorul scriptului la sys.path
   ScriptDir := ExtractFilePath(ExpandFileName(ScriptPath));

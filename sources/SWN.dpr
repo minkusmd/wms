@@ -674,6 +674,7 @@ uses
   frmServiceRequestWarantySelectFoodsFromDocumentUnit in 'frameUtils\32 - Cereri de reparatie in garantie\frmServiceRequestWarantySelectFoodsFromDocumentUnit.pas' {frmServiceRequestWarantySelectFoodsFromDocumentDlg},
   frmAnalizaVinzariUnit in 'Tools\Analiza Vinzari\frmAnalizaVinzariUnit.pas' {frmAnalizaVinzariDlg},
   frmGoodsByTypeUnit in 'classes\GoodsType\frmGoodsByTypeUnit.pas' {frmGoodsByType},
+  frmGoodsTypeFolderSuggestDialog in 'classes\GoodsType\frmGoodsTypeFolderSuggestDialog.pas' {frmGoodsTypeFolderSuggestDlg},
   frmMergeGoodsTypesUnit in 'classes\GoodsType\frmMergeGoodsTypesUnit.pas' {frmMergeGoodsTypesDlg},
   frm81DocDialog in 'frameUtils\81 - Calcul Salariu\frm81DocDialog.pas' {frm81DocDlg},
   frmGoodsGroupSupplierEditorDialog in 'frameUtils\47 - Actiuni de marketing\frmGoodsGroupSupplierEditorDialog.pas' {frmGoodsGroupSupplierEditorDlg},
@@ -918,7 +919,10 @@ uses
   frmSelectGoodsAcntUnit in 'classes\GoodsACNT\frmSelectGoodsAcntUnit.pas' {Form3},
   AloContentUnit in 'frameUtils\78 - Pricelist\AloContentUnit.pas',
   PernaMeaContentUnit in 'frameUtils\78 - Pricelist\PernaMeaContentUnit.pas',
-  TinaContentUnit in 'frameUtils\78 - Pricelist\TinaContentUnit.pas';
+  TinaContentUnit in 'frameUtils\78 - Pricelist\TinaContentUnit.pas',
+  TrisContentUnit in 'frameUtils\78 - Pricelist\TrisContentUnit.pas',
+  TyreContentCommonUnit in 'frameUtils\78 - Pricelist\TyreContentCommonUnit.pas',
+  NatvexContentUnit in 'frameUtils\78 - Pricelist\NatvexContentUnit.pas';
 
 {$R 'swn_images.res' 'Resources\swn_images.rc'}
 {$R *.res}

@@ -13,7 +13,7 @@ program WMSParsers;
     dmlink-pricelist    pricelist API DMLink (229466)                 |  grupul "pricelists":
     olisgrup-pricelist  pricelist feed Olis Grup (251465)             |  pricelist nou + cele 4
     nex-pricelist       pricelist API NexDistribution (275640)        |  reevaluari (ca in WMS)
-    triomac-pricelist   pricelist API SCOP - Triomac (209280)        /   + imaginile (DMLink, Nex)
+    triomac-pricelist   pricelist API SCOP v2 - Triomac (209280)     /   + imaginile (DMLink, Nex, Olis, Triomac)
   Un job nou: vezi antetul din ParserRunnerUnit.
 
   Joburile alese ruleaza IN PARALEL, fiecare in firul lui, cu conexiunea lui la baza.
@@ -65,10 +65,13 @@ uses
   MaximumContentUnit in 'MaximumContentUnit.pas',
   ApiAccentUnit in '..\sources\Tools\ApiAccent\ApiAccentUnit.pas',
   MamicoContentUnit in '..\sources\frameUtils\78 - Pricelist\MamicoContentUnit.pas',
+  libwebp in '..\sources\Utils\libwebp.pas',
+  WebpHelpers in '..\sources\Utils\WebpHelpers.pas',
   PriceListContentTransferUnit in '..\sources\frameUtils\78 - Pricelist\PriceListContentTransferUnit.pas',
   B2B.DMLinkPriceListImport in '..\sources\b2b.api\dmlink\B2B.DMLinkPriceListImport.pas',
   NexDistributionUnit in '..\sources\frameUtils\78 - Pricelist\NexDistributionUnit.pas',
   TriomacPriceListUnit in '..\sources\frameUtils\78 - Pricelist\TriomacPriceListUnit.pas',
+  SCOPAPIClientUnit in '..\sources\b2b.api\scop\SCOPAPIClientUnit.pas',
   OlisGrupContentUnit in '..\sources\b2b.api\Muncitorul\OlisGrupContentUnit.pas',
   OlisGrupPriceListUnit in 'OlisGrupPriceListUnit.pas',
   PriceListReevaluationUnit in 'PriceListReevaluationUnit.pas',

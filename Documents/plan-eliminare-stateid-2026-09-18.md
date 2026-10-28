@@ -26,6 +26,14 @@ Data: 2026-09-18. Decizie user: varianta B - eliminare completa, cu migrarea sta
   Site: pagina de marketing afiseaza etapa deal-ului prin view-ul nou `VW_DOC_DEAL_STATE` (drept SELECT
   pentru WEBUSER, rulat pe SW); modificarea PHP e locala, necomisa, nedeployata.
 - Urmeaza: distribuirea noului SWN.exe la TOTI utilizatorii, deploy site, backup server, apoi faza 3.
+- **Faza 3 - script gata, NERULAT pe SW (28 oct 2026):** `DB Model/drop_stateid_faza3.sql` (+ `_rollback.sql`),
+  generat din sursele SW (isql -x 28.10) cu inlocuiri verificate. Inventar: 19 obiecte in RDB$DEPENDENCIES (VW_TDB_DOCS
+  + _BI/_BU, TRG_TDB_DOCS_BI, TDB_DOCS_AU0, TDB_DOCS_AU_DEAL, FK_TDB_DOCS_11 cu CHECK_1195 / RDB$12534, 10 proceduri);
+  niciun cod viu (WMS, sateliti, site, CurieriWMS, WmsWeb, PriceImport) nu mai foloseste STATEID / STATE_NAME.
+  Scriptul arhiveaza intai cele 176 de stari ne-implicite puse dupa 18.09, sterge SP_DEAL_APPLY_DOC_STATE /
+  SP_DEAL_MIGRATE_DOC_STATES; TS_DOCTYPES_STATES, GET_DEFAULT_STATE si TLOG_DOCS_STATES (gol) raman.
+  Testat pe copia de metadate a SW: drop -> rollback -> drop, 0 erori, triggerele si drepturile view-ului pastrate,
+  SQL-ul dmDB.IBCQueryDocs se pregateste pe schema noua. Ruleaza DBA cu `isql -ch UTF8`, dupa backup.
 
 ## 1. Inventar (verificat in baza SW si in cod)
 

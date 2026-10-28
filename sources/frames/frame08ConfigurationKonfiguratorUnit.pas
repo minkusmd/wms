@@ -362,6 +362,7 @@ type
         procedure DoFrameHide; override;
         procedure CreateNewRecord; override;
         procedure ModifyRecord; override;
+        procedure RefreshCurrentDocument;
         procedure DeleteRecord; override;
         function GetPhoneNumber: string; override;
         procedure RefreshData; override;
@@ -1028,6 +1029,7 @@ begin
         dialog.CreateNewDocument := True;
         if dialog.ShowModal = mrOk then
         begin
+            RefreshCurrentDocument;
             DocumentSelectionChanged;
         end;
     finally
@@ -1068,6 +1070,7 @@ begin
                     raise;
                 end;
             end;
+            RefreshCurrentDocument;
             DocumentSelectionChanged;
         end;
     finally
@@ -1178,27 +1181,14 @@ end;
 
 procedure Tframe08ConfigurationBRK.cxGridBRKDBTableCustomDrawCell(Sender: TcxCustomGridTableView; ACanvas: TcxCanvas; AViewInfo: TcxGridTableDataCellViewInfo; var ADone: Boolean);
 begin
+    // documentul prin contabilitate (FLG_ACNT) nu se mai coloreaza: starea deal-ului = cerculetul din "Stare deal"
     if VarIsNumeric(AViewInfo.GridRecord.Values[cxGridBRK_FLG_CLOSED.index]) then
     begin
-        if AViewInfo.GridRecord.Values[cxGridBRK_FLG_CLOSED.index] = 0 then
-        begin
-            if not AViewInfo.Selected then
-            begin
-                    // Document prin contabilitate
-                if AViewInfo.GridRecord.Values[cxGridBRK_FLG_ACNT.Index] = 1 then
-                    ACanvas.Font.Color := dmAdditions.cxStyle_TextColorRed.TextColor;
-            end;
-        end
-        else
+        if AViewInfo.GridRecord.Values[cxGridBRK_FLG_CLOSED.index] <> 0 then
         begin
             ACanvas.Font.Style := ACanvas.Font.Style + [fsStrikeOut];
             if not AViewInfo.Selected then
-            begin
-                if AViewInfo.GridRecord.Values[cxGridBRK_FLG_ACNT.Index] = 1 then
-                    ACanvas.Font.Color := $008b8bc5
-                else
-                    ACanvas.Font.Color := clGrayText;
-            end;
+                ACanvas.Font.Color := clGrayText;
         end;
     end;
 
@@ -1531,6 +1521,8 @@ begin
      // 1. Legam grid-urile de datasource-sele
     cxGridBRKDBTable.DataController.DataSource := dmDB.IBCDataSourceDocs;
     AddDealColumns(cxGridBRKDBTable);
+    // "Finantare" (axa FIN a deal-ului) si "Canal" - direct in gridul ofertelor
+    AddDealFinChannelColumns(cxGridBRKDBTable);
     // comenzile web mutate in Oferte: coloana "Plata MIA" si butonul "Plata MIA..." din meniul contextual
     AddMiaColumn(cxGridBRKDBTable);
     if fSEC_WebEcomm then
@@ -2320,13 +2312,25 @@ begin
         dialog.CreateNewDocument := False;
         if dialog.ShowModal = mrOK then
         begin
+            // starile deal-ului (etapa, motiv, canal, finantare) se scriu la OK, dupa Post:
+            // recitim randul ca sa se vada imediat in grid
+            RefreshCurrentDocument;
             dmdb.IBCQueryDocComments.Refresh;
-            dmdb.IBCQueryJurnal.Refresh;
         end
     finally
         dialog.Free;
 
     end;
+end;
+
+// Recitirea ofertei curente (dmDB.IBCQueryDocs) si a liniilor ei (IBCQueryJurnal) dupa
+// inchiderea formei de redactare - modificarile se vad imediat in grid.
+procedure Tframe08ConfigurationBRK.RefreshCurrentDocument;
+begin
+    if dmDB.IBCQueryDocs.Active and not dmDB.IBCQueryDocs.IsEmpty then
+        dmDB.IBCQueryDocs.RefreshRecord;
+    if dmDB.IBCQueryJurnal.Active then
+        dmDB.IBCQueryJurnal.Refresh;
 end;
 
 procedure Tframe08ConfigurationBRK.ReadFrameStates;

@@ -1,0 +1,639 @@
+/* Rollback pentru sp_get_ts_goods_lazy.sql: SP_GET_TS_GOODS si SP_GET_TS_GOODS_M1
+   revin la sursele din SW de dinainte (24.10.2026). Ordinea: intii apelantul (fara
+   al 4-lea parametru), apoi M1 cu antetul vechi. */
+
+SET TERM ^ ;
+
+CREATE OR ALTER PROCEDURE SP_GET_TS_GOODS (SELECT_MODE DM_INTEGER,
+DT DM_INTEGER_NN,
+SOURCE_PARENTID DM_INTEGER,
+SEARCH_MASK DM_VARCHAR2048,
+FLG_ONLY_IN_PRICE DM_BOOLEAN = 0)
+RETURNS (GOODSID DM_INTEGER,
+PARENTID DM_INTEGER,
+FLG_FOLDER DM_BOOLEAN,
+BASE_PARAM TYPE OF COLUMN TS_GOODS.BASE_PARAM,
+BASE_PARAM_RU TYPE OF COLUMN TS_GOODS.BASE_PARAM,
+CODE TYPE OF COLUMN TS_GOODS.CODE,
+CODE_RU TYPE OF COLUMN TS_GOODS.CODE,
+TITLE TYPE OF COLUMN TS_GOODS.TITLE,
+DETAILS TYPE OF COLUMN TS_GOODS.DETAILS,
+FLG_SOCIAL DM_BOOLEAN,
+FLG_OLD DM_BOOLEAN,
+FLG_REQUIRE_CERTIFICAT DM_BOOLEAN,
+FLG_BEST_PRICE DM_BOOLEAN,
+FLG_PRICE_NBM DM_BOOLEAN,
+FLG_PROMO DM_BOOLEAN,
+FLG_NEW DM_BOOLEAN,
+FLG_PRICE_FORCED DM_BOOLEAN,
+FLG_DISCOUNT DM_BOOLEAN,
+FLG_FORCED_ADDON DM_INTEGER,
+FLG_SUPPLIER_PROMO DM_INTEGER,
+FLG_WEB_HIDE_COMPLECT_ITEMS DM_INTEGER,
+FLG_PREORDER DM_INTEGER,
+WARRANTY DM_INTEGER,
+GOODS_ACNT_ID DM_INTEGER,
+GOODS_TYPE_ID DM_INTEGER,
+GOODS_TYPE_NAME DM_VARCHAR255,
+WEBGOODSTYPE_ID DM_INTEGER,
+WEBGOODSTYPE_TITLE DM_VARCHAR128,
+WEBGOODSTYPE_TITLE_RU DM_VARCHAR128,
+VENDOR_ID DM_INTEGER,
+USERID DM_INTEGER,
+UMID DM_INTEGER,
+SERIAL_TYPE_ID DM_INTEGER,
+ORDERNO DM_INTEGER,
+USER_FULLNAME DM_VARCHAR512,
+CREATE_DATE DM_DATETIME,
+NAMEACNT DM_VARCHAR255,
+PRICE0 DM_PRICE,
+PRICE1 DM_PRICE,
+PRICE2 DM_PRICE,
+PRICE3 DM_PRICE,
+PRICE4 DM_PRICE,
+PRICE5 DM_PRICE,
+PRICE6 DM_PRICE,
+PRICE7 DM_PRICE,
+PRICE1_LEI DM_PRICE,
+PRICE2_LEI DM_PRICE,
+PRICE3_LEI DM_PRICE,
+PRICE4_LEI DM_PRICE,
+PRICE5_LEI DM_PRICE,
+PRICE6_LEI DM_PRICE,
+PRICE7_LEI DM_PRICE,
+PRICE1_USD DM_PRICE,
+PRICE2_USD DM_PRICE,
+PRICE3_USD DM_PRICE,
+PRICE4_USD DM_PRICE,
+PRICE5_USD DM_PRICE,
+PRICE6_USD DM_PRICE,
+PRICE7_USD DM_PRICE,
+CURRENCYID DM_INTEGER,
+VENDOR DM_VARCHAR255,
+UM_TITLE DM_VARCHAR255,
+QTY_ACCOUNT DM_QTY,
+QTY_AVAILABLE DM_QTY,
+QTY_RESERVE DM_QTY,
+QTY_RMA DM_QTY,
+QTY_INTERNAL DM_QTY,
+QTY_FRANCIZE DM_QTY,
+QTY_FILIALE DM_QTY,
+QTY_TRANSIT DM_QTY,
+GOODS_IMAGE_INDEX DM_INTEGER,
+DELIVERY_TYPEID DM_INTEGER,
+DELIVERY_TYPENAME TYPE OF COLUMN TS_SYSS.TITLE,
+VAT DM_INTEGER,
+CASHBACK_PERCENT DM_AMOUNT,
+COLORID DM_INTEGER,
+COLOR_NAME_RO TYPE OF COLUMN TS_SYSS.TITLE,
+COLOR_NAME_RU TYPE OF COLUMN TS_SYSS.VALUE_STR,
+TEMPLATEID DM_INTEGER,
+ATTRIBUTES DM_INTEGER,
+MARGIN17 DM_AMOUNT,
+RELATED_KEY DM_VARCHAR128,
+PGT_ID DM_INTEGER)
+AS
+BEGIN
+     /* SELECT BY PARENT or PARENT of PARENT */
+     IF ((SELECT_MODE=1) OR (SELECT_MODE=2)) THEN
+     FOR
+        SELECT
+              GOODSID, PARENTID, FLG_FOLDER, CODE, code_ru,  TITLE, DETAILS, BASE_PARAM, BASE_PARAM_RU,
+              FLG_SOCIAL, FLG_OLD, FLG_REQUIRE_CERTIFICAT, flg_best_price, FLG_PRICE_NBM,
+              FLG_PROMO, FLG_NEW,  FLG_PRICE_FORCED, FLG_DISCOUNT, FLG_FORCED_ADDON, FLG_SUPPLIER_PROMO, FLG_WEB_HIDE_COMPLECT_ITEMS,
+              FLG_PREORDER,
+              WARRANTY, GOODS_ACNT_ID, GOODS_TYPE_ID, GOODS_TYPE_NAME, VENDOR_ID, USERID, UMID,
+              SERIAL_TYPE_ID, ORDERNO, USER_FULLNAME, CREATE_DATE, NAMEACNT,
+              PRICE0, PRICE1, PRICE2, PRICE3, PRICE4, PRICE5, PRICE6, PRICE7,
+              PRICE1_LEI, PRICE2_LEI, PRICE3_LEI, PRICE4_LEI, PRICE5_LEI, PRICE6_LEI, PRICE7_LEI,
+
+--              PRICE1_USD, PRICE2_USD, PRICE3_USD, PRICE4_USD, PRICE5_USD, PRICE6_USD, PRICE7_USD,
+              CURRENCYID,
+              WEBGOODSTYPE_ID, WEBGOODSTYPE_TITLE, WEBGOODSTYPE_TITLE_RU,
+              VENDOR, UM_TITLE, QTY_ACCOUNT,
+              QTY_AVAILABLE, QTY_RESERVE, QTY_RMA, QTY_INTERNAL, QTY_FRANCIZE, QTY_FILIALE, QTY_TRANSIT,
+              GOODS_IMAGE_INDEX, DELIVERY_TYPEID, DELIVERY_TYPENAME,
+              vat, cashback_percent, colorid,  color_name_ro, color_name_ru, templateid, attributes, margin17, related_key,
+              pgt_id
+        FROM
+            SP_GET_TS_GOODS_M1(:DT,IIF(:SELECT_MODE=1,:SOURCE_PARENTID,(SELECT PARENTID FROM TS_GOODS WHERE GOODSID=:SOURCE_PARENTID)), :flg_only_in_price)
+--        order by FLG_FOlDER DESC, QTY_AVAILABLE DESC, FLG_PRICE_FORCED DESC, ORDERNO, TITLE
+        INTO
+              :GOODSID, :PARENTID, :FLG_FOLDER, :CODE, :code_ru,  :TITLE, :DETAILS, :BASE_PARAM, :BASE_PARAM_RU,
+              :FLG_SOCIAL, :FLG_OLD, :FLG_REQUIRE_CERTIFICAT, :flg_best_price, :FLG_PRICE_NBM,
+              :FLG_PROMO, :FLG_NEW, :FLG_PRICE_FORCED, :FLG_DISCOUNT,:flg_forced_addon, :FLG_SUPPLIER_PROMO, :FLG_WEB_HIDE_COMPLECT_ITEMS,
+              :FLG_PREORDER,
+              :WARRANTY, :GOODS_ACNT_ID, :GOODS_TYPE_ID, :GOODS_TYPE_NAME, :VENDOR_ID, :USERID, :UMID,
+              :SERIAL_TYPE_ID, :ORDERNO, :USER_FULLNAME, :CREATE_DATE, :NAMEACNT,
+              :PRICE0, :PRICE1, :PRICE2, :PRICE3, :PRICE4, :PRICE5, :PRICE6, :PRICE7,
+              :PRICE1_LEI, :PRICE2_LEI, :PRICE3_LEI, :PRICE4_LEI, :PRICE5_LEI, :PRICE6_LEI, :PRICE7_LEI,
+
+--              :PRICE1_USD, :PRICE2_USD, :PRICE3_USD, :PRICE4_USD, :PRICE5_USD, :PRICE6_USD, :PRICE7_USD,
+              :CURRENCYID,
+              :WEBGOODSTYPE_ID, :WEBGOODSTYPE_TITLE, :WEBGOODSTYPE_TITLE_RU,
+              :VENDOR, :UM_TITLE, :QTY_ACCOUNT,
+              :QTY_AVAILABLE, :QTY_RESERVE, :QTY_RMA, :QTY_INTERNAL, :QTY_FRANCIZE, :QTY_FILIALE, :QTY_TRANSIT,
+              :GOODS_IMAGE_INDEX, :DELIVERY_TYPEID, :DELIVERY_TYPENAME, :vat, :cashback_percent, :colorid,
+              :color_name_ro, :color_name_ru, :templateid, :attributes, :margin17, :related_key, :pgt_id
+
+        DO
+        begin
+
+          SUSPEND;
+        end
+     ELSE
+     /* SELECT by SEARCH CONDITION */
+     IF (SELECT_MODE=3) THEN
+     FOR
+        SELECT
+              GOODSID, PARENTID, FLG_FOLDER, CODE, CODE_RU, TITLE, DETAILS, BASE_PARAM, BASE_PARAM_RU,
+              FLG_SOCIAL, FLG_OLD, FLG_REQUIRE_CERTIFICAT, flg_best_price, FLG_PRICE_NBM,
+              FLG_PROMO, FLG_NEW, FLG_PRICE_FORCED, FLG_DISCOUNT, flg_forced_addon, FLG_SUPPLIER_PROMO, FLG_WEB_HIDE_COMPLECT_ITEMS,
+              FLG_PREORDER,
+              WARRANTY, GOODS_ACNT_ID, GOODS_TYPE_ID, GOODS_TYPE_NAME, VENDOR_ID, USERID, UMID,
+              SERIAL_TYPE_ID, ORDERNO, USER_FULLNAME, CREATE_DATE, NAMEACNT,
+              PRICE0, PRICE1, PRICE2, PRICE3, PRICE4, PRICE5, PRICE6, PRICE7,
+              PRICE1_LEI, PRICE2_LEI, PRICE3_LEI, PRICE4_LEI, PRICE5_LEI, PRICE6_LEI, PRICE7_LEI,
+
+              PRICE1_USD, PRICE2_USD, PRICE3_USD, PRICE4_USD, PRICE5_USD, PRICE6_USD, PRICE7_USD,
+              CURRENCYID,
+              WEBGOODSTYPE_ID, WEBGOODSTYPE_TITLE, WEBGOODSTYPE_TITLE_RU,
+              VENDOR, UM_TITLE, QTY_ACCOUNT,
+              QTY_AVAILABLE, QTY_RESERVE, QTY_RMA, QTY_INTERNAL, QTY_FRANCIZE, QTY_FILIALE, QTY_TRANSIT,
+              GOODS_IMAGE_INDEX, DELIVERY_TYPEID, DELIVERY_TYPENAME, vat, cashback_percent, colorid,
+              color_name_ro, color_name_ru, templateid, attributes, margin17, related_key, pgt_id
+        FROM
+            SP_GET_TS_GOODS_M3(:DT,:SEARCH_MASK)
+--        order by FLG_FOlDER DESC, QTY_AVAILABLE DESC, FLG_PRICE_FORCED DESC, ORDERNO, TITLE
+        INTO
+              :GOODSID, :PARENTID, :FLG_FOLDER, :CODE, :code_ru,  :TITLE, :DETAILS, :BASE_PARAM, :BASE_PARAM_RU,
+              :FLG_SOCIAL, :FLG_OLD, :FLG_REQUIRE_CERTIFICAT, :flg_best_price, :FLG_PRICE_NBM,
+              :FLG_PROMO, :FLG_NEW, :FLG_PRICE_FORCED, :FLG_DISCOUNT, :flg_forced_addon, :flg_supplier_promo, :FLG_WEB_HIDE_COMPLECT_ITEMS,
+              :FLG_PREORDER,
+              :WARRANTY, :GOODS_ACNT_ID, :GOODS_TYPE_ID, :GOODS_TYPE_NAME, :VENDOR_ID, :USERID, :UMID,
+              :SERIAL_TYPE_ID, :ORDERNO, :USER_FULLNAME, :CREATE_DATE, :NAMEACNT,
+              :PRICE0, :PRICE1, :PRICE2, :PRICE3, :PRICE4, :PRICE5, :PRICE6, :PRICE7,
+              :PRICE1_LEI, :PRICE2_LEI, :PRICE3_LEI, :PRICE4_LEI, :PRICE5_LEI, :PRICE6_LEI, :PRICE7_LEI,
+
+              :PRICE1_USD, :PRICE2_USD, :PRICE3_USD, :PRICE4_USD, :PRICE5_USD, :PRICE6_USD, :PRICE7_USD,
+              :CURRENCYID,
+              :WEBGOODSTYPE_ID, :WEBGOODSTYPE_TITLE, :WEBGOODSTYPE_TITLE_RU,
+              :VENDOR, :UM_TITLE, :QTY_ACCOUNT,
+              :QTY_AVAILABLE, :QTY_RESERVE, :QTY_RMA, :QTY_INTERNAL, :QTY_FRANCIZE, :QTY_FILIALE, :QTY_TRANSIT,
+              :GOODS_IMAGE_INDEX, :DELIVERY_TYPEID, :DELIVERY_TYPENAME, :vat, :cashback_percent, :colorid,
+              :color_name_ro, :color_name_ru, :templateid, :attributes, :margin17, :related_key, :pgt_id
+        DO
+          SUSPEND;
+        ELSE
+        /* SELECT by SEARCH CONDITION FOREIGN_GOODS_CODE*/
+        IF (SELECT_MODE=5) THEN
+        FOR
+        SELECT
+              GOODSID, PARENTID, FLG_FOLDER, CODE, CODE_RU, TITLE, DETAILS, BASE_PARAM, BASE_PARAM_RU,
+              FLG_SOCIAL, FLG_OLD, FLG_REQUIRE_CERTIFICAT, flg_best_price, FLG_PRICE_NBM,
+              FLG_PROMO, FLG_NEW, FLG_PRICE_FORCED, FLG_DISCOUNT, flg_forced_addon, FLG_SUPPLIER_PROMO, FLG_WEB_HIDE_COMPLECT_ITEMS,
+              FLG_PREORDER,
+              WARRANTY, GOODS_ACNT_ID, GOODS_TYPE_ID, GOODS_TYPE_NAME, VENDOR_ID, USERID, UMID,
+              SERIAL_TYPE_ID, ORDERNO, USER_FULLNAME, CREATE_DATE, NAMEACNT,
+              PRICE0, PRICE1, PRICE2, PRICE3, PRICE4, PRICE5, PRICE6, PRICE7,
+              PRICE1_LEI, PRICE2_LEI, PRICE3_LEI, PRICE4_LEI, PRICE5_LEI, PRICE6_LEI, PRICE7_LEI,
+
+              PRICE1_USD, PRICE2_USD, PRICE3_USD, PRICE4_USD, PRICE5_USD, PRICE6_USD, PRICE7_USD,
+              CURRENCYID,
+              WEBGOODSTYPE_ID, WEBGOODSTYPE_TITLE, WEBGOODSTYPE_TITLE_RU,
+              VENDOR, UM_TITLE, QTY_ACCOUNT,
+              QTY_AVAILABLE, QTY_RESERVE, QTY_RMA, QTY_INTERNAL, QTY_FRANCIZE, QTY_FILIALE, QTY_TRANSIT,
+              GOODS_IMAGE_INDEX, DELIVERY_TYPEID, DELIVERY_TYPENAME, vat, cashback_percent, colorid,
+              color_name_ro, color_name_ru, templateid, attributes, margin17, related_key, pgt_id
+        FROM
+            SP_GET_TS_GOODS_M5(:DT,:SEARCH_MASK)
+--        order by FLG_FOlDER DESC, QTY_AVAILABLE DESC, FLG_PRICE_FORCED DESC, ORDERNO, TITLE
+        INTO
+              :GOODSID, :PARENTID, :FLG_FOLDER, :CODE, :code_ru,  :TITLE, :DETAILS, :BASE_PARAM, :BASE_PARAM_RU,
+              :FLG_SOCIAL, :FLG_OLD, :FLG_REQUIRE_CERTIFICAT, :flg_best_price, :FLG_PRICE_NBM,
+              :FLG_PROMO, :FLG_NEW, :FLG_PRICE_FORCED, :FLG_DISCOUNT, :flg_forced_addon, :flg_supplier_promo, :FLG_WEB_HIDE_COMPLECT_ITEMS,
+              :FLG_PREORDER,
+              :WARRANTY, :GOODS_ACNT_ID, :GOODS_TYPE_ID, :GOODS_TYPE_NAME, :VENDOR_ID, :USERID, :UMID,
+              :SERIAL_TYPE_ID, :ORDERNO, :USER_FULLNAME, :CREATE_DATE, :NAMEACNT,
+              :PRICE0, :PRICE1, :PRICE2, :PRICE3, :PRICE4, :PRICE5, :PRICE6, :PRICE7,
+              :PRICE1_LEI, :PRICE2_LEI, :PRICE3_LEI, :PRICE4_LEI, :PRICE5_LEI, :PRICE6_LEI, :PRICE7_LEI,
+
+              :PRICE1_USD, :PRICE2_USD, :PRICE3_USD, :PRICE4_USD, :PRICE5_USD, :PRICE6_USD, :PRICE7_USD,
+              :CURRENCYID,
+              :WEBGOODSTYPE_ID, :WEBGOODSTYPE_TITLE, :WEBGOODSTYPE_TITLE_RU,
+              :VENDOR, :UM_TITLE, :QTY_ACCOUNT,
+              :QTY_AVAILABLE, :QTY_RESERVE, :QTY_RMA, :QTY_INTERNAL, :QTY_FRANCIZE, :QTY_FILIALE, :QTY_TRANSIT,
+              :GOODS_IMAGE_INDEX, :DELIVERY_TYPEID, :DELIVERY_TYPENAME, :vat, :cashback_percent, :colorid,
+              :color_name_ro, :color_name_ru, :templateid, :attributes, :margin17, :related_key, :pgt_id
+        DO
+          SUSPEND;
+     ELSE
+     /* SELECT RECURSIVE by Available QTY for PARENTED children */
+     IF (SELECT_MODE=4) THEN
+     FOR
+        SELECT
+              GOODSID, PARENTID, FLG_FOLDER, CODE, CODE_RU, TITLE, DETAILS, BASE_PARAM, BASE_PARAM_RU,
+              FLG_SOCIAL, FLG_OLD, FLG_REQUIRE_CERTIFICAT, flg_best_price, FLG_PRICE_NBM,
+              FLG_PROMO, FLG_NEW, FLG_PRICE_FORCED, FLG_DISCOUNT, FLG_FORCED_ADDON, flg_supplier_promo, FLG_WEB_HIDE_COMPLECT_ITEMS,
+              FLG_PREORDER,
+              WARRANTY, GOODS_ACNT_ID, GOODS_TYPE_ID, GOODS_TYPE_NAME, VENDOR_ID, USERID, UMID,
+              SERIAL_TYPE_ID, ORDERNO, USER_FULLNAME, CREATE_DATE, NAMEACNT,
+              PRICE0, PRICE1, PRICE2, PRICE3, PRICE4, PRICE5, PRICE6, PRICE7,
+              PRICE1_LEI, PRICE2_LEI, PRICE3_LEI, PRICE4_LEI, PRICE5_LEI, PRICE6_LEI, PRICE7_LEI,
+
+              PRICE1_USD, PRICE2_USD, PRICE3_USD, PRICE4_USD, PRICE5_USD, PRICE6_USD, PRICE7_USD,
+              CURRENCYID,
+              WEBGOODSTYPE_ID, WEBGOODSTYPE_TITLE, WEBGOODSTYPE_TITLE_RU,
+
+              VENDOR, UM_TITLE, QTY_ACCOUNT,
+              QTY_AVAILABLE, QTY_RESERVE, QTY_RMA, QTY_INTERNAL, QTY_FRANCIZE, QTY_FILIALE, QTY_TRANSIT,
+              GOODS_IMAGE_INDEX, DELIVERY_TYPEID, DELIVERY_TYPENAME, vat,cashback_percent, colorid,
+              color_name_ro, color_name_ru, templateid, attributes, margin17, related_key, pgt_id
+        FROM
+             SP_GET_TS_GOODS_M4(:DT,:SOURCE_PARENTID)
+        WHERE
+             /*$$IBEC$$ (QTY_AVAILABLE>0) or (QTY_FILIALE>0) OR (QTY_FRANCIZE>0) $$IBEC$$*/
+             FLG_PRICE_FORCED = 1
+--        order by FLG_FOlDER DESC, QTY_AVAILABLE DESC, FLG_PRICE_FORCED DESC, ORDERNO, TITLE
+        INTO
+              :GOODSID, :PARENTID, :FLG_FOLDER, :CODE, :CODE_RU, :TITLE, :DETAILS, :BASE_PARAM, :BASE_PARAM_RU,
+              :FLG_SOCIAL, :FLG_OLD, :FLG_REQUIRE_CERTIFICAT, :flg_best_price, :FLG_PRICE_NBM,
+              :FLG_PROMO, :FLG_NEW, :FLG_PRICE_FORCED, :FLG_DISCOUNT, :FLG_FORCED_ADDON, :flg_supplier_promo, :FLG_WEB_HIDE_COMPLECT_ITEMS,
+              :FLG_PREORDER,
+              :WARRANTY, :GOODS_ACNT_ID, :GOODS_TYPE_ID, :GOODS_TYPE_NAME, :VENDOR_ID, :USERID, :UMID,
+              :SERIAL_TYPE_ID, :ORDERNO, :USER_FULLNAME, :create_date,  :NAMEACNT,
+              :PRICE0, :PRICE1, :PRICE2, :PRICE3, :PRICE4, :PRICE5, :PRICE6, :PRICE7,
+              :PRICE1_LEI, :PRICE2_LEI, :PRICE3_LEI, :PRICE4_LEI, :PRICE5_LEI, :PRICE6_LEI, :PRICE7_LEI,
+
+              :PRICE1_USD, :PRICE2_USD, :PRICE3_USD, :PRICE4_USD, :PRICE5_USD, :PRICE6_USD, :PRICE7_USD,
+              :CURRENCYID,
+              :WEBGOODSTYPE_ID, :WEBGOODSTYPE_TITLE, :WEBGOODSTYPE_TITLE_RU,
+              :VENDOR, :UM_TITLE, :QTY_ACCOUNT,
+              :QTY_AVAILABLE, :QTY_RESERVE, :QTY_RMA, :QTY_INTERNAL, :QTY_FRANCIZE, :QTY_FILIALE, :QTY_TRANSIT,
+              :GOODS_IMAGE_INDEX, :DELIVERY_TYPEID, :DELIVERY_TYPENAME, :vat, :cashback_percent, :colorid,
+              :color_name_ro, :color_name_ru, :templateid, :attributes, :margin17, :related_key, :pgt_id
+        DO
+          SUSPEND;
+        else
+        /* SELECT by SEARCH CONDITION FOREIGN_GOODS_CODE*/
+        IF (SELECT_MODE=6) THEN
+        FOR
+        SELECT
+              GOODSID, PARENTID, FLG_FOLDER, CODE, CODE_RU, TITLE, DETAILS, BASE_PARAM, BASE_PARAM_RU,
+              FLG_SOCIAL, FLG_OLD, FLG_REQUIRE_CERTIFICAT, flg_best_price, FLG_PRICE_NBM,
+              FLG_PROMO, FLG_NEW, FLG_PRICE_FORCED, FLG_DISCOUNT, flg_forced_addon, FLG_SUPPLIER_PROMO, FLG_WEB_HIDE_COMPLECT_ITEMS,
+              FLG_PREORDER,
+              WARRANTY, GOODS_ACNT_ID, GOODS_TYPE_ID, GOODS_TYPE_NAME, VENDOR_ID, USERID, UMID,
+              SERIAL_TYPE_ID, ORDERNO, USER_FULLNAME, CREATE_DATE, NAMEACNT,
+              PRICE0, PRICE1, PRICE2, PRICE3, PRICE4, PRICE5, PRICE6, PRICE7,
+              PRICE1_LEI, PRICE2_LEI, PRICE3_LEI, PRICE4_LEI, PRICE5_LEI, PRICE6_LEI, PRICE7_LEI,
+
+              PRICE1_USD, PRICE2_USD, PRICE3_USD, PRICE4_USD, PRICE5_USD, PRICE6_USD, PRICE7_USD,
+              CURRENCYID,
+              WEBGOODSTYPE_ID, WEBGOODSTYPE_TITLE, WEBGOODSTYPE_TITLE_RU,
+              VENDOR, UM_TITLE, QTY_ACCOUNT,
+              QTY_AVAILABLE, QTY_RESERVE, QTY_RMA, QTY_INTERNAL, QTY_FRANCIZE, QTY_FILIALE, QTY_TRANSIT,
+              GOODS_IMAGE_INDEX, DELIVERY_TYPEID, DELIVERY_TYPENAME, vat, cashback_percent, colorid,
+              color_name_ro, color_name_ru, templateid, attributes, margin17, related_key, pgt_id
+        FROM
+            SP_GET_TS_GOODS_M6(:DT,:SEARCH_MASK)
+            order by rel_qty desc, QTY_AVAILABLE DESC, FLG_PRICE_FORCED DESC
+--        order by FLG_FOlDER DESC, QTY_AVAILABLE DESC, FLG_PRICE_FORCED DESC, ORDERNO, TITLE
+        INTO
+              :GOODSID, :PARENTID, :FLG_FOLDER, :CODE, :code_ru,  :TITLE, :DETAILS, :BASE_PARAM, :BASE_PARAM_RU,
+              :FLG_SOCIAL, :FLG_OLD, :FLG_REQUIRE_CERTIFICAT, :flg_best_price, :FLG_PRICE_NBM,
+              :FLG_PROMO, :FLG_NEW, :FLG_PRICE_FORCED, :FLG_DISCOUNT, :flg_forced_addon, :flg_supplier_promo, :FLG_WEB_HIDE_COMPLECT_ITEMS,
+              :FLG_PREORDER,
+              :WARRANTY, :GOODS_ACNT_ID, :GOODS_TYPE_ID, :GOODS_TYPE_NAME, :VENDOR_ID, :USERID, :UMID,
+              :SERIAL_TYPE_ID, :ORDERNO, :USER_FULLNAME, :CREATE_DATE, :NAMEACNT,
+              :PRICE0, :PRICE1, :PRICE2, :PRICE3, :PRICE4, :PRICE5, :PRICE6, :PRICE7,
+              :PRICE1_LEI, :PRICE2_LEI, :PRICE3_LEI, :PRICE4_LEI, :PRICE5_LEI, :PRICE6_LEI, :PRICE7_LEI,
+
+              :PRICE1_USD, :PRICE2_USD, :PRICE3_USD, :PRICE4_USD, :PRICE5_USD, :PRICE6_USD, :PRICE7_USD,
+              :CURRENCYID,
+              :WEBGOODSTYPE_ID, :WEBGOODSTYPE_TITLE, :WEBGOODSTYPE_TITLE_RU,
+              :VENDOR, :UM_TITLE, :QTY_ACCOUNT,
+              :QTY_AVAILABLE, :QTY_RESERVE, :QTY_RMA, :QTY_INTERNAL, :QTY_FRANCIZE, :QTY_FILIALE, :QTY_TRANSIT,
+              :GOODS_IMAGE_INDEX, :DELIVERY_TYPEID, :DELIVERY_TYPENAME, :vat, :cashback_percent, :colorid,
+              :color_name_ro, :color_name_ru, :templateid, :attributes, :margin17, :related_key, :pgt_id
+        DO
+          SUSPEND;
+
+
+
+END ^
+
+CREATE OR ALTER PROCEDURE SP_GET_TS_GOODS_M1 (DT DM_INTEGER_NN,
+SOURCE_PARENTID DM_INTEGER_NN,
+FLG_ONLY_IN_PRICE DM_BOOLEAN = 0)
+RETURNS (GOODSID DM_INTEGER,
+PARENTID DM_INTEGER,
+FLG_FOLDER DM_BOOLEAN,
+BASE_PARAM TYPE OF COLUMN TS_GOODS.BASE_PARAM,
+BASE_PARAM_RU TYPE OF COLUMN TS_GOODS.BASE_PARAM,
+CODE TYPE OF COLUMN TS_GOODS.CODE,
+CODE_RU TYPE OF COLUMN TS_GOODS.CODE,
+TITLE TYPE OF COLUMN TS_GOODS.TITLE,
+DETAILS TYPE OF COLUMN TS_GOODS.DETAILS,
+FLG_SOCIAL DM_BOOLEAN,
+FLG_OLD DM_BOOLEAN,
+FLG_REQUIRE_CERTIFICAT DM_BOOLEAN,
+FLG_BEST_PRICE DM_BOOLEAN,
+FLG_PRICE_NBM DM_BOOLEAN,
+FLG_PROMO DM_BOOLEAN,
+FLG_NEW DM_BOOLEAN,
+FLG_PRICE_FORCED DM_BOOLEAN,
+FLG_DISCOUNT DM_BOOLEAN,
+FLG_FORCED_ADDON DM_INTEGER,
+FLG_SUPPLIER_PROMO DM_INTEGER,
+FLG_WEB_HIDE_COMPLECT_ITEMS DM_INTEGER,
+FLG_PREORDER DM_INTEGER,
+WARRANTY DM_INTEGER,
+GOODS_ACNT_ID DM_INTEGER,
+GOODS_TYPE_ID DM_INTEGER,
+GOODS_TYPE_NAME DM_VARCHAR255,
+WEBGOODSTYPE_ID DM_INTEGER,
+WEBGOODSTYPE_TITLE DM_VARCHAR60,
+WEBGOODSTYPE_TITLE_RU DM_VARCHAR60,
+VENDOR_ID DM_INTEGER,
+USERID DM_INTEGER,
+UMID DM_INTEGER,
+SERIAL_TYPE_ID DM_INTEGER,
+ORDERNO DM_INTEGER,
+USER_FULLNAME DM_VARCHAR512,
+CREATE_DATE DM_DATETIME,
+NAMEACNT DM_VARCHAR255,
+PRICE0 DM_PRICE,
+PRICE1 DM_PRICE,
+PRICE2 DM_PRICE,
+PRICE3 DM_PRICE,
+PRICE4 DM_PRICE,
+PRICE5 DM_PRICE,
+PRICE6 DM_PRICE,
+PRICE7 DM_PRICE,
+PRICE1_LEI DM_PRICE,
+PRICE2_LEI DM_PRICE,
+PRICE3_LEI DM_PRICE,
+PRICE4_LEI DM_PRICE,
+PRICE5_LEI DM_PRICE,
+PRICE6_LEI DM_PRICE,
+PRICE7_LEI DM_PRICE,
+CURRENCYID DM_INTEGER,
+VENDOR DM_VARCHAR255,
+UM_TITLE DM_VARCHAR255,
+QTY_ACCOUNT DM_QTY,
+QTY_AVAILABLE DM_QTY,
+QTY_RESERVE DM_QTY,
+QTY_RMA DM_QTY,
+QTY_INTERNAL DM_QTY,
+QTY_FRANCIZE DM_QTY,
+QTY_FILIALE DM_QTY,
+QTY_TRANSIT DM_QTY,
+GOODS_IMAGE_INDEX DM_INTEGER,
+MINQTY DM_QTY,
+DELIVERY_TYPEID DM_INTEGER,
+DELIVERY_TYPENAME TYPE OF COLUMN TS_SYSS.TITLE,
+VAT DM_INTEGER,
+CASHBACK_PERCENT DM_AMOUNT,
+COLORID DM_INTEGER,
+COLOR_NAME_RO TYPE OF COLUMN TS_SYSS.TITLE,
+COLOR_NAME_RU TYPE OF COLUMN TS_SYSS.VALUE_STR,
+TEMPLATEID DM_INTEGER,
+ATTRIBUTES DM_INTEGER,
+MARGIN17 DM_AMOUNT,
+RELATED_KEY DM_VARCHAR128,
+PGT_ID DM_INTEGER)
+AS
+BEGIN
+:flg_only_in_price = 0;
+     FOR
+        SELECT
+              TS_GOODS.GOODSID,
+              TS_GOODS.PARENTID,
+              TS_GOODS.FLG_FOLDER,
+              TS_GOODS.BASE_PARAM,
+              TS_GOODS.BASE_PARAM_RU,
+              TS_GOODS.CODE,
+              TS_GOODS.CODE_RU,
+              TS_GOODS.TITLE,
+              TS_GOODS.DETAILS,
+
+              GET_FLG_VALUE(TS_GOODS.FLAGS,1), /* FLG_SOCIAL */
+              GET_FLG_VALUE(TS_GOODS.FLAGS,2), /* FLG_OLD */
+              GET_FLG_VALUE(TS_GOODS.FLAGS,4), /* FLG_REQUIRE_CERTIFICAT */
+              get_flg_value(ts_goods.flags,5), /* flg_best_price */
+              GET_FLG_VALUE(TS_GOODS.FLAGS,6), /* FLG_PRICE_RRP */
+              -- FLG_PROMO
+              iif (exists(select goodsid from tweb_pa_goods pa
+                                 inner join tweb_promos p on p.promoactionid=pa.promoactionid and
+                                                             current_date between p.start_date and p.end_date and get_flg_value(p.flags, 0) = 1
+                          where pa.goodsid = ts_goods.goodsid),1,0),
+              -- FLG_NEW
+              get_flg_new(ts_goods.goodsid) FLG_NEW,
+--              IIF(EXISTS(SELECT GOODSID FROM TDB_GOODS_FLAGS WHERE (TDB_GOODS_FLAGS.GOODSID=TS_GOODS.GOODSID) AND (FLAGTYPEID=2) AND (DT=:DT)),1,0),
+              -- FLG_PRICE_FORCED. !!! se arata numai din 5213
+
+               get_flg_in_price(ts_goods.goodsid),
+              -- FLG_DISCOUNT
+              get_flg_goods_discount(ts_goods.goodsid),
+              /* FLG_AVAILABLE_QTY */
+              get_flg_available_qty(ts_goods.goodsid),
+--              (SELECT flg_forced_addon FROM tdb_goods_flags WHERE tdb_goods_flags.goodsid=ts_goods.goodsid AND flagtypeid=3 AND dt=5213),
+              /* FLG_SUPPLIER_PROMO */
+              get_flg_supplier_action(ts_goods.goodsid), /* FLG_SUPPLIER_ACTION */
+              get_flg_value(ts_goods.flags, 11), /* FLG_WEB_HIDE_COMPLECT_ITEMS, */
+              get_flg_preorder(ts_goods.goodsid), /* flg_preorder */
+
+              IIF(FLG_FOLDER=0,TS_GOODS.WARRANTY,NULL),
+
+              TS_GOODS.GOODS_ACNT_ID,
+              TS_GOODS.GOODS_TYPE_ID,
+              (SELECT TITLE FROM TS_SYSS WHERE TS_SYSS.SYSSID=TS_GOODS.GOODS_TYPE_ID),
+
+              TS_GOODS.WEBGOODSTYPE_ID,
+              IIF(TS_GOODS.WEBGOODSTYPE_ID=-1,NULL, (SELECT TITLE FROM TS_GOODS_TYPE WHERE TS_GOODS_TYPE.GOODSTYPEID = TS_GOODS.WEBGOODSTYPE_ID) ),
+              IIF(TS_GOODS.WEBGOODSTYPE_ID=-1,NULL, (SELECT TS_GOODS_TYPE.title_rus FROM TS_GOODS_TYPE WHERE TS_GOODS_TYPE.GOODSTYPEID = TS_GOODS.WEBGOODSTYPE_ID) ),
+
+              TS_GOODS.VENDOR_ID,
+              TS_GOODS.USERID,
+              TS_GOODS.UMID,
+              TS_GOODS.SERIAL_TYPE_ID,
+              TS_GOODS.ORDERNO,
+
+              (SELECT FULL_NAME FROM TS_USERS WHERE (USERID=TS_GOODS.USERID)),
+              TS_GOODS.DATA,
+              IIF(FLG_FOLDER=0,(SELECT NAMEACNT FROM TS_GOODS_ACNT WHERE (GOODS_ACNT_ID=TS_GOODS.GOODS_ACNT_ID)),NULL),
+
+              IIF(FLG_FOLDER=0,(SELECT TITLE FROM TS_SYSS WHERE (SYSSID=TS_GOODS.VENDOR_ID)),NULL),
+              IIF(FLG_FOLDER=0,(SELECT TITLE FROM TS_UM WHERE (UMID=TS_GOODS.UMID)),NULL),
+
+              IIF(GOODS_ACNT_ID<>-1,COALESCE((SELECT SUM(QTY_ACCOUNT) FROM TS_GOODS_ACNT_STOCK WHERE (GOODS_ACNT_ID=TS_GOODS.GOODS_ACNT_ID)),0),NULL),
+
+              /* QTY's */
+              IIF(FLG_FOLDER=0,(SELECT amount FROM SP_GOODS_STOCK_ROOT_QTY(:DT,1,TS_GOODS.GOODSID)),NULL) QTY_AVAILABLE,
+              IIF(FLG_FOLDER=0,(SELECT amount FROM SP_GOODS_STOCK_ROOT_QTY(:DT,3,TS_GOODS.GOODSID)),NULL) QTY_RESERVE,
+              IIF(FLG_FOLDER=0,(SELECT amount FROM SP_GOODS_STOCK_ROOT_QTY(:DT,3,TS_GOODS.GOODSID)),NULL) QTY_RMA,
+              IIF(FLG_FOLDER=0,(SELECT amount FROM SP_GOODS_STOCK_ROOT_QTY(:DT,2,TS_GOODS.GOODSID)),NULL) QTY_INTERNAL,
+
+              /* Disponibilitatea marfii dupa Filiale */
+              IIF(FLG_FOLDER=0,
+                               (SELECT COALESCE(SUM(QTY),0)
+                                       FROM TS_GOODS_STOCK S1
+                                       INNER JOIN (SELECT STOCKID FROM TS_STOCKS WHERE (get_FLG_VALUE(flags,0)=1)) S2 ON (S2.STOCKID=S1.DTDEP)
+                                       INNER JOIN (SELECT CUSTOMERID FROM TS_CUSTOMER WHERE (CUSTOMER_TYPE_ID=4002)) S3 ON (S3.CUSTOMERID=S1.DT)
+                                       WHERE (GOODSID=TS_GOODS.GOODSID)
+                               )
+                               ,NULL) QTY_FILIALE,
+
+              /* Disponibilitatea marfii dupa Francize*/
+              IIF(FLG_FOLDER=0,
+                               (SELECT COALESCE(SUM(QTY),0)
+                                       FROM TS_GOODS_STOCK S1
+                                       INNER JOIN (SELECT STOCKID FROM TS_STOCKS WHERE (get_FLG_VALUE(flags,0)=1)) S2 ON (S2.STOCKID=S1.DTDEP)
+                                       INNER JOIN (SELECT CUSTOMERID FROM TS_CUSTOMER WHERE (CUSTOMER_TYPE_ID=4004)) S3 ON (S3.CUSTOMERID=S1.DT)
+                                       WHERE (GOODSID=TS_GOODS.GOODSID)
+                               )
+                                        
+                               ,NULL) QTY_FRANCIZE,
+
+              /* QTY_TRANSIT */
+              IIF(FLG_FOLDER=0,(SELECT AMOUNT FROM SP_GOODS_STOCK_TRANSIT_QTY(:DT,TS_GOODS.GOODSID)),NULL),
+
+              /* Image index */
+              IIF(FLG_FOLDER=1,1,GOODS_TYPE_ID), /* GOODS_IMAGE_INDEX: 1=Folder, other = GOODS_TYPE_ID */
+
+              /* internal usage only */
+              TS_GOODS.minqty,
+              TS_GOODS.DELIVERY_TYPEID,
+              (SELECT TITLE FROM TS_SYSS WHERE SYSSID=DELIVERY_TYPEID),
+              vat,
+              cashback_percent,
+              colorid,
+              (select title from ts_syss where syssid=colorid),
+              (select value_str from ts_syss where syssid=colorid),
+              templateid,
+              attributes,
+              get_goods_margin(ts_goods.goodsid),
+              related_key,
+              pgt_id
+        FROM TS_GOODS
+            -- LEFT OUTER JOIN TS_GOODS_PRICE ON (TS_GOODS_PRICE.GOODSID = TS_GOODS.GOODSID)
+        WHERE PARENTID = :SOURCE_PARENTID and
+        iif ( (:flg_only_in_price = 1),
+                (get_flg_in_price(ts_goods.goodsid) = 1) or
+                ((SELECT amount FROM SP_GOODS_STOCK_ROOT_QTY(:DT,1,TS_GOODS.GOODSID)) <> 0) or
+                ((SELECT amount FROM SP_GOODS_STOCK_ROOT_QTY(:DT,2,TS_GOODS.GOODSID)) <> 0) or
+                (FLG_FOLDER = 1),
+
+                (1=1)
+            )
+
+        order by FLG_FOlDER DESC, QTY_AVAILABLE DESC,get_flg_in_price(ts_goods.goodsid) DESC, ORDERNO, TITLE
+        INTO
+            :GOODSID,
+            :PARENTID,
+            :FLG_FOLDER,
+            :BASE_PARAM,
+            :BASE_PARAM_RU,
+            :CODE,
+            :CODE_RU,
+            :TITLE,
+            :DETAILS,
+
+            :FLG_SOCIAL,
+            :FLG_OLD,
+            :FLG_REQUIRE_CERTIFICAT,
+            :flg_best_price, 
+            :FLG_PRICE_NBM,
+            
+            :FLG_PROMO,
+            :FLG_NEW,
+            :FLG_PRICE_FORCED,
+            :FLG_DISCOUNT,
+            :FLG_FORCED_ADDON,
+            :FLG_SUPPLIER_PROMO,
+            :FLG_WEB_HIDE_COMPLECT_ITEMS,
+            :FLG_PREORDER,
+
+            :WARRANTY,
+            :GOODS_ACNT_ID,
+            :GOODS_TYPE_ID,
+            :GOODS_TYPE_NAME,
+
+            :WEBGOODSTYPE_ID,
+            :WEBGOODSTYPE_TITLE,
+            :WEBGOODSTYPE_TITLE_RU,
+
+            :VENDOR_ID,
+            :USERID,
+            :UMID,
+            :SERIAL_TYPE_ID,
+
+            :ORDERNO,
+            :USER_FULLNAME,
+            :CREATE_DATE,
+            :NAMEACNT,
+            :VENDOR,
+            :UM_TITLE,
+            :QTY_ACCOUNT,
+
+            /* QTY's */
+            :QTY_AVAILABLE,
+            :QTY_RESERVE,
+            :QTY_RMA,
+            :QTY_INTERNAL,
+            :QTY_FILIALE,
+            :QTY_FRANCIZE,
+            :QTY_TRANSIT,
+
+            :GOODS_IMAGE_INDEX,
+
+            :minqty,
+            :DELIVERY_TYPEID,
+            :DELIVERY_TYPENAME,
+            :vat,
+            :cashback_percent,
+            :colorid,
+            :color_name_ro,
+            :color_name_ru,
+            :templateid,
+            :attributes,
+            :margin17,
+            :related_key,
+            :pgt_id
+     DO
+     BEGIN
+          :price4 = 0;
+          :price4_lei = 0;
+          :price7 = 0;
+          :price7_LEI = 0;
+
+          select price, price_mdl, currencyid from get_goods_price(:goodsid, 1, 498) into :price4, :price4_LEI, :currencyid;
+          select price, price_mdl from get_goods_price7(:goodsid, 840) into :price7, :price7_LEI;
+
+          /* preturile originale a produsului */
+          :price1 = iif(FLG_FOLDER=0, :price4, null);
+          :price2 = iif(FLG_FOLDER=0, :price4, null);
+          :price3 = iif(FLG_FOLDER=0, :price4, null);
+          :price4 = iif(FLG_FOLDER=0, :price4, null);
+          :price5 = iif(FLG_FOLDER=0, :price4, null);
+          :price6 = iif(FLG_FOLDER=0, :price4, null);
+          :price7 = iif(FLG_FOLDER=0, :price7, null);
+
+--          /* preturile in lei, curs Exchange */
+          :PRICE1_LEI = iif(FLG_FOLDER=0, :price4_lei, null);
+          :PRICE2_LEI = iif(FLG_FOLDER=0, :price4_lei, null);
+          :PRICE3_LEI = iif(FLG_FOLDER=0, :price4_lei, null);
+          :PRICE4_LEI = iif(FLG_FOLDER=0, :price4_lei, null);
+          :PRICE5_LEI = iif(FLG_FOLDER=0, :price4_lei, null);
+          :PRICE6_LEI = iif(FLG_FOLDER=0, :price4_lei, null);
+          :PRICE7_LEI = iif(FLG_FOLDER=0, :price7_lei, null);
+
+
+          suspend;
+    END
+END ^
+
+SET TERM ; ^
+
+COMMIT;

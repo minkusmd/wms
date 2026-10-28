@@ -6,7 +6,8 @@ Regulile importului din WMS:
   code (Trim) -> cod; stoc <= 0 -> nu intra; un cod repetat se ia o singura data (primul);
   PRICE0 = PRICE7 = pret_online, PRICE3 = pret_vinz, toate in lei;
   titluRO -> denumire, brand, categorieRO, stoc -> STOCK_QTY.
-Descrierile si imaginile (OlisGrupContentUnit) raman la WMSParsers pina la etapa 4b.
+Continutul (etapa 4b, ca OlisGrupContentUnit): DESCRIPTION_RO / _RU = textRO / textRU (HTML) + tabelul
+features (name_RO/value_RO, respectiv name_RU/value_RU); imaginile = imagini[] (URL-uri).
 """
 
 from __future__ import annotations
@@ -14,9 +15,10 @@ from __future__ import annotations
 import json
 from typing import Any
 
-from ..models import FetchResult, RowError, Severity, SupplierItem
+from ..models import ContentItem, FetchResult, RowError, Severity, SupplierItem
 from ..normalize import NormalizeError, clean_text, normalize_code
 from .base import AdapterError, RunContext, SupplierAdapter, sha256_json
+from .contenttext import features_table, join_text, unique_urls
 from .http import HttpClient
 from .jsonval import jfloat, jstr
 
@@ -70,10 +72,33 @@ def parse_feed(products: list[Any], mdl: int) -> FetchResult:
     return result
 
 
+def description(product: dict, lang: str) -> str:
+    features = product.get("features")
+    rows = []
+    for f in features if isinstance(features, list) else []:
+        name, value = jstr(f, f"name_{lang}"), jstr(f, f"value_{lang}")
+        if name and value:
+            rows.append((name, value))
+    return join_text(jstr(product, f"text{lang}"), features_table(rows))
+
+
+def content_of(product: Any, code: str) -> ContentItem | None:
+    if not isinstance(product, dict):
+        return None
+    images = product.get("imagini")
+    urls = unique_urls(jstr({"v": v}, "v") for v in images) if isinstance(images, list) else []
+    return ContentItem(code=code, desc_ro=description(product, "RO"), desc_ru=description(product, "RU"),
+                       images=urls)
+
+
 class OlisGrupAdapter(SupplierAdapter):
     code = "olisgrup"
     host = "price.muncitorul.md"
     default_price_category = 17
+    has_content = True
+
+    def content_of(self, product: Any, code: str) -> ContentItem | None:
+        return content_of(product, code)
 
     def fetch(self, ctx: RunContext) -> FetchResult:
         url = ctx.params.get("feed_url", DEFAULT_FEED_URL)

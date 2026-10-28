@@ -7,12 +7,12 @@ unit PriceListApiJobsUnit;
     dmlink-pricelist    DMLink              229466  B2B.DMLinkPriceListImport (b2b.dmlink.md)
     olisgrup-pricelist  Olis Grup           251465  OlisGrupPriceListUnit (price.muncitorul.md)
     nex-pricelist       NexDistribution     275640  NexDistributionUnit (api.nexdistribution.md)
-    triomac-pricelist   Triomac (SCOP)      209280  TriomacPriceListUnit (api.scop.md)
+    triomac-pricelist   Triomac (SCOP)      209280  TriomacPriceListUnit (scop.md/api/partner/v2)
 
   Fiecare job, in firul lui (ParserRunnerUnit.RunParserJobsParallel), cu conexiunea lui:
     1. pricelistul nou, in categoria ultimului pricelist al furnizorului;
     2. cele 4 reevaluari (PriceListReevaluationUnit), daca nu e /reevaluare:no;
-    3. DMLink / Nex / Olis Grup: imaginile nedescarcate, in fire (daca nu e /images:no) - la final, fiindca
+    3. DMLink / Nex / Olis Grup / Triomac: imaginile nedescarcate, in fire (daca nu e /images:no) - la final, fiindca
        dureaza cel mai mult si reevaluarile nu depind de ele. }
 
 interface
@@ -92,6 +92,7 @@ type
     class function SupplierName: string; override;
     class function DefaultCategoryID: Integer; override;
     function ImportPriceList(ACategoryID: Integer): Integer; override;
+    procedure AfterReevaluation(APLID: Integer); override;
   public
     class function JobName: string; override;
   end;
@@ -475,6 +476,25 @@ begin
     begin
       Log(S);
     end);
+end;
+
+procedure TTriomacPriceListJob.AfterReevaluation(APLID: Integer);
+var
+  Stats: TContentTransferStats;
+begin
+  // URL-urile (scop.md/media) si descrierile le-a salvat importul; aici, ca la Olis Grup,
+  // descarcarea imaginilor si copierea la produsele legate
+  TDMLinkPriceListImport.DownloadImagesSilent(FConnection, APLID,
+    procedure(S: string)
+    begin
+      Log(S);
+    end,
+    IsCancelled, cTriomacSupplierID, cImageThreads);
+  if IsCancelled then
+    Exit;
+  Stats := TPriceListContentTransfer.Execute(FConnection, cTriomacSupplierID, APLID);
+  Log('Triomac: copiat la produse - %d produse cu imagini noi (%d imagini), %d descrieri (%d perechi produs-cod)',
+    [Stats.GoodsImages, Stats.Images, Stats.Descriptions, Stats.Pairs]);
 end;
 
 end.

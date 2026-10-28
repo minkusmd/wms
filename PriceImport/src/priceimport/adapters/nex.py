@@ -12,7 +12,9 @@ Regulile importului din WMS:
   title.ro (altfel .ru) -> denumire, article -> model, category.title.ro -> categorie, quantity -> stoc
   (fara filtru de stoc); preturile in lei: PRICE0 = PRICE7 = prices.price_mdl, PRICE3 = prices.rrp;
   un rrp sub jumatate din price_mdl e in EUR si se converteste cu cursul furnizorului (price_mdl / price_euro).
-Descrierile si imaginile raman la WMSParsers pina la etapa 4b.
+Continutul (etapa 4b): DESCRIPTION_RO / _RU = description.ro / .ru + tabelul attributes (denumirea pe limba,
+  valoarea doar in ro), PRODUCT_CATEGORIES = category.title.ro; imaginile = main_image (ORDERNO 1), apoi
+  additional_images; URL-urile relative se completeaza cu https://b2b.nexdistribution.md.
 Datele de acces: TS_API_CONFIG, API_CODE = 'NEXDISTRIBUTION' (USERNAME, PASSWORD, optional API_TOKEN, BASE_URL).
 """
 
@@ -22,13 +24,15 @@ import json
 from typing import Any
 
 from .. import repo
-from ..models import FetchResult, RowError, SupplierItem
+from ..models import ContentItem, FetchResult, RowError, SupplierItem
 from ..normalize import NormalizeError, clean_text, normalize_code
 from .base import AdapterError, RunContext, SupplierAdapter, sha256_json
+from .contenttext import features_table, join_text, unique_urls
 from .http import HttpClient
 from .jsonval import jbool, jfloat, jlang, jobj, jstr, trunc
 
 DEFAULT_BASE_URL = "https://api.nexdistribution.md"
+B2B_BASE_URL = "https://b2b.nexdistribution.md"
 API_CODE = "NEXDISTRIBUTION"
 PAGE_LIMIT = 100
 MAX_PAGES = 1000
@@ -82,6 +86,36 @@ def parse_products(products: list[Any], mdl: int) -> FetchResult:
     return result
 
 
+def normalize_image_url(url: str) -> str:
+    url = url.strip()
+    if url.startswith("//"):
+        url = "https:" + url
+    elif url.startswith("/"):
+        url = B2B_BASE_URL + url
+    return url.replace(" ", "%20")
+
+
+def content_of(product: Any, code: str) -> ContentItem | None:
+    if not isinstance(product, dict):
+        return None
+    attributes = []
+    for a in product.get("attributes") or []:
+        if isinstance(a, dict):
+            title_ro, value = jlang(a, "title", "ro"), jstr(a, "value")
+            if title_ro and value:
+                attributes.append((title_ro, jlang(a, "title", "ru") or title_ro, value))
+    table_ro = features_table((ro, v) for ro, _, v in attributes)
+    table_ru = features_table((ru, v) for _, ru, v in attributes)
+    images = [normalize_image_url(jstr(product, "main_image"))]
+    extra = product.get("additional_images")
+    if isinstance(extra, list):
+        images += [normalize_image_url(u) for u in extra if isinstance(u, str)]
+    category = jlang(jobj(product, "category"), "title", "ro")[:128]
+    return ContentItem(code=code, desc_ro=join_text(jlang(product, "description", "ro"), table_ro),
+                       desc_ru=join_text(jlang(product, "description", "ru"), table_ru),
+                       category=category, images=unique_urls(images))
+
+
 def _graphql(http: HttpClient, base_url: str, query: str, variables: dict | None = None,
              bearer: str | None = None) -> dict:
     """Erorile GraphQL vin cu HTTP 200, in "errors" (detaliile in errors[].extensions.validation)."""
@@ -133,6 +167,10 @@ class NexAdapter(SupplierAdapter):
     code = "nex"
     host = "api.nexdistribution.md"
     default_price_category = 178
+    has_content = True
+
+    def content_of(self, product: Any, code: str) -> ContentItem | None:
+        return content_of(product, code)
 
     def fetch(self, ctx: RunContext) -> FetchResult:
         config = repo.load_api_config(ctx.db, ctx.params.get("api_config_code", API_CODE))

@@ -40,6 +40,20 @@ def match_job(settings: Settings) -> None:
         log.exception("match_job_failed")
 
 
+def content_job(settings: Settings) -> None:
+    from .content import report_text, run_content
+    try:
+        summaries = run_content(settings, trigger="SCHEDULE")
+        if summaries and settings.telegram_enabled:
+            failed = any(s.status == "ERROR" for s in summaries)
+            with open_db(settings) as db:
+                repo.telegram_send(db, (settings.telegram_errors_channel if failed else None)
+                                   or settings.telegram_channel, report_text(summaries), priority=1 if failed else 0)
+                db.commit()
+    except Exception:                      # noqa: BLE001
+        log.exception("content_job_failed")
+
+
 def window_job(settings: Settings, index: int) -> None:
     try:
         run_window(settings, index, now=datetime.now(ZoneInfo(settings.timezone)).replace(tzinfo=None))
@@ -72,6 +86,11 @@ def serve(settings: Settings) -> None:
         scheduler.add_job(match_job, CronTrigger(hour=settings.match_time.hour, minute=settings.match_time.minute,
                                                  timezone=tz), args=[settings], id="matching", name="potrivire",
                           misfire_grace_time=3600, coalesce=True, max_instances=1)
+    if settings.content_enabled:
+        for index, start in enumerate(settings.content_times):
+            scheduler.add_job(content_job, CronTrigger(hour=start.hour, minute=start.minute, timezone=tz),
+                              args=[settings], id=f"content-{index}", name=f"continut {start:%H:%M}",
+                              misfire_grace_time=3600, coalesce=True, max_instances=1)
     scheduler.add_job(heartbeat_tick, "interval", seconds=30, args=[settings], id="heartbeat",
                       max_instances=1, coalesce=True, next_run_time=datetime.now(tz))
     try:

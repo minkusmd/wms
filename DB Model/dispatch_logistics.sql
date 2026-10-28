@@ -775,7 +775,10 @@ END^
 /* Depozitul masinii curierului (decizia proprietarului 2026-10-10: cate unul pe
    sofer, in folderul TS_DISPATCH_SETTINGS.COURIER_STOCK_FOLDERID = 146 "Depozite
    mobile"). Nevizibil la vanzare (FLAGS = 0); masca de acces ACC$MASK se copiaza
-   de la ultimul depozit din acelasi folder (ca 147), ca sa-l vada aceleasi grupe. */
+   de la ultimul depozit din acelasi folder (ca 147), ca sa-l vada aceleasi grupe.
+   Depozitul mobil apartine organizatiei firmei (FIRMAID = FN_FIRM_ORG, STOCK_KIND = 2),
+   ca sa-l poata folosi toate subdiviziunile ei; codul local = "M" + STOCKID.
+   Cere org_subdiv_stocks.sql rulat inainte (coloanele TS_STOCKS, TS_STOCK_VEHICLE). */
 CREATE OR ALTER PROCEDURE SP_COURIER_CREATE_STOCK (
     A_CUSTOMERID INTEGER,
     A_FIRMAID INTEGER,
@@ -807,10 +810,14 @@ BEGIN
     ORDER BY STOCKID DESC
     INTO :V_MASK;
 
-    INSERT INTO TS_STOCKS (PARENTID, FLG_FOLDER, TITLE, DESCRIPTION, FLAGS, ACC$MASK)
+    INSERT INTO TS_STOCKS (PARENTID, FLG_FOLDER, TITLE, DESCRIPTION, FLAGS, ACC$MASK, FIRMAID, STOCK_KIND)
     VALUES (:V_FOLDER, 0, LEFT(COALESCE(NULLIF(TRIM(:A_TITLE), ''), TRIM(:V_NAME)), 60),
-            LEFT('Curier: ' || TRIM(:V_NAME), 255), 0, COALESCE(:V_MASK, 0))
+            LEFT('Curier: ' || TRIM(:V_NAME), 255), 0, COALESCE(:V_MASK, 0),
+            FN_FIRM_ORG(:A_FIRMAID), 2)
     RETURNING STOCKID INTO :O_STOCKID;
+
+    UPDATE TS_STOCKS SET CODE = 'M' || :O_STOCKID WHERE STOCKID = :O_STOCKID;
+    INSERT INTO TS_STOCK_VEHICLE (STOCKID) VALUES (:O_STOCKID);
 
     UPDATE TS_COURIER SET STOCKID = :O_STOCKID WHERE CUSTOMERID = :A_CUSTOMERID;
 

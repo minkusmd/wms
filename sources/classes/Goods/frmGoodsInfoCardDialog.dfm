@@ -50,11 +50,8 @@
     TabOrder = 1
     object cxGridDBTable: TcxGridDBTableView
       OnKeyDown = cxGridDBTableKeyDown
-      Navigator.Buttons.CustomButtons = <>
-      ScrollbarAnnotations.CustomAnnotations = <>
       OnCustomDrawCell = cxGridDBTableCustomDrawCell
       DataController.DataSource = IBCDataSourceInfo
-      DataController.Summary.DefaultGroupSummaryItems = <>
       DataController.Summary.FooterSummaryItems = <
         item
           Kind = skCount
@@ -70,7 +67,6 @@
           Kind = skSum
           Column = cxGridDBTable_QTY_OUT
         end>
-      DataController.Summary.SummaryGroups = <>
       OptionsBehavior.IncSearch = True
       OptionsBehavior.ImmediateEditor = False
       OptionsCustomize.ColumnsQuickCustomization = True
@@ -89,7 +85,6 @@
         AlternateCaption = 'Inchis'
         Caption = 'Inchis'
         DataBinding.FieldName = 'FLG_CLOSED'
-        DataBinding.IsNullValueType = True
         PropertiesClassName = 'TcxCheckBoxProperties'
         Properties.ValueChecked = 1
         Properties.ValueUnchecked = 0
@@ -101,14 +96,12 @@
       object cxGridDBTableDOCTYPE_NAME: TcxGridDBColumn
         Caption = 'Tip document'
         DataBinding.FieldName = 'DOCTYPE_NAME'
-        DataBinding.IsNullValueType = True
         Styles.OnGetContentStyle = cxGridDBTableDOCTYPE_NAMEStylesGetContentStyle
         Width = 133
       end
       object cxGridDBTable_VALUTA: TcxGridDBColumn
         Caption = 'Valuta'
         DataBinding.FieldName = 'CURRENCY_NAME'
-        DataBinding.IsNullValueType = True
         HeaderAlignmentHorz = taCenter
         MinWidth = 50
         Options.HorzSizing = False
@@ -118,7 +111,6 @@
         AlternateCaption = #1055#1086' '#1073#1091#1093#1075#1072#1083#1090#1077#1088#1080#1080
         Caption = 'Cntb'
         DataBinding.FieldName = 'FLG_ACNT'
-        DataBinding.IsNullValueType = True
         PropertiesClassName = 'TcxCheckBoxProperties'
         Properties.ValueChecked = 1
         Properties.ValueUnchecked = 0
@@ -131,7 +123,6 @@
         AlternateCaption = #1050#1086#1076' '#1076#1086#1082#1091#1084#1077#1085#1090#1072
         Caption = 'Cod doc'
         DataBinding.FieldName = 'DOCID'
-        DataBinding.IsNullValueType = True
         FooterAlignmentHorz = taRightJustify
         HeaderAlignmentHorz = taCenter
         MinWidth = 60
@@ -142,7 +133,6 @@
       object cxGridDBTable_CREATED_DATE: TcxGridDBColumn
         Caption = 'Data creare'
         DataBinding.FieldName = 'CREATED_DATE'
-        DataBinding.IsNullValueType = True
         OnGetDisplayText = cxGridDBTable_CREATED_DATEGetDisplayText
         MinWidth = 50
         Options.Filtering = False
@@ -152,7 +142,6 @@
         AlternateCaption = 'Data document'
         Caption = 'Data'
         DataBinding.FieldName = 'DATA'
-        DataBinding.IsNullValueType = True
         PropertiesClassName = 'TcxLabelProperties'
         Properties.Alignment.Horz = taCenter
         OnGetDisplayText = cxGridDBTable_DATAGetDisplayText
@@ -166,64 +155,54 @@
       end
       object cxGridDBTable_DT: TcxGridDBColumn
         DataBinding.FieldName = 'DT'
-        DataBinding.IsNullValueType = True
         Visible = False
         VisibleForCustomization = False
       end
       object cxGridDBTable_DTNAME: TcxGridDBColumn
         Caption = 'Subdiviziune'
         DataBinding.FieldName = 'DTNAME'
-        DataBinding.IsNullValueType = True
         Width = 111
       end
       object cxGridDBTable_CT: TcxGridDBColumn
         DataBinding.FieldName = 'CT'
-        DataBinding.IsNullValueType = True
         Visible = False
         VisibleForCustomization = False
       end
       object cxGridDBTable_DTDEP_NAME: TcxGridDBColumn
         Caption = 'Depozit'
         DataBinding.FieldName = 'DTDEP_NAME'
-        DataBinding.IsNullValueType = True
         Width = 94
       end
       object cxGridDBTable_CTNAME: TcxGridDBColumn
         Caption = 'Client'
         DataBinding.FieldName = 'CT_NAME2'
-        DataBinding.IsNullValueType = True
         OnGetDisplayText = cxGridDBTable_CTNAMEGetDisplayText
         Width = 124
       end
       object cxGridDBTable_DOCTYPEID: TcxGridDBColumn
         DataBinding.FieldName = 'DOCTYPEID'
-        DataBinding.IsNullValueType = True
         Visible = False
         VisibleForCustomization = False
       end
       object cxGridDBTable_CREATED_BY: TcxGridDBColumn
         DataBinding.FieldName = 'CREATED_BY'
-        DataBinding.IsNullValueType = True
         Visible = False
         VisibleForCustomization = False
       end
       object cxGridDBTable_GOODSID: TcxGridDBColumn
         DataBinding.FieldName = 'GOODSID'
-        DataBinding.IsNullValueType = True
         Visible = False
         VisibleForCustomization = False
       end
       object cxGridDBTable_CTDEP_NAME: TcxGridDBColumn
         Caption = 'Depozit client'
         DataBinding.FieldName = 'CTDEP_NAME'
-        DataBinding.IsNullValueType = True
         OnGetDisplayText = cxGridDBTable_CTDEP_NAMEGetDisplayText
         Width = 96
       end
       object cxGridDBTable_QTY_IN: TcxGridDBColumn
         Caption = 'Intrari'
         DataBinding.FieldName = 'qty_in'
-        DataBinding.IsNullValueType = True
         HeaderAlignmentHorz = taCenter
         MinWidth = 40
         Options.HorzSizing = False
@@ -232,7 +211,6 @@
       object cxGridDBTable_QTY_OUT: TcxGridDBColumn
         Caption = 'Iesiri'
         DataBinding.FieldName = 'QTY_OUT'
-        DataBinding.IsNullValueType = True
         HeaderAlignmentHorz = taCenter
         MinWidth = 40
         Options.HorzSizing = False
@@ -242,7 +220,6 @@
         AlternateCaption = 'Cantitate'
         Caption = 'Cant'
         DataBinding.FieldName = 'QTY'
-        DataBinding.IsNullValueType = True
         PropertiesClassName = 'TcxCalcEditProperties'
         Properties.Precision = 2
         HeaderAlignmentHorz = taCenter
@@ -253,7 +230,6 @@
       object cxGridDBTable_PRICE: TcxGridDBColumn
         Caption = #1062#1077#1085#1072' $'
         DataBinding.FieldName = 'PRICE$'
-        DataBinding.IsNullValueType = True
         PropertiesClassName = 'TcxCurrencyEditProperties'
         Properties.DisplayFormat = '0.00'
         Visible = False
@@ -266,7 +242,6 @@
       object cxGridDBTable_SUMA: TcxGridDBColumn
         Caption = #1057#1091#1084#1084#1072' $'
         DataBinding.FieldName = 'SUMA$'
-        DataBinding.IsNullValueType = True
         PropertiesClassName = 'TcxCurrencyEditProperties'
         Properties.DisplayFormat = '0.00'
         Visible = False
@@ -279,7 +254,6 @@
       object cxGridDBTable_SEMN: TcxGridDBColumn
         Caption = 'Semn'
         DataBinding.FieldName = 'SEMN'
-        DataBinding.IsNullValueType = True
         PropertiesClassName = 'TcxLabelProperties'
         Properties.Alignment.Horz = taCenter
         Properties.Alignment.Vert = taVCenter
@@ -294,7 +268,6 @@
       object cxGridDBTable_BALANCE_QTY: TcxGridDBColumn
         Caption = 'Balance'
         DataBinding.FieldName = 'BALANCE_QTY'
-        DataBinding.IsNullValueType = True
         HeaderAlignmentHorz = taCenter
         MinWidth = 60
         Options.Filtering = False
@@ -304,14 +277,12 @@
       object cxGridDBTable_Пользователь: TcxGridDBColumn
         Caption = 'Utilizator'
         DataBinding.FieldName = 'CREATED_BY_NAME'
-        DataBinding.IsNullValueType = True
         Width = 124
       end
       object cxGridDBTable_DOC_SUMA: TcxGridDBColumn
         AlternateCaption = #1057#1091#1084#1084#1072' '#1076#1086#1082#1091#1084#1077#1085#1090#1072
         Caption = #1057#1091#1084#1084#1072' '#1076#1086#1082'.'
         DataBinding.FieldName = 'DOC_SUMA'
-        DataBinding.IsNullValueType = True
         PropertiesClassName = 'TcxCurrencyEditProperties'
         Properties.DisplayFormat = '0.00'
         Visible = False
@@ -321,7 +292,6 @@
       object cxGridDBTable_DOC_RATEUSD: TcxGridDBColumn
         Caption = #1050#1091#1088#1089' '#1076#1086#1082'.'
         DataBinding.FieldName = 'DOC_RATEUSD'
-        DataBinding.IsNullValueType = True
         PropertiesClassName = 'TcxCurrencyEditProperties'
         Properties.DisplayFormat = '0.0000'
         Visible = False
@@ -330,28 +300,21 @@
       end
       object cxGridDBTable_DTDEP: TcxGridDBColumn
         DataBinding.FieldName = 'DTDEP'
-        DataBinding.IsNullValueType = True
         Visible = False
         VisibleForCustomization = False
       end
       object cxGridDBTable_CTDEP: TcxGridDBColumn
         DataBinding.FieldName = 'CTDEP'
-        DataBinding.IsNullValueType = True
         Visible = False
         VisibleForCustomization = False
       end
     end
     object cxGridDBTableView1: TcxGridDBTableView
       OnKeyDown = cxGridDBTableView1KeyDown
-      Navigator.Buttons.CustomButtons = <>
-      ScrollbarAnnotations.CustomAnnotations = <>
       OnCustomDrawCell = cxGridDBTableView1CustomDrawCell
       DataController.DataSource = IBCDataSourceJurnal
       DataController.DetailKeyFieldNames = 'DOCID'
       DataController.MasterKeyFieldNames = 'DOCID'
-      DataController.Summary.DefaultGroupSummaryItems = <>
-      DataController.Summary.FooterSummaryItems = <>
-      DataController.Summary.SummaryGroups = <>
       OptionsBehavior.IncSearch = True
       OptionsBehavior.ImmediateEditor = False
       OptionsData.Deleting = False
@@ -368,7 +331,6 @@
       Styles.Header = dmAdditions.cxStyle_GridHeader
       Styles.Inactive = dmAdditions.cxStyle_GirdContentInactive
       object cxGridDBTableView1_IMG: TcxGridDBColumn
-        DataBinding.IsNullValueType = True
         PropertiesClassName = 'TcxImageComboBoxProperties'
         Properties.DefaultImageIndex = 12
         Properties.Images = dmAdditions.cxImageList_SWN
@@ -382,7 +344,6 @@
       object cxGridDBTableView1_DTDEP_NAME: TcxGridDBColumn
         Caption = 'Depozit'
         DataBinding.FieldName = 'DTDEP_NAME'
-        DataBinding.IsNullValueType = True
         MinWidth = 120
         Options.HorzSizing = False
         Width = 120
@@ -390,7 +351,6 @@
       object cxGridDBTableView1_GOODSID: TcxGridDBColumn
         Caption = 'Cod'
         DataBinding.FieldName = 'GOODSID'
-        DataBinding.IsNullValueType = True
         MinWidth = 50
         Options.HorzSizing = False
         Width = 50
@@ -398,12 +358,10 @@
       object cxGridDBTableView1_GOODS_NAME: TcxGridDBColumn
         Caption = 'Produs'
         DataBinding.FieldName = 'GOODS_NAME'
-        DataBinding.IsNullValueType = True
       end
       object cxGridDBTableView1_QTY: TcxGridDBColumn
         Caption = 'Cant'
         DataBinding.FieldName = 'QTY'
-        DataBinding.IsNullValueType = True
         PropertiesClassName = 'TcxCalcEditProperties'
         Properties.DisplayFormat = '0.00'
         Properties.Precision = 15
@@ -414,7 +372,6 @@
       object cxGridDBTableView1_PRICE: TcxGridDBColumn
         Caption = 'Pret'
         DataBinding.FieldName = 'PRICE'
-        DataBinding.IsNullValueType = True
         PropertiesClassName = 'TcxCurrencyEditProperties'
         Properties.DisplayFormat = '0.00'
         MinWidth = 80
@@ -424,7 +381,6 @@
       object cxGridDBTableView1_PRICE_USD: TcxGridDBColumn
         Caption = 'Pret, $'
         DataBinding.FieldName = 'PRICE_USD'
-        DataBinding.IsNullValueType = True
         PropertiesClassName = 'TcxCurrencyEditProperties'
         Properties.DisplayFormat = ',0.00;-,0.00'
         MinWidth = 64
@@ -433,7 +389,6 @@
       object cxGridDBTableView1_SUMA: TcxGridDBColumn
         Caption = 'Suma'
         DataBinding.FieldName = 'SUMA'
-        DataBinding.IsNullValueType = True
         PropertiesClassName = 'TcxCurrencyEditProperties'
         Properties.DisplayFormat = '0.00'
         MinWidth = 80
@@ -443,7 +398,6 @@
       object cxGridDBTableView1_SUMA_USD: TcxGridDBColumn
         Caption = 'Suma, $'
         DataBinding.FieldName = 'SUMA_USD'
-        DataBinding.IsNullValueType = True
         PropertiesClassName = 'TcxCurrencyEditProperties'
         Properties.DisplayFormat = ',0.00;-,0.00'
         MinWidth = 64

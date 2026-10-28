@@ -718,3 +718,88 @@ def decide_candidate(db: Db, cand_id: int, status: str, decided_by: str) -> None
 def supersede_other_candidates(db: Db, supplier_id: int, code: str, cand_id: int) -> None:
     db.execute("UPDATE TPI_MATCH_CANDIDATE SET STATUS = 'SUPERSEDED' WHERE SUPPLIERID = ? AND SUPPLIER_GOODS_CODE = ? "
                "AND CANDID <> ? AND STATUS = 'PROPOSED'", (supplier_id, code, cand_id))
+
+
+# --- etapa 4b: continutul produselor --------------------------------------------------------
+
+def content_desc_state(db: Db, supplier_id: int) -> dict[str, tuple[bytes, bytes, str | None]]:
+    """Cod -> (SHA-256 RO, SHA-256 RU, PRODUCT_CATEGORIES); NULL = text gol. Blob-urile nu trec prin client."""
+    rows = db.query("SELECT SUPPLIER_GOODS_CODE, CRYPT_HASH(COALESCE(DESCRIPTION_RO, '') USING SHA256) AS H_RO, "
+                    "CRYPT_HASH(COALESCE(DESCRIPTION_RU, '') USING SHA256) AS H_RU, PRODUCT_CATEGORIES "
+                    "FROM TS_PRICELIST_ITEMS_DESCRIPTION WHERE SUPPLIERID = ?", (supplier_id,))
+    return {r["SUPPLIER_GOODS_CODE"]: (bytes(r["H_RO"]), bytes(r["H_RU"]), r["PRODUCT_CATEGORIES"]) for r in rows}
+
+
+def content_image_lists(db: Db, supplier_id: int) -> dict[str, tuple[list[str], bool]]:
+    """Cod -> (URL-urile in ordinea ORDERNO, are randuri nedescarcate)."""
+    lists: dict[str, tuple[list[str], bool]] = {}
+    for r in db.query("SELECT SUPPLIER_GOODS_CODE, IMAGE_URL, IIF(IMAGE IS NULL, 1, 0) AS PENDING "
+                      "FROM TS_PRICELIST_ITEMS_IMAGES WHERE SUPPLIERID = ? ORDER BY SUPPLIER_GOODS_CODE, ORDERNO",
+                      (supplier_id,)):
+        urls, pending = lists.get(r["SUPPLIER_GOODS_CODE"], ([], False))
+        urls.append((r["IMAGE_URL"] or "").strip())
+        lists[r["SUPPLIER_GOODS_CODE"]] = (urls, pending or bool(r["PENDING"]))
+    return lists
+
+
+def upsert_content_desc(db: Db, supplier_id: int, code: str, ro: str | None, ru: str | None,
+                        category: str | None) -> None:
+    """Doar coloanele date (None = ramine ce era): DMLink scrie numai DESCRIPTION_RO, ca in Delphi."""
+    cols = [("DESCRIPTION_RO", ro), ("DESCRIPTION_RU", ru), ("PRODUCT_CATEGORIES", category)]
+    cols = [(name, value) for name, value in cols if value is not None]
+    names = ", ".join(name for name, _ in cols)
+    db.execute(f"UPDATE OR INSERT INTO TS_PRICELIST_ITEMS_DESCRIPTION (SUPPLIERID, SUPPLIER_GOODS_CODE, {names}) "
+               f"VALUES (?, ?{', ?' * len(cols)}) MATCHING (SUPPLIERID, SUPPLIER_GOODS_CODE)",
+               (supplier_id, code, *(value for _, value in cols)))
+
+
+def replace_code_images(db: Db, supplier_id: int, code: str, urls: list[str],
+                        images: list[bytes | None] | None = None) -> None:
+    """Randurile codului se rescriu complet (ordinea = ORDERNO); fara `images` raman nedescarcate (IMAGE null)."""
+    db.execute("DELETE FROM TS_PRICELIST_ITEMS_IMAGES WHERE SUPPLIERID = ? AND SUPPLIER_GOODS_CODE = ?",
+               (supplier_id, code))
+    db.executemany("INSERT INTO TS_PRICELIST_ITEMS_IMAGES (SUPPLIERID, SUPPLIER_GOODS_CODE, IMAGE_URL, PROCESS_DATE, "
+                   "ORDERNO, IMAGE) VALUES (?, ?, ?, CURRENT_TIMESTAMP, ?, ?)",
+                   ((supplier_id, code, url, n, images[n - 1] if images else None)
+                    for n, url in enumerate(urls, start=1)))
+
+
+def codes_needing_images(db: Db, supplier_id: int) -> set[str]:
+    """Codurile legate de un produs real fara nicio imagine - doar pentru ele merita descarcarea."""
+    rows = db.query("SELECT DISTINCT f.GOODS_CODE FROM TS_GOODS_FOREIGN f JOIN TS_GOODS g ON g.GOODSID = f.GOODSID "
+                    "AND COALESCE(g.FLG_FOLDER, 0) = 0 WHERE f.CUSTOMERID = ? "
+                    "AND NOT EXISTS (SELECT 1 FROM TS_GOODS_IMAGE i WHERE i.GOODSID = f.GOODSID)", (supplier_id,))
+    return {r["GOODS_CODE"] for r in rows}
+
+
+def linked_codes(db: Db, supplier_id: int) -> set[str]:
+    return {r["GOODS_CODE"] for r in db.query("SELECT DISTINCT GOODS_CODE FROM TS_GOODS_FOREIGN WHERE CUSTOMERID = ?",
+                                              (supplier_id,))}
+
+
+def content_transfer(db: Db, supplier_id: int, code: str, user_id: int) -> tuple[int | None, int, int]:
+    """SP_PI_CONTENT_TRANSFER: (GOODSID sau None, imagini copiate, descriere scrisa 0/1)."""
+    with db.con.cursor() as cur:
+        cur.execute("EXECUTE PROCEDURE SP_PI_CONTENT_TRANSFER(?, ?, ?)", (supplier_id, code, user_id))
+        row = cur.fetchone()
+    if not row:
+        return None, 0, 0
+    return row[0], int(row[1] or 0), int(row[2] or 0)
+
+
+def insert_content_run(db: Db, supplier_id: int, trigger: str, host: str) -> int:
+    return db.execute_returning("INSERT INTO TPI_CONTENT_RUN (SUPPLIERID, TRIGGER_KIND, STATUS, HOST) "
+                                "VALUES (?, ?, 'RUNNING', ?) RETURNING CONTENTRUNID", (supplier_id, trigger, host[:64]))
+
+
+def finish_content_run(db: Db, run_id: int, status: str, **counts: Any) -> None:
+    fields = {k.upper(): v for k, v in counts.items()}
+    if "ERROR_TEXT" in fields and fields["ERROR_TEXT"]:
+        fields["ERROR_TEXT"] = str(fields["ERROR_TEXT"])[:1000]
+    sets = ", ".join(f"{name} = ?" for name in fields)
+    db.execute(f"UPDATE TPI_CONTENT_RUN SET STATUS = ?, FINISHED_AT = CURRENT_TIMESTAMP{', ' + sets if sets else ''} "
+               "WHERE CONTENTRUNID = ?", (status, *fields.values(), run_id))
+
+
+def recent_content_runs(db: Db, limit: int = 20) -> list[dict[str, Any]]:
+    return db.query(f"SELECT FIRST {int(limit)} * FROM TPI_CONTENT_RUN ORDER BY CONTENTRUNID DESC")

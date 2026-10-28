@@ -63,6 +63,10 @@ type
     procedure SetNumber(AInvoiceID: Integer; const ASeria, ANumber: string; AInvoiceStatus: Integer);
     // doar starea WMS (fara serie/numar) + motivul, pentru starile -1 / -3
     procedure SetState(AInvoiceID, AStatus: Integer; const AError: string);
+    // randul TDB_EFACTURA al unei trimiteri: in procesare (fara eroare) sau respinsa sincron de
+    // PostInvoices (-3 + motivul), ca mesajul si XML-ul trimis sa nu se piarda
+    procedure SaveSendResult(AInvoiceID, ADocID: Integer; const AApiId, ARequestId: string;
+      AStatus, AUserID: Integer; const AXml, AError: string);
     // pentru interogari in Registrul fiscal: firma preferata sau prima firma configurata
     function LookupClient(APreferFirmaID: Integer): TEFacturaApiClient;
   public
@@ -352,28 +356,50 @@ begin
   if (Err = '') and (Result.Post.Status = cEFacturaReqOk) and (Result.Post.TotalInvoicesPosted = 0) then
     Err := 'nicio factura acceptata';
   if Err <> '' then
+  begin
+    // respingere sincrona: pastram motivul si XML-ul (coloana EF_LAST_ERROR in frame25) - starea -3
+    // permite corectarea documentului si retrimiterea; daca nici salvarea nu merge, ramane mesajul API
+    try
+      SaveSendResult(Result.InvoiceID, ADocID, Result.ApiId, Api.LastRequestId, cEFInvRejected, AUserID,
+        Xml, 'Respinsa la trimitere: ' + Err);
+    except
+    end;
     raise EEFacturaApiError.Create('e-Factura a respins factura: ' + Err);
+  end;
 
+  try
+    SaveSendResult(Result.InvoiceID, ADocID, Result.ApiId, Api.LastRequestId, cEFInvPending, AUserID, Xml, '');
+  except
+    on E: Exception do
+      raise EEFacturaApiError.CreateFmt('Factura a fost trimisa in e-Factura (ID %s), dar starea nu s-a ' +
+        'salvat in WMS: %s', [Result.ApiId, E.Message]);
+  end;
+end;
+
+procedure TEFacturaManager.SaveSendResult(AInvoiceID, ADocID: Integer; const AApiId, ARequestId: string;
+  AStatus, AUserID: Integer; const AXml, AError: string);
+var
+  Q: TIBCQuery;
+begin
   Q := NewQuery;
   try
     Q.SQL.Text := 'UPDATE OR INSERT INTO TDB_EFACTURA (INVOICEID, DOCID, API_ID, REQUEST_ID, SERIA, EF_NUMBER,' +
       ' EF_STATUS, EF_STATUS_DATE, SENT_AT, SENT_BY, XML_SENT, LAST_ERROR)' +
       ' VALUES (:INVOICEID, :DOCID, :API_ID, :REQUEST_ID, NULL, NULL, :EF_STATUS, NULL, CURRENT_TIMESTAMP,' +
-      ' :SENT_BY, :XML_SENT, NULL) MATCHING (INVOICEID)';
-    Q.ParamByName('INVOICEID').AsInteger := Result.InvoiceID;
+      ' :SENT_BY, :XML_SENT, :LAST_ERROR) MATCHING (INVOICEID)';
+    Q.ParamByName('INVOICEID').AsInteger := AInvoiceID;
     Q.ParamByName('DOCID').AsInteger := ADocID;
-    Q.ParamByName('API_ID').AsString := Result.ApiId;
-    Q.ParamByName('REQUEST_ID').AsString := Api.LastRequestId;
-    Q.ParamByName('EF_STATUS').AsInteger := cEFInvPending;
+    Q.ParamByName('API_ID').AsString := AApiId;
+    Q.ParamByName('REQUEST_ID').AsString := ARequestId;
+    Q.ParamByName('EF_STATUS').AsInteger := AStatus;
     Q.ParamByName('SENT_BY').AsInteger := AUserID;
-    Q.ParamByName('XML_SENT').AsMemo := Xml;
-    try
-      ExecInTransaction(Q);
-    except
-      on E: Exception do
-        raise EEFacturaApiError.CreateFmt('Factura a fost trimisa in e-Factura (ID %s), dar starea nu s-a ' +
-          'salvat in WMS: %s', [Result.ApiId, E.Message]);
-    end;
+    Q.ParamByName('XML_SENT').AsMemo := AXml;
+    Q.ParamByName('LAST_ERROR').DataType := ftString;
+    if AError = '' then
+      Q.ParamByName('LAST_ERROR').Clear
+    else
+      Q.ParamByName('LAST_ERROR').AsString := Copy(AError, 1, 1024);
+    ExecInTransaction(Q);
   finally
     Q.Free;
   end;
@@ -556,7 +582,9 @@ begin
     raise EEFacturaApiError.CreateFmt('Factura nu poate fi trimisa: furnizorul este platitor de TVA ' +
       '(cod TVA %s), dar niciun rand al facturii nu are TVA.' + sLineBreak + sLineBreak +
       'Documentul a fost probabil creat cand firma nu platea TVA. Recalculati TVA-ul documentului ' +
-      '(sau verificati cu contabilul daca marfa e scutita de TVA).', [CodTVA]);
+      '(sau verificati cu contabilul daca marfa e scutita de TVA).' + sLineBreak + sLineBreak +
+      'Pentru livrari cu cota TVA 0%% (ex. proiecte de asistenta tehnica) setati TVA = 0 in ' +
+      'contractul documentului - randurile vor fi trimise cu cota 0.', [CodTVA]);
   if (CodTVA = '') and (WithVat > 0) then
     raise EEFacturaApiError.CreateFmt('Factura nu poate fi trimisa: furnizorul nu are cod TVA in fisa ' +
       'firmei, dar %d randuri ale facturii au TVA.' + sLineBreak + sLineBreak +

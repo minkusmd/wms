@@ -82,17 +82,35 @@ Plan și decizii: `Documents/plan-import-automat-pricelisturi-2026-10-27.md`. **
   - `triomac` (209280): SCOP v2 (`/auth/token`, cursor). Stocul e suma culorilor. Un sku repetat la același preț adună stocul, altfel rămâne primul. **EUR se rezolvă după TITLE (976)**, nu 978 ca în Delphi.
 - **Categoria pricelistului:** cea a ultimului pricelist al furnizorului (`PRICE_CATEGORYID > 0`), altfel `default_price_category` al adaptorului, ca în WMSParsers. Se aplică doar când `TPI_SUPPLIER.PRICE_CATEGORYID` ≤ 0.
 - **Echivalența:** `pi compare-source ID --adapter X [--plid P]` descarcă prin adaptorul nou și compară câmp cu câmp cu un PLID creat de Delphi, fără nicio scriere. Pe SW (28 oct): prețurile, codurile și brandurile coincid. Diferențele vin din timpul scurs de la PLID-ul vechi și din diacriticele pierdute de importul vechi (`ș` → `?`).
-- **Comutarea:** `DB Model/price_import_stage4c.sql` trece `TPI_SUPPLIER.ADAPTER_CODE` pe adaptoarele native. Accent se mută doar dacă parola e înlocuită în script. **Rulat pe SW pe 28 oct 2026** (toți 5 comutați, inclusiv Accent). Rollback: `_rollback.sql`, care revine la `external_plid`. După comutare, WMSParsers nu mai trebuie programat pentru prețuri.
+- **Comutarea:** `DB Model/price_import_stage4c.sql` trece `TPI_SUPPLIER.ADAPTER_CODE` pe adaptoarele native. Accent se mută doar dacă parola e înlocuită în script. **Rulat pe SW pe 28 oct 2026** (toți 5 comutați, inclusiv Accent). Rollback: `_rollback.sql`, care revine la `external_plid`. **WMSParsers rămâne programat pentru prețuri** cât timp acești furnizori au `FLG_AUTO_APPLY = 0`: până atunci serviciul doar descarcă și raportează (adaptoarele native scriu pricelistul în `TS_PRICELISTS` doar când aplică).
 - Coloanele pe care pricelistul nativ nu le mai scrie (`WARANTY`, `SUPPLIER_GOODSTYPE`, `PRODUCT_LINK`) nu sunt folosite de reevaluări.
+
+## Conținutul produselor (etapa 4b)
+
+- **Unde:** `content.py` (jobul) + `content_images.py` (descărcarea). Rulează la `PI_CONTENT_TIMES` (11:00 și 22:00, în afara ferestrelor de preț), sau la cerere cu `pi content [ID] [--dry]`. Intră furnizorii activi al căror adaptor are `has_content`: `dmlink`, `olisgrup`, `nex`, `triomac`. Accent nu intră: imaginile lui vin prin FTP, pe alt flux.
+- **Sursa:** catalogul se descarcă din nou prin adaptor. Conținutul unei poziții vine din elementul `raw_payload[row_no - 1]` (`content_of`), deci se iau exact pozițiile pricelistului (cu stoc, fără coduri ambigue). Textul se construiește ca în Delphi: HTML, tabele de caracteristici cu `TNetEncoding.HTML.Encode` (doar `& < > "`), rânduri separate cu CRLF. DMLink scrie doar `DESCRIPTION_RO`.
+- **Pașii:**
+  1. **Staging-ul** (`TS_PRICELIST_ITEMS_DESCRIPTION` / `_IMAGES`): se scrie doar descrierea cu alt text (SHA-256 calculat în bază, `CRYPT_HASH`) și doar lista de URL-uri schimbată. Lista nouă se rescrie cu `IMAGE` null, ca în Delphi. Un furnizor care nu mai trimite text sau imagini nu șterge ce era.
+  2. **Imaginile** se descarcă doar pentru codurile **legate de un produs fără nicio imagine**, singurele pe care pasul 3 le poate copia. Celelalte rămân cu URL-ul („amânate”) până devin utile; `PI_CONTENT_DOWNLOAD_ALL=true` le descarcă pe toate, ca WMSParsers.
+     - Descărcarea: `PI_CONTENT_THREADS` fire, 3 încercări per imagine, PNG cu latura de cel mult 1200 px (Pillow).
+     - Un cod se scrie doar dacă a venit măcar o imagine; altfel rămâne pentru rularea următoare.
+     - Sunt acceptate doar URL-uri http(s) spre adrese publice, verificate și la fiecare redirect (anti-SSRF).
+     - O imagine are cel mult 25 MB și cel mult 60 MP.
+     - După `PI_CONTENT_MAX_MINUTES` descărcarea se oprește (`PARTIAL`).
+  3. **Copierea în producție:** `SP_PI_CONTENT_TRANSFER(SUPPLIERID, COD, USERID)` (DEFINER), cod cu cod în ordine alfabetică, commit la 50. Regulile sunt cele din `PriceListContentTransferUnit.pas`:
+     - imaginile ajung doar la produsele fără imagini, fără imaginile repetate (`HASH`);
+     - descrierea creează un rând nou sau completează limba goală (sub 20 de caractere);
+     - nu se suprascrie nimic.
+- **Jurnalul și drepturile:** jurnalul e `TPI_CONTENT_RUN` (`pi content-status`). Serviciul nu primește drept de scriere pe `TS_GOODS_IMAGE` / `TS_GOODS_DSC`, doar `SELECT` pe `TS_GOODS_IMAGE`; testul de integrare verifică asta.
 
 ## DDL (le rulează DBA-ul)
 
-`DB Model/price_import_stage4c.sql` (+ `_rollback`) = adaptoarele native pentru cei 5 furnizori WMSParsers + `TS_API_CONFIG` `ACCENT`. `DB Model/price_import_stage4.sql` (+ `_rollback`, `_grants`) = `TPI_MATCH_CANDIDATE` + `SP_PI_LINK_GOODS`. `DB Model/price_import_stage3.sql` (+ `_rollback`, `_grants`) = tabelele botului (`TPI_BOT_USER`, `TPI_INBOX_FILE`, `TPI_FILE_RULE`, `TPI_BOT_STATE`). `DB Model/price_import_stage1.sql` (tabelele `TPI_*`, canalul `PRICELIST_IMPORT` **inactiv**, furnizorii inițiali cu `FLG_AUTO_APPLY = 0`) + `_rollback.sql` + `price_import_grants.sql` (utilizatorul `PRICEIMPORT`, creat de DBA cu parola lui). Indexul parțial `UX_TPI_RUN_ACTIVE` (Firebird 5) garantează o singură rulare activă per furnizor. `SOURCE_TABLE = -50` în `TELEGRAM_MESSAGES`.
+`DB Model/price_import_stage4b.sql` (+ `_rollback`, `_grants`) = `TPI_CONTENT_RUN` + `SP_PI_CONTENT_TRANSFER`. `DB Model/price_import_stage4c.sql` (+ `_rollback`) = adaptoarele native pentru cei 5 furnizori WMSParsers + `TS_API_CONFIG` `ACCENT`. `DB Model/price_import_stage4.sql` (+ `_rollback`, `_grants`) = `TPI_MATCH_CANDIDATE` + `SP_PI_LINK_GOODS`. `DB Model/price_import_stage3.sql` (+ `_rollback`, `_grants`) = tabelele botului (`TPI_BOT_USER`, `TPI_INBOX_FILE`, `TPI_FILE_RULE`, `TPI_BOT_STATE`). `DB Model/price_import_stage1.sql` (tabelele `TPI_*`, canalul `PRICELIST_IMPORT` **inactiv**, furnizorii inițiali cu `FLG_AUTO_APPLY = 0`) + `_rollback.sql` + `price_import_grants.sql` (utilizatorul `PRICEIMPORT`, creat de DBA cu parola lui). Indexul parțial `UX_TPI_RUN_ACTIVE` (Firebird 5) garantează o singură rulare activă per furnizor. `SOURCE_TABLE = -50` în `TELEGRAM_MESSAGES`.
 
 ## Comenzi
 
 ```
-.venv/Scripts/python -m pytest                       # 125 de teste; cele de integrare cer Firebird 5 local (embedded)
+.venv/Scripts/python -m pytest                       # 137 de teste; cele de integrare cer Firebird 5 local (embedded)
 python -m priceimport preview 14805 --plid 6115      # analiză FĂRĂ scriere (merge și fără DDL)
 python -m priceimport compare-wms 6115               # echivalența cu cele 4 interogări WMS (PLID neprelucrat)
 python -m priceimport compare-source 229466 --adapter dmlink   # adaptorul nativ vs ultimul PLID Delphi, fără scriere
@@ -101,6 +119,7 @@ python -m priceimport apply-test 14805               # rulare + aplicare de TEST
 python -m priceimport quarantine | approve 12 --by nume [--apply] | reject 12 --by nume | apply RUNID [--test] | rollback RUNID [--test] | mute 198 | watchdog
 python -m priceimport bot | bot-user 397948500 Nume --role APPLY | supplier-add 74852 | mapping-suggest f.xlsx | import-file 74852 f.xlsx [--apply]
 python -m priceimport match [ID] [--dry] | match-list | match-accept CANDID --by nume | match-reject CANDID --by nume
+python -m priceimport content [ID] [--dry] [--no-download] [--no-transfer] | content-status
 ```
 
 Configurarea e în variabile `PI_*` (vezi `.env.example`), iar parola în `PI_FB_PASSWORD` / `PI_FB_PASSWORD_FILE`. Parametrii unei surse stau în `suppliers/<id>.yaml`; cei operaționali (fereastră, praguri, activ) în `TPI_SUPPLIER`. Deploy-ul se face cu `compose.yaml` (Docker pe .240) sau `pi serve` sub NSSM.

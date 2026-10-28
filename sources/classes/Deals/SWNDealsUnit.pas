@@ -23,7 +23,7 @@ unit SWNDealsUnit;
 interface
 
 uses
-  System.Classes, Vcl.Forms, Data.DB, cxGridDBTableView;
+  System.Classes, System.UITypes, Vcl.Forms, Data.DB, cxGridDBTableView;
 
 function DealsAvailable: Boolean;
 
@@ -35,8 +35,26 @@ function FindDealByDoc(const ADocID: Integer): Int64;
 function ExecDealSQL(const ASQL: string; const AParams: array of Variant): Boolean;
 
 { Adauga in gridul de documente al unui frame coloanele DEAL_ID / DEAL_STATE
-  (campuri calculate in dmDB.IBCQueryDocs). Idempotent. }
+  (campuri calculate in dmDB.IBCQueryDocs) si coloana ascunsa DEAL_STATE_ID.
+  Coloana "Stare deal" deseneaza inaintea textului un cerculet in culoarea
+  starii (DealStateColor); evenimentul OnCustomDrawCell al view-ului se
+  aplica in continuare (fundal, font, selectie). Idempotent. }
 procedure AddDealColumns(AView: TcxGridDBTableView);
+
+{ Adauga coloanele "Finantare" (axa FIN a deal-ului, cu cerculet colorat; goala
+  la FIN_NONE; calculata doar pentru ofertele 115) si "Canal". Idempotent. }
+procedure AddDealFinChannelColumns(AView: TcxGridDBTableView);
+
+{ Adauga coloana "Canal" (camp calculat in dmDB.IBCQueryDocs): la 115 =
+  TDB_DEALS.CHANNEL_ID -> TS_DEAL_REASONS, la Web-Order 134 mereu canalul
+  CH_WEB (comenzile vin doar de pe site), la 115 din comanda web (CREATED_BY = 9)
+  fara canal setat tot CH_WEB. Idempotent. }
+procedure AddDealChannelColumn(AView: TcxGridDBTableView);
+
+{ Culoarea starii de deal din TS_DEAL_STATES.COLOR ('#RRGGBB'). Daca nu e
+  setata (sau coloana lipseste inca din baza): gri = anulat, verde = reusit,
+  albastru = in curs. clNone = stare necunoscuta. Citita o data pe sesiune. }
+function DealStateColor(const AStateID: Integer): TColor;
 
 procedure ShowDealsBrowser(AOwner: TComponent);
 { incasarile de casa / banca si distribuirea lor pe deal-uri }
@@ -60,14 +78,25 @@ procedure AttachDealToDialog(AForm: TForm; ADataSet: TDataSet);
 implementation
 
 uses
-  System.SysUtils, System.Variants, System.UITypes, System.Math, Winapi.Windows, Winapi.Messages,
+  System.SysUtils, System.Variants, System.Math, System.Generics.Collections, Winapi.Windows, Winapi.Messages,
   Vcl.Dialogs, Vcl.Controls, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.Graphics,
+  cxGraphics, cxGridCustomTableView, cxGridTableView, dxCoreGraphics, dxGDIPlusClasses,
   DBAccess, IBC, MemDS, DataModuleDB, SWNDBErrors,
   frmDealCardDialog, frmDealsBrowserDialog, frmDealPaymentsDialog;
+
+type
+  { handler-ul OnCustomDrawCell al coloanei "Stare deal" }
+  TDealStateCellPainter = class
+    procedure DrawStateCell(Sender: TcxCustomGridTableView; ACanvas: TcxCanvas;
+      AViewInfo: TcxGridTableDataCellViewInfo; var ADone: Boolean);
+  end;
 
 var
   { -1 = neverificat, 0 = schema lipseste, 1 = schema exista }
   GAvailability: Integer = -1;
+  { STATE_ID -> culoare; nil = necitit }
+  GStateColors: TDictionary<Integer, TColor>;
+  GStateCellPainter: TDealStateCellPainter;
 
 function DealsAvailable: Boolean;
 var
@@ -176,33 +205,202 @@ begin
   end;
 end;
 
-procedure AddDealColumns(AView: TcxGridDBTableView);
+function HexToColor(const AHex: string): TColor;
+var
+  s: string;
+  v: Integer;
+begin
+  Result := clNone;
+  s := Trim(AHex);
+  if (s <> '') and (s[1] = '#') then
+    Delete(s, 1, 1);
+  if (Length(s) = 6) and TryStrToInt('$' + s, v) then
+    Result := TColor(RGB((v shr 16) and $FF, (v shr 8) and $FF, v and $FF));
+end;
 
-  procedure AddColumn(const AField, ACaption, AName: string; const AWidth: Integer);
-  var
-    col: TcxGridDBColumn;
+procedure LoadStateColors;
+var
+  q: TIBCQuery;
+  hasColor: Boolean;
+  c: TColor;
+begin
+  GStateColors := TDictionary<Integer, TColor>.Create;
+  if not DealsAvailable then
+    Exit;
+  q := TIBCQuery.Create(nil);
+  try
+    q.Connection := dmDB.IBCConnection;
+    try
+      { COLOR vine din DB Model\deal_states_color.sql - pana la rulare, culori implicite }
+      q.SQL.Text :=
+        'SELECT COUNT(*) AS N FROM RDB$RELATION_FIELDS ' +
+        ' WHERE RDB$RELATION_NAME = ''TS_DEAL_STATES'' AND RDB$FIELD_NAME = ''COLOR''';
+      q.Open;
+      hasColor := q.FieldByName('N').AsInteger > 0;
+      q.Close;
+      if hasColor then
+        q.SQL.Text := 'SELECT STATE_ID, IS_CANCEL, IS_SUCCESS, COLOR FROM TS_DEAL_STATES'
+      else
+        q.SQL.Text := 'SELECT STATE_ID, IS_CANCEL, IS_SUCCESS, CAST(NULL AS VARCHAR(7)) AS COLOR FROM TS_DEAL_STATES';
+      q.Open;
+      while not q.Eof do
+      begin
+        c := HexToColor(q.FieldByName('COLOR').AsString);
+        if c = clNone then
+        begin
+          if q.FieldByName('IS_CANCEL').AsInteger = 1 then
+            c := HexToColor('#9E9E9E')
+          else if q.FieldByName('IS_SUCCESS').AsInteger = 1 then
+            c := HexToColor('#2E7D32')
+          else
+            c := HexToColor('#1E88E5');
+        end;
+        GStateColors.AddOrSetValue(q.FieldByName('STATE_ID').AsInteger, c);
+        q.Next;
+      end;
+    except
+      { fara culori: coloana ramane doar cu text }
+    end;
+  finally
+    q.Free;
+  end;
+end;
+
+function DealStateColor(const AStateID: Integer): TColor;
+begin
+  if GStateColors = nil then
+    LoadStateColors;
+  if not GStateColors.TryGetValue(AStateID, Result) then
+    Result := clNone;
+end;
+
+function DarkerColor(const AColor: TColor): TColor;
+var
+  c: Longint;
+begin
+  c := ColorToRGB(AColor);
+  Result := TColor(RGB(GetRValue(c) * 3 div 4, GetGValue(c) * 3 div 4, GetBValue(c) * 3 div 4));
+end;
+
+procedure TDealStateCellPainter.DrawStateCell(Sender: TcxCustomGridTableView; ACanvas: TcxCanvas;
+  AViewInfo: TcxGridTableDataCellViewInfo; var ADone: Boolean);
+var
+  idCol: TcxGridDBColumn;
+  v: Variant;
+  stateColor: TColor;
+  r, rDot, rText: TRect;
+  d: Integer;
+begin
+  { cxGrid cheama intai evenimentul coloanei si abia apoi pe al view-ului: il
+    chemam aici, ca fundalul / fontul / selectia frame-ului sa se aplice si
+    acestei celule; dupa desenare ADone = True, deci nu se mai cheama a doua oara }
+  if (Sender is TcxGridTableView) and Assigned(TcxGridTableView(Sender).OnCustomDrawCell) then
   begin
-    if AView.GetColumnByFieldName(AField) <> nil then
+    TcxGridTableView(Sender).OnCustomDrawCell(Sender, ACanvas, AViewInfo, ADone);
+    if ADone then
       Exit;
-    col := AView.CreateColumn;
-    if AView.Owner.FindComponent(AName) = nil then
-      col.Name := AName;
-    col.DataBinding.FieldName := AField;
-    col.Caption := ACaption;
-    col.Width := AWidth;
-    col.Options.Editing := False;
   end;
 
+  { ID-ul starii sta in coloana ascunsa <camp>_ID: DEAL_STATE -> DEAL_STATE_ID,
+    DEAL_FIN_STATE -> DEAL_FIN_STATE_ID }
+  stateColor := clNone;
+  idCol := nil;
+  if (Sender is TcxGridDBTableView) and (AViewInfo.Item is TcxGridDBColumn) then
+    idCol := TcxGridDBTableView(Sender).GetColumnByFieldName(
+      TcxGridDBColumn(AViewInfo.Item).DataBinding.FieldName + '_ID');
+  if idCol <> nil then
+  begin
+    v := AViewInfo.GridRecord.Values[idCol.Index];
+    if VarIsNumeric(v) then
+      stateColor := DealStateColor(v);
+  end;
+
+  r := AViewInfo.Bounds;
+  ACanvas.FillRect(r);
+  rText := r;
+  rText.Left := r.Left + 2;
+  if stateColor <> clNone then
+  begin
+    d := Min(r.Height - 6, 12);
+    rDot := Rect(r.Left + 4, r.Top + (r.Height - d) div 2, r.Left + 4 + d, r.Top + (r.Height - d) div 2 + d);
+    dxGPPaintCanvas.BeginPaint(ACanvas.Handle, r);
+    try
+      dxGPPaintCanvas.SmoothingMode := smAntiAlias;
+      dxGPPaintCanvas.Ellipse(rDot, dxColorToAlphaColor(DarkerColor(stateColor)), dxColorToAlphaColor(stateColor));
+    finally
+      dxGPPaintCanvas.EndPaint;
+    end;
+    rText.Left := rDot.Right + 5;
+  end;
+  ACanvas.Brush.Style := bsClear;
+  ACanvas.DrawTexT(AViewInfo.Text, rText, cxAlignLeft or cxAlignVCenter or cxSingleLine or cxShowEndEllipsis);
+  ACanvas.Brush.Style := bsSolid;
+  ADone := True;
+end;
+
+function AddDealColumn(AView: TcxGridDBTableView; const AField, ACaption: string;
+  const AWidth: Integer): TcxGridDBColumn;
+var
+  AName: string;
+begin
+  Result := AView.GetColumnByFieldName(AField);
+  if Result <> nil then
+    Exit;
+  AName := AView.Name + '_col' + AField;
+  Result := AView.CreateColumn;
+  if AView.Owner.FindComponent(AName) = nil then
+    Result.Name := AName;
+  Result.DataBinding.FieldName := AField;
+  Result.Caption := ACaption;
+  Result.Width := AWidth;
+  Result.Options.Editing := False;
+end;
+
+procedure AddDealColumns(AView: TcxGridDBTableView);
+var
+  col: TcxGridDBColumn;
 begin
   if AView = nil then
     Exit;
   AView.BeginUpdate;
   try
-    AddColumn('DEAL_ID', 'Deal', AView.Name + '_colDEAL_ID', 60);
-    AddColumn('DEAL_STATE', 'Stare deal', AView.Name + '_colDEAL_STATE', 130);
+    AddDealColumn(AView, 'DEAL_ID', 'Deal', 60);
+    col := AddDealColumn(AView, 'DEAL_STATE', 'Stare deal', 150);
+    col.OnCustomDrawCell := GStateCellPainter.DrawStateCell;
+    { PIPE_STATE_ID-ul deal-ului: doar pentru culoarea cerculetului }
+    col := AddDealColumn(AView, 'DEAL_STATE_ID', 'Stare deal (ID)', 40);
+    col.Visible := False;
+    col.VisibleForCustomization := False;
   finally
     AView.EndUpdate;
   end;
+end;
+
+procedure AddDealFinChannelColumns(AView: TcxGridDBTableView);
+var
+  col: TcxGridDBColumn;
+begin
+  if AView = nil then
+    Exit;
+  AView.BeginUpdate;
+  try
+    col := AddDealColumn(AView, 'DEAL_FIN_STATE', 'Finantare', 150);
+    col.OnCustomDrawCell := GStateCellPainter.DrawStateCell;
+    { FIN_STATE_ID-ul deal-ului: doar pentru culoarea cerculetului }
+    col := AddDealColumn(AView, 'DEAL_FIN_STATE_ID', 'Finantare (ID)', 40);
+    col.Visible := False;
+    col.VisibleForCustomization := False;
+  finally
+    AView.EndUpdate;
+  end;
+  AddDealChannelColumn(AView);
+end;
+
+procedure AddDealChannelColumn(AView: TcxGridDBTableView);
+begin
+  if AView = nil then
+    Exit;
+  AddDealColumn(AView, 'DEAL_CHANNEL', 'Canal', 110);
 end;
 
 procedure ShowDealsBrowser(AOwner: TComponent);
@@ -447,6 +645,7 @@ type
     procedure LoadStates;
     function GroupIndex(const AGroup: string): Integer;
     procedure DealButtonClick(Sender: TObject);
+    procedure ComboDrawItem(Control: TWinControl; Index: Integer; Rect: TRect; State: TOwnerDrawState);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure ApplyChanges;
   public
@@ -535,7 +734,15 @@ begin
 
     cb := TComboBox.Create(FForm);
     cb.Parent := APanel;
-    cb.Style := csDropDownList;
+    if IsReasonGroup(FGroups[i]) then
+      cb.Style := csDropDownList
+    else
+    begin
+      { starile (etapa, finantare, plata, livrare): cerculet in culoarea starii, ca in grid }
+      cb.Style := csOwnerDrawFixed;
+      cb.ItemHeight := S(17);
+      cb.OnDrawItem := ComboDrawItem;
+    end;
     cb.DropDownCount := 16;
     cb.Width := comboW;
     cb.Left := x + S(cBarLabelW);
@@ -555,6 +762,45 @@ begin
     FCodes[i] := TStringList.Create;
     FInitial[i] := -1;
   end;
+end;
+
+{ elementul listei de stari: cerculet in culoarea starii (STATE_ID in Items.Objects,
+  DealStateColor) + titlul - acelasi desen ca in coloana "Stare deal" din grid }
+procedure TDealDialogBar.ComboDrawItem(Control: TWinControl; Index: Integer; Rect: TRect;
+  State: TOwnerDrawState);
+var
+  cb: TComboBox;
+  stateColor: TColor;
+  d: Integer;
+  rDot, rText: TRect;
+begin
+  cb := Control as TComboBox;
+  cb.Canvas.FillRect(Rect);
+  if (Index < 0) or (Index >= cb.Items.Count) then
+    Exit;
+
+  rText := Rect;
+  rText.Left := Rect.Left + S(2);
+  stateColor := clNone;
+  if cb.Items.Objects[Index] <> nil then
+    stateColor := DealStateColor(Integer(cb.Items.Objects[Index]));
+  if stateColor <> clNone then
+  begin
+    d := Min(Rect.Height - S(6), S(12));
+    rDot := Bounds(Rect.Left + S(4), Rect.Top + (Rect.Height - d) div 2, d, d);
+    dxGPPaintCanvas.BeginPaint(cb.Canvas.Handle, Rect);
+    try
+      dxGPPaintCanvas.SmoothingMode := smAntiAlias;
+      dxGPPaintCanvas.Ellipse(rDot, dxColorToAlphaColor(DarkerColor(stateColor)), dxColorToAlphaColor(stateColor));
+    finally
+      dxGPPaintCanvas.EndPaint;
+    end;
+    rText.Left := rDot.Right + S(5);
+  end;
+  cb.Canvas.Brush.Style := bsClear;
+  DrawText(cb.Canvas.Handle, PChar(cb.Items[Index]), -1, rText,
+    DT_LEFT or DT_VCENTER or DT_SINGLELINE or DT_END_ELLIPSIS or DT_NOPREFIX);
+  cb.Canvas.Brush.Style := bsSolid;
 end;
 
 function InfoField(const ACaption, AValue: string; AWeight: Integer): TDealInfoField;
@@ -753,7 +999,7 @@ begin
         else
         begin
           q.SQL.Text :=
-            'SELECT CODE, TITLE_RO FROM TS_DEAL_STATES ' +
+            'SELECT CODE, TITLE_RO, STATE_ID FROM TS_DEAL_STATES ' +
             ' WHERE TRIM(GROUP_CODE) = :grp AND IS_ACTIVE = 1 ORDER BY SORT_ORDER';
           q.ParamByName('grp').AsString := FGroups[i];
         end;
@@ -761,7 +1007,12 @@ begin
         while not q.Eof do
         begin
           FCodes[i].Add(Trim(q.FieldByName('CODE').AsString));
-          FCombos[i].Items.Add(q.FieldByName('TITLE_RO').AsString);
+          { la stari: STATE_ID in Objects, pentru cerculetul colorat (ComboDrawItem) }
+          if IsReasonGroup(FGroups[i]) then
+            FCombos[i].Items.Add(q.FieldByName('TITLE_RO').AsString)
+          else
+            FCombos[i].Items.AddObject(q.FieldByName('TITLE_RO').AsString,
+              TObject(q.FieldByName('STATE_ID').AsInteger));
           q.Next;
         end;
       end;
@@ -1023,5 +1274,12 @@ begin
     { randul Deal e optional: nu impiedica deschiderea documentului }
   end;
 end;
+
+initialization
+  GStateCellPainter := TDealStateCellPainter.Create;
+
+finalization
+  FreeAndNil(GStateCellPainter);
+  FreeAndNil(GStateColors);
 
 end.

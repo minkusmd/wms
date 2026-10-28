@@ -17,7 +17,8 @@ const
   // codurile stabile ale analiticilor de plata (TS_SYSS grupa 26, VALUE_STR)
   cPOS_Pay_Cash = 'PAY_CASH';
   cPOS_Pay_Card = 'PAY_POS';
-  cPOS_Pay_QR = 'PAY_QR_MIA';
+  // QR MIA la terminalul din magazin; PAY_QR_MIA ramine pentru plata MIA de pe site
+  cPOS_Pay_QR = 'PAY_QR_MIA_POS';
 
   // TS_GOODS.SERIAL_TYPE_ID pentru evidenta pe serii - la vinzare se cere serialul
   cPOS_SerialType_Serii = 4403;

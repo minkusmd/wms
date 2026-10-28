@@ -11,7 +11,7 @@ from typing import Any, Callable, ClassVar
 
 from ..config import Settings
 from ..db import Db
-from ..models import FetchResult
+from ..models import ContentItem, FetchResult
 from ..repo import SupplierConfig
 
 
@@ -63,6 +63,13 @@ class SupplierAdapter:
     default_price_category: ClassVar[int] = -1
 
     def fetch(self, ctx: RunContext) -> FetchResult:
+        raise NotImplementedError
+
+    # etapa 4b: adaptoarele cu continut scot descrierea / imaginile din elementul raw_payload[row_no - 1]
+    # al pozitiei din pricelist (raw_payload = lista JSON a produselor)
+    has_content: ClassVar[bool] = False
+
+    def content_of(self, product: Any, code: str) -> ContentItem | None:
         raise NotImplementedError
 
 

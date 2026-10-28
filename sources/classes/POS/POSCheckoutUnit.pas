@@ -59,7 +59,7 @@ begin
     Result := fpkCash
   else if PayCode = 'PAY_POS' then
     Result := fpkCard
-  else if PayCode = 'PAY_QR_MIA' then
+  else if (PayCode = 'PAY_QR_MIA_POS') or (PayCode = 'PAY_QR_MIA') then
     Result := fpkOnline
   else
     raise EPOSError.Create('Tip de plata necunoscut pentru aparatul fiscal: ' + PayCode);

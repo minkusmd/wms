@@ -50,6 +50,14 @@ class Settings(BaseSettings):
     # etapa 4a - potrivirea codurilor nelegate cu catalogul (zilnic, dupa ferestre)
     match_enabled: bool = True
     match_time: time = time(21, 30)
+    # etapa 4b - continutul (imagini + descrieri), in afara ferestrelor de pret
+    content_enabled: bool = True
+    content_times: list[time] = Field(default_factory=lambda: [time(11, 0), time(22, 0)])
+    content_threads: int = 8                  # fire de descarcare a imaginilor (ca cMamicoThreadCount)
+    content_max_minutes: int = 50             # dupa atit descarcarea se opreste; restul ramine pentru rularea urmatoare
+    content_transfer: bool = True             # copierea in TS_GOODS_IMAGE / TS_GOODS_DSC (fara suprascriere)
+    # False = imaginile doar pentru codurile legate de un produs fara imagini; True = toate (ca WMSParsers)
+    content_download_all: bool = False
 
     timezone: str = "Europe/Chisinau"
     data_dir: Path = PROJECT_DIR / "data"

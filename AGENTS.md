@@ -60,6 +60,8 @@ msbuild SWN.dproj /p:Config=Release /p:Platform=Win32
 
 `Parsers/WMSParsers.dpr` (`WMSParsers.exe`) — парсеры поставщиков и импорт прайс-листов по API; отдельный проект, в `wms project.groupproj` **не входит**. Детали — `Parsers/AGENTS.md`.
 
+`PriceWatch/WMSPriceWatch.dpr` (`WMSPriceWatch.exe`) — круглосуточный мониторинг цен конкурентов (xstore.md, neocomputer.md, geek.md — список и regex-ы парсинга в `TWEB_COMPETITOR_SITES`), сопоставление с нашими товарами, Excel + Telegram раз в 3 часа; отдельный проект на общих библиотеках (DevExpress, IBDAC, `SWNConst`, `TelegramApiUnit`), схема — `DB Model/competitor_prices.sql`. Детали — `PriceWatch/AGENTS.md`.
+
 `PriceImport/` — сервис на **Python** (не Delphi): автоматический импорт прайс-листов поставщиков в окна 09–10 и 15–16, сравнение с `TS_GOODS_FOREIGN` (повторяет 4 переоценки WMS), пороги с карантином, отчёт в Telegram (`PRICELIST_IMPORT`). Этапы: 1 — dry-run, 2 — применение через документы 1414 (по умолчанию выключено), 3 — Telegram-бот `pi bot` для Excel поставщиков без API. Схема — `DB Model/price_import_stage1..3.sql`, план — `Documents/plan-import-automat-pricelisturi-2026-10-27.md`. Детали — `PriceImport/AGENTS.md`.
 
 ## Architecture
@@ -96,7 +98,8 @@ msbuild SWN.dproj /p:Config=Release /p:Platform=Win32
 ## Other Directories
 
 - `fantastic.web/` — **отдельный проект** (свой `.git`, свой `AGENTS.md`): сайт **fantastic.md** — интернет-магазин на Yii2/PHP. Работает с **той же базой Firebird** (`SW`), что и WMS; со стороны WMS его питают `sources/classes/WebShops/`, `WebCatalog/` и views `VW_TWEB_*`. Внутри этой папки следуй её собственному `AGENTS.md`, а не Delphi-инструкциям (в т.ч. правило кодировки cp1251 к PHP не относится).
-- `CurieriWMS/` — **отдельный проект** (свой `.git`, свой `AGENTS.md`; PHP/composer/artisan только в Docker — локальный PHP 7.4 принадлежит fantastic.web): веб-приложение водителей/курьеров для телефона (PHP/Laravel + Livewire 4 + Alpine.js, Docker Compose) — маршрут, забор у поставщиков, доставка клиенту. Работает с той же базой Firebird `SW`; диспетчер остаётся в WMS (Delphi). Исходники PHP — UTF-8, правило cp1251 к ним не относится. План: `Documents/plan-dispecerat-achizitii-livrari-2026-10-08.md` (§9A).
+- `CurieriWMS/` — **отдельный проект** (свой `.git`, свой `AGENTS.md`; PHP/composer/artisan только в Docker — локальный PHP 8.5 в `C:\php` принадлежит fantastic.web): веб-приложение водителей/курьеров для телефона (PHP/Laravel + Livewire 4 + Alpine.js, Docker Compose) — маршрут, забор у поставщиков, доставка клиенту. Работает с той же базой Firebird `SW`; диспетчер остаётся в WMS (Delphi). Исходники PHP — UTF-8, правило cp1251 к ним не относится. План: `Documents/plan-dispecerat-achizitii-livrari-2026-10-08.md` (§9A).
+- `WmsWeb/` — веб-приложение **Laravel 13 / PHP 8.5**, только в Docker (`compose.yaml`: app + Nginx на :8090 + тестовая Firebird 5 на 127.0.0.1:3052); драйверы Firebird — `pdo_firebird`, `interbase` (`ibase_*`) и Eloquent `harrygulliford/laravel-firebird`, подключение `firebird` берёт `FB_*` из `.env`. Лежит в репозитории WMS (своего `.git` нет). Исходники PHP — UTF-8. Детали — `WmsWeb/CLAUDE.md`.
 
 ## Парный файл CLAUDE.md
 

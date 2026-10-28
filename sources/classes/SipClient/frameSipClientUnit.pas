@@ -95,13 +95,10 @@ const
 
   { lista de apeluri pentru o baza fara coloanele de stare (DDL-ul
     phone_calls_state.sql inca nerulat) - altfel aplicatia n-ar porni }
-  cCallHistorySqlLegacy =
-    'select ch.nickname, ch.customerid, ch.docid, ch.phonenumber, ch.calltypeid, ' +
+  cCallHistorySqlLegacy = 'select ch.nickname, ch.customerid, ch.docid, ch.phonenumber, ch.calltypeid, ' +
     '       ch.data, ch.userid, ch.callid, ' +
     '       iif(exists (select callid from ts_phone_calls_register zz where zz.callid = ch.callid), 1, 0) FLG_HAS_WAV ' +
-    'from TS_PHONE_CALLS_HISTORY ch ' +
-    'where ch.data >= (current_date - 1) ' +
-    'order by ch.data desc';
+    'from TS_PHONE_CALLS_HISTORY ch ' + 'where ch.data >= (current_date - 1) ' + 'order by ch.data desc';
 
 type
   TSipInfo = record
@@ -259,6 +256,8 @@ type
     procedure IstoriaSMS1Click(Sender: TObject);
     procedure PhoneEditDblClick(Sender: TObject);
     procedure TransferBtnClick(Sender: TObject);
+    procedure cxGrid1DBTableView1_DATAGetDisplayText(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord; var
+      AText: string);
   private    { Private declarations }
     FConnected: Boolean;
     FRingThread: TRingThread;
@@ -344,38 +343,54 @@ uses
 
 {$R *.dfm}
 
+{ Normalizeaza un numar MD la formatul national 0XXXXXXXX.
+  Numerele scurte (<= 5 cifre: interioare, servicii) raman doar cifre;
+  intrarea fara cifre da ''. Accepta +373 / 00373 / 373 / 0 / fara prefix. }
+
 function NormalizePhoneMD(const AInput: string): string;
 var
-  digits: string;
-  i: Integer;
+  Digits: string;
+  I, Count, StartPos: Integer;
 begin
-  // 1) Păstrăm doar cifrele
-  digits := '';
-  for i := 1 to Length(AInput) do
-    if AInput[i].IsDigit then
-      digits := digits + AInput[i];
+  // Prealocăm memoria pentru a evita concatenările repetate.
+  SetLength(Digits, Length(AInput));
+  Count := 0;
 
-  // 2) Eliminăm 373 dacă e prezent
-  if digits.StartsWith('373') then
-    Delete(digits, 1, 3);
-  if digits.StartsWith('+373') then
-    Delete(digits, 1, 4);
+  for I := 1 to Length(AInput) do
+    if AInput[I].IsDigit then
+    begin
+      Inc(Count);
+      Digits[Count] := AInput[I];
+    end;
 
+  // Numerele scurte rămân intacte.
+  if (Count = 4) or (Count = 5) then
+    Exit(Copy(Digits, 1, Count));
 
-  // 3) Dacă e format național (0xxxxxxxx), scoatem 0 pentru a rămâne 8 cifre
-  if (Length(digits) = 9) and digits.StartsWith('0') then
-    Delete(digits, 1, 1);
+  StartPos := 1;
 
-  // 4) Dacă sunt mai mult de 8 cifre, păstrăm ultimele 8
-  if Length(digits) > 8 then
-    digits := Copy(digits, Length(digits) - 7, 8);
+  // Ignorăm prefixul internațional fără să mutăm caracterele.
+  if Count > 5 then
+    if (Digits[1] = '3') and
+       (Digits[2] = '7') and
+       (Digits[3] = '3') then
+    begin
+      StartPos := 4;
+      Dec(Count, 3);
+    end;
 
-  // 5) Validare
-//  if Length(digits) <> 8 then
-//    raise EArgumentException.CreateFmt('Număr invalid după curățare: "%s" (trebuie exact 8 cifre).', [digits]);
+  // Numere scurte precedate de prefixul internațional.
+  if (Count = 4) or (Count = 5) then
+    Exit(Copy(Digits, StartPos, Count));
 
-  // 6) Adăugăm 0 la început
-  Result := '0' + digits;
+  // Păstrăm ultimele 8 cifre, inclusiv pentru formatul 0xxxxxxxx.
+  if Count > 8 then
+  begin
+    Inc(StartPos, Count - 8);
+    Count := 8;
+  end;
+
+  Result := '0' + Copy(Digits, StartPos, Count);
 end;
 
 function IsMobileMD(const AInput: string): Boolean;
@@ -402,6 +417,23 @@ begin
       Result := False;
     end;
   end;
+end;
+
+{ Data apelului in istorie: azi - doar ora (hh:nn:ss), altfel dd.mm.yy hh:nn:ss. }
+procedure TframeSipClient.cxGrid1DBTableView1_DATAGetDisplayText(Sender: TcxCustomGridTableItem; ARecord:
+  TcxCustomGridRecord; var AText: string);
+var
+  V: Variant;
+  D: TDateTime;
+begin
+  V := ARecord.Values[Sender.Index];
+  if VarIsNull(V) or VarIsEmpty(V) then
+    Exit;
+  D := VarToDateTime(V);
+  if IsToday(D) then
+    AText := FormatDateTime('hh:nn:ss', D)
+  else
+    AText := FormatDateTime('dd.mm.yy hh:nn:ss', D);
 end;
 
 procedure TframeSipClient.RecordActionExecute(Sender: TObject);
@@ -512,22 +544,18 @@ var
 begin
   q := TIBCQuery.Create(nil);
   try
-    q.Connection  := dmdb.IBCConnection;
+    q.Connection := dmdb.IBCConnection;
     q.Transaction := IBCTrSipUpdate;
-    q.AutoCommit  := False;
+    q.AutoCommit := False;
     q.Options.ReturnParams := True;
 
-    q.SQL.Text :=
-      'INSERT INTO TS_PHONE_CALLS_HISTORY ' +
-      ' (CALLTYPEID, PHONENUMBER, DOCID, CUSTOMERID, NICKNAME) ' +
-      'VALUES ' +
-      ' (:CALLTYPEID, :PHONENUMBER, :DOCID, :CUSTOMERID, :NICKNAME) ' +
-      'RETURNING CALLID';
+    q.SQL.Text := 'INSERT INTO TS_PHONE_CALLS_HISTORY ' + ' (CALLTYPEID, PHONENUMBER, DOCID, CUSTOMERID, NICKNAME) ' +
+      'VALUES ' + ' (:CALLTYPEID, :PHONENUMBER, :DOCID, :CUSTOMERID, :NICKNAME) ' + 'RETURNING CALLID';
 
     q.ParamByName('CALLTYPEID').AsInteger := HistoryCallInfo.CallType;
     q.ParamByName('PHONENUMBER').AsString := HistoryCallInfo.PhoneNumber;
     q.ParamByName('CUSTOMERID').AsInteger := HistoryCallInfo.CustomerID;
-    q.ParamByName('NICKNAME').AsString    := Copy(HistoryCallInfo.NickName, 1, 49);
+    q.ParamByName('NICKNAME').AsString := Copy(HistoryCallInfo.NickName, 1, 49);
 
     if HistoryCallInfo.DocID > 0 then
       q.ParamByName('DOCID').AsInteger := HistoryCallInfo.DocID
@@ -562,8 +590,6 @@ begin
     q.Free;
   end;
 end;
-
-
 
 procedure TframeSipClient.CallActionExecute(Sender: TObject);
 var
@@ -1207,7 +1233,7 @@ end;
 
 procedure TframeSipClient.TransferActionUpdate(Sender: TObject);
 begin
-  TransferAction.Enabled := Assigned(FLines[FLineIndex]) and (FLines[FLineIndex].State in [sipints.csActive]);
+  TransferAction.Enabled := Assigned(FLines[FLineIndex]) and (FLines[FLineIndex].state in [sipints.csActive]);
 end;
 
 procedure TframeSipClient.TransferEditPropertiesInitPopup(Sender: TObject);
@@ -1230,7 +1256,7 @@ end;
 
 procedure TframeSipClient.RecordActionUpdate(Sender: TObject);
 begin
-  RecordAction.Enabled := (Assigned(FLines[FLineIndex]) and (FLines[FLineIndex].State in [sipints.csActive, sipints.csRinging,
+  RecordAction.Enabled := (Assigned(FLines[FLineIndex]) and (FLines[FLineIndex].state in [sipints.csActive, sipints.csRinging,
     sipints.csHold, sipints.csConnecting])) or Assigned(FRecorder);
 end;
 
@@ -1489,7 +1515,7 @@ end;
 
 procedure TframeSipClient.SpeedButton13Click(Sender: TObject);
 begin
-  if Assigned(FLines[FLineIndex]) and (FLines[FLineIndex].State = sipints.csActive) then
+  if Assigned(FLines[FLineIndex]) and (FLines[FLineIndex].state = sipints.csActive) then
   begin
     sipclient.DtmfMethod := dtmfSipInfo;
     case TComponent(Sender).Tag of
@@ -1551,7 +1577,7 @@ begin
   begin
     if VarToStr(TransferEdit.EditValue) <> '' then
     begin
-      if Assigned(FLines[FLineIndex]) and (FLines[FLineIndex].State = sipints.csActive) then
+      if Assigned(FLines[FLineIndex]) and (FLines[FLineIndex].state = sipints.csActive) then
       begin
         sipclient.TransferCall(FLines[FLineIndex], VarToStr(TransferEdit.EditValue));
       end

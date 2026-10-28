@@ -57,6 +57,9 @@ type
     // descrierile si URL-urile imaginilor, intr-o singura tranzactie (totul sau nimic)
     class function Save(AConnection: TIBCConnection;
       const AItems: TArray<TOlisContentItem>): TOlisContentStats;
+    // acelasi lucru pentru alt furnizor (Triomac / SCOP - TriomacPriceListUnit)
+    class function SaveForSupplier(AConnection: TIBCConnection; ASupplierID: Integer;
+      const AItems: TArray<TOlisContentItem>): TOlisContentStats;
   end;
 
 implementation
@@ -189,7 +192,7 @@ begin
 end;
 
 // URL-urile deja salvate, pe cod (unite cu #10 in ordinea ORDERNO)
-function LoadExistingImages(AConnection: TIBCConnection): TDictionary<string, string>;
+function LoadExistingImages(AConnection: TIBCConnection; ASupplierID: Integer): TDictionary<string, string>;
 var
   Tr: TIBCTransaction;
   q: TIBCQuery;
@@ -208,7 +211,7 @@ begin
     q.SQL.Text :=
       'select SUPPLIER_GOODS_CODE, IMAGE_URL from TS_PRICELIST_ITEMS_IMAGES ' +
       'where SUPPLIERID = :SUPPLIERID order by SUPPLIER_GOODS_CODE, ORDERNO';
-    q.ParamByName('SUPPLIERID').AsInteger := cOlisContentSupplierID;
+    q.ParamByName('SUPPLIERID').AsInteger := ASupplierID;
     q.Open;
     while not q.Eof do
     begin
@@ -244,6 +247,12 @@ end;
 
 class function TOlisGrupContent.Save(AConnection: TIBCConnection;
   const AItems: TArray<TOlisContentItem>): TOlisContentStats;
+begin
+  Result := SaveForSupplier(AConnection, cOlisContentSupplierID, AItems);
+end;
+
+class function TOlisGrupContent.SaveForSupplier(AConnection: TIBCConnection; ASupplierID: Integer;
+  const AItems: TArray<TOlisContentItem>): TOlisContentStats;
 var
   Existing: TDictionary<string, string>;
   Descr, Changed: TList<Integer>;
@@ -255,7 +264,7 @@ begin
   Result := Default(TOlisContentStats);
   Descr := TList<Integer>.Create;
   Changed := TList<Integer>.Create;
-  Existing := LoadExistingImages(AConnection);
+  Existing := LoadExistingImages(AConnection, ASupplierID);
   try
     for I := 0 to High(AItems) do
     begin
@@ -283,16 +292,16 @@ begin
         qDescr := CreateBatchSQL(AConnection, Tr,
           'update or insert into TS_PRICELIST_ITEMS_DESCRIPTION ' +
           '  (SUPPLIERID, SUPPLIER_GOODS_CODE, DESCRIPTION_RO, DESCRIPTION_RU) ' +
-          Format('values (%d, :CODE, :DESCRIPTION_RO, :DESCRIPTION_RU) ', [cOlisContentSupplierID]) +
+          Format('values (%d, :CODE, :DESCRIPTION_RO, :DESCRIPTION_RU) ', [ASupplierID]) +
           'matching (SUPPLIERID, SUPPLIER_GOODS_CODE)',
           [ftWideString, ftWideMemo, ftWideMemo]);
         qImgDel := CreateBatchSQL(AConnection, Tr,
-          Format('delete from TS_PRICELIST_ITEMS_IMAGES where SUPPLIERID = %d ', [cOlisContentSupplierID]) +
+          Format('delete from TS_PRICELIST_ITEMS_IMAGES where SUPPLIERID = %d ', [ASupplierID]) +
           'and SUPPLIER_GOODS_CODE = :CODE',
           [ftWideString]);
         qImgIns := CreateBatchSQL(AConnection, Tr,
           'insert into TS_PRICELIST_ITEMS_IMAGES (SUPPLIERID, SUPPLIER_GOODS_CODE, IMAGE_URL, PROCESS_DATE, ORDERNO) ' +
-          Format('values (%d, :CODE, :URL, current_timestamp, :ORDERNO)', [cOlisContentSupplierID]),
+          Format('values (%d, :CODE, :URL, current_timestamp, :ORDERNO)', [ASupplierID]),
           [ftWideString, ftWideString, ftInteger]);
 
         // descrierile

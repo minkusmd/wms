@@ -133,6 +133,10 @@ object frmContentGoodsEditorDlg: TfrmContentGoodsEditorDlg
     object tbWebName: TcxTabSheet
       Caption = '&0 Denumire web'
       ImageIndex = 0
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object dxBarDockControl4: TdxBarDockControl
         Left = 0
         Top = 0
@@ -157,6 +161,10 @@ object frmContentGoodsEditorDlg: TfrmContentGoodsEditorDlg
         object tbsSearchKeys: TcxTabSheet
           Caption = 'Search Keys'
           ImageIndex = 1
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object cxDBMemo2: TcxDBMemo
             AlignWithMargins = True
             Left = 3
@@ -203,65 +211,16 @@ object frmContentGoodsEditorDlg: TfrmContentGoodsEditorDlg
           Font.Style = []
           ParentFont = False
           TabOrder = 0
-          ExplicitLeft = 12
-          ExplicitTop = -2
-          inherited cxLabel2: TLabel
-            StyleElements = [seFont, seClient, seBorder]
-          end
-          inherited cxLabel17: TLabel
-            StyleElements = [seFont, seClient, seBorder]
-          end
-          inherited Label1: TLabel
-            StyleElements = [seFont, seClient, seBorder]
-          end
-          inherited Label2: TLabel
-            StyleElements = [seFont, seClient, seBorder]
-          end
-          inherited Label3: TLabel
-            StyleElements = [seFont, seClient, seBorder]
-          end
-          inherited Label4: TLabel
-            StyleElements = [seFont, seClient, seBorder]
-          end
-          inherited lcbVENDOR_ID: TcxDBLookupComboBox
-            ExplicitHeight = 23
-          end
-          inherited cmbWEBGOODSTYPE_ID: TcxDBLookupComboBox
-            ExplicitHeight = 23
-          end
-          inherited edCODE: TcxDBTextEdit
-            ExplicitHeight = 23
-          end
-          inherited edBASE_PARAM: TcxDBTextEdit
-            ExplicitHeight = 23
-          end
-          inherited edDETAILS: TcxDBTextEdit
-            ExplicitHeight = 23
-          end
-          inherited edCODE_RU: TcxDBTextEdit
-            ExplicitHeight = 23
-          end
-          inherited edBASE_PARAM_RU: TcxDBTextEdit
-            ExplicitHeight = 23
-          end
-          inherited cmbColors: TcxDBLookupComboBox
-            ExplicitHeight = 23
-          end
-          inherited cxDBLookupComboBox1: TcxDBLookupComboBox
-            ExplicitHeight = 23
-          end
-          inherited Panel1: TPanel
-            StyleElements = [seFont, seClient, seBorder]
-            inherited lbWebNameRo: TLabel
-              StyleElements = [seFont, seClient, seBorder]
-            end
-          end
         end
       end
     end
     object tbsDescriptions: TcxTabSheet
       Caption = '&1 - Descriere'
       ImageIndex = 1
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object pcDescriptions: TPageControl
         Left = 0
         Top = 0
@@ -309,6 +268,7 @@ object frmContentGoodsEditorDlg: TfrmContentGoodsEditorDlg
             Gutter.Font.Height = -11
             Gutter.Font.Name = 'Consolas'
             Gutter.Font.Style = []
+            Gutter.Font.Quality = fqClearTypeNatural
             Gutter.Bands = <
               item
                 Kind = gbkMarks
@@ -327,7 +287,6 @@ object frmContentGoodsEditorDlg: TfrmContentGoodsEditorDlg
                 Kind = gbkMargin
                 Width = 3
               end>
-            SelectedColor.Alpha = 0.400000005960464500
           end
           object mmGOODS_Description: TDBSynEdit
             Left = 16
@@ -351,6 +310,7 @@ object frmContentGoodsEditorDlg: TfrmContentGoodsEditorDlg
             Gutter.Font.Height = -11
             Gutter.Font.Name = 'Consolas'
             Gutter.Font.Style = []
+            Gutter.Font.Quality = fqClearTypeNatural
             Gutter.Bands = <
               item
                 Kind = gbkMarks
@@ -370,7 +330,6 @@ object frmContentGoodsEditorDlg: TfrmContentGoodsEditorDlg
                 Width = 3
               end>
             Highlighter = SynHTMLSyn1
-            SelectedColor.Alpha = 0.400000005960464500
           end
         end
         object TabSheet3: TTabSheet
@@ -949,18 +908,12 @@ object frmContentGoodsEditorDlg: TfrmContentGoodsEditorDlg
         Font.Style = []
         ParentFont = False
         TabOrder = 0
-        ExplicitWidth = 957
-        ExplicitHeight = 432
         inherited pnTop: TPanel
           Width = 957
-          StyleElements = [seFont, seClient, seBorder]
-          ExplicitWidth = 957
         end
         inherited cxGridAttrs: TcxGrid
           Width = 957
           Height = 320
-          ExplicitWidth = 957
-          ExplicitHeight = 320
           inherited cxGridAttrsTable: TcxGridDBTableView
             OptionsView.Indicator = True
           end
@@ -968,15 +921,6 @@ object frmContentGoodsEditorDlg: TfrmContentGoodsEditorDlg
         inherited pnPreview: TPanel
           Top = 360
           Width = 957
-          StyleElements = [seFont, seClient, seBorder]
-          ExplicitTop = 360
-          ExplicitWidth = 957
-          inherited lbPreviewRo: TLabel
-            StyleElements = [seFont, seClient, seBorder]
-          end
-          inherited lbPreviewRu: TLabel
-            StyleElements = [seFont, seClient, seBorder]
-          end
         end
       end
     end
@@ -996,21 +940,12 @@ object frmContentGoodsEditorDlg: TfrmContentGoodsEditorDlg
         Font.Style = []
         ParentFont = False
         TabOrder = 0
-        ExplicitWidth = 957
-        ExplicitHeight = 432
         inherited pnTop: TPanel
           Width = 957
-          StyleElements = [seFont, seClient, seBorder]
-          ExplicitWidth = 957
-          inherited lbInfo: TLabel
-            StyleElements = [seFont, seClient, seBorder]
-          end
         end
         inherited cxGridSvc: TcxGrid
           Width = 957
           Height = 372
-          ExplicitWidth = 957
-          ExplicitHeight = 372
         end
       end
     end
@@ -2339,6 +2274,7 @@ object frmContentGoodsEditorDlg: TfrmContentGoodsEditorDlg
     end
   end
   object SynHTMLSyn1: TSynHTMLSyn
+    Brackets = '<>()[]{}'
     Left = 480
     Top = 360
   end

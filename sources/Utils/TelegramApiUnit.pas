@@ -29,6 +29,10 @@ type
 
 function TelegramSendMessage(const AToken, AChatId: string; AThreadId: Integer;
   const AText, AParseMode: string; ASilent: Boolean): TTelegramSendResult;
+// sendDocument (multipart): un fisier (ex. Excel) cu legenda optionala (max 1024 caractere).
+// Folosit de WMSPriceWatch pentru raportul preturilor concurentilor.
+function TelegramSendDocument(const AToken, AChatId: string; AThreadId: Integer;
+  const AFileName, ACaption, AParseMode: string; ASilent: Boolean): TTelegramSendResult;
 // AInfo = "@username (Nume)" la succes, altfel textul erorii
 function TelegramGetMe(const AToken: string; out AInfo: string): Boolean;
 // chat-urile din ultimele update-uri ale botului (pentru aflarea CHAT_ID):
@@ -49,7 +53,7 @@ var
 implementation
 
 uses
-  System.Classes, System.JSON, System.Net.HttpClient, System.Net.URLClient;
+  System.Classes, System.JSON, System.Net.HttpClient, System.Net.URLClient, System.Net.Mime;
 
 { TTelegramSendResult }
 
@@ -172,6 +176,69 @@ begin
   end;
 end;
 
+function TelegramSendDocument(const AToken, AChatId: string; AThreadId: Integer;
+  const AFileName, ACaption, AParseMode: string; ASilent: Boolean): TTelegramSendResult;
+var
+  Http: THTTPClient;
+  Form: TMultipartFormData;
+  Resp: IHTTPResponse;
+  Res: TJSONValue;
+begin
+  Result := Default(TTelegramSendResult);
+  if Trim(AToken) = '' then
+  begin
+    Result.Description := 'Lipseste BOT_TOKEN (TS_API_CONFIG, TELEGRAM)';
+    Result.ErrorCode := 401;
+    Exit;
+  end;
+  if not FileExists(AFileName) then
+  begin
+    Result.Description := 'Fisierul nu exista: ' + AFileName;
+    Result.ErrorCode := 404;
+    Exit;
+  end;
+
+  Http := THTTPClient.Create;
+  Form := TMultipartFormData.Create;
+  try
+    Http.ConnectionTimeout := 10000;
+    Http.ResponseTimeout := 120000;
+    Form.AddField('chat_id', Trim(AChatId));
+    if AThreadId > 0 then
+      Form.AddField('message_thread_id', IntToStr(AThreadId));
+    if ACaption <> '' then
+      Form.AddField('caption', Copy(ACaption, 1, 1024));
+    if AParseMode <> '' then
+      Form.AddField('parse_mode', AParseMode);
+    if ASilent then
+      Form.AddField('disable_notification', 'true');
+    Form.AddFile('document', AFileName);
+    try
+      Resp := Http.Post(TelegramApiBaseUrl + '/bot' + Trim(AToken) + '/sendDocument', Form);
+    except
+      on E: Exception do
+      begin
+        Result.Description := 'Telegram nu raspunde: ' + E.Message;
+        Exit;
+      end;
+    end;
+    Result.HttpCode := Resp.StatusCode;
+    Res := nil;
+    ParseResponse(Resp.ContentAsString(TEncoding.UTF8), Result, Res);
+    try
+      if Result.Ok and (Res is TJSONObject) then
+        Result.MessageId := TJSONObject(Res).GetValue<Int64>('message_id', 0);
+    finally
+      Res.Free;
+    end;
+    if (not Result.Ok) and (Result.ErrorCode = 0) then
+      Result.ErrorCode := Result.HttpCode;
+  finally
+    Form.Free;
+    Http.Free;
+  end;
+end;
+
 function TelegramGetMe(const AToken: string; out AInfo: string): Boolean;
 var
   R: TTelegramSendResult;
@@ -271,3 +338,4 @@ begin
 end;
 
 end.
+

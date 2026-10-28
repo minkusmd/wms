@@ -265,6 +265,13 @@ object frmPriceTypesDlg: TfrmPriceTypesDlg
           DataBinding.FieldName = 'CURRENCY6ID'
           DataBinding.IsNullValueType = True
         end
+        object cxGrid3DBTableView1_COST_MDL: TcxGridDBColumn
+          Caption = 'Cost'
+          DataBinding.FieldName = 'COST_MDL'
+          DataBinding.IsNullValueType = True
+          HeaderHint = 'Costul (PRICE0, altfel PRICE7) - baza politicii de preturi'
+          Width = 53
+        end
         object cxGrid3DBTableView1_PRICE7_MDL: TcxGridDBColumn
           Caption = 'P7'
           DataBinding.FieldName = 'PRICE7_MDL'
@@ -285,7 +292,7 @@ object frmPriceTypesDlg: TfrmPriceTypesDlg
         end
         object cxGrid3DBTableView1Column3: TcxGridDBColumn
           Caption = 'AC'
-          DataBinding.Expression = #1'ABS(1-([p4]/[P7]))'
+          DataBinding.Expression = #1'ABS(1-([p4]/[Cost]))'
           DataBinding.IsNullValueType = True
           HeaderAlignmentHorz = taCenter
         end
@@ -1084,6 +1091,9 @@ object frmPriceTypesDlg: TfrmPriceTypesDlg
       
         '        (select price from get_goods_price7(g.goodsid, 840)) pri' +
         'ce7, '
+
+        '        (select price from get_goods_cost(g.goodsid, 498, 0)) co' +
+        'st_mdl, '
       '        gp.currency5id,'
       '        gp.currency6id,'
       '        gp.currency7id,'
@@ -1098,8 +1108,8 @@ object frmPriceTypesDlg: TfrmPriceTypesDlg
         '        join tdb_goods_flags gf on gf.goodsid=g.goodsid and gf.f' +
         'lagtypeid in (3,5)'
       
-        '        join get_goods_price7(g.goodsid, 840) z on z.price betwe' +
-        'en :MIN_VALUE and :MAX_VALUE'
+        '        join get_goods_cost(g.goodsid, 840, 0) z on z.price betw' +
+        'een :MIN_VALUE and :MAX_VALUE'
       '')
     DetailFields = 'PGT_ID'
     Left = 160

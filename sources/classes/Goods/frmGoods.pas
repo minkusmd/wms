@@ -4,7 +4,7 @@ interface
 
 uses
     Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-    SWNBaseUnit, Dialogs, Menus, cxStyles, cxGraphics, cxLabel, IBC, dxBar,
+    dxCore, SWNBaseUnit, Dialogs, Menus, cxStyles, cxGraphics, cxLabel, IBC, dxBar,
     cxGridLevel, cxGridCustomTableView, cxGridTableView, cxGridDBTableView,
     cxGrid, cxDBLabel, StdCtrls, cxButtons, ExtCtrls, CheckLst,
     GoodsFiltersClasses, ComCtrls, Buttons, cxGridPopupMenu, cxPC,
@@ -39,6 +39,16 @@ type
     TOnBurstAddGoods = procedure(const GoodsID: Integer; const GoodsTitle: string; var Added: Boolean; var Count: Integer) of object;
 
     TOnCheckIfGoodsExists = function(const GoodsID: Integer): Boolean of object;
+
+    /// Rind selectat in grid, citit prin TfrmGoodsBrowser.GetSelectedGoods (merge si in GridMode)
+    TSelectedGoodsRow = record
+        GoodsID: Integer;
+        IsFolder: Boolean;
+        Price4Lei: Variant;
+        Code: Variant;
+        Title: Variant;
+    end;
+    TSelectedGoodsRows = array of TSelectedGoodsRow;
 
     TfrmGoodsBrowser = class(TSWNCustomForm)
         dxBarDockControl1: TdxBarDockControl;
@@ -96,6 +106,7 @@ type
         cxGridGoods_FLG_REQUIRE_CERTIFICAT: TcxGridDBColumn;
         bbSet_FLG_OLD: TdxBarButton;
         bbMergeGoods: TdxBarButton;
+        bbMergeSelectedGoods: TdxBarButton;
         bbTools: TdxBarSubItem;
         bbFollowGoods: TdxBarButton;
         cxGridGoods_BASE_PARAM: TcxGridDBColumn;
@@ -243,6 +254,7 @@ type
         procedure bbForeignCodesClick(Sender: TObject);
         procedure bbSet_FLG_OLDClick(Sender: TObject);
         procedure bbMergeGoodsClick(Sender: TObject);
+        procedure bbMergeSelectedGoodsClick(Sender: TObject);
         procedure bbFollowGoodsClick(Sender: TObject);
         procedure bbSetupPropsToSelectionClick(Sender: TObject);
         procedure bbReCalcGoodsStockClick(Sender: TObject);
@@ -300,6 +312,9 @@ type
         procedure bbModifyFiltersParamsClick(Sender: TObject);
         procedure dxBarButton11Click(Sender: TObject);
         procedure IBCQueryGoodsAfterOpen(DataSet: TDataSet);
+        procedure IBCQueryGoodsAfterFetch(DataSet: TCustomDADataSet);
+        procedure cxGridGoods_TableDataControllerSortingChanged(Sender: TObject);
+        procedure cxGridGoods_TableDataControllerFindCriteriaChanged(Sender: TcxDataFindCriteria; const AChanges: TcxDataFindCriteriaChanges);
         procedure bbAddToWebCatalogClick(Sender: TObject);
         procedure bbChangeFiltersValueClick(Sender: TObject);
         procedure bbRefreshClick(Sender: TObject);
@@ -343,10 +358,22 @@ type
         fSupplierFilterID: Integer;
         fSupplierFilterName: string;
         fSupplierBaseFilterSQL: string;
+    // mod rapid (bbFastMode): vezi IsFastMode / GetSelectedGoods
+        fApplyingSort: Boolean;
+        fApplyingFind: Boolean;
+        fFindText: string;
         procedure ShowSupplierFilterDialog;
         procedure ApplySupplierFilter(const SupplierID: Integer; const SupplierName: string);
         procedure ClearSupplierFilter(const Reload: Boolean);
         procedure UpdateSupplierFilterInfo;
+    // mod rapid (bbFastMode = GridMode + fetch pe portii): sortarea si cautarea pe server
+        function IsFastMode: Boolean;
+        function CurrentOrderByMacro: string;
+        procedure ReopenGoodsQuery;
+        procedure ResetFastModeFind;
+        procedure UpdateRecordCountInfo;
+        function GetSelectedGoods: TSelectedGoodsRows;
+        procedure MergeSelectedGoods;
     /// <summary>TfrmGoodsBrowser.SelectedRecordChanged
     /// </summary>
         procedure SelectedRecordChanged;
@@ -497,7 +524,7 @@ uses
     frmGoodsRelatedBrowserUnit, frmSelectGoodsUnit, frmWebCatalogDialog,
     frmGoodsForeignCodeEditorDialog, frmGoodsChangeFiltersUnit,
     frmShowGoodsTypeFoldersUnit, frmGoodsByCategoryFolderDlgUnit,
-    frmGoodsSupplierFilterDialog;
+    frmGoodsSupplierFilterDialog, frmMergeGoodsDialogEx, System.Generics.Collections;
 
 type
     TcxGridTableControllerAccess = class(TcxGridTableController);
@@ -679,6 +706,42 @@ end;
 procedure TfrmGoodsBrowser.bbMergeGoodsClick(Sender: TObject);
 begin
     ShowMergeGoodsDialog(ibcqueryGoods.FieldByName('GOODSID').AsInteger);
+end;
+
+procedure TfrmGoodsBrowser.bbMergeSelectedGoodsClick(Sender: TObject);
+begin
+    MergeSelectedGoods;
+end;
+
+// Fuzioneaza toate produsele selectate in grid intr-unul singur, cu acelasi dialog
+// TfrmMergeGoodsDlgEx ca butonul 'Uneste produse' din 'Produse noi in pricelist':
+// produsul ramas se alege cu dublu-click in lista, restul sint unite in el (MERGE_GOODS_EX)
+procedure TfrmGoodsBrowser.MergeSelectedGoods;
+var
+    d: TfrmMergeGoodsDlgEx;
+begin
+    d := TfrmMergeGoodsDlgEx.Create(Self, dmdb.IBCConnection);
+    d.GoodsList := TObjectList<TMergeGoodsList>.Create;
+    try
+        // GetSelectedGoods merge si in GridMode; mapele si rindurile fara GOODSID sint sarite
+        for var Row in GetSelectedGoods do
+            if (not Row.IsFolder) and (Row.GoodsID > 0) then
+            begin
+                d.GoodsList.Add(TMergeGoodsList.Create);
+                d.GoodsList.Last.GoodsID := Row.GoodsID;
+                d.GoodsList.Last.GoodsName := VarToStr(Row.Title);
+            end;
+        if d.GoodsList.Count < 2 then
+        begin
+            MessageDlg('Selectati cel putin 2 produse (nu mape) pentru a le fuziona!', mtError, [mbOK], 0);
+            Exit;
+        end;
+        if d.ShowModal = mrOK then
+            IBCQueryGoods.Refresh;
+    finally
+        d.GoodsList.Free;
+        d.Free;
+    end;
 end;
 
 procedure TfrmGoodsBrowser.bbModifyClick(Sender: TObject);
@@ -1028,11 +1091,11 @@ begin
     if not IBCTrUpdateGoods.Active then
         IBCTrUpdateGoods.StartTransaction;
     try
-        for i := 0 to cxGridGoods_Table.Controller.SelectedRecordCount - 1 do
+        for var Row in GetSelectedGoods do
         begin
-            if (cxGridGoods_Table.DataController.Values[cxGridGoods_Table.Controller.SelectedRows[i].RecordIndex, cxGridGoods_FLG_FOLDER.Index] = 0) then
+            if not Row.IsFolder then
             begin
-                tmpGoodsID := cxGridGoods_Table.DataController.Values[cxGridGoods_Table.Controller.SelectedRows[i].RecordIndex, cxGridGoods_GOODSID.Index];
+                tmpGoodsID := Row.GoodsID;
                 q.ParamByName('GOODSID').AsInteger := tmpGoodsID;
                 q.Execute;
                 GenerateSeoData(tmpGoodsID, IBCTrUpdateGoods);
@@ -1051,21 +1114,52 @@ var
     i, j: Integer;
     S: string;
     Lines: TStringList;
+    Col: TcxCustomGridTableItem;
+    SavedBookmark: TBookmark;
 begin
     Lines := TStringList.Create;
     try
         if cxGridGoods_Table.OptionsSelection.CellMultiSelect then
-            for i := 0 to cxGridGoods_Table.Controller.SelectedRowCount - 1 do
+        begin
+            if IsFastMode and IBCQueryGoods.Active then
             begin
-                S := '';
-                for j := 0 to cxGridGoods_Table.Controller.SelectedColumnCount - 1 do
-                begin
-                    if S <> '' then
-                        S := S + #9;
-                    S := S + Trim(cxGridGoods_Table.DataController.GetDisplayText(cxGridGoods_Table.Controller.SelectedRows[i].RecordIndex, cxGridGoods_Table.Controller.SelectedColumns[j].Index));
+                // GridMode: rindurile selectate sint tinute prin bookmark-uri, textul vine din dataset
+                SavedBookmark := IBCQueryGoods.Bookmark;
+                IBCQueryGoods.DisableControls;
+                try
+                    for i := 0 to cxGridGoods_Table.DataController.GetSelectedCount - 1 do
+                    begin
+                        IBCQueryGoods.Bookmark := cxGridGoods_Table.DataController.GetSelectedBookmark(i);
+                        S := '';
+                        for j := 0 to cxGridGoods_Table.Controller.SelectedColumnCount - 1 do
+                        begin
+                            if S <> '' then
+                                S := S + #9;
+                            Col := cxGridGoods_Table.Controller.SelectedColumns[j];
+                            if (Col is TcxGridDBColumn) and (TcxGridDBColumn(Col).DataBinding.FieldName <> '') then
+                                S := S + Trim(IBCQueryGoods.FieldByName(TcxGridDBColumn(Col).DataBinding.FieldName).DisplayText);
+                        end;
+                        Lines.Add(S);
+                    end;
+                    if IBCQueryGoods.BookmarkValid(SavedBookmark) then
+                        IBCQueryGoods.Bookmark := SavedBookmark;
+                finally
+                    IBCQueryGoods.EnableControls;
                 end;
-                Lines.Add(S);
             end
+            else
+                for i := 0 to cxGridGoods_Table.Controller.SelectedRowCount - 1 do
+                begin
+                    S := '';
+                    for j := 0 to cxGridGoods_Table.Controller.SelectedColumnCount - 1 do
+                    begin
+                        if S <> '' then
+                            S := S + #9;
+                        S := S + Trim(cxGridGoods_Table.DataController.GetDisplayText(cxGridGoods_Table.Controller.SelectedRows[i].RecordIndex, cxGridGoods_Table.Controller.SelectedColumns[j].Index));
+                    end;
+                    Lines.Add(S);
+                end;
+        end
         else
             Lines.Add(Trim(cxGridGoods_Table.DataController.GetDisplayText(cxGridGoods_Table.Controller.FocusedRecord.RecordIndex, cxGridGoods_Table.Controller.FocusedColumn.Index)));
 
@@ -1433,9 +1527,9 @@ begin
 
         try
             Query.Transaction.StartTransaction;
-            for i := 0 to cxGridGoods_Table.Controller.SelectedRecordCount - 1 do
+            for var Row in GetSelectedGoods do
             begin
-                tmpGoodsID := cxGridGoods_Table.Controller.SelectedRecords[i].Values[cxGridGoods_GOODSID.Index];
+                tmpGoodsID := Row.GoodsID;
 
                 if UpdateGoodsProps then
                 begin
@@ -1601,12 +1695,12 @@ begin
     if not IBCTrUpdateGoods.Active then
         IBCTrUpdateGoods.StartTransaction;
     try
-        for i := 0 to cxGridGoods_Table.Controller.SelectedRecordCount - 1 do
+        for var Row in GetSelectedGoods do
         begin
-            if (cxGridGoods_Table.DataController.Values[cxGridGoods_Table.Controller.SelectedRows[i].RecordIndex, cxGridGoods_FLG_FOLDER.Index] = 0) then
+            if not Row.IsFolder then
             begin
-                tmpGoodsID := cxGridGoods_Table.DataController.Values[cxGridGoods_Table.Controller.SelectedRows[i].RecordIndex, cxGridGoods_GOODSID.Index];
-                tmpGoodsPrice := cxGridGoods_Table.DataController.Values[cxGridGoods_Table.Controller.SelectedRows[i].RecordIndex, cxGridGoods_PRICE4_LEI.Index];
+                tmpGoodsID := Row.GoodsID;
+                tmpGoodsPrice := Row.Price4Lei;
 
                 q.ParamByName('GOODSID').AsInteger := tmpGoodsID;
 
@@ -1708,11 +1802,11 @@ var
 begin
   // create list of goods
     S := '';
-    for i := 0 to cxGridGoods_Table.Controller.SelectedRowCount - 1 do
+    for var Row in GetSelectedGoods do
     begin
         if S <> '' then
             S := S + ',';
-        S := S + IntToStr(cxGridGoods_Table.Controller.SelectedRows[i].Values[cxGridGoods_GOODSID.Index]);
+        S := S + IntToStr(Row.GoodsID);
     end;
 
   // exec
@@ -2181,12 +2275,12 @@ begin
         {$endregion}
 
         {$REGION 'loop through grid and update data' fold }
-                for var i := 0 to cxGridGoods_Table.Controller.SelectedRecordCount - 1 do
+                for var Row in GetSelectedGoods do
                 begin
                     try
-                        if (cxGridGoods_Table.DataController.Values[cxGridGoods_Table.Controller.SelectedRows[i].RecordIndex, cxGridGoods_FLG_FOLDER.Index] = 0) then
+                        if not Row.IsFolder then
                         begin
-                            tmpGoodsID := cxGridGoods_Table.DataController.Values[cxGridGoods_Table.Controller.SelectedRows[i].RecordIndex, cxGridGoods_GOODSID.Index];
+                            tmpGoodsID := Row.GoodsID;
 
                             qd.ParamByName('goodsid').AsInteger := tmpGoodsID;
                             qd.ParamByName('filterid').AsInteger := FilterID;
@@ -2424,6 +2518,7 @@ procedure TfrmGoodsBrowser.EnableCondition(const ConditionIndex: Integer; const 
 begin
     fInSearch := False;
     IBCQueryGoods.Close;
+    ResetFastModeFind; // alta mapa / alta cautare - textul din panoul Find se anuleaza
     ClearSupplierFilter(False); // alta mapa / alta cautare - filtrul pe furnizor se anuleaza
     case ConditionIndex of
         0:
@@ -2550,17 +2645,17 @@ var
 begin
   // comment here
     Result := '';
-    for i := 0 to cxGridGoods_Table.Controller.SelectedRecordCount - 1 do
+    for var Row in GetSelectedGoods do
     begin
         if Result <> '' then
             Result := Result + ',';
-        Result := Result + IntToStr(cxGridGoods_Table.Controller.SelectedRecords[i].Values[cxGridGoods_GOODSID.Index]);
+        Result := Result + IntToStr(Row.GoodsID);
     end;
 end;
 
 procedure TfrmGoodsBrowser.IBCQueryGoodsAfterOpen(DataSet: TDataSet);
 begin
-    dxStatusBar1.Panels[0].Text := Format('Total rec: %d', [DataSet.RecordCount]);
+    UpdateRecordCountInfo;
 end;
 
 procedure TfrmGoodsBrowser.IBC_GOODS_RecomendationAfterInsert(DataSet: TDataSet);
@@ -2693,7 +2788,8 @@ begin
         if AppUserConfigStorage.BooleanValues.GetValue(cSETTINGS_UserSaveGridColumns) then
             AppUserConfigStorage.GridColumns.ReadGridStructure(cxGridGoods_Table);
 
-        bbFastMode.Down := false; //AppUserConfigStorage.BooleanValues.GetValue('GoodsFastMode', False);
+        // 24.10.2026: modul rapid implicit (GridMode + fetch pe portii); userul il poate opri din buton
+        bbFastMode.Down := AppUserConfigStorage.BooleanValues.GetValue('GoodsFastMode', True);
 
     finally
         AppUserConfigStorage.CloseSection;
@@ -2823,7 +2919,7 @@ begin
     IBCQueryGoods.ParamByName('FLG_ONLY_IN_PRICE').AsInteger := 1;
   // ibcquerygoods.FilterSQL := '(flg_price_forced = 1 or qty_available<>0 or qty_internal <> 0 or flg_folder = 1)';
 
-    IBCQueryGoods.MacroByName('ORDERBY').Value := '';
+    IBCQueryGoods.MacroByName('ORDERBY').Value := CurrentOrderByMacro;
   // 'ORDER BY FLG_FOlDER DESC, QTY_AVAILABLE DESC, FLG_PRICE_FORCED DESC, ORDERNO, TITLE';
     FCurrentParentID := ParentID;
     IBCQueryGoods.Open;
@@ -2834,7 +2930,7 @@ begin
     PrepareGrid;
     EnableCondition(2, WhereConditionsInProc, WhereConditionsInSQL); // Search
     fInSearch := True;
-    IBCQueryGoods.MacroByName('ORDERBY').Value := '';
+    IBCQueryGoods.MacroByName('ORDERBY').Value := CurrentOrderByMacro;
   // 'ORDER BY FLG_FOlDER DESC, QTY_AVAILABLE DESC, FLG_PRICE_FORCED DESC, ORDERNO, TITLE';
     IBCQueryGoods.Open;
     FCurrentParentID := -1;
@@ -2845,7 +2941,7 @@ begin
     PrepareGrid;
     EnableCondition(4, WhereConditionsInProc, WhereConditionsInSQL); // Search
     fInSearch := True;
-    IBCQueryGoods.MacroByName('ORDERBY').Value := '';
+    IBCQueryGoods.MacroByName('ORDERBY').Value := CurrentOrderByMacro;
   // 'ORDER BY FLG_FOlDER DESC, QTY_AVAILABLE DESC, FLG_PRICE_FORCED DESC, ORDERNO, TITLE';
     IBCQueryGoods.Open;
     FCurrentParentID := -1;
@@ -2856,7 +2952,7 @@ begin
     PrepareGrid;
     EnableCondition(5, WhereConditionsInProc, WhereConditionsInSQL); // Search
     fInSearch := True;
-    IBCQueryGoods.MacroByName('ORDERBY').Value := '';
+    IBCQueryGoods.MacroByName('ORDERBY').Value := CurrentOrderByMacro;
     IBCQueryGoods.Open;
     FCurrentParentID := -1;
 end;
@@ -2866,7 +2962,7 @@ begin
     PrepareGrid;
     EnableCondition(1); // Browse Backward
     IBCQueryGoods.ParamByName('PARENTID').AsInteger := GoodsID;
-    IBCQueryGoods.MacroByName('ORDERBY').Value := '';
+    IBCQueryGoods.MacroByName('ORDERBY').Value := CurrentOrderByMacro;
   // 'ORDER BY FLG_FOlDER DESC, QTY_AVAILABLE DESC, FLG_PRICE_FORCED DESC, ORDERNO, TITLE';
     IBCQueryGoods.Open;
     IBCQueryGoods.Locate('GOODSID', GoodsID, []);
@@ -2881,7 +2977,7 @@ begin
     EnableCondition(0); // Browse Forward
     IBCQueryGoods.ParamByName('ParentID').AsInteger := RootID;
     FCurrentParentID := RootID;
-    IBCQueryGoods.MacroByName('ORDERBY').Value := '';
+    IBCQueryGoods.MacroByName('ORDERBY').Value := CurrentOrderByMacro;
   // 'ORDER BY FLG_FOlDER DESC, QTY_AVAILABLE DESC, FLG_PRICE_FORCED DESC, ORDERNO, TITLE';
     IBCQueryGoods.Open;
 end;
@@ -3388,6 +3484,7 @@ begin
     if not SecurityFlagEnabled(cSecurityFlag_Справочники_Товары_Просмотр_рентабельности) then
     begin
         bbMergeGoods.Visible := ivNever;
+        bbMergeSelectedGoods.Visible := ivNever;
         cxGridGoods_MARGIN17.Visible := False;
     end;
 
@@ -3469,6 +3566,7 @@ begin
         bbQtyByFirms.Visible := ivNever;
         bbForeignCodes.Visible := ivNever;
         bbMergeGoods.Visible := ivNever;
+        bbMergeSelectedGoods.Visible := ivNever;
         bbSetupPropsToSelection.Visible := ivNever;
 //    bsiDeliveryType.Visible := ivNever;
         bbSet_FLG_OLD.Visible := ivNever;
@@ -3538,6 +3636,7 @@ begin
         bbForeignCodes.Visible := ivNever;
 
         bbMergeGoods.Visible := ivNever;
+        bbMergeSelectedGoods.Visible := ivNever;
     end;
 end;
 
@@ -3608,25 +3707,21 @@ end;
 procedure TfrmGoodsBrowser.ShowChangeParentDialog;
 var
     dialog: TfrmChangeParentFolderDlg;
-    i: Integer;
     S: string;
-    rec: TcxCustomGridRecord;
 begin
     dialog := TfrmChangeParentFolderDlg.Create(Self);
     try
         dialog.DBTable := dbtGOODS;
         dialog.FolderObjectID := IBCQueryGoods.FieldByName('PARENTID').AsInteger;
 
-        for i := 0 to cxGridGoods_Table.Controller.SelectedRecordCount - 1 do
+        for var Row in GetSelectedGoods do
         begin
-            rec := cxGridGoods_Table.Controller.SelectedRecords[i];
-
-            if VarIsNull(rec.Values[cxGridGoods_CODE.Index]) then
-                S := rec.Values[cxGridGoods_TITLE.Index]
+            if VarIsNull(Row.Code) then
+                S := VarToStr(Row.Title)
             else
-                S := rec.Values[cxGridGoods_CODE.Index];
+                S := VarToStr(Row.Code);
 
-            dialog.AddObjectInfo(rec.Values[cxGridGoods_GOODSID.Index], S);
+            dialog.AddObjectInfo(Row.GoodsID, S);
         end;
         if dialog.ShowModal = mrOk then
         begin
@@ -4069,11 +4164,11 @@ begin
         IBCTrUpdateGoods.StartTransaction;
 
     try
-        for i := 0 to cxGridGoods_Table.Controller.SelectedRecordCount - 1 do
+        for var Row in GetSelectedGoods do
         begin
-            if (cxGridGoods_Table.DataController.Values[cxGridGoods_Table.Controller.SelectedRows[i].RecordIndex, cxGridGoods_FLG_FOLDER.Index] = 0) then
+            if not Row.IsFolder then
             begin
-                tmpGoodsID := cxGridGoods_Table.DataController.Values[cxGridGoods_Table.Controller.SelectedRows[i].RecordIndex, cxGridGoods_GOODSID.Index];
+                tmpGoodsID := Row.GoodsID;
                 q.ParamByName('GOODSID').AsInteger := tmpGoodsID;
                 q.ParamByName('RELATED_KEY').AsString := ARelatedKey;
                 q.Execute;
@@ -4085,6 +4180,199 @@ begin
     finally
         q.Free;
     end;
+end;
+
+// ---------------------------------------------------------------------------
+// Mod rapid (bbFastMode, implicit pornit): grid-ul in GridMode, iar IBCQueryGoods cu
+// FetchAll = False si FetchRows = 200 - serverul calculeaza si trimite doar rindurile
+// cerute la derulare (SP_GET_TS_GOODS_M1 face munca grea abia la fetch). In GridMode
+// grid-ul nu poate sorta/filtra local, de aceea sortarea pe coloana merge in macro-ul
+// &orderby, iar panoul Find trimite textul in parametrul SEARCH al SP_GET_TS_GOODS
+// ("cauta in mapa", modurile 1/2). Rindurile selectate se citesc prin bookmark-uri
+// (GetSelectedGoods): in GridMode grid-ul tine doar rindurile din buffer.
+// ---------------------------------------------------------------------------
+function TfrmGoodsBrowser.IsFastMode: Boolean;
+begin
+    Result := cxGridGoods_Table.DataController.DataModeController.GridMode;
+end;
+
+function TfrmGoodsBrowser.CurrentOrderByMacro: string;
+var
+    i: Integer;
+    Item: TcxCustomGridTableItem;
+    FieldName: string;
+begin
+    Result := '';
+    if not IsFastMode then
+        Exit; // in modul obisnuit grid-ul sorteaza singur, local
+    for i := 0 to cxGridGoods_Table.SortedItemCount - 1 do
+    begin
+        Item := cxGridGoods_Table.SortedItems[i];
+        if not (Item is TcxGridDBColumn) then
+            Continue;
+        FieldName := TcxGridDBColumn(Item).DataBinding.FieldName;
+        if FieldName = '' then
+            Continue;
+        if Result <> '' then
+            Result := Result + ', ';
+        Result := Result + FieldName;
+        if Item.SortOrder = soDescending then
+            Result := Result + ' DESC';
+    end;
+    if Result <> '' then
+        Result := 'ORDER BY ' + Result;
+end;
+
+procedure TfrmGoodsBrowser.ReopenGoodsQuery;
+begin
+    if not IBCQueryGoods.Active then
+        Exit;
+    Screen.Cursor := crHourGlass;
+    IBCQueryGoods.DisableControls;
+    try
+        IBCQueryGoods.Close;
+        IBCQueryGoods.MacroByName('ORDERBY').Value := CurrentOrderByMacro;
+        IBCQueryGoods.Open;
+    finally
+        IBCQueryGoods.EnableControls;
+        Screen.Cursor := crDefault;
+    end;
+end;
+
+procedure TfrmGoodsBrowser.cxGridGoods_TableDataControllerSortingChanged(Sender: TObject);
+begin
+    // in GridMode grid-ul doar marcheaza coloana; ordinea o da serverul (&orderby).
+    // Atentie: ORDER BY peste SP_GET_TS_GOODS obliga serverul sa calculeze toata mapa.
+    if fApplyingSort or (not IsFastMode) or (not IBCQueryGoods.Active) then
+        Exit;
+    fApplyingSort := True;
+    try
+        ReopenGoodsQuery;
+    finally
+        fApplyingSort := False;
+    end;
+end;
+
+procedure TfrmGoodsBrowser.cxGridGoods_TableDataControllerFindCriteriaChanged(Sender: TcxDataFindCriteria; const AChanges: TcxDataFindCriteriaChanges);
+var
+    Text: string;
+begin
+    // in modul obisnuit panoul Find filtreaza local (toate rindurile sint in grid);
+    // in GridMode filtrul local nu se aplica, asa ca textul merge pe server (parametrul
+    // SEARCH = "cauta in mapa", doar in modurile 1/2 ale SP_GET_TS_GOODS)
+    if fApplyingFind or (not IsFastMode) or (not IBCQueryGoods.Active) then
+        Exit;
+    if not (IBCQueryGoods.ParamByName('MODE').AsInteger in [1, 2]) then
+        Exit;
+    Text := Trim(Sender.Text);
+    if Text = fFindText then
+        Exit;
+    fFindText := Text;
+    fApplyingFind := True;
+    try
+        Screen.Cursor := crHourGlass;
+        IBCQueryGoods.DisableControls;
+        try
+            IBCQueryGoods.Close;
+            if Text = '' then
+                IBCQueryGoods.ParamByName('SEARCH').Value := Null
+            else
+                IBCQueryGoods.ParamByName('SEARCH').AsString := Text;
+            IBCQueryGoods.Open;
+        finally
+            IBCQueryGoods.EnableControls;
+            Screen.Cursor := crDefault;
+        end;
+    finally
+        fApplyingFind := False;
+    end;
+end;
+
+procedure TfrmGoodsBrowser.ResetFastModeFind;
+begin
+    // la schimbarea mapei / a cautarii textul din panoul Find nu mai are sens
+    if fFindText = '' then
+        Exit;
+    fFindText := '';
+    fApplyingFind := True;
+    try
+        cxGridGoods_Table.DataController.FindCriteria.Text := '';
+    finally
+        fApplyingFind := False;
+    end;
+end;
+
+procedure TfrmGoodsBrowser.UpdateRecordCountInfo;
+var
+    S: string;
+begin
+    if not IBCQueryGoods.Active then
+        Exit;
+    S := IntToStr(IBCQueryGoods.RecordCount);
+    if not IBCQueryGoods.Fetched then
+        S := S + '+'; // FetchAll = False: doar rindurile aduse pina acum, restul vin la derulare
+    dxStatusBar1.Panels[0].Text := 'Total rec: ' + S;
+end;
+
+procedure TfrmGoodsBrowser.IBCQueryGoodsAfterFetch(DataSet: TCustomDADataSet);
+begin
+    UpdateRecordCountInfo;
+end;
+
+function TfrmGoodsBrowser.GetSelectedGoods: TSelectedGoodsRows;
+var
+    i, n, RecIdx: Integer;
+    SavedBookmark: TBookmark;
+
+    procedure AddRow(const AGoodsID, AFolder, APrice, ACode, ATitle: Variant);
+    begin
+        SetLength(Result, n + 1);
+        if VarIsNull(AGoodsID) then
+            Result[n].GoodsID := -1
+        else
+            Result[n].GoodsID := AGoodsID;
+        Result[n].IsFolder := (not VarIsNull(AFolder)) and (AFolder = 1);
+        Result[n].Price4Lei := APrice;
+        Result[n].Code := ACode;
+        Result[n].Title := ATitle;
+        Inc(n);
+    end;
+
+begin
+    Result := nil;
+    n := 0;
+    if IsFastMode then
+    begin
+        // GridMode: selectia e tinuta prin bookmark-uri, in grid sint doar rindurile din
+        // buffer - citim din dataset, rind cu rind, fara sa miscam grid-ul
+        if not IBCQueryGoods.Active then
+            Exit;
+        SavedBookmark := IBCQueryGoods.Bookmark;
+        IBCQueryGoods.DisableControls;
+        try
+            for i := 0 to cxGridGoods_Table.DataController.GetSelectedCount - 1 do
+            begin
+                IBCQueryGoods.Bookmark := cxGridGoods_Table.DataController.GetSelectedBookmark(i);
+                AddRow(IBCQueryGoods.FieldByName('GOODSID').Value, IBCQueryGoods.FieldByName('FLG_FOLDER').Value,
+                    IBCQueryGoods.FieldByName('PRICE4_LEI').Value, IBCQueryGoods.FieldByName('CODE').Value,
+                    IBCQueryGoods.FieldByName('TITLE').Value);
+            end;
+            if IBCQueryGoods.BookmarkValid(SavedBookmark) then
+                IBCQueryGoods.Bookmark := SavedBookmark;
+        finally
+            IBCQueryGoods.EnableControls;
+        end;
+    end
+    else
+        for i := 0 to cxGridGoods_Table.Controller.SelectedRecordCount - 1 do
+        begin
+            RecIdx := cxGridGoods_Table.Controller.SelectedRecords[i].RecordIndex;
+            AddRow(cxGridGoods_Table.DataController.Values[RecIdx, cxGridGoods_GOODSID.Index],
+                cxGridGoods_Table.DataController.Values[RecIdx, cxGridGoods_FLG_FOLDER.Index],
+                cxGridGoods_Table.DataController.Values[RecIdx, cxGridGoods_PRICE4_LEI.Index],
+                cxGridGoods_Table.DataController.Values[RecIdx, cxGridGoods_CODE.Index],
+                cxGridGoods_Table.DataController.Values[RecIdx, cxGridGoods_TITLE.Index]);
+        end;
 end;
 
 procedure TfrmGoodsBrowser.PrepareGrid;

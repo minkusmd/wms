@@ -3,7 +3,7 @@ name: priceimport
 services:
   pi-worker:
     build: .
-    image: priceimport:0.4
+    image: priceimport:0.5
     restart: unless-stopped
     env_file: .env
     environment:
@@ -18,7 +18,7 @@ services:
 
   # botul Telegram al furnizorilor manuali: bot SEPARAT de cel al SWNService (getUpdates are un singur consumator)
   pi-bot:
-    image: priceimport:0.4
+    image: priceimport:0.5
     restart: unless-stopped
     command: ["pi", "bot"]
     env_file: .env

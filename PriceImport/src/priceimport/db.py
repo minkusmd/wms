@@ -35,10 +35,13 @@ class Db:
             self.con.close()
 
     def commit(self) -> None:
-        self.con.commit()
+        # fara tranzactie activa (nimic citit / scris de la ultimul commit) driverul ar arunca AttributeError
+        if self.con.main_transaction.is_active():
+            self.con.commit()
 
     def rollback(self) -> None:
-        self.con.rollback()
+        if self.con.main_transaction.is_active():
+            self.con.rollback()
 
     def query(self, sql: str, params: Sequence[Any] = ()) -> list[dict[str, Any]]:
         with self.con.cursor() as cur:

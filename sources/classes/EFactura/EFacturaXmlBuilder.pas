@@ -73,7 +73,9 @@ const
     '  (SELECT A.FULL_ADDRESS FROM VW_TS_CUST_ADDR A WHERE A.CUSTOMERID = I.TRANSPORTATOR AND A.ADDRTYPEID = :ADDR_LEGAL) TRANS_ADDRESS,' +
     '  TA.ACCOUNTNUMBER TRANS_ACCOUNT, TA.BANKACCOUNT TRANS_BANKACCOUNT,' +
     '  (SELECT B.BANKNAME FROM TS_BANKS B WHERE B.BANKACCOUNT = TA.BANKACCOUNT) TRANS_BANKNAME,' +
-    '  (SELECT S.TITLE FROM TS_SYSS S WHERE S.SYSSID = I.REDIRIJARIID) REDIRIJARI_NAME' +
+    '  (SELECT S.TITLE FROM TS_SYSS S WHERE S.SYSSID = I.REDIRIJARIID) REDIRIJARI_NAME,' +
+    '  (SELECT C.VAT FROM TDB_DOCS D2 JOIN TDB_CONTRACTS C ON C.CONTRACTID = D2.CONTRACTID' +
+    '   WHERE D2.DOCID = D.DOCID) CONTRACT_VAT' +
     ' FROM VW_TDB_DOCS D' +
     '  LEFT OUTER JOIN TDB_DOCS_RECHIZITE DR ON (DR.DOCID = D.DOCID)' +
     '  LEFT OUTER JOIN TS_CUST_ACCOUNTS DA ON (DA.CUSTOMERID = D.DT AND DA.ACCOUNTNUMBER = DR.DT_CD)' +
@@ -143,14 +145,20 @@ end;
 
 // Cota vine din TS_GOODS.VAT (0/8/20). Daca nu se potriveste cu suma TVA din
 // document (cota schimbata intre timp), se recalculeaza din sume, ca in exportul
-// vechi. "-" = fara TVA.
-function VatRateOf(ARate: Integer; ANet, AVat: Double): string;
+// vechi. "-" = fara TVA (neplatitor / scutit), "0" = cota zero.
+// AZeroRated: furnizor platitor de TVA + contract cu TVA 0 (ex. proiecte de asistenta
+// tehnica) - randul fara TVA iese cu cota "0", ca in exportul manual vechi, prin care
+// facturile PRIME STORE cu contract TVA 0 au primit serie si numar (EBI 000096917 etc.).
+// Cu "-" la un platitor e-Factura respinge factura.
+function VatRateOf(ARate: Integer; ANet, AVat: Double; AZeroRated: Boolean): string;
 begin
   if (ARate > 0) and (Abs(RoundTo(ANet * ARate / 100, -2) - AVat) > 0.05) then
     ARate := 0;
   if (ARate = 0) and (Abs(AVat) >= 0.005) and (Abs(ANet) >= 0.005) then
     ARate := Round(100 * AVat / ANet);
-  if ARate = 0 then
+  if (ARate = 0) and AZeroRated then
+    Result := '0'
+  else if ARate = 0 then
     Result := '-'
   else
     Result := IntToStr(ARate);
@@ -172,6 +180,7 @@ var
   Suma, Vat: Double;
   RowCount: Integer;
   S: string;
+  ZeroRated: Boolean;
 begin
   FInvoiceID := 0;
   Errors := TStringList.Create;
@@ -242,6 +251,8 @@ begin
     AddText(SB, 'Redirections', H.FieldByName('REDIRIJARI_NAME').AsString);
 
     SB.Append('<Merchandises>' + sLineBreak);
+    ZeroRated := (Trim(H.FieldByName('DT_VAT_NUMBER').AsString) <> '') and
+      not H.FieldByName('CONTRACT_VAT').IsNull and (H.FieldByName('CONTRACT_VAT').AsFloat = 0);
     R.Connection := FConnection;
     R.SQL.Text := cRowsSQL;
     R.ParamByName('DOCID').AsInteger := ADocID;
@@ -261,7 +272,7 @@ begin
           'Quantity', FmtQty(R.FieldByName('QTY').AsFloat),
           'UnitPriceWithoutTVA', FmtMoney(R.FieldByName('PRICE_WVAT').AsFloat),
           'TotalPriceWithoutTVA', FmtMoney(Suma - Vat),
-          'TVA', VatRateOf(R.FieldByName('VAT_RATE').AsInteger, Suma - Vat, Vat),
+          'TVA', VatRateOf(R.FieldByName('VAT_RATE').AsInteger, Suma - Vat, Vat, ZeroRated),
           'TotalTVA', FmtMoney(Vat),
           'TotalPrice', FmtMoney(Suma),
           'OtherInfo', '', 'PackageType', '', 'NumberOfPlaces', '', 'GrossWeight', '']) + '/>' + sLineBreak);

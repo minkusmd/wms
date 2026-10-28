@@ -78,6 +78,7 @@ type
     cxGrid3DBTableView1_PRICE5_MDL: TcxGridDBColumn;
     cxGrid3DBTableView1_PRICE6_MDL: TcxGridDBColumn;
     cxGrid3DBTableView1_PRICE7_MDL: TcxGridDBColumn;
+    cxGrid3DBTableView1_COST_MDL: TcxGridDBColumn;
     cxGrid3DBTableView1_CURRENCY7ID: TcxGridDBColumn;
     cxGrid3DBTableView1_CURRENCY6ID: TcxGridDBColumn;
     cxGrid3DBTableView1_CURRENCY5ID: TcxGridDBColumn;

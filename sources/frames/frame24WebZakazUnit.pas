@@ -760,6 +760,8 @@ begin
      // 1. Legam grid-urile de datasource-sele
   cxGridWZTable.DataController.DataSource := dmDB.IBCDataSourceDocs;
   AddDealColumns(cxGridWZTable);
+  // comenzile 134 vin doar de pe site: "Canal" = Site web (CH_WEB)
+  AddDealChannelColumn(cxGridWZTable);
   // plata MIA (Victoriabank): coloana cu starea si fereastra cu linkul de plata / rambursarea
   AddMiaColumn(cxGridWZTable);
   if SWNSecurityManager.UserHasSecurityFlag(cSecurityFlag_WEB_Web_Order_Ecomm_transactii) then

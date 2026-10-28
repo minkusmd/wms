@@ -474,6 +474,37 @@ def match_reject(cand_ids: list[int], by: str = typer.Option(..., help="cine dec
         typer.echo(f"{cand_id}: {reject_candidate(settings, cand_id, by)}")
 
 
+@app.command()
+def content(supplier_ids: Optional[list[int]] = typer.Argument(None, help="implicit furnizorii activi cu continut"),
+            dry: bool = typer.Option(False, help="doar numara ce s-ar scrie (fara staging, imagini, copiere)"),
+            download: bool = typer.Option(True, help="descarca imaginile nedescarcate"),
+            transfer: Optional[bool] = typer.Option(None, help="copierea la produse (implicit PI_CONTENT_TRANSFER)"),
+            max_minutes: Optional[int] = typer.Option(None, help="termenul descarcarii (0 = fara)")) -> None:
+    """Descrieri + imagini (staging TS_PRICELIST_ITEMS_*), apoi copierea la produsele fara continut."""
+    from .content import format_summary, run_content
+    settings = _settings()
+    for s in run_content(settings, supplier_ids or None, dry=dry, download=download, transfer=transfer,
+                         max_minutes=max_minutes):
+        typer.echo(format_summary(s))
+        for error in s.errors[:5]:
+            typer.echo(f"    {error}")
+
+
+@app.command("content-status")
+def content_status(limit: int = 20) -> None:
+    """Ultimele rulari de continut (TPI_CONTENT_RUN)."""
+    settings = _settings(log_to_file=False)
+    with open_db(settings) as db:
+        rows = repo.recent_content_runs(db, limit)
+        db.commit()
+    for r in rows:
+        typer.echo(f"{r['CONTENTRUNID']:>5} {r['SUPPLIERID']:>7} {r['STARTED_AT']:%Y-%m-%d %H:%M} "
+                   f"{r['STATUS'].strip():<8} desc {r['N_DESC_WRITTEN'] or 0:>5} liste {r['N_IMG_LISTS_CHANGED'] or 0:>5} "
+                   f"img {r['N_IMG_SAVED'] or 0:>5}/{r['N_IMG_PENDING'] or 0:<5} esuate {r['N_IMG_FAILED'] or 0:>4} "
+                   f"-> produse: img {r['N_IMAGES_COPIED'] or 0:>5} desc {r['N_DESC_COPIED'] or 0:>5} "
+                   f"{(r['ERROR_TEXT'] or '')[:60]}")
+
+
 def main() -> None:
     app()
 

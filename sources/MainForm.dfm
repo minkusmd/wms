@@ -104,7 +104,6 @@ object frmMainForm: TfrmMainForm
     Align = alLeft
     BevelOuter = bvNone
     TabOrder = 1
-    ExplicitHeight = 361
     object SpeedButton1: TSpeedButton
       Left = 441
       Top = 1111
@@ -196,7 +195,6 @@ object frmMainForm: TfrmMainForm
       Height = 28
       Align = dalBottom
       BarManager = dxBarManagerMain
-      ExplicitTop = 328
     end
     inline frameSipClient1: TframeSipClient
       Left = 0
@@ -218,11 +216,13 @@ object frmMainForm: TfrmMainForm
       ParentColor = False
       ParentFont = False
       TabOrder = 3
+      ExplicitTop = 400
       ExplicitWidth = 323
       ExplicitHeight = 361
       inherited Panel1: TPanel
         Width = 323
         Height = 232
+        StyleElements = [seFont, seClient, seBorder]
         ExplicitWidth = 323
         ExplicitHeight = 232
         inherited cxPageControl1: TcxPageControl
@@ -251,6 +251,7 @@ object frmMainForm: TfrmMainForm
         Width = 323
         Font.Charset = RUSSIAN_CHARSET
         ParentFont = False
+        StyleElements = [seFont, seClient, seBorder]
         ExplicitWidth = 323
         inherited SBtn1: TSpeedButton
           Font.Charset = RUSSIAN_CHARSET
@@ -262,6 +263,7 @@ object frmMainForm: TfrmMainForm
         end
         inherited LineMemo: TMemo
           Height = 46
+          StyleElements = [seFont, seClient, seBorder]
           ExplicitHeight = 46
         end
         inherited PhoneEdit: TcxTextEdit
@@ -2870,6 +2872,7 @@ object frmMainForm: TfrmMainForm
       Category = 0
       Hint = 'Arata / ascunde fereastra telefonului (mereu deasupra)'
       Visible = ivAlways
+      ShortCut = 32833
       OnClick = bbSipPhoneClick
     end
     object bbSipLog: TdxBarButton
@@ -3705,14 +3708,18 @@ object frmMainForm: TfrmMainForm
     object bbCompanyNew: TdxBarButton
       Caption = 'Companie / subdiviziune noua...'
       Category = 2
-      Hint = 'Fisa unei companii proprii sau subdiviziuni noi: date ASP / SFS / BNS, conturi, logo, semnaturi, casa ECC'
+      Hint = 
+        'Fisa unei companii proprii sau subdiviziuni noi: date ASP / SFS ' +
+        '/ BNS, conturi, logo, semnaturi, casa ECC'
       Visible = ivAlways
       OnClick = bbCompanyNewClick
     end
     object bbCompanyCard: TdxBarButton
       Caption = 'Fisa companiei curente...'
       Category = 2
-      Hint = 'Datele firmei alese in bara: rechizite, conturi, logo, semnaturi, casa ECC'
+      Hint = 
+        'Datele firmei alese in bara: rechizite, conturi, logo, semnaturi' +
+        ', casa ECC'
       Visible = ivAlways
       OnClick = bbCompanyCardClick
     end

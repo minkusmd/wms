@@ -76,6 +76,8 @@ object frmGoodsBrowser: TfrmGoodsBrowser
       OnFocusedRecordChanged = cxGridGoods_TableFocusedRecordChanged
       OnSelectionChanged = cxGridGoods_TableSelectionChanged
       DataController.DataModeController.GridModeBufferCount = 40
+      DataController.OnFindCriteriaChanged = cxGridGoods_TableDataControllerFindCriteriaChanged
+      DataController.OnSortingChanged = cxGridGoods_TableDataControllerSortingChanged
       DataController.DataSource = IBCDataSourceGoods
       DataController.KeyFieldNames = 'GOODSID'
       EditForm.DefaultColumnCount = 1
@@ -1145,6 +1147,13 @@ object frmGoodsBrowser: TfrmGoodsBrowser
       ShortCut = 32838
       OnClick = bbMergeGoodsClick
     end
+    object bbMergeSelectedGoods: TdxBarButton
+      Caption = 'Fuzioneaza produsele selectate'
+      Category = 0
+      Hint = 'Fuzioneaza produsele selectate'
+      Visible = ivAlways
+      OnClick = bbMergeSelectedGoodsClick
+    end
     object bbTools: TdxBarSubItem
       Caption = 'Instrumente'
       Category = 0
@@ -1153,6 +1162,10 @@ object frmGoodsBrowser: TfrmGoodsBrowser
         item
           Visible = True
           ItemName = 'bbMergeGoods'
+        end
+        item
+          Visible = True
+          ItemName = 'bbMergeSelectedGoods'
         end
         item
           Visible = True
@@ -2140,11 +2153,12 @@ object frmGoodsBrowser: TfrmGoodsBrowser
         ') A'
       '&orderby'
       '')
-    FetchRows = 50
+    FetchRows = 200
     AutoCommit = False
     LockMode = lmLockImmediate
     RefreshOptions = [roAfterInsert, roAfterUpdate, roBeforeEdit]
     AfterOpen = IBCQueryGoodsAfterOpen
+    AfterFetch = IBCQueryGoodsAfterFetch
     Left = 35
     Top = 163
     ParamData = <

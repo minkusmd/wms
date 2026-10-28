@@ -93,6 +93,13 @@ END^
 COMMIT WORK^
 
 /* --- 3. Trigger: cine si cand a modificat -------------------------------- */
+CREATE OR ALTER EXCEPTION ERR_COMPANY_CARD 'Fisa companiei este incorecta'^
+
+COMMIT WORK^
+
+/* Ierarhia are un singur nivel: organizatie -> subdiviziuni. Parintele unei
+   subdiviziuni nu poate fi tot o subdiviziune (FN_FIRM_ORG din
+   org_subdiv_stocks.sql urca un singur nivel). */
 CREATE OR ALTER TRIGGER TRG_TS_CUST_COMPANY_BIU FOR TS_CUST_COMPANY
 ACTIVE BEFORE INSERT OR UPDATE POSITION 0
 AS
@@ -108,6 +115,17 @@ BEGIN
     BEGIN
         NEW.PARENT_FIRMAID = NULL;
         NEW.SUBDIV_CODE = NULL;
+    END
+    ELSE
+    BEGIN
+        IF (EXISTS(SELECT 1 FROM TS_CUST_COMPANY
+                   WHERE CUSTOMERID = NEW.PARENT_FIRMAID AND COMPANY_KIND = 2)) THEN
+            EXCEPTION ERR_COMPANY_CARD
+                'Parintele subdiviziunii ' || NEW.CUSTOMERID || ' este tot o subdiviziune (' || NEW.PARENT_FIRMAID || ')';
+        IF (EXISTS(SELECT 1 FROM TS_CUST_COMPANY
+                   WHERE PARENT_FIRMAID = NEW.CUSTOMERID AND COMPANY_KIND = 2)) THEN
+            EXCEPTION ERR_COMPANY_CARD
+                'Firma ' || NEW.CUSTOMERID || ' are subdiviziuni si nu poate deveni subdiviziune';
     END
 END^
 

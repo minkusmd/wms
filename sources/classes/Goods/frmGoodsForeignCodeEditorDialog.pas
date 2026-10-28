@@ -14,8 +14,8 @@ uses
 const
   // Parametrii vinzarii in rate cu dobinda 0%. Folositi doar pentru afisaj:
   // pretul insusi se calculeaza in baza. Trebuie sa ramina sincronizati cu
-  // DB Model\price0_global.sql (coloana calculata PRICE_CREDIT0
-  // si procedura GET_GOODS_PRICE_CREDIT0).
+  // DB Model\price0_global.sql + price0_compensation_in_policy.sql
+  // (coloana calculata PRICE_CREDIT0 si procedura GET_GOODS_PRICE_CREDIT0).
   cCredit0Months = 6;
   cCredit0CostMarkup = 1.16;
 
@@ -395,9 +395,10 @@ end;
 
 // PRICE_CREDIT0 este coloana calculata in baza:
 //   max(PRICE1, cost in MDL * cCredit0CostMarkup),
-// cost = PRICE0 x factorul furnizorului (TPRICE_SUPPLIER_COST) sau PRICE7.
+// cost = PRICE0 (cu garda GF_USE_PRICE0) sau PRICE7, fara factor de furnizor:
+// compensarea marjei sta doar in formulele politicii de preturi (21.10.2026).
 // Aici doar se afiseaza din ce se compune si cit iese rata lunara.
-// Formula: DB Model\price0_global.sql.
+// Formula: DB Model\price0_compensation_in_policy.sql.
 procedure TfrmGoodsForeignCodeEditorDlg.UpdateCredit0Info;
 var
   Credit0: Double;

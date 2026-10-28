@@ -197,14 +197,6 @@ object frmConfigurationDocDlg: TfrmConfigurationDocDlg
         Caption = 'Analitica doc.'
         Transparent = True
       end
-      object Label4: TLabel
-        Left = 282
-        Top = 41
-        Width = 26
-        Height = 15
-        Caption = 'Stare'
-        Transparent = True
-      end
       object lblSecFinante: TLabel
         Left = 12
         Top = 306
