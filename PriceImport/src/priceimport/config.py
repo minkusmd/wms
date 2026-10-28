@@ -47,6 +47,9 @@ class Settings(BaseSettings):
     telegram_api_base: str = "https://api.telegram.org"
     bot_max_file_mb: int = 20                 # limita Bot API pentru getFile
     preview_max_age_hours: int = 6            # "Aplica" pe o previzualizare mai veche cere una noua
+    # etapa 4a - potrivirea codurilor nelegate cu catalogul (zilnic, dupa ferestre)
+    match_enabled: bool = True
+    match_time: time = time(21, 30)
 
     timezone: str = "Europe/Chisinau"
     data_dir: Path = PROJECT_DIR / "data"

@@ -51,20 +51,41 @@ Plan și decizii: `Documents/plan-import-automat-pricelisturi-2026-10-27.md`. **
   - Fișierele zip mai mari de 200 MB decomprimat se refuză.
 - **Furnizor manual nou:** `pi supplier-add ID` (excel, B, fără ferestre, fără aplicare automată) → `pi mapping-suggest fișier.xlsx` → YAML în `suppliers/ID.yaml`, doar dacă alias-urile nu ajung. Fără bot: `pi import-file ID fișier.xlsx [--apply]`.
 
+## Potrivirea produselor noi (etapa 4a)
+
+- **Unde:** `matching.py` + `matchjob.py`. Codurile nelegate (NEW) din ultima rulare a fiecărui furnizor primesc până la 3 propuneri. Rulează zilnic la `PI_MATCH_TIME` (21:30), sau la cerere cu `pi match [ID]`.
+- **Metode:**
+  - `EAN`: același cod de bare la alt furnizor;
+  - `CODE`: același cod normalizat la alt furnizor;
+  - `MPN`: un cod de producător găsit în denumirea sau modelul unui singur produs din catalog;
+  - `FUZZY`: denumirea seamănă (rapidfuzz), inclusiv RU ↔ RO.
+- **Gărzile găsite pe datele reale din SW:**
+  - **`CODE` / `MPN` cer brand sau cuvinte comune:** plăcuțele `B111152` nu sunt puzzle-ul `B-111152`.
+  - **Măsurile nu trec drept coduri:** `114cm`, `2000W`, `80W90`, `R16`.
+  - **Numerele din nume trebuie să se regăsească la produsul propus,** cu Jaccard ≥ 0.6. Cifra generației contează (Pilot Sport 5 ≠ Pilot Super Sport), la fel 12V ≠ 24V la becuri.
+  - **Potrivirea după nume cere ≥ 2 cuvinte comune.** Denumirile fără numere, de 1–2 cuvinte („Фильтр воздушный”), nu se potrivesc deloc.
+  - **Brandul diferit înmulțește scorul cu 0.6.**
+  - **Se salvează doar propunerile cu scor ≥ 0.85** (`MIN_SCORE`). La prima rulare pe SW, cele sub prag erau mai mult greșite (alt model din aceeași gamă).
+- **Indexul:** catalogul (~310 000 de produse, ~20 s) se construiește o dată per proces (`get_index`, TTL 6 h).
+- **Nimic nu se leagă automat.** Propunerile stau în `TPI_MATCH_CANDIDATE` și se decid cu `pi match-accept / match-reject CANDID --by nume` sau din bot (`/potriviri`, ✓ / ✗, rolul APPLY).
+- **Legarea:** `SP_PI_LINK_GOODS` (DEFINER) adaugă un rând în `TS_GOODS_FOREIGN` cu FLAGS = 0, adică în afara pricelistului și fără prețuri. Produsul intră în preț la următoarea rulare, ca „produs nou”. Respingerea rămâne memorată (nu se mai propune).
+- **Raportul ferestrei** arată câte propuneri așteaptă o decizie.
+
 ## DDL (le rulează DBA-ul)
 
-`DB Model/price_import_stage3.sql` (+ `_rollback`, `_grants`) = tabelele botului (`TPI_BOT_USER`, `TPI_INBOX_FILE`, `TPI_FILE_RULE`, `TPI_BOT_STATE`). `DB Model/price_import_stage1.sql` (tabelele `TPI_*`, canalul `PRICELIST_IMPORT` **inactiv**, furnizorii inițiali cu `FLG_AUTO_APPLY = 0`) + `_rollback.sql` + `price_import_grants.sql` (utilizatorul `PRICEIMPORT`, creat de DBA cu parola lui). Indexul parțial `UX_TPI_RUN_ACTIVE` (Firebird 5) garantează o singură rulare activă per furnizor. `SOURCE_TABLE = -50` în `TELEGRAM_MESSAGES`.
+`DB Model/price_import_stage4.sql` (+ `_rollback`, `_grants`) = `TPI_MATCH_CANDIDATE` + `SP_PI_LINK_GOODS`. `DB Model/price_import_stage3.sql` (+ `_rollback`, `_grants`) = tabelele botului (`TPI_BOT_USER`, `TPI_INBOX_FILE`, `TPI_FILE_RULE`, `TPI_BOT_STATE`). `DB Model/price_import_stage1.sql` (tabelele `TPI_*`, canalul `PRICELIST_IMPORT` **inactiv**, furnizorii inițiali cu `FLG_AUTO_APPLY = 0`) + `_rollback.sql` + `price_import_grants.sql` (utilizatorul `PRICEIMPORT`, creat de DBA cu parola lui). Indexul parțial `UX_TPI_RUN_ACTIVE` (Firebird 5) garantează o singură rulare activă per furnizor. `SOURCE_TABLE = -50` în `TELEGRAM_MESSAGES`.
 
 ## Comenzi
 
 ```
-.venv/Scripts/python -m pytest                       # 100 de teste; cele de integrare cer Firebird 5 local (embedded)
+.venv/Scripts/python -m pytest                       # 109 teste; cele de integrare cer Firebird 5 local (embedded)
 python -m priceimport preview 14805 --plid 6115      # analiză FĂRĂ scriere (merge și fără DDL)
 python -m priceimport compare-wms 6115               # echivalența cu cele 4 interogări WMS (PLID neprelucrat)
 python -m priceimport check | run 198 | window 0 --only 198 | status | serve | health
 python -m priceimport apply-test 14805               # rulare + aplicare de TEST (documente reale, apoi ROLLBACK)
 python -m priceimport quarantine | approve 12 --by nume [--apply] | reject 12 --by nume | apply RUNID [--test] | rollback RUNID [--test] | mute 198 | watchdog
 python -m priceimport bot | bot-user 397948500 Nume --role APPLY | supplier-add 74852 | mapping-suggest f.xlsx | import-file 74852 f.xlsx [--apply]
+python -m priceimport match [ID] [--dry] | match-list | match-accept CANDID --by nume | match-reject CANDID --by nume
 ```
 
 Configurarea e în variabile `PI_*` (vezi `.env.example`), iar parola în `PI_FB_PASSWORD` / `PI_FB_PASSWORD_FILE`. Parametrii unei surse stau în `suppliers/<id>.yaml`; cei operaționali (fereastră, praguri, activ) în `TPI_SUPPLIER`. Deploy-ul se face cu `compose.yaml` (Docker pe .240) sau `pi serve` sub NSSM.

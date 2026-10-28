@@ -36,7 +36,8 @@ HELP = (
     "• /carantina [ID] - preturile oprite de praguri\n"
     "• /aproba QID ... / /respinge QID ... - decizii pe carantina\n"
     "• /run ID - rularea acum a unui furnizor cu API\n"
-    "• /mute ID [ore] - opreste alertele repetate ale unui furnizor")
+    "• /mute ID [ore] - opreste alertele repetate ale unui furnizor\n"
+    "• /potriviri [ID] - produsele noi care seamana cu produse din catalog (✓ leaga / ✗ respinge)")
 
 
 @dataclass
@@ -258,6 +259,9 @@ class BotHandler:
             action, file_id = parts[0], int(parts[1])
         except (IndexError, ValueError):
             return
+        if action in ("mok", "mno"):
+            self._decide_match(user, chat_id, action == "mok", file_id)
+            return
         self.tg.remove_buttons(chat_id, message.get("message_id"))
         with open_db(self.settings) as db:
             row = repo.inbox_get(db, file_id)
@@ -323,6 +327,18 @@ class BotHandler:
         self.tg.send_message(chat_id, f"✅ Fisierul #{file_id} aplicat de {_e(user.name)}: {applied.n_applied} produse, "
                                       f"documentele {', '.join(map(str, applied.docids)) or '-'}{rejected}; "
                                       f"PLID {plid}. Anulare: <code>python -m priceimport rollback {run['RUNID']}</code>")
+
+    def _decide_match(self, user: User, chat_id: int, accept: bool, cand_id: int) -> None:
+        from ..matchjob import accept_candidate, reject_candidate
+        if not user.can_apply:
+            self.tg.send_message(chat_id, "Nu ai dreptul (rolul APPLY).")
+            return
+        by = f"tg:{user.name}"[:64]
+        result = accept_candidate(self.settings, cand_id, by) if accept else reject_candidate(self.settings, cand_id, by)
+        text = {"LINKED": f"✓ {cand_id}: legat; intra in pret la urmatoarea rulare a furnizorului.",
+                "ALREADY": f"{cand_id}: codul era deja legat.", "REJECTED": f"✗ {cand_id}: respins, nu se mai propune.",
+                "NOT_FOUND": f"{cand_id}: nu exista."}.get(result, f"{cand_id}: {result}")
+        self.tg.send_message(chat_id, text)
 
     def _currencies(self) -> dict[str, int]:
         with open_db(self.settings) as db:
@@ -401,6 +417,23 @@ class BotHandler:
             self.tg.send_message(chat_id, build_message(f"Rulare din bot · {supplier.name} · "
                                                         f"{datetime.now():%d.%m %H:%M}", [outcome],
                                                         dry_run=not self.settings.apply_enabled))
+        elif command == "/potriviri":
+            supplier_id = int(args[0]) if args and args[0].isdigit() else None
+            with open_db(self.settings) as db:
+                rows = repo.list_candidates(db, supplier_id, limit=8) if repo.has_table(db, "TPI_MATCH_CANDIDATE") else []
+                total = repo.count_candidates(db) if rows else 0
+                db.commit()
+            if not rows:
+                self.tg.send_message(chat_id, "Nicio propunere de legare in asteptare.")
+                return
+            lines, buttons = [], []
+            for r in rows:
+                lines.append(f"<code>{r['CANDID']}</code> {r['SUPPLIERID']} <b>{_e(r['SUPPLIER_GOODS_CODE'][:20])}</b> "
+                             f"{_e((r['SUPPLIER_GOODS_NAME'] or '')[:45])}\n   → {r['GOODSID']} "
+                             f"{_e((r['TITLE'] or '')[:55])} · {r['METHOD'].strip()} {float(r['SCORE']):.2f}")
+                buttons.append([(f"✓ {r['CANDID']}", f"mok:{r['CANDID']}"), (f"✗ {r['CANDID']}", f"mno:{r['CANDID']}")])
+            text = f"<b>Propuneri de legare: {total}</b> (primele {len(rows)})\n" + "\n".join(lines)
+            self.tg.send_message(chat_id, text, buttons=buttons if user.can_apply else None)
         elif command == "/mute":
             if not user.can_apply or not args or not args[0].isdigit():
                 self.tg.send_message(chat_id, "Folosire: /mute ID [ore] (rolul APPLY).")

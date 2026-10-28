@@ -32,6 +32,14 @@ def heartbeat_tick(settings: Settings) -> None:
         log.exception("heartbeat_failed")
 
 
+def match_job(settings: Settings) -> None:
+    from .matchjob import run_matching
+    try:
+        run_matching(settings)
+    except Exception:                      # noqa: BLE001
+        log.exception("match_job_failed")
+
+
 def window_job(settings: Settings, index: int) -> None:
     try:
         run_window(settings, index, now=datetime.now(ZoneInfo(settings.timezone)).replace(tzinfo=None))
@@ -60,6 +68,10 @@ def serve(settings: Settings) -> None:
         scheduler.add_job(window_job, CronTrigger(hour=start.hour, minute=start.minute, timezone=tz),
                           args=[settings, index], id=f"window-{index}", name=f"fereastra {start:%H:%M}",
                           misfire_grace_time=settings.misfire_grace_min * 60, coalesce=True, max_instances=1)
+    if settings.match_enabled:
+        scheduler.add_job(match_job, CronTrigger(hour=settings.match_time.hour, minute=settings.match_time.minute,
+                                                 timezone=tz), args=[settings], id="matching", name="potrivire",
+                          misfire_grace_time=3600, coalesce=True, max_instances=1)
     scheduler.add_job(heartbeat_tick, "interval", seconds=30, args=[settings], id="heartbeat",
                       max_instances=1, coalesce=True, next_run_time=datetime.now(tz))
     try:

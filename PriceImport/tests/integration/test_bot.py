@@ -230,3 +230,22 @@ def test_6_commands_and_offset(env):
     with open_db(settings) as db:
         assert repo.bot_state_get(db, OFFSET_KEY) == "15"
         db.commit()
+
+
+def test_7_match_proposals_in_bot(env):
+    settings, _ = env
+    with open_db(settings) as db:
+        db.execute("INSERT INTO TS_GOODS (GOODSID, TITLE) VALUES (20, 'Fierbator Tefal KO200')")
+        db.execute("INSERT INTO TPI_MATCH_CANDIDATE (SUPPLIERID, SUPPLIER_GOODS_CODE, SUPPLIER_GOODS_NAME, GOODSID, "
+                   "METHOD, SCORE, DETAIL) VALUES (74852, 'T7', 'Чайник Tefal KO200', 20, 'MPN', 0.88, 'KO200')")
+        cand = db.scalar("SELECT MAX(CANDID) FROM TPI_MATCH_CANDIDATE")
+        db.commit()
+    fake = _run(env, text_update(20, VIEWER, "/potriviri"))
+    assert "Propuneri de legare: 1" in fake.last()["text"] and not fake.buttons(fake.last())   # VIEW: fara butoane
+    fake = _run(env, text_update(21, ADMIN, "/potriviri 74852"))
+    assert f"mok:{cand}" in fake.buttons(fake.last())
+    fake = _run(env, callback_update(22, ADMIN, f"mok:{cand}"))
+    assert "legat" in fake.last()["text"]
+    with open_db(settings) as db:
+        assert db.scalar("SELECT GOODSID FROM TS_GOODS_FOREIGN WHERE CUSTOMERID = 74852 AND GOODS_CODE = 'T7'") == 20
+        db.commit()

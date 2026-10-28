@@ -46,6 +46,27 @@ Abatere de la plan: botul folosește un client Bot API propriu (sincron, peste `
 
 **Pentru pornire:** un bot nou din @BotFather (token în `secrets/bot_token.txt`), `pi bot-user <ID Telegram> <nume> --role APPLY` pentru fiecare operator, `pi supplier-add <ID>` pentru fiecare furnizor manual, apoi 2–3 fișiere reale per furnizor ca să verificăm maparea.
 
+### Etapa 4a (28 oct 2026): potrivirea produselor noi, pe SW
+
+| Ce | Stare |
+|---|---|
+| DDL `DB Model/price_import_stage4.sql` (+ `_rollback`, `_grants`): `TPI_MATCH_CANDIDATE`, `SP_PI_LINK_GOODS` (DEFINER, rând GF cu FLAGS = 0) | Testat local de 2 ori + rollback. **Rulat pe SW 28 oct** (tabela, 3 indecși, procedura DEFINER validă, drepturile PRICEIMPORT) |
+| Motorul (`matching.py`): EAN / cod la alt furnizor / MPN / denumire, cu gărzile de mai jos; job zilnic 21:30, CLI, `/potriviri` în bot, rândul din raport | 9 teste noi; 109 în total |
+| Evaluare pe SW (doar citire), ultimele rulări | Olis: 3/27 (toate `CODE` HECHT, corecte). Ultra: 2/54. Triomac: 5/43 (MX Keys corect, restul slabe, sub 0,85). AgroPiese: 30/4 435, aproape doar anvelope corecte; restul sunt piese auto pe care catalogul nu le are |
+
+Prima potrivire pe SW (28 oct, doar propuneri, nimic legat): 35 de propuneri pentru 22 de coduri. Olis 3, Ultra 2, Triomac 5, AgroPiese 25; Tritel, Darwin, NexDistribution 0. Peste 0,85 sunt aproape toate corecte (HECHT, anvelopele Lassa/Michelin, becurile Philips H15/H16). Sub 0,85 majoritatea erau greșite (alt model de anvelopă din aceeași gamă, capac de obiectiv → cameră). De aceea pragul minim de salvare a fost ridicat la 0,85, iar cele 18 propuneri de sub prag au fost marcate `SUPERSEDED`. Au rămas 17 propuneri pentru 13 coduri.
+
+Ce a corectat evaluarea pe date reale:
+- **Același cod la produse diferite:** plăcuțele de frână `B111152` ↔ puzzle-ul `B-111152`; acum `CODE` / `MPN` cer brand sau cuvinte comune.
+- **Măsurile luate drept coduri:** `114cm`, `80W90`.
+- **Generația modelului:** Pilot Sport 5 ↔ Pilot Super Sport.
+- **Becurile:** 24V ↔ 12V.
+- **Denumirile generice:** „Фильтр воздушный” ↔ un cooler. Acestea erau ~550 de propuneri false doar la AgroPiese.
+
+**Criteriul din plan (≥ 80% legate sau propuse la furnizorii cu EAN) nu se poate măsura acum:** niciun pricelist nu aduce EAN, iar `TS_GOODS_BARCODE` e goală. Partea mare a produselor nelegate (piesele auto AgroPiese) nu există deloc în catalog, deci trebuie create, nu legate.
+
+**Rămân din etapa 4:** (b) imaginile și descrierile, incremental + `SP_PI_CONTENT_TRANSFER`; (c) portarea în Python a celor 5 adaptoare WMSParsers, de care `external_plid` depinde azi.
+
 Găsit la implementare (schimbă §4.4–4.5):
 - `ADJUST_RRP_REEVALUATION` scade `TS_CUSTOMER.RRP_DISCOUNT` (1–3%) din RRP la fiecare reevaluare. De aceea comparația brută (și cea din WMS) arată la fiecare import „+1%” la toate produsele pe RRP. Diff-ul Python aplică aceeași formulă înainte de comparare. La NATVEX 6111, falsele creșteri scad de la 1 187 la 0, iar la AgroPiese de la 952 la 812.
 - Pragul de zgomot implicit e **0%**: se ignoră doar diferențele care dispar la rotunjirea la 2 zecimale. Un prag procentual (0,5%) ar fi ascuns 629 de schimbări reale mici doar la AgroPiese.

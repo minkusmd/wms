@@ -394,6 +394,51 @@ def bot_user_cmd(tg_user_id: int, name: str, role: str = typer.Option("VIEW", he
     typer.echo(f"{tg_user_id} {name}: {role.upper()}{' (dezactivat)' if disable else ''}")
 
 
+# --- etapa 4a: potrivirea produselor -------------------------------------------------------
+
+@app.command()
+def match(supplier_ids: Optional[list[int]] = typer.Argument(None, help="implicit toti furnizorii activi"),
+          dry: bool = typer.Option(False, help="doar numara, nu salveaza propunerile")) -> None:
+    """Propuneri de legare pentru codurile nelegate din ultima rulare (EAN, cod, MPN, denumire)."""
+    from .matchjob import run_matching
+    settings = _settings()
+    for s in run_matching(settings, supplier_ids or None, dry=dry):
+        typer.echo(f"{s.supplier_id:>7} run {s.run_id or '-':>5}: {s.n_new:>5} nelegate, {s.n_with_proposals:>4} cu "
+                   f"propuneri, {s.n_saved} noi salvate")
+
+
+@app.command("match-list")
+def match_list(supplier_id: Optional[int] = None, limit: int = 30) -> None:
+    """Propunerile de legare in asteptare."""
+    settings = _settings(log_to_file=False)
+    with open_db(settings) as db:
+        rows = repo.list_candidates(db, supplier_id, limit=limit)
+        db.commit()
+    for r in rows:
+        typer.echo(f"{r['CANDID']:>6} {r['SUPPLIERID']:>7} {r['SUPPLIER_GOODS_CODE'][:18]:<18} "
+                   f"{(r['SUPPLIER_GOODS_NAME'] or '')[:38]:<38} -> {r['GOODSID']:>7} {(r['TITLE'] or '')[:45]:<45} "
+                   f"{r['METHOD'].strip():<5} {float(r['SCORE']):.2f}")
+    typer.echo(f"{len(rows)} propuneri")
+
+
+@app.command("match-accept")
+def match_accept(cand_ids: list[int], by: str = typer.Option(..., help="cine decide")) -> None:
+    """Leaga codurile propuse (SP_PI_LINK_GOODS); produsul intra in pret la urmatoarea rulare."""
+    from .matchjob import accept_candidate
+    settings = _settings()
+    for cand_id in cand_ids:
+        typer.echo(f"{cand_id}: {accept_candidate(settings, cand_id, by)}")
+
+
+@app.command("match-reject")
+def match_reject(cand_ids: list[int], by: str = typer.Option(..., help="cine decide")) -> None:
+    """Respinge propuneri (nu se mai propun pentru acelasi cod si produs)."""
+    from .matchjob import reject_candidate
+    settings = _settings()
+    for cand_id in cand_ids:
+        typer.echo(f"{cand_id}: {reject_candidate(settings, cand_id, by)}")
+
+
 def main() -> None:
     app()
 

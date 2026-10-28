@@ -638,3 +638,77 @@ def supplier_names(db: Db, ids: Iterable[int]) -> dict[int, str]:
         return {}
     rows = db.query(f"SELECT CUSTOMERID, NAME FROM TS_CUSTOMER WHERE CUSTOMERID IN ({','.join('?' * len(ids))})", ids)
     return {r["CUSTOMERID"]: (r["NAME"] or "").strip() for r in rows}
+
+
+# --- etapa 4a: potrivirea produselor ------------------------------------------------------
+
+def latest_analyzed_run(db: Db, supplier_id: int) -> dict[str, Any] | None:
+    return db.query_one("SELECT FIRST 1 RUNID, PLID FROM TPI_RUN WHERE SUPPLIERID = ? "
+                        "AND STATUS IN ('DRY_RUN', 'APPLIED', 'PARTIAL', 'BLOCKED') ORDER BY RUNID DESC", (supplier_id,))
+
+
+def new_codes_of_run(db: Db, run_id: int) -> list[dict[str, Any]]:
+    """Codurile NEW (nelegate) ale rularii, fara cele legate intre timp."""
+    return db.query("SELECT c.SUPPLIER_GOODS_CODE, c.SUPPLIER_GOODS_NAME, c.SUPPLIER_CATEGORY, c.SUPPLIERID "
+                    "FROM TPI_ITEM_CHANGE c WHERE c.RUNID = ? AND c.CHANGE_TYPE = 'NEW' AND NOT EXISTS "
+                    "(SELECT 1 FROM TS_GOODS_FOREIGN gf WHERE gf.CUSTOMERID = c.SUPPLIERID "
+                    "AND gf.GOODS_CODE = c.SUPPLIER_GOODS_CODE)", (run_id,))
+
+
+def candidate_decisions(db: Db, supplier_id: int) -> dict[tuple[str, int], str]:
+    rows = db.query("SELECT SUPPLIER_GOODS_CODE, GOODSID, STATUS FROM TPI_MATCH_CANDIDATE WHERE SUPPLIERID = ?",
+                    (supplier_id,))
+    return {(r["SUPPLIER_GOODS_CODE"], r["GOODSID"]): r["STATUS"].strip() for r in rows}
+
+
+def save_candidate(db: Db, run_id: int, supplier_id: int, code: str, name: str | None, goodsid: int, method: str,
+                   score: float, detail: str, existing: str | None) -> bool:
+    """Propunere noua sau reimprospatata; deciziile (ACCEPTED / REJECTED) nu se ating. True = rind nou."""
+    if existing is None:
+        db.execute("INSERT INTO TPI_MATCH_CANDIDATE (SUPPLIERID, SUPPLIER_GOODS_CODE, SUPPLIER_GOODS_NAME, GOODSID, "
+                   "METHOD, SCORE, DETAIL, FIRST_SEEN_RUNID, LAST_SEEN_RUNID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                   (supplier_id, code[:128], (name or "")[:1024] or None, goodsid, method, score, detail[:256],
+                    run_id, run_id))
+        return True
+    if existing == "PROPOSED":
+        db.execute("UPDATE TPI_MATCH_CANDIDATE SET METHOD = ?, SCORE = ?, DETAIL = ?, LAST_SEEN_RUNID = ? "
+                   "WHERE SUPPLIERID = ? AND SUPPLIER_GOODS_CODE = ? AND GOODSID = ?",
+                   (method, score, detail[:256], run_id, supplier_id, code, goodsid))
+    return False
+
+
+def list_candidates(db: Db, supplier_id: int | None = None, status: str = "PROPOSED",
+                    limit: int = 50) -> list[dict[str, Any]]:
+    sql = (f"SELECT FIRST {int(limit)} m.CANDID, m.SUPPLIERID, m.SUPPLIER_GOODS_CODE, m.SUPPLIER_GOODS_NAME, "
+           "m.GOODSID, g.TITLE, m.METHOD, m.SCORE, m.DETAIL FROM TPI_MATCH_CANDIDATE m "
+           "LEFT JOIN TS_GOODS g ON g.GOODSID = m.GOODSID WHERE m.STATUS = ?")
+    params: list[Any] = [status]
+    if supplier_id is not None:
+        sql += " AND m.SUPPLIERID = ?"
+        params.append(supplier_id)
+    return db.query(sql + " ORDER BY m.SCORE DESC, m.CANDID", params)
+
+
+def count_candidates(db: Db, status: str = "PROPOSED") -> int:
+    return int(db.scalar("SELECT COUNT(*) FROM TPI_MATCH_CANDIDATE WHERE STATUS = ?", (status,)) or 0)
+
+
+def get_candidate(db: Db, cand_id: int) -> dict[str, Any] | None:
+    return db.query_one("SELECT * FROM TPI_MATCH_CANDIDATE WHERE CANDID = ?", (cand_id,))
+
+
+def link_goods(db: Db, supplier_id: int, code: str, goodsid: int, title: str | None, user_id: int) -> str:
+    with db.con.cursor() as cur:
+        cur.execute("EXECUTE PROCEDURE SP_PI_LINK_GOODS(?, ?, ?, ?, ?)", (supplier_id, code, goodsid, title, user_id))
+        row = cur.fetchone()
+    return (row[0] or "").strip() if row else ""
+
+
+def decide_candidate(db: Db, cand_id: int, status: str, decided_by: str) -> None:
+    db.execute("UPDATE TPI_MATCH_CANDIDATE SET STATUS = ?, DECIDED_BY = ?, DECIDED_AT = CURRENT_TIMESTAMP "
+               "WHERE CANDID = ?", (status, decided_by[:64], cand_id))
+
+
+def supersede_other_candidates(db: Db, supplier_id: int, code: str, cand_id: int) -> None:
+    db.execute("UPDATE TPI_MATCH_CANDIDATE SET STATUS = 'SUPERSEDED' WHERE SUPPLIERID = ? AND SUPPLIER_GOODS_CODE = ? "
+               "AND CANDID <> ? AND STATUS = 'PROPOSED'", (supplier_id, code, cand_id))

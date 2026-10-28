@@ -130,6 +130,14 @@ def select_alerts(db, settings: Settings, outcomes: list[RunOutcome]) -> tuple[l
 def send_report(settings: Settings, title: str, outcomes: list[RunOutcome], label: str) -> str:
     text = build_message(title, outcomes, dry_run=not settings.apply_enabled)
     try:
+        with open_db(settings) as db:
+            pending = repo.count_candidates(db) if repo.has_table(db, "TPI_MATCH_CANDIDATE") else 0
+            db.commit()
+        if pending:
+            text += f"\n\n🔗 Propuneri de legare in asteptare: {pending} (/potriviri)"
+    except Exception:                      # noqa: BLE001 - raportul pleaca oricum
+        log.exception("pending_matches_failed")
+    try:
         write_xlsx(report_path(settings.data_dir, label), outcomes)
     except OSError:
         log.exception("report_xlsx_failed")
