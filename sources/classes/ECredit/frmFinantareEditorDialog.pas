@@ -1094,6 +1094,9 @@ begin
     if (Trim(edFatherName.Text) = '') and (S.FatherName <> '') then
         edFatherName.Text := S.FatherName;
     Log(S.Summary);
+    if (FConfig.ShopID > 0) and (S.ShopID <> '') and (S.ShopID <> IntToStr(FConfig.ShopID)) then
+        Log(Format('Atentie: cererea e pe magazinul %s "%s", nu pe %d din Configurari API (ECREDIT, SHOP_ID).',
+            [S.ShopID, S.ShopName, FConfig.ShopID]));
     ShowEcreditState;
 end;
 

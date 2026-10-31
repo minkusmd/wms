@@ -194,6 +194,14 @@ type
         CommissionRate: Double;
         PayableByConsumer: Double;
         Installments: Integer;
+        // doar in URNStatus_v9 (v8 si mai vechi nu le au)
+        CreationDate: string;          // yyyy-mm-dd, cind a fost depusa cererea
+        BirthDate: string;
+        ShopID: string;
+        ShopName: string;
+        FixedExpenses: Double;
+        FrozenStatus: string;          // cerere inghetata la eCredit
+        InsuranceContractStatus: string;
         function Summary: string;
     end;
 
@@ -717,8 +725,14 @@ end;
 function TECreditStatus.Summary: string;
 begin
     Result := Format('URN %s: cerere "%s", contract "%s"', [URN, RequestStatus, DocumentStatus]);
+    if CreationDate <> '' then
+        Result := Result + ', depusa ' + CreationDate;
+    if LoanAmount > 0 then
+        Result := Result + Format(', credit %.2f MDL', [LoanAmount]);
     if InstallmentAmount > 0 then
         Result := Result + Format(', rata %.2f MDL x %d', [InstallmentAmount, Installments]);
+    if FrozenStatus <> '' then
+        Result := Result + ', inghetata: ' + FrozenStatus;
     if Message <> '' then
         Result := Result + '. ' + Message;
 end;
@@ -1047,8 +1061,10 @@ begin
     end;
 end;
 
-// URNStatus_v9 pica uneori in gateway ("Unexpected element ...CreationDate", 20.10.2026) -
-// se incearca pe rind v9, v8, v4, v3, v2 (toate au RequestStatus / DocumentStatus; v6/v7 au doar ID-uri).
+// URNStatus_v9 a picat in gateway ("Unexpected element ...CreationDate", 20.10.2026); eCredit l-a
+// reparat (verificat 29.10.2026: {"Status": "OK", "URNStatus_v9_Multi": {"URNStatus_v9_One": [{...}]}},
+// cu CreationDate, Shop*, sumele creditului). Ca plasa de siguranta, la "Unexpected element" se
+// incearca pe rind v8, v4, v3, v2 (toate au RequestStatus / DocumentStatus; v6/v7 au doar ID-uri).
 // {"X_Multi": {"X_One": [{...}]}} -> clona primului obiect din lista; nil daca nu e asa impachetat.
 function UnwrapMulti(AObj: TJSONObject): TJSONObject;
 var
@@ -1101,8 +1117,8 @@ begin
     end;
     try
         CheckStatus(O, FLastMethod);
-        // Gateway-ul (din 21.10.2026) incuibeaza raspunsul v8: {"Status": "OK",
-        // "URNStatus_v8_Multi": {"URNStatus_v8_One": [{...}]}} - luam primul element.
+        // Gateway-ul (din 21.10.2026) incuibeaza raspunsul v8/v9: {"Status": "OK",
+        // "URNStatus_v9_Multi": {"URNStatus_v9_One": [{...}]}} - luam primul element.
         Inner := UnwrapMulti(O);
         if Assigned(Inner) then
         begin
@@ -1133,6 +1149,13 @@ begin
         Result.CommissionRate := JFloat(O, 'CommissionRate');
         Result.PayableByConsumer := JFloat(O, 'PayablebyConsumer');
         Result.Installments := JInt(O, 'Installments');
+        Result.CreationDate := JStr(O, 'CreationDate');
+        Result.BirthDate := JStr(O, 'BirthDate');
+        Result.ShopID := JStr(O, 'ShopID');
+        Result.ShopName := JStr(O, 'ShopName');
+        Result.FixedExpenses := JFloat(O, 'Fixedexpenses');
+        Result.FrozenStatus := JStr(O, 'FrozenStatus');
+        Result.InsuranceContractStatus := JStr(O, 'InsuranceContractStatus');
     finally
         O.Free;
     end;

@@ -571,9 +571,10 @@ function DealAxesForDocType(const ADocTypeID: Integer): string;
 begin
   case ADocTypeID of
     // FIN: creditul e o modalitate de plata a comenzii (unificarea 1791 -> 134)
-    134: Result := 'PIPE,REASON,FIN';
-    115: Result := 'PIPE,REASON,CHANNEL,FIN';
-    1791: Result := 'FIN,PIPE,REASON';
+    // motivul pierderii nu se mai alege din document (28.10.2026); ramane in TDB_DEALS
+    134: Result := 'PIPE,FIN';
+    115: Result := 'PIPE,CHANNEL,FIN';
+    1791: Result := 'FIN,PIPE';
     101: Result := 'PIPE,PAY';
     107: Result := 'PIPE,PAY,DLV';
     112, 116, 117, 119, 120, 1199: Result := 'PAY';
@@ -1182,7 +1183,11 @@ begin
       and (FCombos[iReason].ItemIndex > 0) then
       ok := ExecDealSQL('EXECUTE PROCEDURE SP_DEAL_SET_REASON(:dealid, :code, :userid, ''MANUAL'')',
         ['dealid', dealID, 'code', '', 'userid', dmDB.CurrentUserID]);
-  end;
+  end
+  else if ok and IsChanged(iPipe) and (Pos('CANCELLED', FCodes[iPipe][FCombos[iPipe].ItemIndex]) = 0) then
+    { fara lista "Motiv": etapa redeschisa sterge motivul ramas de la anulare }
+    ok := ExecDealSQL('EXECUTE PROCEDURE SP_DEAL_SET_REASON(:dealid, :code, :userid, ''MANUAL'')',
+      ['dealid', dealID, 'code', '', 'userid', dmDB.CurrentUserID]);
 
   { 3. canalul }
   i := GroupIndex('CHANNEL');
