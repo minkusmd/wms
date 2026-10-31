@@ -85,16 +85,26 @@ Găsit la portare:
 | Ce | Stare |
 |---|---|
 | `content.py` + `content_images.py`, `content_of` în `dmlink` / `olisgrup` / `nex` / `triomac`, `pi content`, jobul de la 11:00 și 22:00 | 12 teste noi; 137 în total |
-| DDL `DB Model/price_import_stage4b.sql` (+ `_grants`, `_rollback`): `TPI_CONTENT_RUN` + `SP_PI_CONTENT_TRANSFER` (DEFINER) | Testat local (re-rulare, drepturi, rollback). **Nerulat pe SW** |
+| DDL `DB Model/price_import_stage4b.sql` (+ `_grants`, `_rollback`): `TPI_CONTENT_RUN` + `SP_PI_CONTENT_TRANSFER` (DEFINER) | Testat local (re-rulare, drepturi, rollback). **Rulat pe SW pe 31 oct 2026** |
 | Previzualizare pe SW (`pi content --dry`, fără scriere) | Nex: din 424 de descrieri doar 3 diferă de cele scrise de Delphi (text schimbat la furnizor), deci formatul e identic. DMLink: 71 de descrieri schimbate și 107 liste de imagini. Olis și Triomac: staging-ul era **gol** pe SW, deci totul e nou (4 204 și 508 descrieri) |
 | Descărcarea reală (4 coduri / furnizor, în memorie) | Toate imaginile descărcate și convertite (PNG ≤ 1200 px), fără erori |
 
 Găsit la portare:
 - **Imaginile se descarcă doar unde folosesc.** Dintre cele ~8 000 de coduri cu imagini nedescărcate, doar ~870 sunt legate de produse fără nicio imagine: DMLink 47, Olis 818, Triomac 2, Nex 0. Celelalte ar fi adăugat câțiva GB de PNG în SW fără niciun efect; rămân cu URL-ul și se descarcă dacă devin utile.
-- **Estimarea primei rulări** (produse care primesc conținut; nimic nu se suprascrie): DMLink 2 056 descrieri RO + 110 produse cu imagini; Olis 1 552 RO + 1 968 RU + 818 cu imagini; Triomac 189 RO + 2 cu imagini; Nex nimic (conținutul lui e deja copiat). Pe SW conținutul Olis / Triomac nu ajunsese deloc în staging, iar descrierile DMLink nu fuseseră copiate la produse.
+- **Prima rulare pe SW (31 oct 2026, 2 min 44 s, fără nicio imagine eșuată):**
+
+  | Furnizor | Descrieri în staging | Imagini descărcate | Produse cu imagini noi | Imagini copiate | Descrieri copiate |
+  |---|---|---|---|---|---|
+  | NexDistribution | 8 | 0 | 0 | 0 | 0 |
+  | Triomac | 491 | 2 | 2 | 2 | 186 |
+  | DMLink | 73 | 151 | 109 | 296 | 2 039 |
+  | Olis Grup | 10 | 741 | 431 | 744 | 10 |
+
+  În total: 1 042 de imagini la 542 de produse și 2 235 de descrieri RO + 10 RU. Numerele coincid cu cele numărate separat în `TS_GOODS_IMAGE` / `TS_GOODS_DSC`. O rulare `--dry` după ea nu mai găsește nimic de făcut. Olis a primit mai puține descrieri decât estimarea din 28 oct (1 552 RO + 1 968 RU), pentru că importul din WMS din seara de 28 oct îi umpluse staging-ul înainte.
+- **Texte în engleză la Triomac:** SCOP trimite la unele produse text englezesc în `description.ro` (ex. `EKM028`, „Table Blender Esperanza...”), iar acesta ajunge în `DESCRIPTION_RO`, ca și în Delphi.
 - **Comutarea din etapa 4c nu oprește WMSParsers.** Cât timp `FLG_AUTO_APPLY = 0`, prețurile acestor furnizori le actualizează tot WMSParsers; serviciul doar raportează.
 
-**Rămâne după etapa 4:** rularea `price_import_stage4b.sql` + `_grants` pe SW, apoi prima rulare `pi content` (sau jobul din serviciu, după deploy).
+**Rămâne după etapa 4:** deploy-ul pe .240, ca jobul de la 11:00 și 22:00 să ruleze singur. Până atunci, `pi content` se pornește manual.
 
 Găsit la implementare (schimbă §4.4–4.5):
 - `ADJUST_RRP_REEVALUATION` scade `TS_CUSTOMER.RRP_DISCOUNT` (1–3%) din RRP la fiecare reevaluare. De aceea comparația brută (și cea din WMS) arată la fiecare import „+1%” la toate produsele pe RRP. Diff-ul Python aplică aceeași formulă înainte de comparare. La NATVEX 6111, falsele creșteri scad de la 1 187 la 0, iar la AgroPiese de la 952 la 812.
@@ -1161,7 +1171,7 @@ Fără pandas: volumele (zeci de mii de rânduri) nu justifică dependența, iar
 
 **Etapa 4**
 - [ ] Restul furnizorilor A; portarea adaptoarelor Delphi la nevoie
-- [x] Conținut incremental + `SP_PI_CONTENT_TRANSFER` (cod gata 28 oct 2026; DDL nerulat pe SW)
+- [x] Conținut incremental + `SP_PI_CONTENT_TRANSFER` (rulat pe SW 31 oct 2026; jobul programat pornește după deploy)
 - [ ] Matching EAN/MPN/fuzzy cu propuneri în `TPI_MATCH_CANDIDATE`
 
 **Etapa 5**
